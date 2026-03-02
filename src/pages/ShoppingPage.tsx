@@ -239,7 +239,7 @@ const sortOptions = [
   { value: "reviews", label: "Mais avaliados" },
 ];
 
-/* ══════════════════════════════���════════════════
+/* ══════════════════════════════════════════════
    COMPONENT
    ═══════════════════════════════════════════════ */
 
@@ -683,10 +683,10 @@ export function ShoppingPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: i * 0.03 }}
-                    className="group bg-white rounded-xl sm:rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden flex flex-col"
+                    className="group bg-white rounded-xl sm:rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden flex flex-col relative"
                   >
                     {/* Image */}
-                    <div className="relative aspect-square bg-slate-100 overflow-hidden">
+                    <Link to={`/shopping/${product.id}`} className="relative aspect-square bg-slate-100 overflow-hidden">
                       <ImageWithFallback
                         src={product.image}
                         alt={product.name}
@@ -702,27 +702,27 @@ export function ShoppingPage() {
                         </span>
                       )}
 
-                      {/* Favorite */}
-                      <button
-                        onClick={() => toggleFavorite(product.id)}
-                        className="absolute top-2 right-2 sm:top-3 sm:right-3 h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
-                      >
-                        <Heart
-                          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
-                            favorites.has(product.id)
-                              ? "fill-red-500 text-red-500"
-                              : "text-slate-400"
-                          }`}
-                        />
-                      </button>
-
                       {/* Discount % */}
                       {product.originalPrice && (
                         <span className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-md">
                           -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                         </span>
                       )}
-                    </div>
+                    </Link>
+
+                    {/* Favorite */}
+                    <button
+                      onClick={() => toggleFavorite(product.id)}
+                      className="absolute top-2 right-2 sm:top-3 sm:right-3 h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors z-10"
+                    >
+                      <Heart
+                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
+                          favorites.has(product.id)
+                            ? "fill-red-500 text-red-500"
+                            : "text-slate-400"
+                        }`}
+                      />
+                    </button>
 
                     {/* Info */}
                     <div className="flex-1 flex flex-col p-3 sm:p-4">
@@ -856,7 +856,7 @@ export function ShoppingPage() {
   );
 }
 
-/* ─��─ Chip Component ─── */
+/* ── Chip Component ─── */
 function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-1 bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-xs font-medium pl-2.5 pr-1.5 py-1 rounded-full">

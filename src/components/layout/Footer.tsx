@@ -32,16 +32,15 @@ export function Footer() {
             <ul className="space-y-3 text-sm">
               <li><Link to="/about" className="hover:text-white transition-colors">Sobre Nós</Link></li>
               <li><a href="#" className="hover:text-white transition-colors">Para Parceiros</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Carreiras</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Contato</Link></li>
             </ul>
           </div>
 
            <div>
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4 font-[family-name:var(--font-display)]">Legal</h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Termos de Uso</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacidade</a></li>
+              <li><Link to="/terms" className="hover:text-white transition-colors">Termos de Uso</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacidade</Link></li>
             </ul>
           </div>
         </div>

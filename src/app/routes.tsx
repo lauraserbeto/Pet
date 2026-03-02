@@ -16,6 +16,10 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { AboutPage } from "../pages/AboutPage";
 import { ShoppingPage } from "../pages/ShoppingPage";
+import { ProductDetailPage } from "../pages/ProductDetailPage";
+import { TermsPage } from "../pages/TermsPage";
+import { PrivacyPage } from "../pages/PrivacyPage";
+import { ContactPage } from "../pages/ContactPage";
 
 export const router = createBrowserRouter([
   // Auth routes (no layout wrapper)
@@ -76,7 +80,16 @@ export const router = createBrowserRouter([
       },
       {
         path: "shopping",
-        Component: ShoppingPage,
+        children: [
+          {
+            index: true,
+            Component: ShoppingPage,
+          },
+          {
+            path: ":id",
+            Component: ProductDetailPage,
+          },
+        ],
       },
       {
         path: "appointments",
@@ -85,7 +98,19 @@ export const router = createBrowserRouter([
       {
         path: "about",
         Component: AboutPage,
-      }
+      },
+      {
+        path: "terms",
+        Component: TermsPage,
+      },
+      {
+        path: "privacy",
+        Component: PrivacyPage,
+      },
+      {
+        path: "contact",
+        Component: ContactPage,
+      },
     ],
   },
   {
