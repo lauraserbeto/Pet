@@ -32,22 +32,22 @@ function Calendar({
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
         head_cell:
-          "text-[var(--text-muted)] rounded-md w-9 font-normal text-[0.8rem]",
+          "text-slate-500 rounded-md w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-[var(--bg-sunken)]/50 [&:has([aria-selected])]:bg-[var(--bg-sunken)] first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-slate-100/50 [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
           "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
         day_selected:
-          "bg-[var(--accent-bg)] text-[var(--text-on-accent)] hover:bg-[var(--accent-bg-hover)] hover:text-[var(--text-on-accent)] focus:bg-[var(--accent-bg)] focus:text-[var(--text-on-accent)]",
-        day_today: "bg-[var(--bg-sunken)] text-[var(--text-primary)]",
+          "bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] hover:text-white focus:bg-[var(--color-primary-500)] focus:text-white",
+        day_today: "bg-slate-100 text-slate-900",
         day_outside:
-          "day-outside text-[var(--text-muted)] opacity-50 aria-selected:bg-[var(--bg-sunken)]/50 aria-selected:text-[var(--text-muted)] aria-selected:opacity-30",
-        day_disabled: "text-[var(--text-muted)] opacity-50",
+          "day-outside text-slate-500 opacity-50 aria-selected:bg-slate-100/50 aria-selected:text-slate-500 aria-selected:opacity-30",
+        day_disabled: "text-slate-500 opacity-50",
         day_range_middle:
-          "aria-selected:bg-[var(--bg-sunken)] aria-selected:text-[var(--text-primary)]",
+          "aria-selected:bg-slate-100 aria-selected:text-slate-900",
         day_hidden: "invisible",
         ...classNames,
       }}

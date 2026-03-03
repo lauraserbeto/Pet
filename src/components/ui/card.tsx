@@ -8,7 +8,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--text-primary)] shadow-[var(--shadow-sm)]",
+      "rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm",
       className
     )}
     {...props}
@@ -35,7 +35,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-bold leading-none tracking-tight font-[family-name:var(--font-display)] text-[var(--text-primary)]",
+      "text-2xl font-bold leading-none tracking-tight font-[family-name:var(--font-display)] text-slate-800",
       className
     )}
     {...props}
@@ -49,10 +49,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn(
-      "text-sm text-[var(--text-secondary)] font-[family-name:var(--font-body)]",
-      className
-    )}
+    className={cn("text-sm text-slate-500 font-[family-name:var(--font-body)]", className)}
     {...props}
   />
 ));
@@ -62,14 +59,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "p-6 pt-0 font-[family-name:var(--font-body)]",
-      className
-    )}
-    {...props}
-  />
+  <div ref={ref} className={cn("p-6 pt-0 font-[family-name:var(--font-body)]", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 
@@ -85,11 +75,4 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = "CardFooter";
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-};
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };

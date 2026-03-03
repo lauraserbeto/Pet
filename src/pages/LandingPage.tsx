@@ -346,10 +346,10 @@ function ProductCard({ product }: { product: Product }) {
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group flex flex-col bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-xl)] transition-shadow overflow-hidden"
+      className="group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-shadow overflow-hidden"
     >
       {/* Image */}
-      <Link to={`/shopping/${product.id}`} className="relative block aspect-square overflow-hidden bg-[var(--bg-sunken)]">
+      <Link to={`/shopping/${product.id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
         <ImageWithFallback
           src={product.image}
           alt={product.name}
@@ -384,11 +384,11 @@ function ProductCard({ product }: { product: Product }) {
             setFav(!fav);
             toast.success(fav ? "Removido dos favoritos" : "Adicionado aos favoritos");
           }}
-          className="absolute top-3 right-3 h-9 w-9 rounded-full bg-[var(--bg-surface)]/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-[var(--bg-surface)] transition-colors"
+          className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
         >
           <Heart
             className={`h-4 w-4 transition-colors ${
-              fav ? "fill-red-500 text-red-500" : "text-[var(--text-muted)]"
+              fav ? "fill-red-500 text-red-500" : "text-slate-400"
             }`}
           />
         </button>
@@ -396,12 +396,12 @@ function ProductCard({ product }: { product: Product }) {
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4 gap-2">
-        <p className="text-[11px] text-[var(--text-muted)] uppercase tracking-wider font-medium">
+        <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">
           {product.brand}
         </p>
         <Link
           to={`/shopping/${product.id}`}
-          className="text-sm font-semibold text-[var(--text-primary)] leading-snug line-clamp-2 hover:text-[var(--accent-text)] transition-colors font-[family-name:var(--font-display)]"
+          className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 hover:text-[var(--color-primary-600)] transition-colors font-[family-name:var(--font-display)]"
         >
           {product.name}
         </Link>
@@ -415,22 +415,22 @@ function ProductCard({ product }: { product: Product }) {
                 className={`h-3 w-3 ${
                   s <= Math.round(product.rating)
                     ? "text-amber-400 fill-amber-400"
-                    : "text-[var(--border-default)]"
+                    : "text-slate-200"
                 }`}
               />
             ))}
           </div>
-          <span className="text-[11px] text-[var(--text-muted)]">({product.reviews})</span>
+          <span className="text-[11px] text-slate-400">({product.reviews})</span>
         </div>
 
         {/* Price */}
         <div className="mt-auto pt-2">
           {product.originalPrice && (
-            <span className="text-xs text-[var(--text-muted)] line-through mr-2">
+            <span className="text-xs text-slate-400 line-through mr-2">
               R$ {product.originalPrice.toFixed(2).replace(".", ",")}
             </span>
           )}
-          <span className="text-lg font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+          <span className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
             R$ {product.price.toFixed(2).replace(".", ",")}
           </span>
         </div>
@@ -438,7 +438,7 @@ function ProductCard({ product }: { product: Product }) {
         {/* CTA */}
         <button
           onClick={() => toast.success(`${product.name} adicionado ao carrinho!`)}
-          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--accent-bg)] text-[var(--text-on-accent)] text-sm font-semibold hover:bg-[var(--accent-bg-hover)] active:scale-[0.98] transition-all"
+          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary-500)] text-white text-sm font-semibold hover:bg-[var(--color-primary-600)] active:scale-[0.98] transition-all"
         >
           <ShoppingCart className="h-4 w-4" />
           Adicionar
@@ -497,7 +497,7 @@ function HorizontalCarousel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 8 }}
             onClick={() => scroll("left")}
-            className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-[var(--bg-surface)] shadow-lg border border-[var(--border-default)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:shadow-xl transition-all hidden sm:flex"
+            className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:shadow-xl transition-all hidden sm:flex"
           >
             <ChevronLeft className="h-5 w-5" />
           </motion.button>
@@ -511,7 +511,7 @@ function HorizontalCarousel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
             onClick={() => scroll("right")}
-            className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-[var(--bg-surface)] shadow-lg border border-[var(--border-default)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:shadow-xl transition-all hidden sm:flex"
+            className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:shadow-xl transition-all hidden sm:flex"
           >
             <ChevronRight className="h-5 w-5" />
           </motion.button>
@@ -529,10 +529,10 @@ function HorizontalCarousel({
 
       {/* Gradient fades */}
       {canLeft && (
-        <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[var(--bg-base)] to-transparent pointer-events-none z-[5]" />
+        <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-slate-50 to-transparent pointer-events-none z-[5]" />
       )}
       {canRight && (
-        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[var(--bg-base)] to-transparent pointer-events-none z-[5]" />
+        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-[5]" />
       )}
     </div>
   );
@@ -560,19 +560,19 @@ function SectionHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
       <div>
-        <div className="inline-flex items-center gap-2 bg-[var(--accent-bg-subtle)] text-[var(--accent-text)] px-3.5 py-1.5 rounded-full mb-3">
+        <div className="inline-flex items-center gap-2 bg-[var(--color-primary-50)] text-[var(--color-primary-600)] px-3.5 py-1.5 rounded-full mb-3">
           {BadgeIcon && <BadgeIcon className="h-3.5 w-3.5" />}
           <span className="text-xs font-semibold">{badge}</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
           {title}
         </h2>
-        <p className="mt-1.5 text-sm sm:text-base text-[var(--text-secondary)]">{subtitle}</p>
+        <p className="mt-1.5 text-sm sm:text-base text-slate-500">{subtitle}</p>
       </div>
       {action && actionHref && (
         <Link
           to={actionHref}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--accent-text)] hover:text-[var(--accent-bg)] transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] transition-colors shrink-0"
         >
           {action}
           <ArrowRight className="h-4 w-4" />
@@ -654,40 +654,40 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           1. HERO
           ═══════════════════════════════════════════════ */}
-      <section className="relative bg-[var(--secondary-bg-subtle)] py-20 lg:py-32 overflow-hidden">
+      <section className="relative bg-[var(--color-secondary-50)] py-20 lg:py-32 overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <Badge
-                variant="subtle"
-                className="px-4 py-1 text-sm font-medium rounded-full shadow-sm"
+                variant="secondary"
+                className="px-4 py-1 text-sm font-medium rounded-full bg-white text-[var(--color-secondary-700)] shadow-sm"
               >
                 A melhor plataforma para seu pet
               </Badge>
-              <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+              <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)]">
                 Cuidado completo para quem você{" "}
-                <span className="text-[var(--accent-bg)]">mais ama</span>.
+                <span className="text-[var(--color-primary-500)]">mais ama</span>.
               </h1>
-              <p className="text-lg text-[var(--text-secondary)] max-w-xl">
+              <p className="text-lg text-slate-600 max-w-xl">
                 Encontre hotéis pet, pet sitters e os melhores produtos no nosso
                 Shopping. Agende serviços, compare preços e garanta o bem-estar
                 do seu melhor amigo.
               </p>
 
-              <div className="bg-[var(--bg-surface)] p-4 rounded-2xl shadow-[var(--shadow-lg)] border border-[var(--border-default)] max-w-lg">
+              <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 max-w-lg">
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-[var(--text-muted)]" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="O que seu pet precisa?"
-                      className="pl-9 border-0 bg-[var(--bg-sunken)] focus-visible:ring-0"
+                      className="pl-9 border-0 bg-slate-50 focus-visible:ring-0"
                     />
                   </div>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-[var(--text-muted)]" />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="Localização"
-                      className="pl-9 border-0 bg-[var(--bg-sunken)] focus-visible:ring-0"
+                      className="pl-9 border-0 bg-slate-50 focus-visible:ring-0"
                     />
                   </div>
                   <Button size="lg" className="w-full md:w-auto">
@@ -696,13 +696,13 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 text-sm text-[var(--text-secondary)] font-medium">
+              <div className="flex items-center gap-6 text-sm text-slate-500 font-medium">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-[var(--secondary-text)]" />
+                  <Shield className="h-5 w-5 text-[var(--color-secondary-500)]" />
                   Profissionais Verificados
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-[var(--secondary-text)]" />
+                  <Calendar className="h-5 w-5 text-[var(--color-secondary-500)]" />
                   Agendamento Online
                 </div>
               </div>
@@ -732,20 +732,20 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-[var(--accent-bg)]/15 rounded-full blur-3xl z-0" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-[var(--secondary-bg)]/15 rounded-full blur-3xl z-0" />
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-[var(--color-primary-100)] rounded-full blur-3xl opacity-50 z-0" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-[var(--color-secondary-100)] rounded-full blur-3xl opacity-50 z-0" />
       </section>
 
       {/* ═══════════════════════════════════════════════
           2. SERVIÇOS — 3 Cards
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--bg-surface)]">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <h2 className="text-3xl font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+            <h2 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
               Tudo que seu pet precisa
             </h2>
-            <p className="mt-4 text-[var(--text-secondary)]">
+            <p className="mt-4 text-slate-600">
               Navegue por categorias e encontre o serviço ideal.
             </p>
           </div>
@@ -754,30 +754,30 @@ export default function LandingPage() {
               {
                 name: "Hotelaria",
                 icon: Hotel,
-                color: "bg-[var(--secondary-bg-subtle)] text-[var(--secondary-text)]",
+                color: "bg-blue-100 text-blue-600",
                 href: "/hotels",
               },
               {
                 name: "Pet Sitter",
                 icon: PawPrint,
-                color: "bg-[var(--accent-bg-subtle)] text-[var(--accent-text)]",
+                color: "bg-orange-100 text-orange-600",
                 href: "/walkers",
               },
               {
                 name: "Shopping",
                 icon: ShoppingBag,
-                color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+                color: "bg-green-100 text-green-600",
                 href: "/shopping",
               },
             ].map((cat) => (
               <Link key={cat.name} to={cat.href}>
-                <div className="flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] hover:shadow-[var(--shadow-lg)] hover:border-[var(--card-hover-border)] transition-all group cursor-pointer">
+                <div className="flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-slate-100 bg-white hover:shadow-lg hover:border-[var(--color-primary-200)] transition-all group cursor-pointer">
                   <div
                     className={`p-4 rounded-full ${cat.color} mb-4 group-hover:scale-110 transition-transform`}
                   >
                     <cat.icon className="h-8 w-8" />
                   </div>
-                  <h3 className="font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+                  <h3 className="font-bold text-slate-900 font-[family-name:var(--font-display)]">
                     {cat.name}
                   </h3>
                 </div>
@@ -790,7 +790,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           3. DESTAQUES DA SEMANA — Carousel Progressivo
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--bg-base)]">
+      <section className="py-16 sm:py-20 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Promoção"
@@ -828,7 +828,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           4. CATEGORIAS POPULARES — Circular visual
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--bg-surface)]">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Navegue"
@@ -853,7 +853,7 @@ export default function LandingPage() {
                   className="flex flex-col items-center gap-3 group"
                 >
                   <div className="relative">
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden ring-2 ring-[var(--border-default)] group-hover:ring-[var(--accent-bg)] transition-all shadow-sm group-hover:shadow-md">
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden ring-2 ring-slate-100 group-hover:ring-[var(--color-primary-300)] transition-all shadow-sm group-hover:shadow-md">
                       <ImageWithFallback
                         src={cat.image}
                         alt={cat.name}
@@ -866,7 +866,7 @@ export default function LandingPage() {
                       {cat.count}
                     </div>
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)] group-hover:text-[var(--accent-text)] transition-colors text-center font-[family-name:var(--font-display)]">
+                  <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-[var(--color-primary-600)] transition-colors text-center font-[family-name:var(--font-display)]">
                     {cat.name}
                   </span>
                 </Link>
@@ -879,7 +879,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           5. BEST SELLERS — Lista Numerada
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--bg-base)]">
+      <section className="py-16 sm:py-20 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Ranking"
@@ -897,7 +897,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="lg:row-span-2 bg-gradient-to-br from-[var(--accent-bg-subtle)] to-[var(--accent-bg-subtle)] rounded-2xl border border-[var(--card-border)] overflow-hidden group"
+              className="lg:row-span-2 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100 overflow-hidden group"
             >
               <Link to={`/shopping/${bestSellers[0].id}`} className="block">
                 <div className="relative aspect-square overflow-hidden">
@@ -918,10 +918,10 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="p-5">
-                  <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">
                     {bestSellers[0].brand}
                   </p>
-                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 font-[family-name:var(--font-display)]">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-[family-name:var(--font-display)]">
                     {bestSellers[0].name}
                   </h3>
                   <div className="flex items-center gap-2 mb-3">
@@ -932,12 +932,12 @@ export default function LandingPage() {
                           className={`h-3.5 w-3.5 ${
                             s <= Math.round(bestSellers[0].rating)
                               ? "text-amber-400 fill-amber-400"
-                              : "text-[var(--border-default)]"
+                              : "text-slate-200"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-[var(--text-muted)]">
+                    <span className="text-xs text-slate-500">
                       ({bestSellers[0].reviews})
                     </span>
                     <span className="text-xs text-emerald-600 font-medium">
@@ -946,11 +946,11 @@ export default function LandingPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {bestSellers[0].originalPrice && (
-                      <span className="text-sm text-[var(--text-muted)] line-through">
+                      <span className="text-sm text-slate-400 line-through">
                         R$ {bestSellers[0].originalPrice.toFixed(2).replace(".", ",")}
                       </span>
                     )}
-                    <span className="text-2xl font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+                    <span className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
                       R$ {bestSellers[0].price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
@@ -969,7 +969,7 @@ export default function LandingPage() {
               >
                 <Link
                   to={`/shopping/${product.id}`}
-                  className="flex items-center gap-4 bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-3 sm:p-4 hover:shadow-[var(--shadow-lg)] hover:border-[var(--card-hover-border)] transition-all group"
+                  className="flex items-center gap-4 bg-white rounded-2xl border border-slate-100 p-3 sm:p-4 hover:shadow-lg hover:border-slate-200 transition-all group"
                 >
                   {/* Rank number */}
                   <div
@@ -978,14 +978,14 @@ export default function LandingPage() {
                         ? "bg-gradient-to-br from-slate-300 to-slate-400 text-white"
                         : i === 1
                         ? "bg-gradient-to-br from-amber-700 to-amber-800 text-white"
-                        : "bg-[var(--bg-sunken)] text-[var(--text-muted)]"
+                        : "bg-slate-100 text-slate-500"
                     }`}
                   >
                     {i + 2}
                   </div>
 
                   {/* Image */}
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl overflow-hidden shrink-0 bg-[var(--bg-sunken)]">
+                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
                     <ImageWithFallback
                       src={product.image}
                       alt={product.name}
@@ -995,10 +995,10 @@ export default function LandingPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">
                       {product.brand}
                     </p>
-                    <h4 className="text-sm font-semibold text-[var(--text-primary)] truncate font-[family-name:var(--font-display)]">
+                    <h4 className="text-sm font-semibold text-slate-800 truncate font-[family-name:var(--font-display)]">
                       {product.name}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
@@ -1009,12 +1009,12 @@ export default function LandingPage() {
                             className={`h-2.5 w-2.5 ${
                               s <= Math.round(product.rating)
                                 ? "text-amber-400 fill-amber-400"
-                                : "text-[var(--border-default)]"
+                                : "text-slate-200"
                             }`}
                           />
                         ))}
                       </div>
-                      <span className="text-[10px] text-[var(--text-muted)]">
+                      <span className="text-[10px] text-slate-400">
                         {product.soldCount.toLocaleString("pt-BR")} vendidos
                       </span>
                     </div>
@@ -1023,11 +1023,11 @@ export default function LandingPage() {
                   {/* Price */}
                   <div className="text-right shrink-0">
                     {product.originalPrice && (
-                      <span className="text-[10px] text-[var(--text-muted)] line-through block">
+                      <span className="text-[10px] text-slate-400 line-through block">
                         R$ {product.originalPrice.toFixed(2).replace(".", ",")}
                       </span>
                     )}
-                    <span className="text-base font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+                    <span className="text-base font-bold text-slate-900 font-[family-name:var(--font-display)]">
                       R$ {product.price.toFixed(2).replace(".", ",")}
                     </span>
                   </div>
@@ -1041,12 +1041,12 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           6. CTA PARCEIROS
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--accent-bg)] text-[var(--text-on-accent)]">
+      <section className="py-16 sm:py-20 bg-[var(--color-primary-600)] text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6 font-[family-name:var(--font-display)]">
             Você tem um Pet Shop ou Clínica?
           </h2>
-          <p className="text-lg text-[var(--text-on-accent)]/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--color-primary-100)] mb-8 max-w-2xl mx-auto">
             Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos,
             clientes e produtos em um só lugar.
           </p>
@@ -1068,7 +1068,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           7. SOCIAL PROOF — Depoimentos + Instagram
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--bg-surface)] overflow-hidden">
+      <section className="py-16 sm:py-20 bg-white overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Comunidade"
@@ -1078,8 +1078,8 @@ export default function LandingPage() {
           />
 
           {/* Testimonials carousel */}
-          <div className="relative bg-gradient-to-br from-[var(--bg-sunken)] to-[var(--bg-base)] rounded-3xl p-6 sm:p-10 mb-12 sm:mb-16 border border-[var(--border-subtle)]">
-            <Quote className="absolute top-6 left-6 h-10 w-10 text-[var(--accent-bg)]/30" />
+          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-6 sm:p-10 mb-12 sm:mb-16">
+            <Quote className="absolute top-6 left-6 h-10 w-10 text-[var(--color-primary-200)] opacity-60" />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -1092,7 +1092,7 @@ export default function LandingPage() {
               >
                 {/* Avatar */}
                 <div className="shrink-0">
-                  <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-full overflow-hidden ring-4 ring-[var(--bg-surface)] shadow-lg">
+                  <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
                     <ImageWithFallback
                       src={testimonials[testimonialIdx].avatar}
                       alt={testimonials[testimonialIdx].name}
@@ -1111,16 +1111,16 @@ export default function LandingPage() {
                       />
                     ))}
                   </div>
-                  <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-4 italic">
+                  <p className="text-base sm:text-lg text-slate-700 leading-relaxed mb-4 italic">
                     "{testimonials[testimonialIdx].text}"
                   </p>
                   <div>
-                    <p className="font-bold text-[var(--text-primary)] font-[family-name:var(--font-display)]">
+                    <p className="font-bold text-slate-900 font-[family-name:var(--font-display)]">
                       {testimonials[testimonialIdx].name}
                     </p>
-                    <p className="text-sm text-[var(--text-muted)]">
+                    <p className="text-sm text-slate-500">
                       Tutor(a) de{" "}
-                      <span className="font-medium text-[var(--accent-text)]">
+                      <span className="font-medium text-[var(--color-primary-600)]">
                         {testimonials[testimonialIdx].petName}
                       </span>
                     </p>
@@ -1133,7 +1133,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-center md:justify-end gap-3 mt-6">
               <button
                 onClick={prevTestimonial}
-                className="h-9 w-9 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
+                className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -1144,15 +1144,15 @@ export default function LandingPage() {
                     onClick={() => setTestimonialIdx(i)}
                     className={`h-2 rounded-full transition-all ${
                       i === testimonialIdx
-                        ? "w-6 bg-[var(--accent-bg)]"
-                        : "w-2 bg-[var(--border-strong)] hover:bg-[var(--text-muted)]"
+                        ? "w-6 bg-[var(--color-primary-500)]"
+                        : "w-2 bg-slate-300 hover:bg-slate-400"
                     }`}
                   />
                 ))}
               </div>
               <button
                 onClick={nextTestimonial}
-                className="h-9 w-9 rounded-full border border-[var(--border-default)] bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
+                className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -1161,10 +1161,10 @@ export default function LandingPage() {
 
           {/* Instagram Grid */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--text-secondary)]">
+            <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
               <Instagram className="h-5 w-5 text-pink-500" />
               <span>
-                Siga <span className="text-[var(--accent-text)]">@petmais</span>{" "}
+                Siga <span className="text-[var(--color-primary-600)]">@petmais</span>{" "}
                 no Instagram
               </span>
             </div>
@@ -1199,7 +1199,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           8. NEWSLETTER / OFERTAS — Banner de captura
           ═══════════════════════════════════════════════ */}
-      <section className="relative py-16 sm:py-20 bg-gradient-to-br from-[var(--color-primary-700)] via-[var(--accent-bg)] to-[var(--color-primary-400)] overflow-hidden">
+      <section className="relative py-16 sm:py-20 bg-gradient-to-br from-[var(--color-primary-600)] via-[var(--color-primary-500)] to-amber-500 overflow-hidden">
         {/* Decorative shapes */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -ml-16 -mb-16" />
@@ -1257,7 +1257,7 @@ export default function LandingPage() {
                   toast.success("Cadastro realizado! Verifique seu e-mail para o cupom.");
                   setNewsletterEmail("");
                 }}
-                className="px-8 py-3.5 rounded-xl bg-[#1A1A2E] text-white text-sm font-semibold hover:bg-[#2A2A3E] transition-colors flex items-center justify-center gap-2 shadow-lg"
+                className="px-8 py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 shadow-lg"
               >
                 <Tag className="h-4 w-4" />
                 Quero meu cupom
