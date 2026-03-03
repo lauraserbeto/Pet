@@ -4,16 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 font-[family-name:var(--font-display)]",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--input-focus-ring)] focus-visible:ring-offset-2 ring-offset-[var(--ring-offset)] disabled:pointer-events-none disabled:opacity-50 font-[family-name:var(--font-display)]",
   {
     variants: {
       variant: {
-        default: "bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] shadow-sm",
-        secondary: "bg-[var(--color-secondary-500)] text-white hover:bg-[var(--color-secondary-600)] shadow-sm",
-        destructive: "bg-red-500 text-white hover:bg-red-600 shadow-sm",
-        outline: "border border-slate-200 bg-white hover:bg-slate-100 text-slate-900 hover:text-slate-900",
-        ghost: "hover:bg-slate-100 hover:text-slate-900",
-        link: "text-[var(--color-primary-600)] underline-offset-4 hover:underline",
+        default:
+          "bg-[var(--accent-bg)] text-[var(--text-on-accent)] hover:bg-[var(--accent-bg-hover)] shadow-[var(--shadow-sm)]",
+        secondary:
+          "bg-[var(--secondary-bg)] text-[var(--text-on-secondary)] hover:bg-[var(--secondary-bg-hover)] shadow-[var(--shadow-sm)]",
+        destructive:
+          "bg-red-500 text-white hover:bg-red-600 shadow-[var(--shadow-sm)]",
+        outline:
+          "border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-sunken)] text-[var(--text-primary)] hover:text-[var(--text-primary)]",
+        ghost:
+          "hover:bg-[var(--bg-sunken)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
+        link: "text-[var(--accent-text)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
