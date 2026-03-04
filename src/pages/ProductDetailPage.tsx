@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { toast } from "sonner";
+import { useCart } from "../components/cart/CartContext";
 import {
   Star,
   Heart,

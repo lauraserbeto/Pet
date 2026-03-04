@@ -75,7 +75,7 @@ export function LoginPage() {
               </h2>
               <p className="mt-4 text-white/80 max-w-sm">
                 Conectamos tutores apaixonados aos melhores serviços pet da
-                região. Hotéis, passeadores e muito mais.
+                região. Hotéis, pet sitters e muito mais.
               </p>
             </motion.div>
 

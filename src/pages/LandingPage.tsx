@@ -12,13 +12,11 @@ import {
   PawPrint,
   ShoppingBag,
   Star,
-  Bell,
   Heart,
   ShoppingCart,
   ChevronLeft,
   ChevronRight,
   Flame,
-  TrendingUp,
   ArrowRight,
   Sparkles,
   Gift,
@@ -37,6 +35,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import { useCart } from "../components/cart/CartContext";
 
 /* ═══════════════════════════════════════════════
    PRODUCT DATA
@@ -133,72 +132,7 @@ const weeklyHighlights: Product[] = [
   },
 ];
 
-const bestSellers: (Product & { soldCount: number })[] = [
-  {
-    id: 1,
-    name: "Ração Premium Cães Adultos 15kg",
-    brand: "Royal Canin",
-    price: 149.9,
-    originalPrice: 189.9,
-    rating: 4.8,
-    reviews: 328,
-    soldCount: 2340,
-    image:
-      "https://images.unsplash.com/photo-1725533488658-437e3619f856?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVtaXVtJTIwZG9nJTIwZm9vZCUyMGJhZyUyMGtpYmJsZXxlbnwxfHx8fDE3NzIxMjE1NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    badge: "Mais Vendido",
-    discount: 21,
-  },
-  {
-    id: 4,
-    name: "Cama Ortopédica Pet Grande",
-    brand: "Premier",
-    price: 219.9,
-    originalPrice: 289.9,
-    rating: 4.9,
-    reviews: 201,
-    soldCount: 1890,
-    image:
-      "https://images.unsplash.com/photo-1632147104665-09e9bf73703e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBiZWQlMjBjdXNoaW9uJTIwY29tZm9ydHxlbnwxfHx8fDE3NzIxMjE1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    discount: 24,
-  },
-  {
-    id: 2,
-    name: "Brinquedo Interativo Resistente",
-    brand: "PetClean",
-    price: 39.9,
-    rating: 4.6,
-    reviews: 156,
-    soldCount: 1520,
-    image:
-      "https://images.unsplash.com/photo-1714339691990-803e3dbf2056?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjB0b3klMjBjb2xvcmZ1bCUyMGRvZ3xlbnwxfHx8fDE3NzIxMjE1NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  },
-  {
-    id: 3,
-    name: "Coleira Refletiva Premium Ajustável",
-    brand: "Premier",
-    price: 89.9,
-    originalPrice: 119.9,
-    rating: 4.7,
-    reviews: 94,
-    soldCount: 1180,
-    image:
-      "https://images.unsplash.com/photo-1765895899115-bfdd2854b141?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBjb2xsYXIlMjBsZWFzaCUyMGFjY2Vzc29yaWVzfGVufDF8fHx8MTc3MjEyMTU1OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    discount: 25,
-  },
-  {
-    id: 5,
-    name: "Suplemento Vitamínico Cães e Gatos",
-    brand: "Sanol",
-    price: 54.9,
-    originalPrice: 69.9,
-    rating: 4.5,
-    reviews: 78,
-    soldCount: 980,
-    image:
-      "https://images.unsplash.com/photo-1770836037793-95bdbf190f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjBwZXQlMjBoZWFsdGglMjBjaGVja3VwfGVufDF8fHx8MTc3MjQyODU2NHww&ixlib=rb-4.1.0&q=80&w=1080",
-    discount: 21,
-  },
-];
+
 
 const popularCategories = [
   {
@@ -341,6 +275,7 @@ const instagramPhotos = [
 
 function ProductCard({ product }: { product: Product }) {
   const [fav, setFav] = useState(false);
+  const { addItem } = useCart();
 
   return (
     <motion.div
@@ -437,7 +372,10 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* CTA */}
         <button
-          onClick={() => toast.success(`${product.name} adicionado ao carrinho!`)}
+          onClick={() => {
+            addItem(product);
+            toast.success(`${product.name} adicionado ao carrinho!`);
+          }}
           className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary-500)] text-white text-sm font-semibold hover:bg-[var(--color-primary-600)] active:scale-[0.98] transition-all"
         >
           <ShoppingCart className="h-4 w-4" />
@@ -825,7 +763,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════
+      {/* ══════════════��════════════════════════════════
           4. CATEGORIAS POPULARES — Circular visual
           ═══════════════════════════════════════════════ */}
       <section className="py-16 sm:py-20 bg-white">
@@ -860,11 +798,6 @@ export default function LandingPage() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
-                    <div
-                      className={`absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gradient-to-r ${cat.color} text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm`}
-                    >
-                      {cat.count}
-                    </div>
                   </div>
                   <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-[var(--color-primary-600)] transition-colors text-center font-[family-name:var(--font-display)]">
                     {cat.name}
@@ -877,163 +810,143 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════
-          5. BEST SELLERS — Lista Numerada
+          5. NOSSOS SERVIÇOS — Hotéis & Pet Sitters
           ═══════════════════════════════════════════════ */}
       <section className="py-16 sm:py-20 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            badge="Ranking"
-            badgeIcon={TrendingUp}
-            title="Best Sellers"
-            subtitle="Os 5 produtos mais vendidos deste mês."
-            action="Ver mais produtos"
-            actionHref="/shopping"
+            badge="Serviços"
+            badgeIcon={Hotel}
+            title="Mais que um Shopping"
+            subtitle="Conheça nossos serviços exclusivos para o bem-estar do seu pet."
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Featured #1 — Big card */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Hotel Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="lg:row-span-2 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-100 overflow-hidden group"
             >
-              <Link to={`/shopping/${bestSellers[0].id}`} className="block">
-                <div className="relative aspect-square overflow-hidden">
+              <Link
+                to="/hotels"
+                className="group block bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden">
                   <ImageWithFallback
-                    src={bestSellers[0].image}
-                    alt={bestSellers[0].name}
+                    src="https://images.unsplash.com/photo-1641851962761-43d3c1a34360?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZXQlMjBob3RlbCUyMHN1aXRlJTIwcm9vbXxlbnwxfHx8fDE3NzI2MjQ3NjV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                    alt="Hotel Pet"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                      <span className="text-white font-extrabold font-[family-name:var(--font-display)]">
-                        1
-                      </span>
-                    </div>
-                    <span className="bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-lg shadow-sm">
-                      Mais Vendido
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                      <Hotel className="h-3.5 w-3.5" />
+                      Hotelaria Pet
                     </span>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="text-xl font-bold font-[family-name:var(--font-display)]">
+                      Hotelaria Pet Premium
+                    </h3>
+                    <p className="text-sm text-white/80 mt-1">
+                      O melhor cuidado enquanto você viaja
+                    </p>
                   </div>
                 </div>
-                <div className="p-5">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">
-                    {bestSellers[0].brand}
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Encontre hotéis pet verificados com suítes confortáveis, monitoramento 24h, 
+                    alimentação personalizada e muito carinho para seu melhor amigo.
                   </p>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-[family-name:var(--font-display)]">
-                    {bestSellers[0].name}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`h-3.5 w-3.5 ${
-                            s <= Math.round(bestSellers[0].rating)
-                              ? "text-amber-400 fill-amber-400"
-                              : "text-slate-200"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-slate-500">
-                      ({bestSellers[0].reviews})
-                    </span>
-                    <span className="text-xs text-emerald-600 font-medium">
-                      {bestSellers[0].soldCount.toLocaleString("pt-BR")} vendidos
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {bestSellers[0].originalPrice && (
-                      <span className="text-sm text-slate-400 line-through">
-                        R$ {bestSellers[0].originalPrice.toFixed(2).replace(".", ",")}
+                  <div className="flex flex-wrap gap-2">
+                    {["Suítes Premium", "Monitoramento 24h", "Veterinário", "Área de Lazer"].map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[11px] font-medium bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg"
+                      >
+                        {tag}
                       </span>
-                    )}
-                    <span className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                      R$ {bestSellers[0].price.toFixed(2).replace(".", ",")}
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="text-sm font-bold text-slate-900">4.9</span>
+                      <span className="text-xs text-slate-400">(+200 avaliações)</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary-600)] group-hover:text-[var(--color-primary-700)] transition-colors">
+                      Explorar hotéis
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                   </div>
                 </div>
               </Link>
             </motion.div>
 
-            {/* #2–5 compact cards */}
-            {bestSellers.slice(1).map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: (i + 1) * 0.08 }}
+            {/* Pet Sitter Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+            >
+              <Link
+                to="/walkers"
+                className="group block bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all"
               >
-                <Link
-                  to={`/shopping/${product.id}`}
-                  className="flex items-center gap-4 bg-white rounded-2xl border border-slate-100 p-3 sm:p-4 hover:shadow-lg hover:border-slate-200 transition-all group"
-                >
-                  {/* Rank number */}
-                  <div
-                    className={`shrink-0 h-9 w-9 rounded-full flex items-center justify-center font-extrabold font-[family-name:var(--font-display)] text-sm shadow-sm ${
-                      i === 0
-                        ? "bg-gradient-to-br from-slate-300 to-slate-400 text-white"
-                        : i === 1
-                        ? "bg-gradient-to-br from-amber-700 to-amber-800 text-white"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {i + 2}
-                  </div>
-
-                  {/* Image */}
-                  <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                    <ImageWithFallback
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">
-                      {product.brand}
-                    </p>
-                    <h4 className="text-sm font-semibold text-slate-800 truncate font-[family-name:var(--font-display)]">
-                      {product.name}
-                    </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star
-                            key={s}
-                            className={`h-2.5 w-2.5 ${
-                              s <= Math.round(product.rating)
-                                ? "text-amber-400 fill-amber-400"
-                                : "text-slate-200"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[10px] text-slate-400">
-                        {product.soldCount.toLocaleString("pt-BR")} vendidos
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-right shrink-0">
-                    {product.originalPrice && (
-                      <span className="text-[10px] text-slate-400 line-through block">
-                        R$ {product.originalPrice.toFixed(2).replace(".", ",")}
-                      </span>
-                    )}
-                    <span className="text-base font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                      R$ {product.price.toFixed(2).replace(".", ",")}
+                <div className="relative aspect-[16/9] overflow-hidden">
+                  <ImageWithFallback
+                    src="https://images.unsplash.com/photo-1647479459036-6ec472a43e8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBwZXQlMjBzaXR0ZXIlMjB3YWxraW5nJTIwZG9ncyUyMHBhcmt8ZW58MXx8fHwxNzcyNjI0NzY2fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                    alt="Pet Sitter"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className="inline-flex items-center gap-1.5 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                      <PawPrint className="h-3.5 w-3.5" />
+                      Pet Sitter
                     </span>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="text-xl font-bold font-[family-name:var(--font-display)]">
+                      Pet Sitters Certificados
+                    </h3>
+                    <p className="text-sm text-white/80 mt-1">
+                      Profissionais de confiança perto de você
+                    </p>
+                  </div>
+                </div>
+                <div className="p-5 space-y-4">
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    Conecte-se com pet sitters verificados e experientes. Passeios, 
+                    hospedagem domiciliar, day care e cuidados especiais com todo carinho.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {["Verificados", "Passeios", "Hospedagem", "Day Care"].map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[11px] font-medium bg-orange-50 text-orange-600 px-2.5 py-1 rounded-lg"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="text-sm font-bold text-slate-900">4.8</span>
+                      <span className="text-xs text-slate-400">(+150 avaliações)</span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary-600)] group-hover:text-[var(--color-primary-700)] transition-colors">
+                      Encontrar pet sitters
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </section>

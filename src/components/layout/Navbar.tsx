@@ -15,14 +15,16 @@ import {
   LogOut,
   ChevronRight,
   UserCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "../../lib/utils";
+import { useCart } from "../cart/CartContext";
 
 /* ─── Public nav items (always visible) ─── */
 const publicNavItems = [
   { name: "Hotéis", href: "/hotels", icon: Hotel },
-  { name: "Passeadores", href: "/walkers", icon: Footprints },
+  { name: "Pet Sitter", href: "/walkers", icon: Footprints },
   { name: "Shopping", href: "/shopping", icon: ShoppingBag },
   { name: "Sobre Nós", href: "/about", icon: Info },
 ];
@@ -82,6 +84,8 @@ export function Navbar() {
         .toUpperCase()
     : "";
 
+  const { totalItems } = useCart();
+
   return (
     <nav className="border-b border-slate-100 bg-white sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -116,6 +120,19 @@ export function Navbar() {
 
           {/* ── Desktop Right Side ── */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Cart */}
+            <Link
+              to="/cart"
+              className="relative p-2 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <ShoppingCart className="h-5 w-5 text-slate-600" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 min-w-[18px] rounded-full bg-[var(--color-primary-500)] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+
             <Link to="/dashboard">
               <Button variant="outline" size="sm">
                 Para Parceiros
@@ -180,6 +197,18 @@ export function Navbar() {
 
           {/* ── Mobile Hamburger ── */}
           <div className="-mr-2 flex items-center md:hidden gap-2">
+            {/* Cart (mobile) */}
+            <Link
+              to="/cart"
+              className="relative p-2 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <ShoppingCart className="h-5 w-5 text-slate-600" />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 h-4.5 w-4.5 min-w-[18px] rounded-full bg-[var(--color-primary-500)] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
             {/* If logged in, show small avatar on mobile too */}
             {user && (
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">

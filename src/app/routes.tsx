@@ -20,6 +20,9 @@ import { ProductDetailPage } from "../pages/ProductDetailPage";
 import { TermsPage } from "../pages/TermsPage";
 import { PrivacyPage } from "../pages/PrivacyPage";
 import { ContactPage } from "../pages/ContactPage";
+import { CartPage } from "../pages/CartPage";
+import { CheckoutPage } from "../pages/CheckoutPage";
+import { CheckoutSuccessPage } from "../pages/CheckoutSuccessPage";
 
 export const router = createBrowserRouter([
   // Auth routes (no layout wrapper)
@@ -88,6 +91,23 @@ export const router = createBrowserRouter([
           {
             path: ":id",
             Component: ProductDetailPage,
+          },
+        ],
+      },
+      {
+        path: "cart",
+        Component: CartPage,
+      },
+      {
+        path: "checkout",
+        children: [
+          {
+            index: true,
+            Component: CheckoutPage,
+          },
+          {
+            path: "success",
+            Component: CheckoutSuccessPage,
           },
         ],
       },
