@@ -12,6 +12,13 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import {
   PawPrint,
   ArrowLeft,
   Eye,
@@ -28,6 +35,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
+import { supabase } from "../../lib/supabase";
 
 interface PasswordCheck {
   label: string;
@@ -51,6 +59,9 @@ export function RegisterPage() {
     password: "",
     confirmPassword: "",
     type: "tutor" as "tutor" | "partner",
+    partnerType: "",
+    businessName: "",
+    document: "",
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -102,18 +113,51 @@ export function RegisterPage() {
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    toast.success("Conta criada com sucesso!", {
-      description:
+    try {
+      const authOptions =
         formData.type === "partner"
-          ? "Bem-vindo ao painel de parceiros Pet+!"
-          : "Bem-vindo ao Pet+! Explore os melhores serviços.",
-    });
+          ? {
+              data: {
+                role_id: parseInt(formData.partnerType),
+                full_name: formData.name,
+                business_name: formData.businessName,
+                document: formData.document,
+              },
+            }
+          : {
+              data: {
+                role_id: 5,
+                full_name: formData.name,
+              },
+            };
 
-    setTimeout(() => {
-      navigate(formData.type === "partner" ? "/dashboard" : "/");
-    }, 600);
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: authOptions,
+      });
+
+      if (error) throw error;
+
+      toast.success("Conta criada com sucesso!", {
+        description:
+          formData.type === "partner"
+            ? "Sua conta foi criada. Aguarde a aprovação do administrador."
+            : "Bem-vindo ao Pet+! Explore os melhores serviços.",
+      });
+
+      setTimeout(() => {
+        navigate(formData.type === "partner" ? "/login" : "/");
+      }, 600);
+    } catch (error: any) {
+      console.error("Register error:", error);
+      toast.error("Erro ao criar conta", {
+        description: error.message || "Verifique os dados e tente novamente",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -285,6 +329,62 @@ export function RegisterPage() {
                     />
                   </div>
                 </div>
+
+                {formData.type === "partner" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-4 overflow-hidden"
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="partnerType">Tipo de Parceiro</Label>
+                      <Select
+                        value={formData.partnerType}
+                        onValueChange={(val) => setFormData({ ...formData, partnerType: val })}
+                      >
+                        <SelectTrigger id="partnerType" className="bg-white">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">Lojista</SelectItem>
+                          <SelectItem value="3">Hotel</SelectItem>
+                          <SelectItem value="4">Pet Sitter</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="businessName">Nome do Negócio</Label>
+                      <div className="relative">
+                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          id="businessName"
+                          placeholder="Nome da sua empresa ou negócio"
+                          required={formData.type === "partner"}
+                          value={formData.businessName}
+                          onChange={handleChange}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="document">CNPJ / CPF</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          id="document"
+                          placeholder="Somente números"
+                          required={formData.type === "partner"}
+                          value={formData.document}
+                          onChange={handleChange}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="email">E-mail</Label>

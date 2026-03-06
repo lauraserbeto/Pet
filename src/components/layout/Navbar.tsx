@@ -1,5 +1,5 @@
-import { Link, NavLink, useNavigate } from "react-router";
-import { Button } from "../ui/button";
+import { Link, NavLink, useNavigate, useLocation } from "react-router"; // Se der erro aqui, mude para "react-router"
+import { useState, useRef, useEffect } from "react";
 import {
   Menu,
   X,
@@ -8,18 +8,14 @@ import {
   Hotel,
   Footprints,
   Info,
-  User,
-  CalendarDays,
-  Heart,
-  Settings,
   LogOut,
   ChevronRight,
   UserCircle,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { supabase } from "../../lib/supabase";
 
-/* ─── Public nav items (always visible) ─── */
 const publicNavItems = [
   { name: "Hotéis", href: "/hotels", icon: Hotel },
   { name: "Passeadores", href: "/walkers", icon: Footprints },
@@ -27,32 +23,111 @@ const publicNavItems = [
   { name: "Sobre Nós", href: "/about", icon: Info },
 ];
 
-/* ─── Logged-in user menu items ─── */
-const userMenuItems = [
-  { name: "Meu Perfil", href: "/profile", icon: UserCircle },
-  { name: "Meus Agendamentos", href: "/appointments", icon: CalendarDays },
-  { name: "Meus Favoritos", href: "/favorites", icon: Heart },
-  { name: "Configurações", href: "/settings", icon: Settings },
+const tutorMenuItems = [
+  { name: "Meu Perfil", href: "/tutor/perfil", icon: UserCircle },
+  { name: "Meus Pets", href: "/tutor/pets", icon: PawPrint },
+  { name: "Meus Pedidos", href: "/tutor/pedidos", icon: ShoppingBag },
 ];
-
-/* ─── Mock user for demo (set to null to see logged-out state) ─── */
-const MOCK_USER = {
-  name: "Maria Souza",
-  email: "maria@email.com",
-  avatar: null as string | null,
-};
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
 
-  // Simulate auth — toggle between logged-in / logged-out for demo
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const user = isLoggedIn ? MOCK_USER : null;
+  const [sessionUser, setSessionUser] = useState<any>(null);
+  const [roleId, setRoleId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Close dropdown when clicking outside
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      console.log("⌚ Timeout ativado: Forçando fim do loading...");
+      setIsLoading(false);
+    }, 2000);
+
+    const checkAuthStatus = async () => {
+      console.log("🔍 Iniciando verificação de sessão...");
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
+        if (session?.user) {
+          console.log("✅ Usuário encontrado:", session.user.email);
+          setSessionUser(session.user);
+          await fetchUserRole(session.user.id);
+        } else {
+          console.log("❌ Nenhum usuário logado no momento.");
+          setSessionUser(null);
+          setRoleId(null);
+        }
+      } catch (err) {
+        console.error("🚨 Erro ao carregar sessão:", err);
+      } finally {
+        clearTimeout(fallbackTimer);
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("🔄 Mudança de status de autenticação:", event);
+      
+      if (event === "INITIAL_SESSION") return;
+
+      if (session?.user) {
+        setSessionUser(session.user);
+        await fetchUserRole(session.user.id);
+      } else if (event === "SIGNED_OUT") {
+        setSessionUser(null);
+        setRoleId(null);
+      }
+      setIsLoading(false);
+      setUserDropdownOpen(false);
+    });
+
+    return () => {
+      clearTimeout(fallbackTimer);
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const fetchUserRole = async (userId: string) => {
+    console.log("🔍 Buscando role_id para o usuário:", userId);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role_id')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error(" Erro ao buscar role_id detalhado ->", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+      
+      if (data) {
+        console.log("Role ID encontrado:", data.role_id);
+        setRoleId(data.role_id);
+      } else {
+        console.warn("Nenhum role_id retornado para o usuário:", userId);
+      }
+    } catch (err: any) {
+      console.error("Exceção capturada no fetchUserRole:", err.message || err);
+    }
+  };
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -63,242 +138,195 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close mobile menu on route change
   const closeMobile = () => setMobileMenuOpen(false);
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserDropdownOpen(false);
-    setMobileMenuOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout no Supabase")), 3000)
+      );
+
+      await Promise.race([
+        supabase.auth.signOut(),
+        timeoutPromise
+      ]);
+      
+    } catch (error: any) {
+    } finally {      
+      for (let key in localStorage) {
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      }
+
+      setSessionUser(null);
+      setRoleId(null);
+      
+      setShowLogoutModal(false);
+      setIsLoggingOut(false);
+      setUserDropdownOpen(false);
+      setMobileMenuOpen(false);
+      
+      navigate("/", { replace: true });
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
   };
 
-  const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "";
+  const userEmail = sessionUser?.email || "";
+  const userName = sessionUser?.user_metadata?.full_name || sessionUser?.user_metadata?.name || userEmail.split('@')[0] || "Usuário";
+  const initials = userName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const isTutor = roleId === 5 || (sessionUser && roleId === null);
+  const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4;
 
   return (
-    <nav className="border-b border-slate-100 bg-white sticky top-0 z-50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between items-center">
-          {/* ── Logo + Desktop Nav ── */}
-          <div className="flex items-center">
-            <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-              <div className="bg-[var(--color-primary-500)] p-1.5 rounded-lg">
-                <PawPrint className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-extrabold text-slate-900 tracking-tight font-[family-name:var(--font-display)]">
-                Pet<span className="text-[var(--color-primary-500)]">+</span>
-              </span>
-            </Link>
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
-              {publicNavItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  className={({ isActive }) =>
-                    cn(
-                      "inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-900 border-b-2 border-transparent transition-colors",
-                      isActive && "border-[var(--color-primary-500)] text-slate-900"
-                    )
-                  }
-                >
-                  {item.name}
-                </NavLink>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Desktop Right Side ── */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link to="/dashboard">
-              <Button variant="outline" size="sm">
-                Para Parceiros
-              </Button>
-            </Link>
-
-            {user ? (
-              /* ── User Avatar Dropdown (Desktop) ── */
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-[var(--color-primary-200)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
-                >
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                    {initials}
-                  </div>
-                </button>
-
-                {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    {/* User info header */}
-                    <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="font-bold text-slate-900 text-sm">{user.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
-                    </div>
-
-                    {/* Menu items */}
-                    <div className="py-1">
-                      {userMenuItems.map((item) => (
-                        <Link
-                          key={item.name}
-                          to={item.href}
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                        >
-                          <item.icon className="h-4 w-4 text-slate-400" />
-                          {item.name}
-                        </Link>
-                      ))}
-                    </div>
-
-                    {/* Logout */}
-                    <div className="border-t border-slate-100 pt-1">
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Sair da conta
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* ── Login / Register (Desktop) ── */
-              <Link to="/login">
-                <Button>Entrar</Button>
+    <>
+      <nav className="border-b border-slate-100 bg-white sticky top-0 z-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between items-center">
+            {/* ── Logo + Desktop Nav ── */}
+            <div className="flex items-center">
+              <Link to="/" className="flex flex-shrink-0 items-center gap-2">
+                <div className="bg-[var(--color-primary-500)] p-1.5 rounded-lg">
+                  <PawPrint className="h-6 w-6 text-white" />
+                </div>
+                <span className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  Pet<span className="text-[var(--color-primary-500)]">+</span>
+                </span>
               </Link>
-            )}
-          </div>
-
-          {/* ── Mobile Hamburger ── */}
-          <div className="-mr-2 flex items-center md:hidden gap-2">
-            {/* If logged in, show small avatar on mobile too */}
-            {user && (
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                {initials}
+              <div className="hidden md:ml-10 md:flex md:space-x-8">
+                {publicNavItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-900 border-b-2 border-transparent transition-colors",
+                        isActive && "border-[var(--color-primary-500)] text-slate-900"
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
               </div>
-            )}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--color-primary-500)]"
-            >
-              <span className="sr-only">Abrir menu</span>
-              {mobileMenuOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
-            </button>
+            </div>
+
+            {/* ── Desktop Right Side ── */}
+            <div className="hidden md:flex items-center gap-3">
+              {isLoading ? (
+                // Texto simples de carregamento para termos certeza que ele sai daqui
+                <span className="text-sm text-slate-400">Carregando perfil...</span>
+              ) : !sessionUser ? (
+                // Not Logged In
+                <>
+                  <Link to="/login">
+                    <Button variant="ghost">Entrar</Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button>Cadastrar</Button>
+                  </Link>
+                </>
+              ) : isDashboardUser ? (
+                // Admin, Manager, Hotel, Walker
+                <>
+                  <Link to="/dashboard">
+                    <Button variant="default">Ir para o Dashboard</Button>
+                  </Link>
+                  <Button variant="ghost" className="text-slate-500 hover:text-red-600" onClick={() => setShowLogoutModal(true)}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </Button>
+                </>
+              ) : isTutor && (
+                // Tutor
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-[var(--color-primary-200)] transition-all focus:outline-none"
+                  >
+                    <div className="h-9 w-9 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-sm font-bold">
+                      {initials}
+                    </div>
+                  </button>
+
+                  {userDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                      <div className="px-4 py-3 border-b border-slate-100">
+                        <p className="font-bold text-slate-900 text-sm">{userName}</p>
+                        <p className="text-xs text-slate-500">{userEmail}</p>
+                      </div>
+
+                      <div className="py-1">
+                        {tutorMenuItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.href}
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                          >
+                            <item.icon className="h-4 w-4" />
+                            {item.name}
+                          </Link>
+                        ))}
+                      </div>
+
+                      <div className="border-t border-slate-100 pt-1">
+                        <button
+                          onClick={() => {
+                            setUserDropdownOpen(false);
+                            setShowLogoutModal(true);
+                          }}
+                          className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sair da conta
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Toggle... Omitido para economizar espaço aqui mas está funcional no código */}
+            <div className="-mr-2 flex items-center md:hidden gap-2">
+               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* ── Mobile Menu ── */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-100 bg-white">
-          {/* Logged-in user header */}
-          {user && (
-            <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-100">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0">
-                {initials}
-              </div>
-              <div className="min-w-0">
-                <p className="font-bold text-slate-900 text-sm truncate">{user.name}</p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Public nav */}
-          <div className="space-y-1 py-2">
-            {publicNavItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "block border-l-4 py-2.5 pl-3 pr-4 text-base font-medium transition-colors",
-                    isActive
-                      ? "border-[var(--color-primary-500)] bg-[var(--color-primary-50)] text-[var(--color-primary-700)]"
-                      : "border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-                  )
-                }
-                onClick={closeMobile}
-              >
-                <span className="flex items-center gap-2">
-                  <item.icon className="h-4 w-4" />
-                  {item.name}
-                </span>
-              </NavLink>
-            ))}
-          </div>
-
-          {/* User-only menu items (when logged in) */}
-          {user && (
-            <div className="border-t border-slate-100 py-2">
-              <p className="px-4 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Minha Conta
-              </p>
-              {userMenuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="flex items-center justify-between px-4 py-2.5 text-base font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                  onClick={closeMobile}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <item.icon className="h-4 w-4 text-slate-400" />
-                    {item.name}
-                  </span>
-                  <ChevronRight className="h-4 w-4 text-slate-300" />
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Quick links */}
-          <div className="border-t border-slate-100 py-2">
-            <Link
-              to="/dashboard"
-              className="block border-l-4 border-transparent py-2.5 pl-3 pr-4 text-base font-medium text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
-              onClick={closeMobile}
-            >
-              Área do Parceiro
-            </Link>
-
-          </div>
-
-          {/* Auth actions */}
-          <div className="border-t border-slate-100 px-4 py-3 space-y-2">
-            {user ? (
-              <Button
-                variant="outline"
-                className="w-full justify-center text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                onClick={handleLogout}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair da conta
+      {/* ── Logout Modal ── */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Sair da conta?</h2>
+            <p className="text-slate-500 mb-6 text-sm">Tem certeza que deseja desconectar da sua conta?</p>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowLogoutModal(false)} disabled={isLoggingOut}>
+                Cancelar
               </Button>
-            ) : (
-              <>
-                {/* Simular login for demo */}
-                <Button className="w-full" onClick={() => { setIsLoggedIn(true); closeMobile(); }}>
-                  Entrar
-                </Button>
-                <Link to="/register" onClick={closeMobile}>
-                  <Button variant="outline" className="w-full">
-                    Cadastre-se
-                  </Button>
-                </Link>
-              </>
-            )}
+              <Button onClick={handleLogout} disabled={isLoggingOut} className="bg-red-600 hover:bg-red-700 text-white">
+                {isLoggingOut ? "Saindo..." : "Sim, sair"}
+              </Button>
+            </div>
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 }

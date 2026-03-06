@@ -20,6 +20,7 @@ import { ProductDetailPage } from "../pages/ProductDetailPage";
 import { TermsPage } from "../pages/TermsPage";
 import { PrivacyPage } from "../pages/PrivacyPage";
 import { ContactPage } from "../pages/ContactPage";
+import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 
 export const router = createBrowserRouter([
   // Auth routes (no layout wrapper)
@@ -115,7 +116,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    Component: DashboardLayout,
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
         {
             index: true,
