@@ -11,14 +11,16 @@ import {
   LogOut,
   ChevronRight,
   UserCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { useCart } from "../cart/CartContext";
 import { supabase } from "../../lib/supabase";
 
 const publicNavItems = [
   { name: "Hotéis", href: "/hotels", icon: Hotel },
-  { name: "Passeadores", href: "/walkers", icon: Footprints },
+  { name: "Pet Sitter", href: "/walkers", icon: Footprints },
   { name: "Shopping", href: "/shopping", icon: ShoppingBag },
   { name: "Sobre Nós", href: "/about", icon: Info },
 ];
@@ -188,6 +190,8 @@ export function Navbar() {
 
   const isTutor = roleId === 5 || (sessionUser && roleId === null);
   const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4;
+
+  const { totalItems } = useCart();
 
   return (
     <>
