@@ -12,11 +12,15 @@ import {
   ChevronRight,
   UserCircle,
   ShoppingCart,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
 import { supabase } from "../../lib/supabase";
+import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
+import logo from "../../assets/pet+/logo2.png";
 
 const publicNavItems = [
   { name: "Hotéis", href: "/hotels", icon: Hotel },
@@ -163,6 +167,8 @@ export function Navbar() {
         }
       }
 
+      toast.success('Conta deslogada com sucesso!');
+
       setSessionUser(null);
       setRoleId(null);
       
@@ -171,11 +177,10 @@ export function Navbar() {
       setUserDropdownOpen(false);
       setMobileMenuOpen(false);
       
-      navigate("/", { replace: true });
-      
       setTimeout(() => {
+        navigate("/", { replace: true });
         window.location.reload();
-      }, 100);
+      }, 1200);
     }
   };
 
@@ -201,12 +206,7 @@ export function Navbar() {
             {/* ── Logo + Desktop Nav ── */}
             <div className="flex items-center">
               <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-                <div className="bg-[var(--color-primary-500)] p-1.5 rounded-lg">
-                  <PawPrint className="h-6 w-6 text-white" />
-                </div>
-                <span className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  Pet<span className="text-[var(--color-primary-500)]">+</span>
-                </span>
+                <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-18 w-auto" />
               </Link>
               <div className="hidden md:ml-10 md:flex md:space-x-8">
                 {publicNavItems.map((item) => {
@@ -318,16 +318,25 @@ export function Navbar() {
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Sair da conta?</h2>
-            <p className="text-slate-500 mb-6 text-sm">Tem certeza que deseja desconectar da sua conta?</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowLogoutModal(false)} disabled={isLoggingOut}>
-                Cancelar
-              </Button>
-              <Button onClick={handleLogout} disabled={isLoggingOut} className="bg-red-600 hover:bg-red-700 text-white">
-                {isLoggingOut ? "Saindo..." : "Sim, sair"}
-              </Button>
-            </div>
+            {isLoggingOut ? (
+              <div className="flex flex-col items-center justify-center py-6">
+                <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)] mb-4" />
+                <p className="text-slate-600 font-medium text-center">Desconectando...</p>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">Sair da conta?</h2>
+                <p className="text-slate-500 mb-6 text-sm">Tem certeza que deseja desconectar da sua conta?</p>
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white">
+                    Sim, sair
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

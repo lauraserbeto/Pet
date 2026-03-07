@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -56,13 +58,57 @@ export function Overview() {
     { name: 'Pet Sitter', value: 10, color: '#6366F1' },
   ];
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
+  const [providerData, setProviderData] = useState<any>(null);
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setIsLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) return;
+
+        const { data: user } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (user) {
+          setUserData(user);
+
+          // If provider (role 2, 3, or 4), fetch provider data
+          if ([2, 3, 4].includes(user.role_id)) {
+            const { data: provider } = await supabase
+              .from('providers')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .single();
+              
+            if (provider) setProviderData(provider);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="space-y-6 pb-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">Visão Geral</h2>
-          <p className="text-slate-500 mt-1">Bem-vindo de volta! Aqui está o resumo do seu negócio hoje.</p>
+          <p className="text-slate-500 mt-1">
+            {isLoading ? "Carregando..." : `Bem-vindo(a), ${userData?.full_name || 'Usuário'}! Aqui está o resumo do seu negócio hoje.`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
             <Button variant="outline" className="hidden md:flex">
@@ -77,6 +123,27 @@ export function Overview() {
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {providerData && (
+          <Card className="border-l-4 border-l-indigo-500 shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                      <div>
+                          <p className="text-sm font-medium text-slate-500">Seu Negócio</p>
+                          <h3 className="text-xl font-bold text-slate-900 mt-2 truncate w-32" title={providerData.business_name}>
+                            {providerData.business_name || 'Não informado'}
+                          </h3>
+                      </div>
+                      <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                          <Activity size={20} />
+                      </div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-4 text-xs font-medium text-indigo-600 bg-indigo-50 w-fit px-2 py-1 rounded-full">
+                      <span>Status: {providerData.status}</span>
+                  </div>
+              </CardContent>
+          </Card>
+        )}
+
         <Card className="border-l-4 border-l-[#3699D2] shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
                 <div className="flex justify-between items-start">

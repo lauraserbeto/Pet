@@ -1,3 +1,62 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+
+/* ─── Animação do Loader Customizado ─── */
+.pet-spinner {
+  position: relative;
+  width: 25px;
+  height: 40px;
+  margin: 0 auto; /* Para centralizar onde for colocado */
+}
+
+.pet-spinner > div:not(.middle) {
+  position: absolute;
+  width: 50%;
+  height: 150%;
+  background: transparent;
+  transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%));
+  animation: spinner-fzua35 1s calc(var(--delay) * 1s) infinite ease;
+  color: var(--color-primary-500); /* Usando a cor laranja da sua marca! */
+  text-align: end;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.pet-spinner .middle {
+  position: absolute;
+  background: transparent;
+  top: 15px;
+  left: -20px;
+  color: var(--color-primary-400);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.pet-spinner .icon-1 svg,
+.pet-spinner .icon-2 svg {
+  background: transparent;
+  fill: var(--color-primary-500);
+}
+
+.pet-spinner .icon-1 svg {
+  transform: rotate(180deg);
+  position: relative;
+  left: -15px;
+}
+
+.pet-spinner .icon-2 svg {
+  position: relative;
+  left: -15px;
+}
+
+@keyframes spinner-fzua35 {
+  0%, 10%, 20%, 30%, 50%, 60%, 70%, 80%, 90%, 100% {
+    transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1%));
+  }
+  50% {
+    transform: rotate(calc(var(--rotation) * 1deg)) translate(0, calc(var(--translation) * 1.5%));
+  }
+}

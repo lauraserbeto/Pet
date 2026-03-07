@@ -12,6 +12,7 @@ import { Schedule } from "../pages/dashboard/Schedule";
 import { Customers } from "../pages/dashboard/Customers";
 import { Products } from "../pages/dashboard/Products";
 import { Settings } from "../pages/dashboard/Settings";
+import { Approvals } from "../pages/dashboard/admin/Approvals";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { AboutPage } from "../pages/AboutPage";
@@ -161,6 +162,10 @@ export const router = createBrowserRouter([
         {
             path: "settings",
             Component: Settings
+        },
+        {
+            path: "aprovacoes",
+            Component: Approvals
         }
     ]
   },

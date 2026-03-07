@@ -106,9 +106,7 @@ export function RegisterPage() {
     }
 
     if (!acceptedTerms) {
-      toast.error("Termos obrigatórios", {
-        description: "Você precisa aceitar os termos para continuar.",
-      });
+      toast.error("Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.");
       return;
     }
 
@@ -123,12 +121,14 @@ export function RegisterPage() {
                 full_name: formData.name,
                 business_name: formData.businessName,
                 document: formData.document,
+                terms_accepted: true,
               },
             }
           : {
               data: {
                 role_id: 5,
                 full_name: formData.name,
+                terms_accepted: true,
               },
             };
 
@@ -140,16 +140,22 @@ export function RegisterPage() {
 
       if (error) throw error;
 
-      toast.success("Conta criada com sucesso!", {
-        description:
-          formData.type === "partner"
-            ? "Sua conta foi criada. Aguarde a aprovação do administrador."
-            : "Bem-vindo ao Pet+! Explore os melhores serviços.",
-      });
-
-      setTimeout(() => {
-        navigate(formData.type === "partner" ? "/login" : "/");
-      }, 600);
+      if (data.session) {
+        if (formData.type === "tutor") {
+          toast.success("Bem-vindo ao Pet+!", {
+            description: "Conta criada com sucesso. Explore os melhores serviços.",
+          });
+          navigate("/");
+        } else {
+          toast.success("Cadastro realizado!", {
+            description: "Sua conta foi criada e aguarda aprovação do administrador.",
+          });
+          navigate("/login");
+        }
+      } else {
+        toast.success("Conta criada com sucesso!");
+        navigate("/login");
+      }
     } catch (error: any) {
       console.error("Register error:", error);
       toast.error("Erro ao criar conta", {

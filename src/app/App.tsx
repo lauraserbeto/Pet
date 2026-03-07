@@ -7,7 +7,17 @@ function App() {
   return (
     <CartProvider>
       <RouterProvider router={router} />
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster 
+        position="bottom-right"
+        richColors 
+        closeButton
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            padding: '16px',
+          },
+        }}
+      />
     </CartProvider>
   );
 }

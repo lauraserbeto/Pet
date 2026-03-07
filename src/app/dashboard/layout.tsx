@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
@@ -8,63 +9,47 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-interface UserProfile {
-  id: string;
-  role_id: number;
-  full_name: string | null;
-}
-
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [roleId, setRoleId] = useState<number | null>(null);
   const [userName, setUserName] = useState<string>('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    async function getUserData() {
+    async function getUserSession() {
       try {
-        setLoading(true);
-        
-        // 1. Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError || !session) {
-          // If no session, redirect to login could be handled here 
-          // but usually the ProtectedRoute handles this.
-          // For now just stop loading.
-          setLoading(false);
+          navigate('/login');
           return;
         }
 
-        const userId = session.user.id;
-
-        // 2. Fetch role_id and name from public.users table
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('role_id, full_name')
-          .eq('id', userId)
-          .single();
-
-        if (userError) {
-          console.error('Error fetching user role:', userError);
-        } else if (userData) {
-          setRoleId(userData.role_id);
-          setUserName(userData.full_name || session.user.email?.split('@')[0] || '');
-        }
+        const role = session.user.user_metadata?.role_id;
+        setRoleId(role || null);
+        setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '');
 
       } catch (err) {
-        console.error('Unexpected error loading user data:', err);
+        console.error('Unexpected error loading user session:', err);
       } finally {
-        // Adding a slight delay to ensure the loading state feels "elegant"
-        // and doesn't just flash if the request is too fast.
-        setTimeout(() => setLoading(false), 800);
+        setIsLoading(false);
       }
     }
 
-    getUserData();
-  }, []);
+    getUserSession();
+  }, [navigate]);
 
-  if (loading) {
-    return <LoadingState />;
+  // Guard Clause: Block rendering until loading finishes
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <div className="w-16 h-16 rounded-xl bg-[var(--color-primary-500)] flex items-center justify-center text-white font-bold text-3xl mb-6 animate-pulse shadow-lg shadow-primary-500/20">
+          P
+        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+        <p className="mt-4 text-slate-500 font-medium">Carregando painel...</p>
+      </div>
+    );
   }
 
   return (
@@ -85,7 +70,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Simple Footer for Dashboard */}
         <footer className="py-4 px-8 border-t border-slate-200 text-center">
           <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">
-            &copy; 2026 Pet+ Partner - Sistema de Gestão Pet
+            &copy; 2026 Pet+ - Sistema de Gestão Pet
           </p>
         </footer>
       </div>

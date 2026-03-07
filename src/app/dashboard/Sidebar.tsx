@@ -12,6 +12,7 @@ import {
   MapPin, 
   UserPlus, 
   CheckCircle,
+  ClipboardCheck,
   LogOut,
   LucideIcon
 } from 'lucide-react';
@@ -21,27 +22,25 @@ import { Button } from '@/components/ui/button';
 
 interface MenuItem {
   title: string;
-  href: string;
+  path: string;
   icon: LucideIcon;
-  allowedRoles: number[];
+  roles: number[];
 }
 
 const menuItems: MenuItem[] = [
-  { title: "Visão Geral", href: "/dashboard", icon: LayoutDashboard, allowedRoles: [1, 2, 3, 4] },
-  { title: "Configurações", href: "/dashboard/settings", icon: Settings, allowedRoles: [1, 2, 3, 4] },
+  { title: 'Visão Geral', path: '/dashboard', roles: [1, 2, 3, 4], icon: LayoutDashboard },
+  { title: 'Aprovações de Parceiros', path: '/dashboard/aprovacoes', roles: [1], icon: ClipboardCheck },
+  { title: 'Meus Produtos', path: '/dashboard/products', roles: [2], icon: Package },
+  { title: 'Pedidos', path: '/dashboard/orders', roles: [2], icon: ShoppingCart },
+  { title: 'Agenda', path: '/dashboard/schedule', roles: [3, 4], icon: Calendar },
+  { title: 'Financeiro', path: '/dashboard/finance', roles: [2, 3, 4], icon: Wallet },
+  { title: 'Configurações', path: '/dashboard/settings', roles: [1], icon: Settings },
   
-  { title: "Clientes", href: "/dashboard/customers", icon: Users, allowedRoles: [2, 3, 4] },
-  { title: "Financeiro", href: "/dashboard/finance", icon: Wallet, allowedRoles: [2, 3, 4] },
-
-  { title: "Gestão de Usuários", href: "/dashboard/admin/users", icon: UserPlus, allowedRoles: [1] },
-  { title: "Aprovação de Parceiros", href: "/dashboard/admin/approvals", icon: CheckCircle, allowedRoles: [1] },
-
-  { title: "Produtos", href: "/dashboard/products", icon: Package, allowedRoles: [2] },
-  { title: "Pedidos Físicos", href: "/dashboard/orders", icon: ShoppingCart, allowedRoles: [2] },
-  { title: "Agenda", href: "/dashboard/schedule", icon: Calendar, allowedRoles: [3, 4] },
-  { title: "Gestão de Vagas", href: "/dashboard/hotel/slots", icon: DoorOpen, allowedRoles: [3] },
-  { title: "Reservas de Hospedagem", href: "/dashboard/hotel/bookings", icon: Bed, allowedRoles: [3] },
-  { title: "Raio de Atendimento", href: "/dashboard/sitter/radius", icon: MapPin, allowedRoles: [4] },
+  // Others kept for compatibility if needed, but strictly role filtered
+  { title: "Clientes", path: "/dashboard/customers", icon: Users, roles: [2, 3, 4] },
+  { title: "Gestão de Usuários", path: "/dashboard/admin/users", icon: UserPlus, roles: [1] },
+  { title: "Gestão de Vagas", path: "/dashboard/hotel/slots", icon: DoorOpen, roles: [3] },
+  { title: "Raio de Atendimento", path: "/dashboard/sitter/radius", icon: MapPin, roles: [4] },
 ];
 
 interface SidebarProps {
@@ -54,7 +53,7 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
 
   if (roleId === null) return null;
 
-  const filteredMenu = menuItems.filter(item => item.allowedRoles.includes(roleId));
+  const filteredMenu = menuItems.filter(item => item.roles.includes(roleId));
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col z-40 border-r border-slate-800">
@@ -71,11 +70,11 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
 
       <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto scrollbar-hide">
         {filteredMenu.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.path;
           return (
             <Link
-              key={item.href}
-              to={item.href}
+              key={item.path}
+              to={item.path}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
                 isActive
