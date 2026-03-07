@@ -37,6 +37,9 @@ Este repositório está dividido em duas partes principais:
    yarn dev
    ```
 
+## 🌐 Acessar o site em produção
+[https://petplus.vercel.app/](https://petplus.vercel.app/)
+
 ## 🎨 Design System & Componentes
 
 O projeto segue um design system moderno baseado em Figma, com componentes reutilizáveis e tipografia consistente.
