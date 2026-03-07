@@ -19,7 +19,7 @@ Este repositório está dividido em duas partes principais:
 
 1. Clone o repositório:
    ```bash
-   git clone [https://github.com/lauraserbeto/Pet](https://github.com/lauraserbeto/Pet)
+   git clone https://github.com/lauraserbeto/Pet
    ```
 
 2. Navegue até a pasta frontend:
