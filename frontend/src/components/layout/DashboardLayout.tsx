@@ -128,9 +128,8 @@ export function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header / Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-end px-4 sm:px-6 z-10 shadow-sm flex-shrink-0 gap-4">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-end px-4 sm:px-6 relative z-40 shadow-sm flex-shrink-0 gap-4">
           <div className="flex items-center gap-4 flex-1">
-             {/* Mobile Menu Trigger could go here */}
             <div className="relative w-full max-w-md hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[var(--color-primary-500)]" placeholder="Buscar no painel..." />
@@ -157,7 +156,7 @@ export function DashboardLayout() {
                   {getInitials(displayName)}
                 </Avatar>
               </button>
-
+ 
               {/* Dropdown Menu */}
               {isProfileOpen && (
                 <>
@@ -165,7 +164,7 @@ export function DashboardLayout() {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsProfileOpen(false)}
                   ></div>
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden text-sm">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-[100] overflow-hidden text-sm">
                     {/* Header: Nome e Função */}
                     <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
                       <p className="font-semibold text-slate-800 truncate">{displayName || 'Usuário'}</p>

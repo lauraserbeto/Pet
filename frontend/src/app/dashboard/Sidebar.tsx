@@ -33,7 +33,7 @@ const menuItems: MenuItem[] = [
   { title: 'Meus Produtos', path: '/dashboard/products', roles: [2], icon: Package },
   { title: 'Pedidos', path: '/dashboard/orders', roles: [2], icon: ShoppingCart },
   { title: 'Agenda', path: '/dashboard/schedule', roles: [3, 4], icon: Calendar },
-  { title: 'Financeiro', path: '/dashboard/finance', roles: [2, 3, 4], icon: Wallet },
+  { title: 'Financeiro', path: '/dashboard/financeiro', roles: [2, 3, 4], icon: Wallet },
   { title: 'Configurações', path: '/dashboard/settings', roles: [1], icon: Settings },
   
   // Others kept for compatibility if needed, but strictly role filtered

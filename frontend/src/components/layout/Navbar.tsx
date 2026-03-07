@@ -8,6 +8,7 @@ import {
   Hotel,
   Footprints,
   Info,
+  LogIn,
   LogOut,
   ChevronRight,
   UserCircle,
@@ -38,6 +39,7 @@ const tutorMenuItems = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
@@ -50,6 +52,15 @@ export function Navbar() {
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
@@ -105,7 +116,6 @@ export function Navbar() {
   }, []);
 
   const fetchUserRole = async (userId: string) => {
-    console.log("🔍 Buscando role_id para o usuário:", userId);
     try {
       const { data, error } = await supabase
         .from('users')
@@ -200,7 +210,14 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="border-b border-slate-100 bg-white sticky top-0 z-50">
+      <nav 
+        className={cn(
+          "sticky top-0 z-50",
+          isScrolled 
+            ? "bg-white/70 backdrop-blur-md border-b border-white/20 shadow-sm transition-all duration-300" 
+            : "bg-white border-b border-slate-100 transition-all duration-300"
+        )}
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
             {/* ── Logo + Desktop Nav ── */}
@@ -234,14 +251,21 @@ export function Navbar() {
                 <span className="text-sm text-slate-400">Carregando perfil...</span>
               ) : !sessionUser ? (
                 // Not Logged In
-                <>
-                  <Link to="/login">
-                    <Button variant="ghost">Entrar</Button>
+                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1 rounded-full shadow-sm">
+                  <Link 
+                    to="/login"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-full transition-all"
+                  >
+                    <LogIn size={16} />
+                    Entrar
                   </Link>
-                  <Link to="/register">
-                    <Button>Cadastrar</Button>
+                  <Link 
+                    to="/register"
+                    className="bg-[var(--color-primary-500)] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[var(--color-primary-600)] shadow-md shadow-primary-500/20 transition-all transform hover:scale-105"
+                  >
+                    Cadastrar
                   </Link>
-                </>
+                </div>
               ) : isDashboardUser ? (
                 // Admin, Manager, Hotel, Walker
                 <>

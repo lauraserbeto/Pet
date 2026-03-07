@@ -25,9 +25,11 @@ import { CartPage } from "../pages/CartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
 import { CheckoutSuccessPage } from "../pages/CheckoutSuccessPage";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
+import { Profile } from "../pages/dashboard/Profile";
+import Finance from "@/pages/dashboard/Finance";
+import Orders from "@/pages/dashboard/Orders";
 
 export const router = createBrowserRouter([
-  // Auth routes (no layout wrapper)
   {
     path: "/login",
     Component: LoginPage,
@@ -74,7 +76,6 @@ export const router = createBrowserRouter([
             }
         ]
       },
-      // Mock routes for navigation items to prevent 404s on demo
       {
         path: "search",
         Component: LandingPage, 
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
         path: "products",
         Component: ShoppingPage,
       },
+      
       {
         path: "shopping",
         children: [
@@ -150,6 +152,18 @@ export const router = createBrowserRouter([
         {
             path: "schedule",
             Component: Schedule
+        },
+        {
+            path: "perfil",
+            Component: Profile
+        },
+        {
+            path: "financeiro",
+            Component: Finance
+        },
+        {
+            path: "orders",
+            Component: Orders
         },
         {
             path: "customers",

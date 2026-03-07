@@ -15,6 +15,9 @@ import { Button } from "../../components/ui/button";
 import { Avatar } from "../../components/ui/avatar";
 import { supabase } from "../../lib/supabase";
 import { cn } from "../../lib/utils";
+import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import logo from "../../assets/pet+/logo2.png";
+
 
 interface SidebarProps {
   roleId: number | null;
@@ -35,7 +38,7 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
     { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
     { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },
     { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, roles: [3, 4], end: false },
-    { name: 'Financeiro', href: '/dashboard/finance', icon: DollarSign, roles: [2, 3, 4], end: false },
+    { name: 'Financeiro', href: '/dashboard/financeiro', icon: DollarSign, roles: [2, 3, 4], end: false },
     { name: 'Configurações', href: '/dashboard/settings', icon: Settings, roles: [1], end: false },
   ];
 
@@ -64,7 +67,7 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
     <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col flex-shrink-0 transition-all duration-300">
       <div className="p-6">
          <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-display)]">Pet<span className="text-[var(--color-primary-500)]">+</span> Partner</h1>
+          <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-24 w-auto" />
          </Link>
       </div>
 
