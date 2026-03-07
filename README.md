@@ -66,11 +66,6 @@ O sistema possui controle de acesso rigoroso baseado nos seguintes papéis:
 
 5: Tutor (Visão pública e compras)
 
-## 📊 Dashboard & Admin
-
-Após o login, os usuários são redirecionados para o Dashboard, onde podem gerenciar seus serviços e visualizar métricas.
-
-* **Dashboard:** [http://localhost:5173/dashboard](http://localhost:5173/dashboard)
 
 ## 📱 Responsividade
 
