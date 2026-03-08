@@ -28,6 +28,12 @@ import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { Profile } from "../pages/dashboard/Profile";
 import Finance from "@/pages/dashboard/Finance";
 import Orders from "@/pages/dashboard/Orders";
+import { PetSitterOnboarding } from "../pages/onboarding/PetSitterOnboarding";
+import { SitterEvaluations } from "@/pages/dashboard/SitterEvaluations";
+import { TutorProfile } from "../pages/tutor/TutorProfile";
+import { TutorPets } from "../pages/tutor/TutorPets";
+import { TutorAppointments } from "../pages/tutor/TutorAppointments";
+import { TutorOrders } from "../pages/tutor/TutorOrders";
 
 export const router = createBrowserRouter([
   {
@@ -135,7 +141,47 @@ export const router = createBrowserRouter([
         path: "contact",
         Component: ContactPage,
       },
+      {
+        path: "tutor/perfil",
+        element: (
+          <ProtectedRoute>
+            <TutorProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "tutor/pets",
+        element: (
+          <ProtectedRoute>
+            <TutorPets />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "tutor/agendamentos",
+        element: (
+          <ProtectedRoute>
+            <TutorAppointments />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "tutor/pedidos",
+        element: (
+          <ProtectedRoute>
+            <TutorOrders />
+          </ProtectedRoute>
+        ),
+      },
     ],
+  },
+  {
+    path: "/onboarding/sitter",
+    element: (
+      <ProtectedRoute>
+        <PetSitterOnboarding />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/dashboard",
@@ -180,6 +226,10 @@ export const router = createBrowserRouter([
         {
             path: "aprovacoes",
             Component: Approvals
+        },
+        {
+            path: "avaliacoes-sitters",
+            Component: SitterEvaluations
         }
     ]
   },

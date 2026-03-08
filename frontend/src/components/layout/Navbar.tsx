@@ -14,6 +14,7 @@ import {
   UserCircle,
   ShoppingCart,
   Loader2,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -33,6 +34,7 @@ const publicNavItems = [
 const tutorMenuItems = [
   { name: "Meu Perfil", href: "/tutor/perfil", icon: UserCircle },
   { name: "Meus Pets", href: "/tutor/pets", icon: PawPrint },
+  { name: "Meus Agendamentos", href: "/tutor/agendamentos", icon: Calendar },
   { name: "Meus Pedidos", href: "/tutor/pedidos", icon: ShoppingBag },
 ];
 
@@ -336,7 +338,130 @@ export function Navbar() {
             </div>
           </div>
         </div>
+
+        {/* ── Mobile Menu Overlay ── */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full z-50 bg-white border-b border-slate-100 shadow-xl overflow-y-auto" style={{ maxHeight: "calc(100vh - 4rem)" }}>
+          <div className="px-4 pt-2 pb-6 flex flex-col gap-4">
+            
+            {/* Navegação Pública (Itens do menu) */}
+            <div className="flex flex-col gap-2 pt-4">
+              {publicNavItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={closeMobile}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors",
+                      isActive 
+                        ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)]" 
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-slate-100 pt-4 pb-2">
+              {isLoading ? (
+                <div className="px-4 py-2 text-sm text-slate-400">Carregando perfil...</div>
+              ) : !sessionUser ? (
+                // Not Logged In Mobile
+                <div className="flex flex-col gap-3 px-4">
+                  <Link 
+                    to="/login"
+                    onClick={closeMobile}
+                    className="flex items-center justify-center gap-2 w-full py-3 text-sm font-medium text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+                  >
+                    <LogIn size={18} />
+                    Entrar
+                  </Link>
+                  <Link 
+                    to="/register"
+                    onClick={closeMobile}
+                    className="flex items-center justify-center w-full py-3 text-sm font-bold text-white bg-[var(--color-primary-500)] rounded-xl hover:bg-[var(--color-primary-600)] shadow-md transition-colors"
+                  >
+                    Cadastrar
+                  </Link>
+                </div>
+              ) : isDashboardUser ? (
+                // Admin, Manager, Hotel, Walker Mobile
+                <div className="flex flex-col gap-3 px-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{userName}</p>
+                      <p className="text-xs text-slate-500">{userEmail}</p>
+                    </div>
+                  </div>
+                  <Link to="/dashboard" onClick={closeMobile} className="w-full">
+                    <Button variant="default" className="w-full justify-center">Ir para o Dashboard</Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-center text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700" 
+                    onClick={() => {
+                      closeMobile();
+                      setShowLogoutModal(true);
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair da conta
+                  </Button>
+                </div>
+              ) : isTutor && (
+                // Tutor Mobile
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 mb-2 px-4">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{userName}</p>
+                      <p className="text-xs text-slate-500">{userEmail}</p>
+                    </div>
+                  </div>
+                  
+                  {tutorMenuItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={closeMobile}
+                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                      <item.icon className="h-5 w-5 text-slate-400" />
+                      {item.name}
+                    </Link>
+                  ))}
+                  
+                  <div className="mt-2 px-4">
+                    <button
+                      onClick={() => {
+                        closeMobile();
+                        setShowLogoutModal(true);
+                      }}
+                      className="flex items-center justify-center gap-2 w-full py-3 text-sm font-medium text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sair da conta
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       </nav>
+
+      
 
       {/* ── Logout Modal ── */}
       {showLogoutModal && (

@@ -7,7 +7,8 @@ import {
   ClipboardCheck,
   ShoppingCart,
   DollarSign,
-  Globe
+  Globe,
+  Heart
 } from "lucide-react";
 import { NavLink, Link, useNavigate } from "react-router";
 import { useState } from "react";
@@ -35,6 +36,7 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
   const menuItems = [
     { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard, roles: [1, 2, 3, 4], end: true },
     { name: 'Aprovações de Parceiros', href: '/dashboard/aprovacoes', icon: ClipboardCheck, roles: [1], end: false },
+    { name: 'Avaliações de Pet Sitters', href: '/dashboard/avaliacoes-sitters', icon: Heart, roles: [1], end: false },
     { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
     { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },
     { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, roles: [3, 4], end: false },

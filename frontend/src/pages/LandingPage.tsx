@@ -592,8 +592,8 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           1. HERO
           ═══════════════════════════════════════════════ */}
-      <section className="relative bg-[var(--color-secondary-50)] py-20 lg:py-32 overflow-hidden">
-        <div className="container mx-auto px-4 relative z-10">
+      <section className="relative bg-[var(--color-secondary-50)] pt-16 pb-20 md:pt-24 md:pb-24 lg:pt-24 lg:pb-32 overflow-hidden">
+        <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <Badge

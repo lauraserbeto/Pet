@@ -141,7 +141,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" },
+    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
   }),
 };
 
@@ -785,12 +785,6 @@ export function AboutPage() {
                   className="inline-flex items-center justify-center gap-2 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl transition-colors shadow-lg shadow-orange-200 text-sm sm:text-base"
                 >
                   Criar conta gratuita
-                </Link>
-                <Link
-                  to="/hotels"
-                  className="inline-flex items-center justify-center gap-2 bg-white text-slate-700 font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all text-sm sm:text-base"
-                >
-                  Conhecer serviços
                 </Link>
               </div>
             </div>

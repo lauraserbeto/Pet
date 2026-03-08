@@ -22,16 +22,36 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
           return
         }
 
-        if (adminOnly) {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('role_id')
-            .eq('id', user.id)
-            .single()
+        // We now fetch user data for all protected routes to check onboarding status
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role_id, onboarding_step')
+          .eq('id', user.id)
+          .single()
 
-          if (userData?.role_id !== 1) {
+        if (userData) {
+          // Admin Check
+          if (adminOnly && userData.role_id !== 1) {
             navigate('/')
             return
+          }
+
+          // Pet Sitter Onboarding Check
+          if (userData.role_id === 4) {
+            const currentPath = window.location.pathname;
+            const obs = userData.onboarding_step;
+
+            if (obs === 'INCOMPLETE' || obs === 'REJECTED' || obs === 'IN_REVIEW') {
+              if (currentPath !== '/onboarding/sitter') {
+                navigate('/onboarding/sitter')
+                return
+              }
+            } else if (obs === 'COMPLETED') {
+              if (currentPath === '/onboarding/sitter') {
+                navigate('/dashboard')
+                return
+              }
+            }
           }
         }
 
