@@ -52,7 +52,7 @@ O projeto segue um design system moderno baseado em Figma, com componentes reuti
 
 O sistema utiliza o Supabase para autenticação de usuários. As regras de segurança (Row Level Security - RLS) estão implementadas no banco de dados para garantir que os dados sejam acessados apenas pelo usuário correto.
 
-# 🔐 Níveis de Acesso (Role IDs)
+## 🔐 Níveis de Acesso (Role IDs)
 O sistema possui controle de acesso rigoroso baseado nos seguintes papéis:
 
 1: Admin Master (Aprovações e Gestão)
