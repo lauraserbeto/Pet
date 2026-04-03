@@ -1,0 +1,15 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//  modelo de Teste provisório só para o Prisma compilar
+model Teste {
+  id   String @id @default(uuid())
+  nome String
+}
