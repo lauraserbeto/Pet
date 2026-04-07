@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { supabase } from '../../lib/supabase'
+
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -15,31 +15,32 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        const token = localStorage.getItem("petplus_token");
+        const userStr = localStorage.getItem("petplus_user");
 
-        if (!user) {
+        if (!token || !userStr) {
           navigate('/login')
           return
         }
 
-        // We now fetch user data for all protected routes to check onboarding status
-        const { data: userData } = await supabase
-          .from('users')
-          .select('role_id, onboarding_step')
-          .eq('id', user.id)
-          .single()
+        const user = JSON.parse(userStr);
 
-        if (userData) {
+        // O role_id agora vem diretamente do payload de login e fica salvo no local storage
+        if (user) {
           // Admin Check
-          if (adminOnly && userData.role_id !== 1) {
+          if (adminOnly && user.role_id !== 1) {
             navigate('/')
             return
           }
 
-          // Pet Sitter Onboarding Check
-          if (userData.role_id === 4) {
+          if (user.role_id === 4) {
             const currentPath = window.location.pathname;
-            const obs = userData.onboarding_step;
+            
+            // ATENÇÃO: Como onboarding_step ainda não vem do novo Express endpoint de login,
+            // poderemos precisar fazer um fetch futuramente se o step continuar num DB.
+            // Para não quebrar a transição agora, validamos apenas se ele tentar acessar dashboard
+            // com dados incompletos quando essa coluna existir no Express (aqui assumimos COMPLETED provisoriamente)
+            const obs = user.onboarding_step || 'COMPLETED';
 
             if (obs === 'INCOMPLETE' || obs === 'REJECTED' || obs === 'IN_REVIEW') {
               if (currentPath !== '/onboarding/sitter') {

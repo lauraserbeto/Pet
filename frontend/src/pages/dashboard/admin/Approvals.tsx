@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase";
+import { API_URL, getHeaders } from "../../../lib/api";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, XCircle, Store, Bed, MapPin, User, AlertTriangle, Search, Loader2, Ban, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -40,17 +40,13 @@ export function Approvals() {
     async function verifyAccess() {
       try {
         setLoadingContext(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
+        const userStr = localStorage.getItem("petplus_user");
+        if (!userStr) {
           setIsAdmin(false);
           return;
         }
 
-        const { data: user } = await supabase
-          .from('users')
-          .select('role_id')
-          .eq('id', session.user.id)
-          .single();
+        const user = JSON.parse(userStr);
 
         if (user && user.role_id === 1) {
           setIsAdmin(true);
@@ -75,35 +71,14 @@ export function Approvals() {
     async function fetchPartners() {
       try {
         setLoadingData(true);
-        const { data: providers, error: provError } = await supabase
-          .from('providers')
-          .select('*');
-
-        if (provError) throw provError;
-        if (!providers || providers.length === 0) {
-          setPartners([]);
-          return;
-        }
-
-        const userIds = providers.map(p => p.user_id);
-        const { data: users, error: userError } = await supabase
-          .from('users')
-          .select('id, full_name, email, role_id')
-          .in('id', userIds);
-          
-        if (userError) throw userError;
-
-        const merged: Partner[] = providers.map(p => {
-          const userObj = users?.find(u => u.id === p.user_id);
-          return {
-            ...p,
-            full_name: userObj?.full_name || 'Desconhecido',
-            email: userObj?.email || 'Sem email',
-            role_id: userObj?.role_id
-          };
+        const res = await fetch(`${API_URL}/providers`, {
+          headers: getHeaders()
         });
-
-        setPartners(merged);
+        
+        if (!res.ok) throw new Error("Erro ao carregar parceiros");
+        const data = await res.json();
+        
+        setPartners(data);
 
       } catch (err) {
         console.error('Error fetching partners:', err);
@@ -119,12 +94,14 @@ export function Approvals() {
   const handleApprove = async (providerId: string) => {
     try {
       setProcessingId(providerId);
-      const { error } = await supabase
-        .from('providers')
-        .update({ status: 'APROVADO', rejection_reason: null })
-        .eq('id', providerId);
-
-      if (error) throw error;
+      
+      const res = await fetch(`${API_URL}/providers/${providerId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ status: 'APROVADO' })
+      });
+      
+      if (!res.ok) throw new Error("Erro ao aprovar parceiro");
 
       toast.success("Parceiro aprovado com sucesso!");
       setPartners(prev => prev.map(p => p.id === providerId ? { ...p, status: 'APROVADO', rejection_reason: undefined } : p));
@@ -152,12 +129,14 @@ export function Approvals() {
     if (!rejectingId) return;
     try {
       setProcessingId(rejectingId);
-      const { error } = await supabase
-        .from('providers')
-        .update({ status: 'REJEITADO', rejection_reason: rejectionReason || null })
-        .eq('id', rejectingId);
+      
+      const res = await fetch(`${API_URL}/providers/${rejectingId}/status`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ status: 'REJEITADO', rejection_reason: rejectionReason || null })
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error("Erro ao rejeitar parceiro");
 
       toast.success(activeTab === 'APROVADO' ? "Parceiro desativado com sucesso." : "Parceiro recusado com sucesso.");
       setPartners(prev => prev.map(p => p.id === rejectingId ? { ...p, status: 'REJEITADO', rejection_reason: rejectionReason } : p));

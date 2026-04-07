@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { supabase } from '../../lib/supabase';
+import { authService } from "../../lib/services/authService";
 import { toast } from 'sonner';
 import { 
     CheckCircle2, 
@@ -41,8 +42,7 @@ export const PetSitterOnboarding = () => {
 
     const handleLogout = async () => {
         try {
-            await supabase.auth.signOut();
-            navigate('/login');
+            authService.logout();
         } catch (error) {
             console.error('Logout error:', error);
             toast.error('Erro ao sair da conta.');

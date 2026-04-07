@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,8 +7,107 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//  modelo de Teste provisório só para o Prisma compilar
-model Teste {
-  id   String @id @default(uuid())
-  nome String
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @db.VarChar(50)
+  description String? @db.Text
+  users       User[]
+
+  @@map("roles")
+}
+
+model User {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role_id          Int
+  full_name        String   @db.VarChar(150)
+  email            String   @unique @db.VarChar(150)
+  password_hash    String?  @db.VarChar(255)
+  phone            String?  @db.VarChar(20)
+  avatar_url       String?  @db.Text
+  is_active        Boolean? @default(true)
+  terms_accepted   Boolean  @default(true)
+  onboarding_step  String?  @default("INCOMPLETE") @db.Text
+  rejection_reason String?  @default("") @db.Text
+  created_at       DateTime @default(now()) @db.Timestamptz
+  updated_at       DateTime @default(now()) @db.Timestamptz
+
+  role               Role                @relation(fields: [role_id], references: [id])
+  provider           Provider?           // Relacionamento 1 para 1
+  sitter_evaluations SitterEvaluation[]
+  pets               Pet[]
+  addresses          Address[]
+
+  @@map("users")
+}
+
+model Provider {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String   @unique @db.Uuid
+  business_name    String   @db.VarChar(150)
+  document         String   @unique @db.VarChar(20)
+  status           String?  @default("PENDENTE") @db.VarChar(50)
+  description      String?  @db.Text
+  phone            String?  @db.VarChar(20)
+  zip_code         String?  @db.VarChar(20)
+  address_line     String?  @db.VarChar(255)
+  city             String?  @db.VarChar(100)
+  state            String?  @db.VarChar(2)
+  rejection_reason String?  @db.Text
+  created_at       DateTime @default(now()) @db.Timestamptz
+  updated_at       DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("providers")
+}
+
+model SitterEvaluation {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String   @db.Uuid
+  experience_details String   @db.Text
+  environment_photos Json?    @default("[]")
+  quiz_answers       Json?    @default("{}")
+  status             String?  @default("PENDENTE") @db.Text
+  feedback           String?  @db.Text
+  created_at         DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sitter_evaluations")
+}
+
+
+model Pet {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutor_id      String    @db.Uuid
+  name          String    @db.VarChar(100)
+  species       String    @db.VarChar(50)
+  breed         String?   @db.VarChar(100)
+  weight_kg     Float?
+  birth_date    DateTime? @db.Date
+  medical_notes String?   @db.Text
+  created_at    DateTime  @default(now()) @db.Timestamptz
+  updated_at    DateTime  @default(now()) @db.Timestamptz
+
+  tutor User @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+
+  @@map("pets")
+}
+
+model Address {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String   @db.Uuid
+  cep         String   @db.VarChar(20)
+  rua         String   @db.VarChar(255)
+  numero      String   @db.VarChar(20)
+  complemento String?  @db.VarChar(255)
+  bairro      String   @db.VarChar(100)
+  cidade      String   @db.VarChar(100)
+  estado      String   @db.VarChar(2)
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
 }

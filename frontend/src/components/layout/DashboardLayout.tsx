@@ -4,8 +4,8 @@ import { Input } from "../../components/ui/input";
 import { Avatar } from "../../components/ui/avatar";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "../../lib/supabase";
 import { Sidebar } from "./Sidebar";
+import { authService } from "../../lib/services/authService";
 
 export function DashboardLayout() {
   const { pathname } = useLocation();
@@ -32,45 +32,24 @@ export function DashboardLayout() {
     const fetchUserRoleAndSession = async () => {
       try {
         setIsLoading(true);
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const userStr = localStorage.getItem("petplus_user");
         
-        if (sessionError || !session) {
-          throw new Error("Sessão não encontrada");
+        if (!userStr) {
+          navigate('/login');
+          return;
         }
 
-        setSessionUser(session.user);
-
-        // Fetch using the exact query from instructions
-        const { data, error: userError } = await supabase
-          .from("users")
-          .select("role_id, full_name")
-          .eq("id", session.user.id)
-          .single();
-
-        if (userError) {
-          throw userError;
+        const user = JSON.parse(userStr);
+        setSessionUser(user);
+        setRoleId(user.role_id);
+          
+        let finalName = user.full_name || "Usuário";
+        
+        if (user.business_name) {
+          finalName = user.business_name;
         }
-
-        if (data) {
-          setRoleId(data.role_id);
-          
-          let finalName = data.full_name || "Usuário";
-          
-          // Se for Parceiro (Lojista: 2, Hotel: 3, Pet Sitter: 4)
-          if ([2, 3, 4].includes(data.role_id)) {
-            const { data: providerData } = await supabase
-              .from('providers')
-              .select('business_name')
-              .eq('user_id', session.user.id)
-              .single();
-            
-            if (providerData && providerData.business_name) {
-              finalName = providerData.business_name;
-            }
-          }
-          
-          setDisplayName(finalName);
-        }
+        
+        setDisplayName(finalName);
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
       } finally {
@@ -79,7 +58,7 @@ export function DashboardLayout() {
     };
 
     fetchUserRoleAndSession();
-  }, []);
+  }, [navigate]);
 
   const getInitials = (name: string) => {
     if (!name) return "US";
@@ -103,8 +82,7 @@ export function DashboardLayout() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await supabase.auth.signOut();
-      navigate('/login');
+      authService.logout();
     } catch (error) {
       console.error('Erro ao sair:', error);
     } finally {

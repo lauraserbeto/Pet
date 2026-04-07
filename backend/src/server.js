@@ -3,11 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 
-// Importação das configurações isoladas
 const prisma = require('./config/database');
 const swaggerDocs = require('./config/swagger.config');
 
 const app = express();
+
+const authRoutes = require('./routes/authRoutes');
+const providerRoutes = require('./routes/providerRoutes');
 
 // Middlewares Globais
 app.use(cors());
@@ -19,12 +21,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 /**
  * @swagger
  * /api/health:
- * get:
- * summary: Verifica a saúde da API e a conexão com o banco
- * tags: [Health]
- * responses:
- * 200:
- * description: API e Banco operacionais
+ *   get:
+ *     summary: Verifica a saúde da API e a conexão com o banco
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API e Banco operacionais
  */
 app.get('/api/health', async (req, res) => {
   try {
@@ -40,13 +42,14 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Importaremos as rotas oficiais aqui futuramente
-// ex: app.use('/api/v1/tutors', tutorRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/providers', providerRoutes);
 
 
 // INICIALIZAÇÃO
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Acesso local do Swagger: http://localhost:${PORT}/api-docs`);
+const server = app.listen(PORT, () => {
+  console.log(`✅ Servidor rodando na porta ${PORT}`);
+  console.log(`📚 Acesso local do Swagger: http://localhost:${PORT}/api-docs`);
 });

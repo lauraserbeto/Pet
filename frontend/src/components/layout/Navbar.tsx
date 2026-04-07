@@ -70,16 +70,17 @@ export function Navbar() {
       setIsLoading(false);
     }, 2000);
 
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = () => {
       console.log("🔍 Iniciando verificação de sessão...");
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
+        const token = localStorage.getItem("petplus_token");
+        const userStr = localStorage.getItem("petplus_user");
 
-        if (session?.user) {
-          console.log("✅ Usuário encontrado:", session.user.email);
-          setSessionUser(session.user);
-          await fetchUserRole(session.user.id);
+        if (token && userStr) {
+          const user = JSON.parse(userStr);
+          console.log("✅ Usuário encontrado:", user.email);
+          setSessionUser(user);
+          setRoleId(user.role_id);
         } else {
           console.log("❌ Nenhum usuário logado no momento.");
           setSessionUser(null);
@@ -95,56 +96,14 @@ export function Navbar() {
 
     checkAuthStatus();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Mudança de status de autenticação:", event);
-      
-      if (event === "INITIAL_SESSION") return;
-
-      if (session?.user) {
-        setSessionUser(session.user);
-        await fetchUserRole(session.user.id);
-      } else if (event === "SIGNED_OUT") {
-        setSessionUser(null);
-        setRoleId(null);
-      }
-      setIsLoading(false);
-      setUserDropdownOpen(false);
-    });
+    // Podemos também ouvir um evento de storage se o login ocorrer em outra aba
+    window.addEventListener('storage', checkAuthStatus);
 
     return () => {
       clearTimeout(fallbackTimer);
-      authListener.subscription.unsubscribe();
+      window.removeEventListener('storage', checkAuthStatus);
     };
   }, []);
-
-  const fetchUserRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('role_id')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error(" Erro ao buscar role_id detalhado ->", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        throw error;
-      }
-      
-      if (data) {
-        console.log("Role ID encontrado:", data.role_id);
-        setRoleId(data.role_id);
-      } else {
-        console.warn("Nenhum role_id retornado para o usuário:", userId);
-      }
-    } catch (err: any) {
-      console.error("Exceção capturada no fetchUserRole:", err.message || err);
-    }
-  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -160,44 +119,15 @@ export function Navbar() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-
-    try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout no Supabase")), 3000)
-      );
-
-      await Promise.race([
-        supabase.auth.signOut(),
-        timeoutPromise
-      ]);
-      
-    } catch (error: any) {
-    } finally {      
-      for (let key in localStorage) {
-        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
-          localStorage.removeItem(key);
-        }
-      }
-
-      toast.success('Conta deslogada com sucesso!');
-
-      setSessionUser(null);
-      setRoleId(null);
-      
-      setShowLogoutModal(false);
-      setIsLoggingOut(false);
-      setUserDropdownOpen(false);
-      setMobileMenuOpen(false);
-      
-      setTimeout(() => {
-        navigate("/", { replace: true });
-        window.location.reload();
-      }, 1200);
-    }
+    
+    // Agora usando a authService centralizada
+    import("../../lib/services/authService").then(({ authService }) => {
+      authService.logout();
+    });
   };
 
   const userEmail = sessionUser?.email || "";
-  const userName = sessionUser?.user_metadata?.full_name || sessionUser?.user_metadata?.name || userEmail.split('@')[0] || "Usuário";
+  const userName = sessionUser?.full_name || sessionUser?.name || userEmail.split('@')[0] || "Usuário";
   const initials = userName
     .split(" ")
     .map((n: string) => n[0])

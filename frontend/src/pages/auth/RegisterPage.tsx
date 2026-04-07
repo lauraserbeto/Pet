@@ -35,7 +35,8 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import { supabase } from "../../lib/supabase";
+
+import { authService } from "@/lib/services/authService";
 
 interface PasswordCheck {
   label: string;
@@ -92,16 +93,12 @@ export function RegisterPage() {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("As senhas não coincidem", {
-        description: "Verifique e tente novamente.",
-      });
+      toast.error("As senhas não coincidem", { description: "Verifique e tente novamente." });
       return;
     }
 
     if (passwordStrength < 3) {
-      toast.error("Senha muito fraca", {
-        description: "Sua senha precisa atender todos os requisitos.",
-      });
+      toast.error("Senha muito fraca", { description: "Sua senha precisa atender todos os requisitos." });
       return;
     }
 
@@ -110,59 +107,48 @@ export function RegisterPage() {
       return;
     }
 
+    if (formData.type === "partner" && !formData.partnerType) {
+      toast.error("Selecione o tipo de parceiro.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const authOptions =
-        formData.type === "partner"
-          ? {
-              data: {
-                role_id: parseInt(formData.partnerType),
-                full_name: formData.name,
-                business_name: formData.businessName,
-                document: formData.document,
-                terms_accepted: true,
-              },
-            }
-          : {
-              data: {
-                role_id: 5,
-                full_name: formData.name,
-                terms_accepted: true,
-              },
-            };
-
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Monta o Payload que o Express espera
+      const payload = {
         email: formData.email,
         password: formData.password,
-        options: authOptions,
-      });
+        full_name: formData.name,
+        role_id: formData.type === "partner" ? parseInt(formData.partnerType) : 5,
+        terms_accepted: true,
+        ...(formData.type === "partner" && {
+          business_name: formData.businessName,
+          document: formData.document,
+        }),
+      };
 
-      if (error) throw error;
+      await authService.register(payload);
 
-      if (data.session) {
-        if (formData.type === "tutor") {
-          toast.success("Bem-vindo ao Pet+!", {
-            description: "Conta criada com sucesso. Explore os melhores serviços.",
-          });
-          navigate("/");
-        } else {
-          toast.success("Cadastro realizado!", {
-            description: "Sua conta foi criada e aguarda aprovação do administrador.",
-          });
-          navigate("/login");
-        }
+      if (formData.type === "tutor") {
+        toast.success("Bem-vindo ao Pet+!", {
+          description: "Conta criada com sucesso. Faça login para continuar.",
+        });
       } else {
-        toast.success("Conta criada com sucesso!");
-        navigate("/login");
+        toast.success("Cadastro realizado!", {
+          description: "Sua conta foi criada e aguarda aprovação do administrador.",
+        });
       }
+      
+      navigate("/login");
+      
     } catch (error: any) {
       console.error("Register error:", error);
       toast.error("Erro ao criar conta", {
         description: error.message || "Verifique os dados e tente novamente",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Garante que o botão volte ao normal
     }
   };
 

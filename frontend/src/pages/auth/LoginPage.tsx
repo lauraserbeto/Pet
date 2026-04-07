@@ -16,7 +16,8 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import { supabase } from "../../lib/supabase";
+
+import { authService } from "@/lib/services/authService";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -32,62 +33,27 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const data = await authService.login({ email, password });
+
+      toast.success("Login realizado com sucesso!", {
+        description: "Redirecionando...",
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { data: userData, error: userError } = await supabase
-          .from("users")
-          .select("role_id")
-          .eq("id", authData.user.id)
-          .single();
-
-        if (userError) throw userError;
-
-        toast.success("Login realizado com sucesso!", {
-          description: "Redirecionando...",
-        });
-
-        if ([2, 3, 4].includes(userData.role_id)) {
-          const { data: providerData, error: providerError } = await supabase
-            .from("providers")
-            .select("status")
-            .eq("user_id", authData.user.id)
-            .single();
-
-          if (providerError) throw providerError;
-
-          if (providerData?.status === "PENDENTE" || providerData?.status === "REJEITADO") {
-            toast.error("Acesso bloqueado", {
-                description: "Sua conta está em análise pelo administrador. Aguarde a aprovação."
-            });
-            await supabase.auth.signOut();
-            return;
-          }
-        }
-
-        if ([1, 2, 3, 4].includes(userData.role_id)) {
-          navigate("/dashboard");
-        } else {
-          navigate("/");
-        }
+      const userRoleId = data.user.role_id;
+      if ([1, 2, 3, 4].includes(userRoleId)) {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
       }
+
     } catch (err: any) {
       console.error("Login error:", err);
-      const errorMsg = err.message === "Invalid login credentials"
-        ? "E-mail ou senha incorretos."
-        : "Ocorreu um erro ao tentar entrar. Verifique seus dados.";
-      
-      setError(errorMsg);
+      setError(err.message);
       toast.error("Erro ao entrar", {
-        description: errorMsg,
+        description: err.message,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); 
     }
   };
 
