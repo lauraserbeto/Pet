@@ -36,11 +36,8 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
           if (user.role_id === 4) {
             const currentPath = window.location.pathname;
             
-            // ATENÇÃO: Como onboarding_step ainda não vem do novo Express endpoint de login,
-            // poderemos precisar fazer um fetch futuramente se o step continuar num DB.
-            // Para não quebrar a transição agora, validamos apenas se ele tentar acessar dashboard
-            // com dados incompletos quando essa coluna existir no Express (aqui assumimos COMPLETED provisoriamente)
-            const obs = user.onboarding_step || 'COMPLETED';
+
+            const obs = user.onboarding_step || 'INCOMPLETE';
 
             if (obs === 'INCOMPLETE' || obs === 'REJECTED' || obs === 'IN_REVIEW') {
               if (currentPath !== '/onboarding/sitter') {

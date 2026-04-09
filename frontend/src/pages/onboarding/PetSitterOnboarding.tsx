@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { supabase } from '../../lib/supabase';
 import { authService } from "../../lib/services/authService";
+import { userService } from "../../lib/services/userService";
 import { toast } from 'sonner';
 import { 
     CheckCircle2, 
@@ -55,19 +55,13 @@ export const PetSitterOnboarding = () => {
 
     const checkUserStatus = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+            const userStr = localStorage.getItem('petplus_user');
+            if (!userStr) {
                 navigate('/login');
                 return;
             }
 
-            const { data, error } = await supabase
-                .from('users')
-                .select('onboarding_step')
-                .eq('id', user.id)
-                .single();
-
-            if (error) throw error;
+            const data = await userService.getMe();
 
             if (data.onboarding_step === 'IN_REVIEW') {
                 setStatus('IN_REVIEW');
@@ -79,6 +73,7 @@ export const PetSitterOnboarding = () => {
         } catch (error) {
             console.error('Error fetching user status:', error);
             toast.error('Erro ao verificar status.');
+            authService.logout();
         }
     };
 
@@ -98,58 +93,36 @@ export const PetSitterOnboarding = () => {
         setPhotoPreviews(prev => prev.filter((_, i) => i !== index));
     };
 
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleSubmit = async () => {
         try {
             setIsSubmitting(true);
-            setSubmitText('Enviando arquivos...');
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Usuário não autenticado');
+            setSubmitText('Processando arquivos...');
+            
+            const userStr = localStorage.getItem('petplus_user');
+            if (!userStr) throw new Error('Usuário não autenticado');
 
-            // Upload real photos to Supabase Storage
             const uploadedUrls: string[] = [];
             for (let i = 0; i < photos.length; i++) {
-                const file = photos[i];
-                const fileExt = file.name.split('.').pop() || 'jpg';
-                const fileName = `${user.id}-${Date.now()}-${i}.${fileExt}`;
-                
-                const { error: uploadError } = await supabase.storage
-                    .from('sitter_photos')
-                    .upload(fileName, file);
-
-                if (uploadError) {
-                    console.error('Error uploading photo:', uploadError);
-                    throw new Error('Falha ao enviar fotos. Tente novamente.');
-                }
-
-                const { data } = supabase.storage
-                    .from('sitter_photos')
-                    .getPublicUrl(fileName);
-                
-                uploadedUrls.push(data.publicUrl);
+                const base64Str = await fileToBase64(photos[i]);
+                uploadedUrls.push(base64Str);
             }
 
             setSubmitText('Salvando dados...');
 
-            // 1. Insert into sitter_evaluations
-            const { error: evalError } = await supabase
-                .from('sitter_evaluations')
-                .insert({
-                    user_id: user.id,
-                    experience_details: JSON.stringify(resumeData),
-                    environment_photos: uploadedUrls,
-                    quiz_answers: quizData,
-                    status: 'PENDENTE'
-                });
-
-            if (evalError) throw evalError;
-
-            // 2. Update users table `onboarding_step`
-            const { error: userError } = await supabase
-                .from('users')
-                .update({ onboarding_step: 'IN_REVIEW' })
-                .eq('id', user.id);
-
-            if (userError) throw userError;
+            await userService.submitSitterEvaluation({
+                experience_details: resumeData,
+                environment_photos: uploadedUrls,
+                quiz_answers: quizData
+            });
 
             toast.success('Currículo enviado com sucesso! Estamos analisando.');
             setStatus('IN_REVIEW');

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 import { Eye, CheckCircle2, XCircle, Clock, Image as ImageIcon } from 'lucide-react';
+import { userService } from '../../lib/services/userService';
 
 interface SitterEvaluation {
     id: string;
@@ -12,7 +12,7 @@ interface SitterEvaluation {
     quiz_answers: any;
     feedback?: string;
     created_at: string;
-    users?: {
+    user?: {
         full_name: string;
         email: string;
     };
@@ -35,33 +35,11 @@ export const SitterEvaluations = () => {
     const fetchPendingEvaluations = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('sitter_evaluations')
-                .select(`
-                    id, 
-                    user_id, 
-                    status, 
-                    experience_details,
-                    environment_photos,
-                    quiz_answers,
-                    created_at,
-                    users:user_id (full_name, email)
-                `)
-                .eq('status', 'PENDENTE')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            
-            // Map correctly if users comes as an array or object
-            const formattedData = data?.map(d => ({
-                ...d,
-                users: Array.isArray(d.users) ? d.users[0] : d.users 
-            })) as SitterEvaluation[];
-
-            setEvaluations(formattedData || []);
-        } catch (error) {
+            const data = await userService.getPendingEvaluations();
+            setEvaluations(data || []);
+        } catch (error: any) {
             console.error('Error fetching evaluations:', error);
-            toast.error('Erro ao buscar avaliações.');
+            toast.error(error.message || 'Erro ao buscar avaliações.');
         } finally {
             setLoading(false);
         }
@@ -72,28 +50,14 @@ export const SitterEvaluations = () => {
         try {
             setIsProcessing(true);
 
-            // Update evaluation status
-            const { error: evalError } = await supabase
-                .from('sitter_evaluations')
-                .update({ status: 'APROVADO' })
-                .eq('id', selectedEval.id);
-
-            if (evalError) throw evalError;
-
-            // Update user onboarding step
-            const { error: userError } = await supabase
-                .from('users')
-                .update({ onboarding_step: 'COMPLETED' })
-                .eq('id', selectedEval.user_id);
-
-            if (userError) throw userError;
+            await userService.reviewEvaluation(selectedEval.id, 'APROVADO');
 
             toast.success('Pet Sitter aprovado com sucesso!');
             closeModal();
             fetchPendingEvaluations();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error approving sitter:', error);
-            toast.error('Ocorreu um erro ao aprovar.');
+            toast.error(error.message || 'Ocorreu um erro ao aprovar.');
         } finally {
             setIsProcessing(false);
         }
@@ -108,34 +72,14 @@ export const SitterEvaluations = () => {
         try {
             setIsProcessing(true);
 
-            // Update evaluation status
-            const { error: evalError } = await supabase
-                .from('sitter_evaluations')
-                .update({ 
-                    status: 'REJEITADO', 
-                    experience_details: selectedEval.experience_details,
-                    environment_photos: selectedEval.environment_photos,
-                    quiz_answers: selectedEval.quiz_answers,
-                    feedback: rejectFeedback 
-                })
-                .eq('id', selectedEval.id);
-
-            if (evalError) throw evalError;
-
-            // Update user onboarding step
-            const { error: userError } = await supabase
-                .from('users')
-                .update({ onboarding_step: 'REJECTED' })
-                .eq('id', selectedEval.user_id);
-
-            if (userError) throw userError;
+            await userService.reviewEvaluation(selectedEval.id, 'REJEITADO', rejectFeedback);
 
             toast.success('Pet Sitter rejeitado. Feedback salvo.');
             closeModal();
             fetchPendingEvaluations();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error rejecting sitter:', error);
-            toast.error('Ocorreu um erro ao rejeitar.');
+            toast.error(error.message || 'Ocorreu um erro ao rejeitar.');
         } finally {
             setIsProcessing(false);
         }
@@ -188,8 +132,8 @@ export const SitterEvaluations = () => {
                                 {evaluations.map((evalItem) => (
                                     <tr key={evalItem.id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="font-medium text-gray-900">{evalItem.users?.full_name || 'Usuário'}</div>
-                                            <div className="text-xs text-gray-500">{evalItem.users?.email}</div>
+                                            <div className="font-medium text-gray-900">{evalItem.user?.full_name || 'Usuário'}</div>
+                                            <div className="text-xs text-gray-500">{evalItem.user?.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                                             {formatDate(evalItem.created_at)}
@@ -225,9 +169,9 @@ export const SitterEvaluations = () => {
                         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 font-cabinet">
-                                    Avaliação: {selectedEval.users?.full_name}
+                                    Avaliação: {selectedEval.user?.full_name}
                                 </h3>
-                                <p className="text-sm text-gray-500">{selectedEval.users?.email}</p>
+                                <p className="text-sm text-gray-500">{selectedEval.user?.email}</p>
                             </div>
                             <button 
                                 onClick={closeModal}

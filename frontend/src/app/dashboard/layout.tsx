@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { supabase } from '../../lib/supabase';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { LoadingState } from './LoadingState';
+import { userService } from '../../lib/services/userService';
+import { authService } from '../../lib/services/authService';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -18,19 +19,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     async function getUserSession() {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session) {
+        const token = localStorage.getItem('petplus_token');
+        if (!token) {
           navigate('/login');
           return;
         }
 
-        const role = session.user.user_metadata?.role_id;
-        setRoleId(role || null);
-        setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '');
+        const data = await userService.getMe();
+        
+        if (data.role_id === 4 && data.onboarding_step !== 'COMPLETED') {
+          navigate('/onboarding/sitter');
+          return;
+        }
+
+        if ([2, 3].includes(data.role_id) && data.provider_status === 'PENDENTE') {
+          navigate('/');
+          return;
+        }
+
+        setRoleId(data.role_id);
+        setUserName(data.full_name || data.email?.split('@')[0] || '');
 
       } catch (err) {
         console.error('Unexpected error loading user session:', err);
+        authService.logout(); // Will redirect to login
       } finally {
         setIsLoading(false);
       }

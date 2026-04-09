@@ -40,7 +40,18 @@ export function LoginPage() {
       });
 
       const userRoleId = data.user.role_id;
-      if ([1, 2, 3, 4].includes(userRoleId)) {
+      const onboardingStep = data.user.onboarding_step;
+      const providerStatus = data.user.provider_status;
+
+      if (userRoleId === 4 && onboardingStep !== "COMPLETED") {
+        navigate("/onboarding/sitter");
+      } else if ([2, 3].includes(userRoleId) && providerStatus === "PENDENTE") {
+        // Lojistas ou Hotéis pendentes (opcional mostrar aviso e não ir pro dash)
+        toast.info("Conta em análise", {
+          description: "Aguarde a aprovação do administrador para acessar o painel."
+        });
+        navigate("/");
+      } else if ([1, 2, 3, 4].includes(userRoleId)) {
         navigate("/dashboard");
       } else {
         navigate("/");

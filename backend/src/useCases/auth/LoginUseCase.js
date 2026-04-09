@@ -16,21 +16,6 @@ class LoginUseCase {
       throw new Error('E-mail ou senha inválidos.');
     }
 
-    // 2.5. Verificação de Status (Para Provedores)
-    // Se o usuário for Lojista, Hotel ou Pet Sitter, verifica se a conta está ativa
-    if ([2, 3, 4].includes(user.role_id)) {
-      
-      // Se não tem cadastro de provedor ou está PENDENTE
-      if (!user.provider || user.provider.status === 'PENDENTE') {
-        throw new Error('Sua conta está em análise! Aguarde a aprovação do administrador.');
-      }
-
-      // Se foi REJEITADO
-      if (user.provider.status === 'REJEITADO') {
-        throw new Error(`Cadastro rejeitado. Motivo: ${user.provider.rejection_reason || 'Não informado'}`);
-      }
-    }
-
     // 3. Gerar o Token JWT (O "Crachá" de acesso)
     // O secret deve estar no seu .env
     const token = jwt.sign(
@@ -46,7 +31,9 @@ class LoginUseCase {
         full_name: user.full_name,
         email: user.email,
         role_id: user.role_id,
-        business_name: user.provider?.business_name || null
+        onboarding_step: user.onboarding_step,
+        business_name: user.provider?.business_name || null,
+        provider_status: user.provider?.status || null
       },
       token
     };
