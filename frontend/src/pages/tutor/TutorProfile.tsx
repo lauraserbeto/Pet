@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import { API_URL, getHeaders } from "../../lib/api";
 import { toast } from "sonner";
 import { Camera, MapPin, Lock, Loader2, Plus, Edit2, Trash2 } from "lucide-react";
 
@@ -35,24 +36,25 @@ export function TutorProfile() {
 
   const loadProfile = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      setUser(session.user);
+      const userStr = localStorage.getItem("petplus_user");
+      if (!userStr) return;
+      
+      const sessionUser = JSON.parse(userStr);
+      setUser(sessionUser);
 
-      // Fetch user personal data
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-        
-      if (!userError && userData) {
+      // Fetch user personal data from Backend
+      const res = await fetch(`${API_URL}/users/me`, {
+        headers: getHeaders()
+      });
+
+      if (res.ok) {
+        const userData = await res.json();
         setFullName(userData.full_name || "");
         setPhone(userData.phone || "");
         setAvatarUrl(userData.avatar_url || "");
       }
 
-      await loadAddresses(session.user.id);
+      await loadAddresses();
     } catch (error) {
       console.error("Erro ao carregar perfil:", error);
       toast.error("Erro ao carregar dados do perfil");
@@ -61,16 +63,18 @@ export function TutorProfile() {
     }
   };
 
-  const loadAddresses = async (userId: string) => {
+  const loadAddresses = async () => {
     setLoadingAddresses(true);
-    const { data, error } = await supabase
-      .from("addresses")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      setAddresses(data);
+    try {
+      const res = await fetch(`${API_URL}/addresses`, {
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAddresses(data);
+      }
+    } catch (e) {
+      console.error(e);
     }
     setLoadingAddresses(false);
   };
@@ -79,12 +83,13 @@ export function TutorProfile() {
     if (!user) return;
     setIsSavingPersonal(true);
     try {
-      const { error } = await supabase
-        .from("users")
-        .update({ full_name: fullName, phone: phone })
-        .eq("id", user.id);
+      const res = await fetch(`${API_URL}/users/me`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ full_name: fullName, phone })
+      });
 
-      if (error) throw error;
+      if (!res.ok) throw new Error("Erro");
       toast.success("Dados pessoais atualizados!");
     } catch (error) {
       toast.error("Erro ao atualizar dados.");
@@ -138,24 +143,28 @@ export function TutorProfile() {
     if (!user) return;
     setIsSavingAddress(true);
     try {
+      let res;
       if (editingAddressId) {
-        const { error } = await supabase
-          .from("addresses")
-          .update({ ...addressForm })
-          .eq("id", editingAddressId);
-        if (error) throw error;
-        toast.success("Endereço atualizado!");
+        res = await fetch(`${API_URL}/addresses/${editingAddressId}`, {
+          method: "PUT",
+          headers: getHeaders(),
+          body: JSON.stringify(addressForm)
+        });
       } else {
-        const { error } = await supabase
-          .from("addresses")
-          .insert([{ ...addressForm, user_id: user.id }]);
-        if (error) throw error;
-        toast.success("Endereço adicionado!");
+        res = await fetch(`${API_URL}/addresses`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(addressForm)
+        });
       }
+      
+      if (!res.ok) throw new Error("Erro");
+      
+      toast.success(editingAddressId ? "Endereço atualizado!" : "Endereço adicionado!");
       setShowAddressForm(false);
       setEditingAddressId(null);
       setAddressForm({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" });
-      loadAddresses(user.id);
+      loadAddresses();
     } catch (error) {
       toast.error("Erro ao salvar endereço.");
     } finally {
@@ -166,10 +175,13 @@ export function TutorProfile() {
   const handleDeleteAddress = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este endereço?")) return;
     try {
-      const { error } = await supabase.from("addresses").delete().eq("id", id);
-      if (error) throw error;
+      const res = await fetch(`${API_URL}/addresses/${id}`, {
+        method: "DELETE",
+        headers: getHeaders()
+      });
+      if (!res.ok) throw new Error("Erro");
       toast.success("Endereço excluído!");
-      if (user) loadAddresses(user.id);
+      if (user) loadAddresses();
     } catch (error) {
       toast.error("Erro ao excluir endereço.");
     }
@@ -196,8 +208,12 @@ export function TutorProfile() {
     }
     setIsSavingPassword(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      const res = await fetch(`${API_URL}/users/me/password`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ newPassword })
+      });
+      if (!res.ok) throw new Error("Erro");
       toast.success("Senha atualizada com sucesso!");
       setNewPassword("");
       setConfirmPassword("");

@@ -44,6 +44,8 @@ app.get('/api/health', async (req, res) => {
 // Importaremos as rotas oficiais aqui futuramente
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/providers', providerRoutes);
+app.use('/api/v1/users', require('./routes/userRoutes'));
+app.use('/api/v1/addresses', require('./routes/addressRoutes'));
 
 
 // INICIALIZAÇÃO
