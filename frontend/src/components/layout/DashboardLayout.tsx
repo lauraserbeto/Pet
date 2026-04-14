@@ -1,4 +1,4 @@
-import { Bell, Search, Home, Loader2, User, Globe, LogOut } from "lucide-react";
+import { Bell, Search, Home, Loader2, User, Globe, LogOut, Menu, X } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Avatar } from "../../components/ui/avatar";
@@ -6,6 +6,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
+import { cn } from "../../lib/utils";
 
 export function DashboardLayout() {
   const { pathname } = useLocation();
@@ -21,6 +22,8 @@ export function DashboardLayout() {
   // Header State
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -99,15 +102,66 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 font-[family-name:var(--font-body)]">
-      {/* Sidebar with props received from global layout state */}
-      <Sidebar roleId={roleId} userName={displayName} />
+    <div className="flex h-screen bg-slate-50 font-[family-name:var(--font-body)] overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/50 z-[60] md:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <div 
+        className={cn(
+          "fixed inset-y-0 left-0 z-[70] w-64 bg-slate-900 shadow-2xl transition-transform duration-300 md:hidden",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-4 flex justify-end">
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 text-slate-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <Sidebar 
+            roleId={roleId} 
+            userName={displayName} 
+            onLinkClick={() => setIsMobileMenuOpen(false)}
+            onLogout={handleLogout}
+            isLoggingOut={isLoggingOut}
+            className="w-full flex-1"
+          />
+        </div>
+      </div>
+
+      {/* Desktop Sidebar with props received from global layout state */}
+      <Sidebar 
+        roleId={roleId} 
+        userName={displayName} 
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onLogout={handleLogout}
+        isLoggingOut={isLoggingOut}
+        className="hidden md:flex" 
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header / Topbar */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-end px-4 sm:px-6 relative z-40 shadow-sm flex-shrink-0 gap-4">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 sm:px-6 relative z-40 shadow-sm flex-shrink-0 gap-4">
           <div className="flex items-center gap-4 flex-1">
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className="md:hidden rounded-lg text-slate-600 hover:bg-slate-100"
+                onClick={() => setIsMobileMenuOpen(true)}
+            >
+                <Menu className="h-6 w-6" />
+            </Button>
             <div className="relative w-full max-w-md hidden sm:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[var(--color-primary-500)]" placeholder="Buscar no painel..." />

@@ -8,7 +8,10 @@ import {
   ShoppingCart,
   DollarSign,
   Globe,
-  Heart
+  Heart,
+  ChevronLeft,
+  ChevronRight,
+  Loader2
 } from "lucide-react";
 import { NavLink, Link, useNavigate } from "react-router";
 import { useState } from "react";
@@ -23,11 +26,25 @@ import logo from "../../assets/pet+/logo2.png";
 interface SidebarProps {
   roleId: number | null;
   userName: string;
+  onLinkClick?: () => void;
+  className?: string;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  onLogout?: () => void;
+  isLoggingOut?: boolean;
 }
 
-export function Sidebar({ roleId, userName }: SidebarProps) {
+export function Sidebar({ 
+  roleId, 
+  userName, 
+  onLinkClick, 
+  className,
+  isCollapsed = false,
+  onToggleCollapse,
+  onLogout,
+  isLoggingOut = false
+}: SidebarProps) {
   const navigate = useNavigate();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   if (roleId === null) {
     return null;
@@ -46,30 +63,23 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
 
   const allowedItems = menuItems.filter(item => item.roles.includes(roleId));
 
-  const getInitials = (name: string) => {
-    if (!name) return "US";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  const getRoleLabel = (id: number) => {
-    switch (id) {
-      case 1: return 'Admin Master';
-      case 2: return 'PetShop';
-      case 3: return 'Hotel';
-      case 4: return 'Pet Sitter';
-      default: return 'Usuário';
-    }
-  };
-
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col flex-shrink-0 transition-all duration-300">
-      <div className="p-6">
-         <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-24 w-auto" />
+    <aside className={cn(
+        "bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 transition-all duration-300 relative",
+        isCollapsed ? "w-20" : "w-64",
+        className
+    )}>
+      {/* Collapse Toggle Button (Desktop Only) */}
+      <button
+        onClick={onToggleCollapse}
+        className="hidden md:flex absolute -right-3 top-20 bg-slate-800 text-white p-1 rounded-full border border-slate-700 hover:bg-[var(--color-primary-600)] transition-colors z-50"
+      >
+        {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+      </button>
+
+      <div className={cn("p-6", isCollapsed && "px-4")}>
+         <Link to="/" onClick={onLinkClick} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <ImageWithFallback src={logo} alt="Pet+ Logo" className={cn("h-24 w-auto transition-all", isCollapsed && "h-12")} />
          </Link>
       </div>
 
@@ -79,20 +89,43 @@ export function Sidebar({ roleId, userName }: SidebarProps) {
             key={link.name}
             to={link.href}
             end={link.end}
+            onClick={onLinkClick}
+            title={isCollapsed ? link.name : ""}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group",
                 isActive
                   ? "bg-[var(--color-primary-600)] text-white shadow-md"
-                  : "hover:bg-slate-800 hover:text-white"
+                  : "hover:bg-slate-800 hover:text-white",
+                isCollapsed && "justify-center px-0"
               )
             }
           >
             <link.icon size={20} className="group-hover:scale-110 transition-transform" />
-            <span className="font-medium">{link.name}</span>
+            {!isCollapsed && <span className="font-medium truncate">{link.name}</span>}
           </NavLink>
         ))}
       </nav>
+
+      {/* Logout Area */}
+      <div className={cn("p-4 border-t border-slate-800", isCollapsed && "px-2")}>
+        <button
+          onClick={onLogout}
+          disabled={isLoggingOut}
+          title={isCollapsed ? "Sair da conta" : ""}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-red-500/10 transition-all duration-200 group font-medium",
+            isCollapsed && "justify-center px-0"
+          )}
+        >
+          {isLoggingOut ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
+          )}
+          {!isCollapsed && <span>{isLoggingOut ? "Saindo..." : "Sair da conta"}</span>}
+        </button>
+      </div>
     </aside>
   );
 }
