@@ -13,7 +13,7 @@ router.patch('/me/password', UserController.updatePassword);
 router.post('/me/evaluations', UserController.submitSitterEvaluation);
 
 // Rotas do Administrador
-router.get('/admin/evaluations', adminMiddleware, UserController.getPendingEvaluations);
+router.get('/admin/evaluations', adminMiddleware, UserController.getEvaluations);
 router.patch('/admin/evaluations/:id', adminMiddleware, UserController.reviewEvaluation);
 
 module.exports = router;

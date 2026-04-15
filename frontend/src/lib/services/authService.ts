@@ -44,6 +44,34 @@ export const authService = {
   logout() {
     localStorage.removeItem("petplus_token");
     localStorage.removeItem("petplus_user");
-    window.location.href = "/login"; // Força o redirecionamento
-  }
-};
+    window.location.href = "/login";
+  },
+
+  // === RECUPERAÇÃO DE SENHA ===
+  async forgotPassword(email: string) {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ email }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Erro ao solicitar recuperação de senha.");
+    }
+    return data;
+  },
+
+  // === REDEFINIÇÃO DE SENHA ===
+  async resetPassword(token: string, password: string) {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ token, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Erro ao redefinir a senha.");
+    }
+    return data;
+  },
+};

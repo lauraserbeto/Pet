@@ -93,7 +93,7 @@ class UserController {
           experience_details: typeof experience_details === 'string' ? experience_details : JSON.stringify(experience_details),
           environment_photos, // array of base64 ou urls
           quiz_answers,
-          status: 'PENDENTE'
+          status: 'PENDING'
         }
       });
 
@@ -112,12 +112,14 @@ class UserController {
 
   // --- MÉTODOS DO ADMINISTRADOR ---
 
-  // Retorna todas as avaliações pendentes
-  async getPendingEvaluations(req, res) {
+  // Retorna avaliações filtradas por status
+  async getEvaluations(req, res) {
     try {
+      const { status } = req.query;
+      
       const evaluations = await prisma.sitterEvaluation.findMany({
         where: {
-          status: 'PENDENTE'
+          status: status || 'PENDING'
         },
         orderBy: {
           created_at: 'desc'
@@ -135,7 +137,7 @@ class UserController {
       return res.status(200).json(evaluations);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: 'Erro ao buscar avaliações pendentes' });
+      return res.status(500).json({ error: 'Erro ao buscar avaliações' });
     }
   }
 
@@ -143,7 +145,7 @@ class UserController {
   async reviewEvaluation(req, res) {
     try {
       const { id } = req.params;
-      const { status, feedback } = req.body;
+      const { status, feedback } = req.body; // status: APPROVED or REJECTED
 
       // Verifica se a avaliação existe
       const evaluation = await prisma.sitterEvaluation.findUnique({
@@ -155,7 +157,7 @@ class UserController {
       }
 
       // Prepara as atualizações em transação
-      const targetUserStatus = status === 'APROVADO' ? 'COMPLETED' : 'REJECTED';
+      const targetUserStatus = status === 'APPROVED' ? 'COMPLETED' : 'REJECTED';
 
       await prisma.$transaction(async (tx) => {
         // 1. Atualizar a evaluation
@@ -176,7 +178,7 @@ class UserController {
         });
 
         // 3. Atualizar provider do usuário se for aprovado
-        if (status === 'APROVADO') {
+        if (status === 'APPROVED') {
           // Precisamos encontrar se ele tem um provider
           const provider = await tx.provider.findUnique({
             where: { user_id: evaluation.user_id }

@@ -33,10 +33,11 @@ model User {
   updated_at       DateTime @default(now()) @db.Timestamptz
 
   role               Role                @relation(fields: [role_id], references: [id])
-  provider           Provider?           // Relacionamento 1 para 1
+  provider           Provider?
   sitter_evaluations SitterEvaluation[]
   pets               Pet[]
   addresses          Address[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -46,6 +47,7 @@ model Provider {
   user_id          String   @unique @db.Uuid
   business_name    String   @db.VarChar(150)
   document         String   @unique @db.VarChar(20)
+  document_type    String   @default("CNPJ") @db.VarChar(4)
   status           String?  @default("PENDENTE") @db.VarChar(50)
   description      String?  @db.Text
   phone            String?  @db.VarChar(20)
@@ -62,15 +64,21 @@ model Provider {
   @@map("providers")
 }
 
+enum EvaluationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model SitterEvaluation {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id            String   @db.Uuid
-  experience_details String   @db.Text
-  environment_photos Json?    @default("[]")
-  quiz_answers       Json?    @default("{}")
-  status             String?  @default("PENDENTE") @db.Text
-  feedback           String?  @db.Text
-  created_at         DateTime @default(now()) @db.Timestamptz
+  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String           @db.Uuid
+  experience_details String           @db.Text
+  environment_photos Json?            @default("[]")
+  quiz_answers       Json?            @default("{}")
+  status             EvaluationStatus? @default(PENDING)
+  feedback           String?          @db.Text
+  created_at         DateTime         @default(now()) @db.Timestamptz
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -110,4 +118,17 @@ model Address {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("addresses")
+}
+
+model PasswordResetToken {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token_hash String   @unique @db.VarChar(255)
+  user_id    String   @db.Uuid
+  expires_at DateTime @db.Timestamptz
+  used       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }

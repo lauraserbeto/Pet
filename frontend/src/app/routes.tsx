@@ -15,6 +15,8 @@ import { Settings } from "../pages/dashboard/Settings";
 import { Approvals } from "../pages/dashboard/admin/Approvals";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
+import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "../pages/auth/ResetPasswordPage";
 import { AboutPage } from "../pages/AboutPage";
 import { ShoppingPage } from "../pages/ShoppingPage";
 import { ProductDetailPage } from "../pages/ProductDetailPage";
@@ -43,6 +45,14 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     Component: RegisterPage,
+  },
+  {
+    path: "/recuperar-senha",
+    Component: ForgotPasswordPage,
+  },
+  {
+    path: "/redefinir-senha",
+    Component: ResetPasswordPage,
   },
   {
     path: "/",

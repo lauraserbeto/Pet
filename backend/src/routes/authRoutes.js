@@ -56,4 +56,50 @@ router.post('/register', AuthController.register);
  */
 router.post('/login', AuthController.login);
 
-module.exports = router;
+/**
+ * @swagger
+ * /Auth/ForgotPassword:
+ *   post:
+ *     summary: Solicita recuperação de senha por e-mail
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Instruções enviadas (resposta genérica por segurança)
+ */
+router.post('/forgot-password', AuthController.forgotPassword);
+
+/**
+ * @swagger
+ * /Auth/ResetPassword:
+ *   post:
+ *     summary: Redefine a senha usando o token recebido por e-mail
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Senha atualizada com sucesso
+ *       400:
+ *         description: Token inválido, expirado ou já utilizado
+ */
+router.post('/reset-password', AuthController.resetPassword);
+
+module.exports = router;
