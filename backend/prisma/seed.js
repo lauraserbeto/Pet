@@ -10,7 +10,7 @@ async function main() {
       { id: 4, name: 'PET_SITTER', description: 'Parceiro Pet Sitter' },
       { id: 5, name: 'TUTOR', description: 'Usuário Padrão (Tutor)' },
     ],
-    skipDuplicates: true, // Se já existir, ele ignora e não dá erro
+    skipDuplicates: true,
   });
   console.log('✅ Tabela de Roles populada com sucesso!');
 }
