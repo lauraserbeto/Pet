@@ -42,12 +42,12 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Importaremos as rotas oficiais aqui futuramente
+// Rotas do Sistema
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/users', require('./routes/userRoutes'));
 app.use('/api/v1/addresses', require('./routes/addressRoutes'));
-
+app.use('/api/v1/products', require('./routes/productsRoutes'));
 
 // INICIALIZAÇÃO
 const PORT = process.env.PORT || 3000;

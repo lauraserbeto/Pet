@@ -39,6 +39,8 @@ model User {
   addresses          Address[]
   passwordResetTokens PasswordResetToken[]
 
+  orders      Order[]
+
   @@map("users")
 }
 
@@ -60,6 +62,11 @@ model Provider {
   updated_at       DateTime @default(now()) @db.Timestamptz
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  products      Product[]
+  orders        Order[]
+  services      Service[]
+  appointments  Appointment[]
 
   @@map("providers")
 }
@@ -100,6 +107,9 @@ model Pet {
 
   tutor User @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
+  appointments Appointment[]
+
+
   @@map("pets")
 }
 
@@ -131,4 +141,93 @@ model PasswordResetToken {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
+}
+
+
+// Entidades para Lojistas
+model Product {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id    String      @db.Uuid // Relaciona ao Lojista
+  name           String      @db.VarChar(150)
+  category       String      @db.VarChar(50)
+  description    String?     @db.Text
+  sku            String?     @db.VarChar(50)
+  stock_quantity Int         @default(0)
+  price          Decimal     @db.Decimal(10, 2)
+  image_url      String?     @db.Text
+  status         String      @default("ACTIVE") // ACTIVE, INACTIVE, OUT_OF_STOCK
+  created_at     DateTime    @default(now()) @db.Timestamptz
+  updated_at     DateTime    @default(now()) @db.Timestamptz
+
+  provider       Provider    @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  order_items    OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id String      @db.Uuid // O lojista que recebe o pedido
+  customer_id String      @db.Uuid // O Tutor/Cliente
+  total_price Decimal     @db.Decimal(10, 2)
+  status      String      @default("PENDING") // PENDING, PREPARING, SHIPPED, DELIVERED, CANCELLED
+  created_at  DateTime    @default(now()) @db.Timestamptz
+  updated_at  DateTime    @default(now()) @db.Timestamptz
+
+  provider    Provider    @relation(fields: [provider_id], references: [id])
+  customer    User        @relation(fields: [customer_id], references: [id])
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id   String  @db.Uuid
+  product_id String  @db.Uuid
+  quantity   Int
+  unit_price Decimal @db.Decimal(10, 2)
+
+  order      Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product    Product @relation(fields: [product_id], references: [id], onDelete: Restrict)
+
+  @@map("order_items")
+}
+
+// Entidades para Hotel e Pet Sitter
+model Service {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id      String        @db.Uuid // Relaciona ao Hotel ou Pet Sitter
+  name             String        @db.VarChar(150)
+  category         String        @db.VarChar(50) // BOARDING, DAYCARE, SITTING, WALKING
+  description      String?       @db.Text
+  price            Decimal       @db.Decimal(10, 2)
+  duration_minutes Int?
+  is_active        Boolean       @default(true)
+  created_at       DateTime      @default(now()) @db.Timestamptz
+
+  provider         Provider      @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  appointments     Appointment[]
+
+  @@map("services")
+}
+
+model Appointment {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id String   @db.Uuid
+  service_id  String   @db.Uuid
+  pet_id      String   @db.Uuid
+  start_time  DateTime @db.Timestamptz
+  end_time    DateTime @db.Timestamptz
+  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  total_price Decimal  @db.Decimal(10, 2)
+  notes       String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @default(now()) @db.Timestamptz
+
+  provider    Provider  @relation(fields: [provider_id], references: [id])
+  service     Service   @relation(fields: [service_id], references: [id])
+  pet         Pet       @relation(fields: [pet_id], references: [id])
+
+  @@map("appointments")
 }

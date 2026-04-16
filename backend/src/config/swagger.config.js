@@ -16,7 +16,7 @@ const swaggerOptions = {
       },
     ],
   },
-  // O path.join garante que ele ache a pasta routes independente de onde o terminal foi aberto
+
   apis: [
     path.join(__dirname, '../server.js'),
     path.join(__dirname, '../routes/*.js'), 
