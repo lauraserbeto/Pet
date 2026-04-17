@@ -1,4 +1,4 @@
-const CreateProductUseCase = require('../useCases/products/createProductUseCase');
+const CreateProductUseCase = require('../useCases/products/CreateProductUseCase');
 const listProviderProductsUseCase = require('../useCases/products/ListProviderProductsUseCase');
 const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
 
