@@ -1,4 +1,4 @@
-const productRepository = require('../../repositories/productRepository');
+const productRepository = require('../../repositories/ProductRepository');
 
 class CreateProductUseCase {
   async execute({ provider_id, name, category, description, sku, stock_quantity, price, image_url }) {
