@@ -12,7 +12,12 @@ const authRoutes = require('./routes/authRoutes');
 const providerRoutes = require('./routes/providerRoutes');
 
 // Middlewares Globais
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://petplus-frontend.vercel.app'], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -31,7 +36,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  */
 app.get('/api/health', async (req, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`; // Testa o PostgreSQL
+    await prisma.$queryRaw`SELECT 1`; 
     res.status(200).json({ 
       status: 'success', 
       message: 'API rodando e conectada ao PostgreSQL!' 
