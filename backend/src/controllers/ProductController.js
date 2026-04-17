@@ -5,12 +5,17 @@ const updateProductUseCase = require('../useCases/products/UpdateProductUseCase'
 class ProductController {
   
   getOptions(req, res) {
-    const categories = [
-      "Alimentação", "Higiene", "Farmácia", "Acessórios", "Conforto", "Beleza", "Roupas"
-    ];
-    const petTypes = ["Cães", "Gatos", "Outros"];
-    
-    return res.status(200).json({ categories, petTypes });
+    try {
+      const categories = [
+        "Alimentação", "Higiene", "Farmácia", "Acessórios", "Conforto", "Beleza", "Roupas"
+      ];
+      const petTypes = ["Cães", "Gatos", "Outros"];
+      
+      return res.status(200).json({ categories, petTypes });
+    } catch (error) {
+      console.error("[ProductController] Erro em getOptions:", error);
+      return res.status(500).json({ error: error.message });
+    }
   }
 
   async listByProvider(req, res) {
@@ -19,7 +24,8 @@ class ProductController {
       const products = await listProviderProductsUseCase.execute(provider_id);
       return res.status(200).json(products);
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      console.error("[ProductController] Erro em listByProvider:", error);
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -54,7 +60,8 @@ class ProductController {
       });
 
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      console.error("[ProductController] Erro em create:", error);
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -86,7 +93,8 @@ class ProductController {
         product
       });
     } catch (error) {
-      return res.status(400).json({ error: error.message });
+      console.error("[ProductController] Erro em update:", error);
+      return res.status(500).json({ error: error.message });
     }
   }
 }

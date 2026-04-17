@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 
 router.get('/options', ProductController.getOptions);
+
 router.use(authMiddleware);
 
 router.get('/provider', ProductController.listByProvider);
