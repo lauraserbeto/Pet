@@ -37,7 +37,7 @@ export function Products() {
     description: "",
     sku: "",
     stock_quantity: 0,
-    price: 0,
+    price: "",
     image_url: ""
   };
 
@@ -65,6 +65,21 @@ export function Products() {
       ...prev,
       [name]: type === 'number' ? Number(value) : value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setFormData(prev => ({
+        ...prev,
+        image_url: base64String
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,7 +173,7 @@ export function Products() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">Preço Real (R$)</Label>
-                    <Input id="price" name="price" type="number" min="0" step="0.01" required value={formData.price} onChange={handleInputChange} />
+                    <Input id="price" name="price" type="text" required value={formData.price} onChange={handleInputChange} placeholder="Ex: 30,00" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="stock_quantity">Qtd. Estoque</Label>
@@ -167,8 +182,9 @@ export function Products() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="image_url">URL da Imagem (Opcional)</Label>
-                  <Input id="image_url" name="image_url" type="url" value={formData.image_url} onChange={handleInputChange} placeholder="https://exemplo.com/imagem.png" />
+                  <Label htmlFor="image_file">Imagem do Produto (Opcional)</Label>
+                  <Input id="image_file" name="image_file" type="file" accept="image/*" onChange={handleFileChange} />
+                  {formData.image_url && <p className="text-xs text-green-600 mt-1">Imagem carregada e pronta para envio.</p>}
                 </div>
 
                 <div className="space-y-2">

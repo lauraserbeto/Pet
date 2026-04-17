@@ -21,7 +21,7 @@ export interface CreateProductDTO {
   description?: string;
   sku?: string;
   stock_quantity: number;
-  price: number;
+  price: number | string;
   image_url?: string;
 }
 

@@ -5,7 +5,14 @@ class ProductController {
     try {
       const { name, category, description, sku, stock_quantity, price, image_url } = req.body;
       
-      const provider_id = req.user.id; 
+      const provider_id = req.userId; 
+
+      // Sanitização do Preço
+      let sanitizedPrice = 0;
+      if (price) {
+        const priceStr = price.toString().replace(/[R$\s]/g, '').replace(',', '.');
+        sanitizedPrice = parseFloat(priceStr);
+      }
 
       const product = await createProductUseCase.execute({
         provider_id,
@@ -13,8 +20,8 @@ class ProductController {
         category,
         description,
         sku,
-        stock_quantity,
-        price,
+        stock_quantity: Number(stock_quantity),
+        price: sanitizedPrice,
         image_url
       });
 
