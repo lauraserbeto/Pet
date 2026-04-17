@@ -1,4 +1,4 @@
-const createProductUseCase = require('../useCases/products/createProductUseCase');
+const CreateProductUseCase = require('../useCases/products/createProductUseCase');
 const listProviderProductsUseCase = require('../useCases/products/ListProviderProductsUseCase');
 const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
 
@@ -36,7 +36,7 @@ class ProductController {
         sanitizedPrice = parseFloat(priceStr);
       }
 
-      const product = await createProductUseCase.execute({
+      const product = await CreateProductUseCase.execute({
         provider_id,
         name,
         category,
