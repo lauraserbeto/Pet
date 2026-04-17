@@ -25,4 +25,8 @@
 
   --font-display: "Nunito", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  /* Suporte para resoluções grandes (Full HD) */
+  --breakpoint-fhd: 1920px;
+  --breakpoint-3xl: 1920px;
 }
