@@ -1,4 +1,4 @@
-const createProductUseCase = require('../useCases/products/createProductUseCase');
+const createProductUseCase = require('../useCases/products/CreateProductUseCase');
 
 class ProductController {
   async create(req, res) {
