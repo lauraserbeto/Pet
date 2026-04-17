@@ -5,6 +5,7 @@ export interface Product {
   provider_id: string;
   name: string;
   category: string;
+  pet_type: string;
   description?: string;
   sku?: string;
   stock_quantity: number;
@@ -18,6 +19,7 @@ export interface Product {
 export interface CreateProductDTO {
   name: string;
   category: string;
+  pet_type: string;
   description?: string;
   sku?: string;
   stock_quantity: number;
@@ -26,6 +28,19 @@ export interface CreateProductDTO {
 }
 
 export const productService = {
+  async fetchOptions(): Promise<{ categories: string[], petTypes: string[] }> {
+    const response = await fetch(`${API_URL}/products/options`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar opções');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
   async fetchProducts(): Promise<Product[]> {
     const response = await fetch(`${API_URL}/products/provider`, {
       method: 'GET',

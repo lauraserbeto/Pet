@@ -150,6 +150,7 @@ model Product {
   provider_id    String      @db.Uuid // Relaciona ao Lojista
   name           String      @db.VarChar(150)
   category       String      @db.VarChar(50)
+  pet_type       String      @default("TODOS") @db.VarChar(50)
   description    String?     @db.Text
   sku            String?     @db.VarChar(50)
   stock_quantity Int         @default(0)

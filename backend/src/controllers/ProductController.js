@@ -1,9 +1,31 @@
-const createProductUseCase = require('../useCases/products/CreateProductUseCase');
+const createProductUseCase = require('../useCases/products/createProductUseCase');
+const listProviderProductsUseCase = require('../useCases/products/ListProviderProductsUseCase');
+const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
 
 class ProductController {
+  
+  getOptions(req, res) {
+    const categories = [
+      "Alimentação", "Higiene", "Farmácia", "Acessórios", "Conforto", "Beleza", "Roupas"
+    ];
+    const petTypes = ["Cães", "Gatos", "Outros"];
+    
+    return res.status(200).json({ categories, petTypes });
+  }
+
+  async listByProvider(req, res) {
+    try {
+      const provider_id = req.userId;
+      const products = await listProviderProductsUseCase.execute(provider_id);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
   async create(req, res) {
     try {
-      const { name, category, description, sku, stock_quantity, price, image_url } = req.body;
+      const { name, category, pet_type, description, sku, stock_quantity, price, image_url } = req.body;
       
       const provider_id = req.userId; 
 
@@ -18,6 +40,7 @@ class ProductController {
         provider_id,
         name,
         category,
+        pet_type,
         description,
         sku,
         stock_quantity: Number(stock_quantity),
@@ -30,6 +53,38 @@ class ProductController {
         product
       });
 
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  }
+
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, category, pet_type, description, sku, stock_quantity, price, image_url } = req.body;
+      const provider_id = req.userId;
+
+      let sanitizedPrice = undefined;
+      if (price !== undefined) {
+        const priceStr = price.toString().replace(/[R$\s]/g, '').replace(',', '.');
+        sanitizedPrice = parseFloat(priceStr);
+      }
+
+      const product = await updateProductUseCase.execute(id, provider_id, {
+        name,
+        category,
+        pet_type,
+        description,
+        sku,
+        stock_quantity: stock_quantity !== undefined ? Number(stock_quantity) : undefined,
+        price: sanitizedPrice,
+        image_url
+      });
+
+      return res.status(200).json({
+        message: "Produto atualizado com sucesso!",
+        product
+      });
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }

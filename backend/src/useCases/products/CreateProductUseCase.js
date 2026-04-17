@@ -2,7 +2,7 @@ const productRepository = require('../../repositories/ProductRepository');
 const prisma = require('../../config/database');
 
 class CreateProductUseCase {
-  async execute({ provider_id, name, category, description, sku, stock_quantity, price, image_url }) {
+  async execute({ provider_id, name, category, pet_type, description, sku, stock_quantity, price, image_url }) {
     
     if (!name || name.trim() === "") {
       throw new Error("O nome do produto é obrigatório.");
@@ -33,6 +33,7 @@ class CreateProductUseCase {
       provider_id: provider.id,
       name,
       category: category || "GERAL",
+      pet_type: pet_type || "TODOS",
       description,
       sku: generatedSku,
       stock_quantity: stock_quantity || 0,

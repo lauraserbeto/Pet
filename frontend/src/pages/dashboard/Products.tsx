@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { 
   Table, 
@@ -20,20 +20,24 @@ import {
   DialogFooter,
   DialogDescription
 } from "../../components/ui/dialog";
-import { Search, Plus, Filter, Package, AlertCircle, Trash2, Loader2, ArrowRight } from "lucide-react";
+import { Search, Plus, Filter, Package, AlertCircle, Trash2, Edit2, Loader2, UploadCloud, Image as ImageIcon } from "lucide-react";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 import { productService, Product, CreateProductDTO } from "../../lib/services/productService";
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [options, setOptions] = useState<{categories: string[], petTypes: string[]}>({ categories: [], petTypes: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initialFormState: CreateProductDTO = {
     name: "",
     category: "",
+    pet_type: "",
     description: "",
     sku: "",
     stock_quantity: 0,
@@ -42,29 +46,60 @@ export function Products() {
   };
 
   const [formData, setFormData] = useState<CreateProductDTO>(initialFormState);
+  const [priceInput, setPriceInput] = useState("");
 
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const data = await productService.fetchProducts();
-      setProducts(data);
+      const [productsData, optionsData] = await Promise.all([
+        productService.fetchProducts(),
+        productService.fetchOptions()
+      ]);
+      setProducts(productsData);
+      setOptions(optionsData);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao carregar produtos");
+      toast.error(error.message || "Erro ao carregar os dados.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const formatPrice = (value: string) => {
+    // Remove everything that is not a digit
+    const numbers = value.replace(/\D/g, '');
+    if (!numbers) return '';
+    // Convert to float with 2 decimal places
+    const floatValue = parseInt(numbers, 10) / 100;
+    // Format to BRL
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(floatValue);
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    const formatted = formatPrice(rawValue);
+    setPriceInput(formatted);
+    // Para o submit, vamos converter depois
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? Number(value) : value
     }));
+  };
+
+  const handleDropzoneClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,17 +117,58 @@ export function Products() {
     reader.readAsDataURL(file);
   };
 
+  const openNewProductModal = () => {
+    setEditingProductId(null);
+    setFormData(initialFormState);
+    setPriceInput("");
+    setIsModalOpen(true);
+  };
+
+  const openEditProductModal = (product: Product) => {
+    setEditingProductId(product.id);
+    setFormData({
+      name: product.name,
+      category: product.category,
+      pet_type: product.pet_type || "",
+      description: product.description || "",
+      sku: product.sku || "",
+      stock_quantity: product.stock_quantity,
+      price: product.price,
+      image_url: product.image_url || ""
+    });
+    setPriceInput(formatPrice(Number(product.price).toFixed(2).replace('.', '')));
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitLoading(true);
-      const newProduct = await productService.createProduct(formData);
-      setProducts(prev => [newProduct, ...prev]);
-      toast.success("Produto criado com sucesso!");
+      
+      // Converte preço formatado (R$ 1.234,50) para float (1234.50)  
+      let numericPrice: number | string = 0;
+      if (priceInput) {
+        const strVal = priceInput.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
+        numericPrice = parseFloat(strVal);
+      } else {
+        numericPrice = Number(formData.price);
+      }
+
+      const payload = { ...formData, price: numericPrice };
+
+      if (editingProductId) {
+        const updatedProduct = await productService.updateProduct(editingProductId, payload);
+        setProducts(prev => prev.map(p => p.id === editingProductId ? updatedProduct : p));
+        toast.success("Produto atualizado com sucesso!");
+      } else {
+        const newProduct = await productService.createProduct(payload);
+        setProducts(prev => [newProduct, ...prev]);
+        toast.success("Produto criado com sucesso!");
+      }
       setIsModalOpen(false);
       setFormData(initialFormState);
     } catch (error: any) {
-      toast.error(error.message || "Erro ao criar produto");
+      toast.error(error.message || "Erro ao salvar produto");
     } finally {
       setIsSubmitLoading(false);
     }
@@ -141,62 +217,132 @@ export function Products() {
            </Button>
            
            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Novo Produto
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
+            <Button onClick={openNewProductModal}>
+              <Plus className="mr-2 h-4 w-4" /> Novo Produto
+            </Button>
+            <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
               <DialogHeader>
-                <DialogTitle>Cadastrar Novo Produto</DialogTitle>
+                <DialogTitle>{editingProductId ? "Editar Produto" : "Cadastrar Novo Produto"}</DialogTitle>
                 <DialogDescription>
-                  Preencha os dados do produto para adicioná-lo ao catálogo.
+                  {editingProductId ? "Altere as informações do produto selecionado." : "Preencha os dados do produto para adicioná-lo ao catálogo."}
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 py-4">
+              <form onSubmit={handleSubmit} className="space-y-5 py-4">
+                
+                {/* Upload Imagem Dropzone */}
+                <div className="space-y-2">
+                  <Label>Imagem do Produto</Label>
+                  <div 
+                    onClick={handleDropzoneClick}
+                    className="border-2 border-dashed border-slate-200 hover:border-[#3699D2] hover:bg-slate-50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer group"
+                  >
+                    {formData.image_url ? (
+                      <div className="relative w-full h-32 md:h-40 rounded-lg overflow-hidden group-hover:opacity-90 transition-opacity">
+                         <img src={formData.image_url} alt="Preview" className="w-full h-full object-contain" />
+                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                           <span className="text-white font-medium text-sm flex items-center"><UploadCloud className="mr-2 w-4 h-4" /> Trocar imagem</span>
+                         </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
+                          <ImageIcon className="text-[#3699D2] h-6 w-6" />
+                        </div>
+                        <p className="text-sm font-medium text-slate-700">Clique para selecionar uma imagem</p>
+                        <p className="text-xs text-slate-500 mt-1">PNG, JPG ou WEBP (Max. 2MB)</p>
+                      </>
+                    )}
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome do Produto</Label>
                   <Input id="name" name="name" required value={formData.name} onChange={handleInputChange} placeholder="Ex: Ração Golden 15kg" />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col">
                     <Label htmlFor="category">Categoria</Label>
-                    <Input id="category" name="category" required value={formData.category} onChange={handleInputChange} placeholder="Ex: Alimentos" />
+                    <select 
+                      id="category" 
+                      name="category" 
+                      required 
+                      value={formData.category} 
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Selecione...</option>
+                      {options.categories.map(cat => (
+                         <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sku">SKU (Opcional)</Label>
-                    <Input id="sku" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="Ex: R-001" />
+                  <div className="space-y-2 flex flex-col">
+                    <Label htmlFor="pet_type">Tipo de Pet</Label>
+                    <select 
+                      id="pet_type" 
+                      name="pet_type" 
+                      required 
+                      value={formData.pet_type} 
+                      onChange={handleInputChange}
+                      className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Selecione...</option>
+                      {options.petTypes.map(pt => (
+                         <option key={pt} value={pt}>{pt}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Preço Real (R$)</Label>
-                    <Input id="price" name="price" type="text" required value={formData.price} onChange={handleInputChange} placeholder="Ex: 30,00" />
+                <div className="grid items-center grid-cols-3 gap-4">
+                  <div className="space-y-2 col-span-1">
+                    <Label htmlFor="sku">SKU (Opcional)</Label>
+                    <Input id="sku" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="Ex: R-001" />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 col-span-1">
+                    <Label htmlFor="price">Preço Venda</Label>
+                    <Input 
+                      id="price" 
+                      name="price" 
+                      type="text" 
+                      required 
+                      value={priceInput} 
+                      onChange={handlePriceChange} 
+                      placeholder="R$ 0,00" 
+                    />
+                  </div>
+                  <div className="space-y-2 col-span-1">
                     <Label htmlFor="stock_quantity">Qtd. Estoque</Label>
                     <Input id="stock_quantity" name="stock_quantity" type="number" min="0" required value={formData.stock_quantity} onChange={handleInputChange} />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="image_file">Imagem do Produto (Opcional)</Label>
-                  <Input id="image_file" name="image_file" type="file" accept="image/*" onChange={handleFileChange} />
-                  {formData.image_url && <p className="text-xs text-green-600 mt-1">Imagem carregada e pronta para envio.</p>}
-                </div>
-
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col">
                   <Label htmlFor="description">Descrição</Label>
-                  <Input id="description" name="description" value={formData.description} onChange={handleInputChange} placeholder="Breve descrição do produto" />
+                  <textarea 
+                    id="description" 
+                    name="description" 
+                    rows={4}
+                    value={formData.description} 
+                    onChange={handleInputChange} 
+                    placeholder="Descreva os detalhes do produto, tamanho, indicação, etc." 
+                    className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                  />
                 </div>
 
-                <DialogFooter className="mt-6">
+                <DialogFooter className="mt-6 pt-4 border-t border-slate-100">
                   <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
                   <Button type="submit" disabled={isSubmitLoading}>
                     {isSubmitLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Salvar Produto
+                    {editingProductId ? "Salvar Alterações" : "Cadastrar Produto"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -269,7 +415,7 @@ export function Products() {
                 <Package className="h-12 w-12 text-slate-300 mb-4" />
                 <h3 className="text-lg font-bold text-slate-700">Nenhum produto encontrado</h3>
                 <p className="text-slate-500 mt-1 mb-4 text-sm max-w-sm">Você ainda não tem produtos cadastrados ou nenhum corresponde à sua busca atual.</p>
-                <Button onClick={() => setIsModalOpen(true)} variant="outline" className="text-[#3699D2] border-[#3699D2] hover:bg-blue-50">
+                <Button onClick={openNewProductModal} variant="outline" className="text-[#3699D2] border-[#3699D2] hover:bg-blue-50">
                    <Plus className="mr-2 h-4 w-4" /> Cadastrar Primeiro Produto
                 </Button>
              </div>
@@ -280,6 +426,7 @@ export function Products() {
                   <TableHead className="w-[80px] pl-6 font-semibold">Imagem</TableHead>
                   <TableHead className="font-semibold">Produto</TableHead>
                   <TableHead className="font-semibold">Categoria</TableHead>
+                  <TableHead className="font-semibold">Tipo Pet</TableHead>
                   <TableHead className="font-semibold">SKU</TableHead>
                   <TableHead className="font-semibold px-4 text-right">Preço</TableHead>
                   <TableHead className="font-semibold">Estoque</TableHead>
@@ -307,6 +454,11 @@ export function Products() {
                         {product.category}
                       </span>
                     </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100">
+                        {product.pet_type || '-'}
+                      </span>
+                    </TableCell>
                     <TableCell className="font-mono text-xs text-slate-500">{product.sku || '-'}</TableCell>
                     <TableCell className="font-bold text-slate-900 px-4 text-right">{formatCurrency(product.price)}</TableCell>
                     <TableCell>
@@ -322,15 +474,26 @@ export function Products() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right pr-6">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => handleDelete(product.id, product.name)}
-                        className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                        title="Excluir Produto"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => openEditProductModal(product)}
+                          className="text-slate-400 hover:text-[#3699D2] hover:bg-blue-50 transition-colors"
+                          title="Editar Produto"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleDelete(product.id, product.name)}
+                          className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          title="Excluir Produto"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
