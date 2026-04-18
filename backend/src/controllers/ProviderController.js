@@ -30,7 +30,7 @@ class ProviderController {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'ATIVO',
+          status: 'APROVADO',
           user: { role_id: 3 } // HOTEL
         },
         include: {
@@ -60,7 +60,7 @@ class ProviderController {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'ATIVO',
+          status: 'APROVADO',
           user: { role_id: 4 } // PET_SITTER
         },
         include: {
@@ -90,7 +90,7 @@ class ProviderController {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'ATIVO',
+          status: 'APROVADO',
           user: { role_id: 2 } // LOJISTA
         },
         include: {
