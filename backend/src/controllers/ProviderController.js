@@ -1,5 +1,7 @@
 const prisma = require('../config/database');
 const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDetailsUseCase');
+const updateProviderProfileUseCase = require('../useCases/providers/UpdateProviderProfileUseCase');
+const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
 
 class ProviderController {
   // Lista todos os provedores anexando dados do user
@@ -57,38 +59,30 @@ class ProviderController {
     }
   }
 
-  async updateMe(req, res) {
+  // Novo endpoint exclusivo para Vitrine/Perfil Público
+  async updateProfile(req, res) {
     try {
-      const { business_name, document, phone, description, zip_code, address_line, city, state, full_name, avatar_url } = req.body;
       const userId = req.userId;
+      console.log("[updateProfile] Atualizando vitrine para:", userId);
 
-      if (full_name || avatar_url) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            full_name: full_name !== undefined ? full_name : undefined,
-            avatar_url: avatar_url !== undefined ? avatar_url : undefined
-          }
-        });
-      }
-
-      const updatedProvider = await prisma.provider.update({
-        where: { user_id: userId },
-        data: {
-          business_name,
-          document,
-          phone,
-          description,
-          zip_code,
-          address_line,
-          city,
-          state,
-        }
-      });
-
+      const updatedProvider = await updateProviderProfileUseCase.execute(userId, req.body);
       return res.status(200).json(updatedProvider);
     } catch (error) {
-      console.error("[ProviderController] Erro em updateMe:", error);
+      console.error("[ProviderController] Erro em updateProfile:", error.message);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  // Endpoint para dados básicos de conta
+  async updateMe(req, res) {
+    try {
+      const userId = req.userId;
+      console.log("[updateMe] Atualizando conta para:", userId);
+
+      const updatedProvider = await updateProviderAccountUseCase.execute(userId, req.body);
+      return res.status(200).json(updatedProvider);
+    } catch (error) {
+      console.error("[ProviderController] Erro em updateMe:", error.message);
       return res.status(500).json({ error: error.message });
     }
   }

@@ -17,6 +17,19 @@ export interface ProviderDetails {
   };
   products?: any[];
   services?: any[];
+  hourly_rate?: number | string;
+  daily_rate?: number | string;
+  gallery_images?: string[];
+  highlights?: string[];
+  amenities?: string[];
+  allowed_animals?: string[];
+  operating_hours?: any;
+  rules_policies?: string;
+  sitter_roles?: string[];
+  address_line?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
 }
 
 export const providerService = {
@@ -59,6 +72,22 @@ export const providerService = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Erro ao atualizar seu perfil');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
+  async updatePublicProfile(updateData: any): Promise<any> {
+    const response = await fetch(`${API_URL}/providers/profile`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(updateData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erro ao atualizar sua vitrine');
     }
 
     const data = await response.json();

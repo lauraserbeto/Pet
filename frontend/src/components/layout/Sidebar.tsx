@@ -11,7 +11,8 @@ import {
   Heart,
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Store
 } from "lucide-react";
 import { NavLink, Link, useNavigate } from "react-router";
 import { useState } from "react";
@@ -54,6 +55,7 @@ export function Sidebar({
     { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard, roles: [1, 2, 3, 4], end: true },
     { name: 'Aprovações de Parceiros', href: '/dashboard/aprovacoes', icon: ClipboardCheck, roles: [1], end: false },
     { name: 'Avaliações de Pet Sitters', href: '/dashboard/avaliacoes-sitters', icon: Heart, roles: [1], end: false },
+    { name: 'Meu Perfil Público', href: '/dashboard/perfil', icon: Store, roles: [2, 3, 4], end: false },
     { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
     { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },
     { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, roles: [3, 4], end: false },
@@ -107,10 +109,23 @@ export function Sidebar({
         ))}
       </nav>
 
-      {/* Logout Area */}
+      {/* Support & Site Area */}
       <div className={cn("p-4 border-t border-slate-800", isCollapsed && "px-2")}>
+        <Link
+          to="/"
+          onClick={onLinkClick}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200 group font-medium mb-1",
+            isCollapsed && "justify-center px-0"
+          )}
+        >
+          <Globe size={20} className="group-hover:rotate-12 transition-transform text-[var(--color-primary-500)]" />
+          {!isCollapsed && <span>Ir para o Site</span>}
+        </Link>
+
         <button
           onClick={onLogout}
+
           disabled={isLoggingOut}
           title={isCollapsed ? "Sair da conta" : ""}
           className={cn(

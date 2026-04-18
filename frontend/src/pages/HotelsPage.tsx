@@ -39,15 +39,18 @@ export function HotelsPage() {
         setApiHotels(
           activeHotels.map((h: any) => ({
             id: h.id,
-            name: h.business_name || h.full_name,
+            name: h.business_name || h.user?.full_name || "Hotel Pet",
             rating: 5.0, // Mock
             reviews: Math.floor(Math.random() * 100) + 10,
-            price: 150, // Mock fallback
-            image: "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80",
-            accepts: { dog: true, cat: true },
+            price: h.daily_rate ? Number(h.daily_rate) : 150,
+            image: (h.gallery_images && h.gallery_images.length > 0) ? h.gallery_images[0] : (h.user?.avatar_url || "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80"),
+            accepts: { 
+               dog: h.allowed_animals?.includes('Cachorro') || h.allowed_animals?.includes('Sem restrição') || false, 
+               cat: h.allowed_animals?.includes('Gato') || h.allowed_animals?.includes('Sem restrição') || false 
+            },
             distance: "3.0 km",
             address: h.address_line || "São Paulo, SP",
-            amenities: ["Wi-Fi", "Área Verde", "Supervisão 24h"],
+            amenities: h.amenities?.length > 0 ? h.amenities : ["Wi-Fi", "Área Verde", "Supervisão 24h"],
             openNow: true,
           }))
         );
@@ -341,7 +344,7 @@ export function HotelsPage() {
 
                       {/* Amenities */}
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {hotel.amenities.map((amenity) => (
+                        {hotel.amenities.map((amenity: string) => (
                           <span
                             key={amenity}
                             className="inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-50 px-2 py-1 rounded-md"

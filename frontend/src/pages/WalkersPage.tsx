@@ -39,17 +39,17 @@ export function WalkersPage() {
         setApiWalkers(
           activeWalkers.map((w: any) => ({
             id: w.id,
-            name: w.business_name || w.full_name,
+            name: w.business_name || w.user?.full_name || "Pet Sitter",
             role: w.description || "Pet Sitter & Dog Walker",
             rating: 5.0, // Mock
             reviews: Math.floor(Math.random() * 50) + 5,
-            price: 50, // Mock fallback
-            image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
+            price: w.hourly_rate ? Number(w.hourly_rate) : 50,
+            image: w.user?.avatar_url || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
             verified: true,
             distance: "2.0 km",
             experience: "3 anos",
             petsServed: 40,
-            services: ["Pet Sitter", "Dog Walker"],
+            services: w.sitter_roles?.length > 0 ? w.sitter_roles : ["Pet Sitter", "Dog Walker"],
             available: true,
             bio: w.description || "Apaixonado por animais.",
           }))
@@ -376,7 +376,7 @@ export function WalkersPage() {
                   {/* Bottom Row: Services + Actions */}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
                     <div className="flex flex-wrap gap-1.5">
-                      {walker.services.map((service) => (
+                      {walker.services.map((service: string) => (
                         <Badge
                           key={service}
                           variant="secondary"

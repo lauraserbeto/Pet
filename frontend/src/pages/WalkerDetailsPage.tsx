@@ -42,7 +42,7 @@ export function WalkerDetailsPage() {
           name: data.user.full_name || data.business_name,
           age: 30, // Mock
           role: data.description || "Pet Sitter & Dog Walker",
-          price: 40, // Mock fallback
+          price: data.hourly_rate ? Number(data.hourly_rate) : 40,
           rating: 5.0,
           reviews: 24,
           distance: "2.0 km",
@@ -64,7 +64,7 @@ export function WalkerDetailsPage() {
           reviewsList: [
             { name: "Fernanda L.", rating: 5, text: "Incrível! Muito atencioso com meu cão.", date: "1 semana atrás" }
           ],
-          highlights: ["Certificado profissional", "Envia fotos e vídeos"]
+          highlights: (data.highlights && data.highlights.length > 0) ? data.highlights : ["Certificado profissional", "Envia fotos e vídeos"]
         });
         setLoading(false);
       })
@@ -359,7 +359,7 @@ export function WalkerDetailsPage() {
                 Destaques
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {walker.highlights.map((hl) => (
+                {walker.highlights.map((hl: string) => (
                   <div
                     key={hl}
                     className="flex items-center gap-2.5 bg-slate-50 rounded-xl p-3 border border-slate-100"
@@ -381,7 +381,7 @@ export function WalkerDetailsPage() {
             transition={{ duration: 0.2 }}
             className="mt-6 space-y-3"
           >
-            {walker.services.map((service) => (
+            {walker.services.map((service: { name: string; price: number; description: string }) => (
               <div
                 key={service.name}
                 className="bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:border-sky-200 transition-colors group cursor-pointer"
@@ -450,7 +450,7 @@ export function WalkerDetailsPage() {
             </div>
 
             {/* Reviews */}
-            {walker.reviewsList.map((review, i) => (
+            {walker.reviewsList.map((review: { name: string; rating: number; text: string; date: string }, i: number) => (
               <div
                 key={i}
                 className="bg-white border border-slate-100 rounded-xl p-4"

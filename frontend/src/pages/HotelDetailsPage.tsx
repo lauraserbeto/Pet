@@ -50,22 +50,25 @@ export function HotelDetailsPage() {
           name: data.business_name || data.user.full_name,
           distance: "3.0 km",
           address: data.address_line || "Endereço não informado",
-          price: 150, // Mock
+          price: data.daily_rate ? Number(data.daily_rate) : 150,
           rating: 4.8,
           reviews: 50,
           description: data.description || "O melhor lugar para seu pet.",
-          images: [
+          images: (data.gallery_images && data.gallery_images.length > 0) ? data.gallery_images : [
             data.user.avatar_url || "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&auto=format&fit=crop&q=80",
             "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=900&auto=format&fit=crop&q=80"
           ],
-          amenities: [
+          amenities: (data.amenities && data.amenities.length > 0) ? data.amenities.map((a: string) => ({
+            icon: a.toLowerCase().includes('verde') ? 'tree' : a.toLowerCase().includes('wi') ? 'wifi' : a.toLowerCase().includes('superv') ? 'shield' : 'paw',
+            label: a
+          })) : [
             { icon: "tree", label: "Área Verde" },
             { icon: "shield", label: "Supervisão 24h" }
           ],
-          acceptsDogs: true,
-          acceptsCats: true,
-          openHours: "08:00 — 20:00",
-          policies: ["Carteira de vacinação obrigatória"],
+          acceptsDogs: data.allowed_animals?.includes('Cachorro') || data.allowed_animals?.includes('Sem restrição') || false,
+          acceptsCats: data.allowed_animals?.includes('Gato') || data.allowed_animals?.includes('Sem restrição') || false,
+          openHours: data.operating_hours || "08:00 — 20:00",
+          policies: data.rules_policies ? [data.rules_policies] : ["Carteira de vacinação obrigatória"],
           reviewsList: []
         });
         setLoading(false);
@@ -241,7 +244,7 @@ export function HotelDetailsPage() {
         <div className="absolute bottom-0 left-0 right-0 z-10">
           {/* Progress bar */}
           <div className="flex gap-1 px-4 mb-2">
-            {hotel.images.map((_, i) => (
+            {hotel.images.map((_: any, i: number) => (
               <div
                 key={i}
                 className="flex-1 h-[3px] rounded-full overflow-hidden bg-white/30 cursor-pointer"
@@ -268,7 +271,7 @@ export function HotelDetailsPage() {
           {/* Thumbnails row */}
           <div className="flex items-center justify-between px-4 pb-4">
             <div className="flex gap-2">
-              {hotel.images.map((img, i) => (
+              {hotel.images.map((img: string, i: number) => (
                 <button
                   key={i}
                   className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${
@@ -384,10 +387,10 @@ export function HotelDetailsPage() {
 
         {/* Tabs */}
         <div className="flex gap-1 mt-6 bg-slate-100 rounded-xl p-1">
-          {(["info", "reviews"] as const).map((tab) => (
+          {(["info", "reviews"] as const).map((tab: string) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab as "info" | "reviews")}
               className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                 activeTab === tab
                   ? "bg-white text-slate-900 shadow-sm"
@@ -422,7 +425,7 @@ export function HotelDetailsPage() {
                 Comodidades
               </h2>
               <div className="grid grid-cols-2 gap-3">
-                {hotel.amenities.map((am) => (
+                {hotel.amenities.map((am: { icon: string; label: string }) => (
                   <div
                     key={am.label}
                     className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-100"
@@ -444,7 +447,7 @@ export function HotelDetailsPage() {
                 Regras e Políticas
               </h2>
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2.5">
-                {hotel.policies.map((policy, i) => (
+                {hotel.policies.map((policy: string, i: number) => (
                   <div key={i} className="flex items-start gap-2">
                     <ChevronRight className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                     <span className="text-sm text-amber-800">{policy}</span>
@@ -468,7 +471,7 @@ export function HotelDetailsPage() {
                   {hotel.rating.toFixed(1)}
                 </p>
                 <div className="flex gap-0.5 mt-1 justify-center">
-                  {[1, 2, 3, 4, 5].map((s) => (
+                  {[1, 2, 3, 4, 5].map((s: number) => (
                     <Star
                       key={s}
                       className="h-4 w-4 fill-amber-400 text-amber-400"
@@ -480,7 +483,7 @@ export function HotelDetailsPage() {
                 </p>
               </div>
               <div className="flex-1 space-y-1.5">
-                {[5, 4, 3, 2, 1].map((level) => (
+                {[5, 4, 3, 2, 1].map((level: number) => (
                   <div key={level} className="flex items-center gap-2">
                     <span className="text-xs text-slate-500 w-3">{level}</span>
                     <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -502,7 +505,7 @@ export function HotelDetailsPage() {
             </div>
 
             {/* Review Cards */}
-            {hotel.reviewsList.map((review, i) => (
+            {hotel.reviewsList.map((review: any, i: number) => (
               <div
                 key={i}
                 className="bg-white border border-slate-100 rounded-xl p-4"
@@ -522,7 +525,7 @@ export function HotelDetailsPage() {
                     </div>
                   </div>
                   <div className="flex gap-0.5">
-                    {[...Array(review.rating)].map((_, j) => (
+                    {[...Array(review.rating)].map((_: any, j: number) => (
                       <Star
                         key={j}
                         className="h-3 w-3 fill-amber-400 text-amber-400"

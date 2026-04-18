@@ -7,6 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.get('/', ProviderController.listPartners);
 router.get('/me', authMiddleware, ProviderController.getMe);
 router.put('/me', authMiddleware, ProviderController.updateMe);
+router.put('/profile', authMiddleware, ProviderController.updateProfile); // Novo endpoint de vitrine
 router.get('/:id', ProviderController.getDetails);
 router.patch('/:id/status', ProviderController.updateStatus);
 

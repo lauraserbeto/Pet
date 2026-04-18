@@ -206,12 +206,12 @@ export function DashboardLayout() {
                     {/* Corpo do Dropdown */}
                     <div className="p-1">
                       <Link 
-                        to="/dashboard/perfil" 
+                        to="/dashboard/conta" 
                         onClick={() => setIsProfileOpen(false)}
                         className="flex items-center gap-2 px-3 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors"
                       >
                         <User className="h-4 w-4" />
-                        Meu Perfil
+                        Minha Conta
                       </Link>
                       
                       <Link 

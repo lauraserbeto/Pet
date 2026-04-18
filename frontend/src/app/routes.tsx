@@ -29,6 +29,8 @@ import { CheckoutPage } from "../pages/CheckoutPage";
 import { CheckoutSuccessPage } from "../pages/CheckoutSuccessPage";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { Profile } from "../pages/dashboard/Profile";
+import { Account } from "../pages/dashboard/Account";
+import { PublicProfile } from "../pages/dashboard/PublicProfile";
 import Finance from "@/pages/dashboard/Finance";
 import Orders from "@/pages/dashboard/Orders";
 import { PetSitterOnboarding } from "../pages/onboarding/PetSitterOnboarding";
@@ -37,6 +39,7 @@ import { TutorProfile } from "../pages/tutor/TutorProfile";
 import { TutorPets } from "../pages/tutor/TutorPets";
 import { TutorAppointments } from "../pages/tutor/TutorAppointments";
 import { TutorOrders } from "../pages/tutor/TutorOrders";
+import { NotFound } from "../pages/NotFound";
 
 export const router = createBrowserRouter([
   {
@@ -216,7 +219,11 @@ export const router = createBrowserRouter([
         },
         {
             path: "perfil",
-            Component: Profile
+            Component: PublicProfile
+        },
+        {
+            path: "conta",
+            Component: Account
         },
         {
             path: "financeiro",
@@ -247,5 +254,9 @@ export const router = createBrowserRouter([
             Component: SitterEvaluations
         }
     ]
+  },
+  {
+    path: "*",
+    Component: NotFound,
   },
 ]);

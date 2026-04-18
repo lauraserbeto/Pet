@@ -57,6 +57,15 @@ model Provider {
   address_line     String?  @db.VarChar(255)
   city             String?  @db.VarChar(100)
   state            String?  @db.VarChar(2)
+  operating_hours  Json?
+  allowed_animals  Json?
+  amenities        Json?
+  gallery_images   Json?
+  daily_rate       Decimal? @db.Decimal(10, 2)
+  rules_policies   String?  @db.Text
+  highlights       Json?
+  hourly_rate      Decimal? @db.Decimal(10, 2)
+  sitter_roles     Json?
   rejection_reason String?  @db.Text
   created_at       DateTime @default(now()) @db.Timestamptz
   updated_at       DateTime @default(now()) @db.Timestamptz
