@@ -77,10 +77,18 @@ export function LoginPage() {
 
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.message);
-      toast.error("Erro ao entrar", {
-        description: err.message,
-      });
+      
+      if (err.status === 403 || err.message?.includes('análise')) {
+        toast.info("Conta em análise", {
+            description: "Sua conta está sendo avaliada pelo nosso time. Você receberá um e-mail em breve!",
+            duration: 6000
+        });
+      } else {
+        setError(err.message);
+        toast.error("Erro ao entrar", {
+            description: err.message,
+        });
+      }
     } finally {
       setIsLoading(false);
     }

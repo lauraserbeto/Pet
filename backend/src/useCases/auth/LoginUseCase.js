@@ -16,6 +16,14 @@ class LoginUseCase {
       throw new Error('E-mail ou senha inválidos.');
     }
 
+    // --- BLOQUEIO DE LOGIN PARA PET SITTER EM ANÁLISE ---
+    // Se for role 4 (PET_SITTER) e o status do provedor for PENDENTE, bloqueamos o login.
+    if (user.role_id === 4 && user.provider?.status === 'PENDENTE' && user.onboarding_step === 'INCOMPLETE') {
+        const error = new Error('Sua conta está em análise pelo administrador.');
+        error.statusCode = 403;
+        throw error;
+    }
+
     // 3. Gerar o Token JWT (O "Crachá" de acesso)
     // O secret deve estar no seu .env
     const token = jwt.sign(

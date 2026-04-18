@@ -76,6 +76,7 @@ export function HotelDetailsPage() {
 
         setApiHotel({
           name: data.business_name || data.user.full_name,
+          logo: data.user.avatar_url,
           distance: "3.0 km",
           address: `${data.city || 'Cidade'}, ${data.state || 'UF'}`,
           price: data.daily_rate ? Number(data.daily_rate) : 150,
@@ -310,7 +311,18 @@ export function HotelDetailsPage() {
           transition={{ duration: 0.3 }}
           className="bg-white -mt-6 relative z-10 rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6"
         >
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          {/* Hotel Logo Avatar */}
+          <div className="absolute -top-12 sm:-top-16 left-6 z-20">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-white">
+              <ImageWithFallback
+                src={hotel.logo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(hotel.name)}
+                alt={`Logo ${hotel.name}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pt-8 sm:pt-0 sm:pl-36">
             <div className="flex-1 min-w-0">
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
                 {hotel.name}

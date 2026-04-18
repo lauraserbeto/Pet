@@ -72,6 +72,7 @@ export function HotelsPage() {
               reviews: Math.floor(Math.random() * 50) + 5,
               price: h.daily_rate ? Number(h.daily_rate) : 150,
               image: gallery.length > 0 ? gallery[0] : (h.user?.avatar_url || "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80"),
+              logo: h.user?.avatar_url,
               accepts: { 
                  dog: allowed.includes('Cachorro') || allowed.includes('Sem restrição') || false, 
                  cat: allowed.includes('Gato') || allowed.includes('Sem restrição') || false 
@@ -227,15 +228,14 @@ export function HotelsPage() {
               >
                 {/* Mobile: Stacked / Desktop: Side by side */}
                 <div className="flex flex-col sm:flex-row">
-                  {/* Image */}
-                  <div className="relative sm:w-48 md:w-56 shrink-0">
-                    <div className="aspect-[16/10] sm:aspect-auto sm:h-full">
-                      <ImageWithFallback
-                        src={hotel.image}
-                        alt={hotel.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
+                  {/* Logo Container */}
+                  <div className="relative sm:w-48 md:w-56 shrink-0 bg-slate-50 border-b sm:border-b-0 sm:border-r border-slate-100 overflow-hidden">
+                    <ImageWithFallback
+                      src={hotel.logo || "https://ui-avatars.com/api/?name=" + encodeURIComponent(hotel.name)}
+                      alt={hotel.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+
                     {/* Favorite */}
                     <button
                       className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white transition-colors"

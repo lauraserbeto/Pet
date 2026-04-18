@@ -18,7 +18,8 @@ class AuthController {
         ...result
       });
     } catch (error) {
-      return res.status(401).json({ success: false, message: error.message });
+      const status = error.statusCode || 401;
+      return res.status(status).json({ success: false, message: error.message });
     }
   }
 
