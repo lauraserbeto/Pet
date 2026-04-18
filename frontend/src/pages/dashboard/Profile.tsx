@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { providerService } from "../../lib/services/providerService";
+import { useCepLookup } from "../../lib/hooks/useCepLookup";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, UploadCloud, Image as ImageIcon } from "lucide-react";
+import { Loader2, UploadCloud, Image as ImageIcon, Search } from "lucide-react";
 
 interface ProfileFormState {
   full_name: string;
@@ -40,6 +41,7 @@ export function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isFetchingCep, lookupCep } = useCepLookup();
 
   const handleDropzoneClick = () => {
     if (fileInputRef.current) {
@@ -97,6 +99,39 @@ export function Profile() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    // Aplica máscara 00000-000
+    const masked = raw
+      .replace(/\D/g, "")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 9);
+
+    setFormData(prev => ({ ...prev, zip_code: masked }));
+
+    const cleanDigits = masked.replace(/\D/g, "");
+    if (cleanDigits.length === 8) {
+      const cepData = await lookupCep(cleanDigits);
+      if (cepData) {
+        setFormData(prev => ({
+          ...prev,
+          address_line: cepData.address_line,
+          city: cepData.city,
+          state: cepData.state,
+        }));
+        toast.success("Endereço preenchido automaticamente!");
+      } else {
+        // Limpa campos de endereço se CEP inválido
+        setFormData(prev => ({
+          ...prev,
+          address_line: "",
+          city: "",
+          state: "",
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -292,20 +327,38 @@ export function Profile() {
           </CardHeader>
           <CardContent className="space-y-6 pt-6 mb-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* CEP com busca automática */}
               <div className="space-y-2">
                 <Label htmlFor="zip_code" className="text-sm font-medium text-slate-700">
                   CEP
                 </Label>
-                <Input
-                  id="zip_code"
-                  name="zip_code"
-                  value={formData.zip_code}
-                  onChange={handleChange}
-                  placeholder="00000-000"
-                  required
-                  className="bg-white border-slate-200 text-slate-900 h-11"
-                />
+                <div className="relative">
+                  <Input
+                    id="zip_code"
+                    name="zip_code"
+                    value={formData.zip_code}
+                    onChange={handleCepChange}
+                    placeholder="00000-000"
+                    required
+                    maxLength={9}
+                    className="bg-white border-slate-200 text-slate-900 h-11 pr-10"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    {isFetchingCep ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </div>
+                </div>
+                {isFetchingCep && (
+                  <p className="text-xs text-sky-600 flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Buscando endereço...
+                  </p>
+                )}
               </div>
+
+              {/* Endereço - preenchido pelo ViaCEP, editável */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address_line" className="text-sm font-medium text-slate-700">
                   Endereço
@@ -320,6 +373,8 @@ export function Profile() {
                   className="bg-white border-slate-200 text-slate-900 h-11"
                 />
               </div>
+
+              {/* Cidade - preenchida pelo ViaCEP, editável */}
               <div className="space-y-2">
                 <Label htmlFor="city" className="text-sm font-medium text-slate-700">
                   Cidade
@@ -334,16 +389,18 @@ export function Profile() {
                   className="bg-white border-slate-200 text-slate-900 h-11"
                 />
               </div>
+
+              {/* Estado - preenchido pelo ViaCEP, editável */}
               <div className="space-y-2">
                 <Label htmlFor="state" className="text-sm font-medium text-slate-700">
-                  Estado
+                  Estado (UF)
                 </Label>
                 <Input
                   id="state"
                   name="state"
                   value={formData.state}
                   onChange={handleChange}
-                  placeholder="Sigla (Ex: SP)"
+                  placeholder="Ex: SP"
                   maxLength={2}
                   required
                   className="bg-white border-slate-200 text-slate-900 h-11"
