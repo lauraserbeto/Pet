@@ -211,6 +211,25 @@ export function Profile() {
                   className="bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed h-11"
                 />
               </div>
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="document" className="text-sm font-medium text-slate-700">
+                    Documento (CNPJ/CPF)
+                  </Label>
+                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                    Não editável
+                  </span>
+                </div>
+                <Input
+                  id="document"
+                  name="document"
+                  value={formData.document}
+                  disabled
+                  readOnly
+                  placeholder="Documento cadastrado na conta"
+                  className="bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed h-11"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -267,20 +286,6 @@ export function Profile() {
                   value={formData.business_name}
                   onChange={handleChange}
                   placeholder="Ex: PetShop Cão Feliz"
-                  required
-                  className="bg-white border-slate-200 text-slate-900 h-11"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="document" className="text-sm font-medium text-slate-700">
-                  Documento (CNPJ/CPF)
-                </Label>
-                <Input
-                  id="document"
-                  name="document"
-                  value={formData.document}
-                  onChange={handleChange}
-                  placeholder="00.000.000/0000-00 ou 000.000.000-00"
                   required
                   className="bg-white border-slate-200 text-slate-900 h-11"
                 />
