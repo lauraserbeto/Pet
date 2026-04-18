@@ -4,7 +4,100 @@ const updateProviderProfileUseCase = require('../useCases/providers/UpdateProvid
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
 
 class ProviderController {
-  // Lista todos os provedores anexando dados do user
+  // Filtro base para provedores "Completos" e "Ativos"
+  #getPublicBaseFilter() {
+    return {
+      status: 'ATIVO',
+      description: { not: null },
+      phone: { not: null },
+      zip_code: { not: null },
+      city: { not: null },
+    };
+  }
+
+  async listHotels(req, res) {
+    try {
+      const hotels = await prisma.provider.findMany({
+        where: {
+          ...this.#getPublicBaseFilter(),
+          daily_rate: { gt: 0 },
+          user: { role_id: 3 } // HOTEL
+        },
+        include: {
+          user: {
+            select: {
+              full_name: true,
+              avatar_url: true,
+            }
+          },
+          services: {
+            where: { is_active: true },
+            take: 3
+          }
+        }
+      });
+      return res.status(200).json(hotels);
+    } catch (error) {
+      console.error("[ProviderController] listHotels:", error);
+      return res.status(500).json({ error: 'Erro ao listar hotéis' });
+    }
+  }
+
+  async listSitters(req, res) {
+    try {
+      const sitters = await prisma.provider.findMany({
+        where: {
+          ...this.#getPublicBaseFilter(),
+          hourly_rate: { gt: 0 },
+          user: { role_id: 4 } // PET_SITTER
+        },
+        include: {
+          user: {
+            select: {
+              full_name: true,
+              avatar_url: true,
+            }
+          },
+          services: {
+            where: { is_active: true },
+            take: 3
+          }
+        }
+      });
+      return res.status(200).json(sitters);
+    } catch (error) {
+      console.error("[ProviderController] listSitters:", error);
+      return res.status(500).json({ error: 'Erro ao listar pet sitters' });
+    }
+  }
+
+  async listStores(req, res) {
+    try {
+      const stores = await prisma.provider.findMany({
+        where: {
+          ...this.#getPublicBaseFilter(),
+          user: { role_id: 2 } // LOJISTA
+        },
+        include: {
+          user: {
+            select: {
+              full_name: true,
+              avatar_url: true,
+            }
+          },
+          _count: {
+            select: { products: true }
+          }
+        }
+      });
+      return res.status(200).json(stores);
+    } catch (error) {
+      console.error("[ProviderController] listStores:", error);
+      return res.status(500).json({ error: 'Erro ao listar lojas' });
+    }
+  }
+
+  // Lista todos os provedores anexando dados do user (Padrão/Admin)
   async listPartners(req, res) {
     try {
       const providers = await prisma.provider.findMany({

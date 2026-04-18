@@ -3,6 +3,11 @@ const router = express.Router();
 const ProviderController = require('../controllers/ProviderController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+// Rotas Públicas Otimizadas
+router.get('/hotels', (req, res) => ProviderController.listHotels(req, res));
+router.get('/sitters', (req, res) => ProviderController.listSitters(req, res));
+router.get('/stores', (req, res) => ProviderController.listStores(req, res));
+
 // Define as rotas (Temporariamente sem middleware de auth forte para fins de simplificação, mas idealmente teria um verifyAdmin)
 router.get('/', ProviderController.listPartners);
 router.get('/me', authMiddleware, ProviderController.getMe);

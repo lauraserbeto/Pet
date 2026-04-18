@@ -33,14 +33,13 @@ export function WalkersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    providerService.fetchAllProviders()
+    providerService.fetchSitters()
       .then(data => {
-        const activeWalkers = data.filter((p: any) => p.role_id === 3 && p.status === 'ACTIVE');
         setApiWalkers(
-          activeWalkers.map((w: any) => ({
+          data.map((w: any) => ({
             id: w.id,
             name: w.business_name || w.user?.full_name || "Pet Sitter",
-            role: w.description || "Pet Sitter & Dog Walker",
+            role: w.description ? (w.description.substring(0, 50) + "...") : "Pet Sitter & Dog Walker",
             rating: 5.0, // Mock
             reviews: Math.floor(Math.random() * 50) + 5,
             price: w.hourly_rate ? Number(w.hourly_rate) : 50,
@@ -49,15 +48,15 @@ export function WalkersPage() {
             distance: "2.0 km",
             experience: "3 anos",
             petsServed: 40,
-            services: w.sitter_roles?.length > 0 ? w.sitter_roles : ["Pet Sitter", "Dog Walker"],
+            services: Array.isArray(w.sitter_roles) && w.sitter_roles.length > 0 ? w.sitter_roles : ["Pet Sitter", "Dog Walker"],
             available: true,
             bio: w.description || "Apaixonado por animais.",
           }))
         );
         setLoading(false);
       })
-      .catch(() => {
-        setApiWalkers(walkers);
+      .catch(err => {
+        console.error("Erro ao buscar sitters:", err);
         setLoading(false);
       });
   }, []);
@@ -67,77 +66,6 @@ export function WalkersPage() {
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
   };
-
-  const walkers = [
-    {
-      id: "pedro-alves",
-      name: "Pedro Alves",
-      role: "Pet Sitter & Dog Walker",
-      rating: 5.0,
-      reviews: 24,
-      price: 40,
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
-      verified: true,
-      distance: "1 km",
-      experience: "3 anos",
-      petsServed: 35,
-      services: ["Pet Sitter", "Dog Walker"],
-      available: true,
-      bio: "Publicitário e dog walker certificado. Apaixonado por animais.",
-    },
-    {
-      id: "isabela-smith",
-      name: "Isabela Smith",
-      role: "Pet Sitter & Dog Walker",
-      rating: 5.0,
-      reviews: 48,
-      price: 40,
-      image:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60",
-      verified: true,
-      distance: "2.5 km",
-      experience: "5 anos",
-      petsServed: 80,
-      services: ["Pet Sitter", "Dog Walker", "Day Care"],
-      available: true,
-      bio: "Veterinária com experiência em cuidados especiais.",
-    },
-    {
-      id: "joao-souza",
-      name: "João Souza",
-      role: "Médico Veterinário & Dog Walker",
-      rating: 4.8,
-      reviews: 36,
-      price: 45,
-      image:
-        "https://images.unsplash.com/photo-1771340183956-6f69d2d08f43?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdCUyMG91dGRvb3JzJTIwY2FzdWFsJTIwY29uZmlkZW50fGVufDF8fHx8MTc3MjAyOTc0MHww&ixlib=rb-4.1.0&q=80&w=1080",
-      verified: true,
-      distance: "2.5 km",
-      experience: "7 anos",
-      petsServed: 120,
-      services: ["Pet Sitter", "Dog Walker"],
-      available: false,
-      bio: "Médico veterinário com especialização em comportamento animal.",
-    },
-    {
-      id: "ana-costa",
-      name: "Ana Costa",
-      role: "Pet Sitter",
-      rating: 4.9,
-      reviews: 62,
-      price: 35,
-      image:
-        "https://images.unsplash.com/photo-1765648763932-43a3e2f8f35c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHdvbWFuJTIwcG9ydHJhaXQlMjBmcmllbmRseSUyMHNtaWxlJTIwcHJvZmVzc2lvbmFsfGVufDF8fHx8MTc3MjAyOTczOXww&ixlib=rb-4.1.0&q=80&w=1080",
-      verified: true,
-      distance: "3.1 km",
-      experience: "2 anos",
-      petsServed: 45,
-      services: ["Pet Sitter", "Day Care"],
-      available: true,
-      bio: "Bióloga apaixonada por pets. Cuido com muito carinho e responsabilidade.",
-    },
-  ];
 
   const serviceFilters = [
     { key: "todos", label: "Todos" },
@@ -150,10 +78,8 @@ export function WalkersPage() {
     .filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((w) => {
       if (activeService === "todos") return true;
-      if (activeService === "pet-sitter") return w.services.includes("Pet Sitter");
-      if (activeService === "dog-walker") return w.services.includes("Dog Walker");
-      if (activeService === "day-care") return w.services.includes("Day Care");
-      return true;
+      const term = activeService.replace('-', ' ');
+      return w.services.some((s: string) => s.toLowerCase().includes(term));
     })
     .sort((a, b) => {
       if (sortBy === "price") return a.price - b.price;
@@ -200,6 +126,7 @@ export function WalkersPage() {
               </Button>
             </div>
 
+            {/* Expandable Filters */}
             {showFilters && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
@@ -424,7 +351,7 @@ export function WalkersPage() {
             </motion.div>
           ))}
 
-          {filtered.length === 0 && (
+          {!loading && filtered.length === 0 && (
             <div className="text-center py-16">
               <PawPrint className="h-12 w-12 text-slate-300 mx-auto mb-4" />
               <h3 className="font-semibold text-slate-600 mb-1">

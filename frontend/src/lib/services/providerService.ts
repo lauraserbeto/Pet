@@ -121,5 +121,44 @@ export const providerService = {
 
     const data = await response.json();
     return data;
+  },
+
+  async fetchHotels(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/providers/hotels`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erro ao buscar hotéis');
+    }
+
+    return await response.json();
+  },
+
+  async fetchSitters(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/providers/sitters`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erro ao buscar sitters');
+    }
+
+    return await response.json();
+  },
+
+  async fetchStores(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/providers/stores`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erro ao buscar lojas');
+    }
+
+    return await response.json();
   }
 };
