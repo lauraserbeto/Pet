@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDetailsUseCase');
 
 class ProviderController {
   // Lista todos os provedores anexando dados do user
@@ -18,12 +19,7 @@ class ProviderController {
 
       // Transforma para o formato esperado pelo frontend
       const mapped = providers.map(p => ({
-        id: p.id,
-        user_id: p.user_id,
-        business_name: p.business_name,
-        document: p.document,
-        status: p.status,
-        rejection_reason: p.rejection_reason,
+        ...p,
         full_name: p.user ? p.user.full_name : 'Desconhecido',
         email: p.user ? p.user.email : 'Sem email',
         role_id: p.user ? p.user.role_id : undefined
@@ -33,6 +29,67 @@ class ProviderController {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erro ao buscar provedores' });
+    }
+  }
+
+  async getDetails(req, res) {
+    try {
+      const { id } = req.params;
+      const provider = await getProviderDetailsUseCase.execute(id);
+      return res.status(200).json(provider);
+    } catch (error) {
+      console.error("[ProviderController] Erro em getDetails:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getMe(req, res) {
+    try {
+      const userId = req.userId;
+      const provider = await prisma.provider.findUnique({
+        where: { user_id: userId },
+        include: { user: true }
+      });
+      return res.status(200).json(provider);
+    } catch (error) {
+      console.error("[ProviderController] Erro em getMe:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateMe(req, res) {
+    try {
+      const { business_name, document, phone, description, zip_code, address_line, city, state, full_name, avatar_url } = req.body;
+      const userId = req.userId;
+
+      if (full_name || avatar_url) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            full_name: full_name !== undefined ? full_name : undefined,
+            avatar_url: avatar_url !== undefined ? avatar_url : undefined
+          }
+        });
+      }
+
+      const updatedProvider = await prisma.provider.update({
+        where: { user_id: userId },
+        data: {
+          business_name,
+          document,
+          phone,
+          description,
+          zip_code,
+          address_line,
+          city,
+          state,
+        }
+      });
+
+      return res.status(200).json(updatedProvider);
+    } catch (error) {
+      console.error("[ProviderController] Erro em updateMe:", error);
+      return res.status(500).json({ error: error.message });
     }
   }
 

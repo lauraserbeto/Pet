@@ -14,6 +14,9 @@ export interface Product {
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
   created_at: string;
   updated_at: string;
+  provider?: any;
+  provider_name?: string;
+  provider_avatar?: string;
 }
 
 export interface CreateProductDTO {
@@ -35,6 +38,32 @@ export const productService = {
 
     if (!response.ok) {
       throw new Error('Erro ao buscar opções');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
+  async fetchAllPublicProducts(): Promise<Product[]> {
+    const response = await fetch(`${API_URL}/products`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar produtos publicos');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
+  async fetchProductDetails(id: string): Promise<Product> {
+    const response = await fetch(`${API_URL}/products/${id}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar as informações do produto');
     }
 
     const data = await response.json();

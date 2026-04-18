@@ -193,7 +193,7 @@ export function Products() {
     }).format(Number(value));
   };
 
-  const totalValue = products.reduce((acc, curr) => acc + (Number(curr.price) * curr.stock_quantity), 0);
+  const totalValue = products.reduce((acc, curr) => acc + Number(curr.price), 0);
   const lowStockCount = products.filter(p => p.stock_quantity > 0 && p.stock_quantity <= 5).length;
   const outOfStockCount = products.filter(p => p.stock_quantity === 0).length;
 

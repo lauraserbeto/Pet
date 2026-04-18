@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { providerService } from "../lib/services/providerService";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -30,7 +31,50 @@ export function WalkerDetailsPage() {
     "about"
   );
 
-  const walker = {
+  const [apiWalker, setApiWalker] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    providerService.fetchProviderDetails(id)
+      .then(data => {
+        setApiWalker({
+          name: data.user.full_name || data.business_name,
+          age: 30, // Mock
+          role: data.description || "Pet Sitter & Dog Walker",
+          price: 40, // Mock fallback
+          rating: 5.0,
+          reviews: 24,
+          distance: "2.0 km",
+          experience: "3 anos",
+          petsCount: 35,
+          description: data.description || "Apaixonado por animais. Levo os passeios a sério.",
+          image: data.user.avatar_url || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
+          coverImage: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&auto=format&fit=crop&q=80",
+          verified: data.status === 'ACTIVE',
+          available: true,
+          services: data.services && data.services.length > 0 ? data.services.map((s: any) => ({
+            name: s.name,
+            price: s.price,
+            description: s.description
+          })) : [
+            { name: "Passeio (30 min)", price: 30, description: "Passeio individual com duração de 30 minutos" },
+            { name: "Pet Sitting", price: 120, description: "Cuidados na sua casa" }
+          ],
+          reviewsList: [
+            { name: "Fernanda L.", rating: 5, text: "Incrível! Muito atencioso com meu cão.", date: "1 semana atrás" }
+          ],
+          highlights: ["Certificado profissional", "Envia fotos e vídeos"]
+        });
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error(e);
+        setLoading(false);
+      });
+  }, [id]);
+
+  const mockWalker = {
     name: "Pedro Alves",
     age: 30,
     role: "Pet Sitter & Dog Walker",
@@ -97,6 +141,12 @@ export function WalkerDetailsPage() {
       "Disponível finais de semana",
     ],
   };
+
+  const walker = apiWalker || mockWalker;
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)] text-sky-600">Carregando perfil...</div>;
+  }
 
   const stats = [
     {

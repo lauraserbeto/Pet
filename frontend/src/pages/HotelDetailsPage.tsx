@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { providerService } from "../lib/services/providerService";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -38,7 +39,44 @@ export function HotelDetailsPage() {
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const hotel = {
+  const [apiHotel, setApiHotel] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    providerService.fetchProviderDetails(id)
+      .then(data => {
+        setApiHotel({
+          name: data.business_name || data.user.full_name,
+          distance: "3.0 km",
+          address: data.address_line || "Endereço não informado",
+          price: 150, // Mock
+          rating: 4.8,
+          reviews: 50,
+          description: data.description || "O melhor lugar para seu pet.",
+          images: [
+            data.user.avatar_url || "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=900&auto=format&fit=crop&q=80"
+          ],
+          amenities: [
+            { icon: "tree", label: "Área Verde" },
+            { icon: "shield", label: "Supervisão 24h" }
+          ],
+          acceptsDogs: true,
+          acceptsCats: true,
+          openHours: "08:00 — 20:00",
+          policies: ["Carteira de vacinação obrigatória"],
+          reviewsList: []
+        });
+        setLoading(false);
+      })
+      .catch(e => {
+        console.error(e);
+        setLoading(false);
+      });
+  }, [id]);
+
+  const mockHotel = {
     name: "Hotel São Roque",
     distance: "3.3 km",
     address: "Rua 33, Bairro Verde",
@@ -89,6 +127,8 @@ export function HotelDetailsPage() {
     ],
   };
 
+  const hotel = apiHotel || mockHotel;
+
   // Autoplay logic
   useEffect(() => {
     if (isPaused) {
@@ -131,6 +171,10 @@ export function HotelDetailsPage() {
         return <CheckCircle2 className="h-5 w-5" />;
     }
   };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)] text-[var(--color-primary-600)]">Carregando hotel...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white pb-28 font-[family-name:var(--font-body)]">

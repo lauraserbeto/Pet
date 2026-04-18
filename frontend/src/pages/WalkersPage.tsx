@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { providerService } from "../lib/services/providerService";
 import { useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -27,6 +28,39 @@ export function WalkersPage() {
   const [sortBy, setSortBy] = useState<"rating" | "price" | "distance">("rating");
   const [activeService, setActiveService] = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [apiWalkers, setApiWalkers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    providerService.fetchAllProviders()
+      .then(data => {
+        const activeWalkers = data.filter((p: any) => p.role_id === 3 && p.status === 'ACTIVE');
+        setApiWalkers(
+          activeWalkers.map((w: any) => ({
+            id: w.id,
+            name: w.business_name || w.full_name,
+            role: w.description || "Pet Sitter & Dog Walker",
+            rating: 5.0, // Mock
+            reviews: Math.floor(Math.random() * 50) + 5,
+            price: 50, // Mock fallback
+            image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
+            verified: true,
+            distance: "2.0 km",
+            experience: "3 anos",
+            petsServed: 40,
+            services: ["Pet Sitter", "Dog Walker"],
+            available: true,
+            bio: w.description || "Apaixonado por animais.",
+          }))
+        );
+        setLoading(false);
+      })
+      .catch(() => {
+        setApiWalkers(walkers);
+        setLoading(false);
+      });
+  }, []);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
@@ -112,7 +146,7 @@ export function WalkersPage() {
     { key: "day-care", label: "Day Care" },
   ];
 
-  const filtered = walkers
+  const filtered = apiWalkers
     .filter((w) => w.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((w) => {
       if (activeService === "todos") return true;
@@ -242,7 +276,7 @@ export function WalkersPage() {
 
         {/* Results Count */}
         <p className="text-sm text-slate-500 mb-4 px-1">
-          <span className="font-semibold text-slate-700">{filtered.length}</span>{" "}
+          <span className="font-semibold text-slate-700">{loading ? "..." : filtered.length}</span>{" "}
           {filtered.length === 1
             ? "profissional encontrado"
             : "profissionais encontrados"}

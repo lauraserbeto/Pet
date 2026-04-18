@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import React, { useEffect, useState, useRef } from "react";
+import { providerService } from "../../lib/services/providerService";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, UploadCloud, Image as ImageIcon } from "lucide-react";
 
 interface ProfileFormState {
   full_name: string;
@@ -19,6 +19,7 @@ interface ProfileFormState {
   address_line: string;
   city: string;
   state: string;
+  avatar_url?: string;
 }
 
 export function Profile() {
@@ -33,51 +34,55 @@ export function Profile() {
     address_line: "",
     city: "",
     state: "",
+    avatar_url: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDropzoneClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setFormData(prev => ({
+        ...prev,
+        avatar_url: base64String
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     const fetchProfileData = async () => {
       setIsLoading(true);
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const providerData = await providerService.fetchMe();
         
-        if (sessionError) throw sessionError;
-        if (!session) {
-          setIsLoading(false);
-          return;
+        if (providerData) {
+           setFormData({
+             full_name: providerData.user?.full_name || "",
+             email: providerData.user?.email || "",
+             business_name: providerData.business_name || "",
+             document: providerData.document || "",
+             phone: providerData.phone || "",
+             description: providerData.description || "",
+             zip_code: providerData.zip_code || "",
+             address_line: providerData.address_line || "",
+             city: providerData.city || "",
+             state: providerData.state || "",
+             avatar_url: providerData.user?.avatar_url || "",
+           });
         }
-
-        const userId = session.user.id;
-
-        const [usersResponse, providersResponse] = await Promise.all([
-          supabase.from("users").select("full_name, email").eq("id", userId).single(),
-          supabase.from("providers").select("business_name, document, phone, description, zip_code, address_line, city, state").eq("user_id", userId).single()
-        ]);
-
-        if (usersResponse.error) {
-          console.error("Erro ao buscar dados do usuário:", usersResponse.error);
-        }
-        
-        if (providersResponse.error && providersResponse.error.code !== "PGRST116") {
-           console.error("Erro ao buscar dados do provedor:", providersResponse.error);
-        }
-
-        setFormData({
-          full_name: usersResponse.data?.full_name || "",
-          email: usersResponse.data?.email || session.user.email || "",
-          business_name: providersResponse.data?.business_name || "",
-          document: providersResponse.data?.document || "",
-          phone: providersResponse.data?.phone || "",
-          description: providersResponse.data?.description || "",
-          zip_code: providersResponse.data?.zip_code || "",
-          address_line: providersResponse.data?.address_line || "",
-          city: providersResponse.data?.city || "",
-          state: providersResponse.data?.state || "",
-        });
-
       } catch (error) {
         console.error("Erro geral na busca de perfil:", error);
         toast.error("Erro ao carregar os dados do perfil.");
@@ -99,40 +104,7 @@ export function Profile() {
     setIsSaving(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Usuário não autenticado");
-
-      const userId = session.user.id;
-
-      // UPDATE na tabela users
-      const userUpdatePromise = supabase
-        .from("users")
-        .update({ full_name: formData.full_name })
-        .eq("id", userId);
-
-      // UPDATE na tabela providers
-      const providerUpdatePromise = supabase
-        .from("providers")
-        .update({
-          business_name: formData.business_name,
-          document: formData.document,
-          phone: formData.phone,
-          description: formData.description,
-          zip_code: formData.zip_code,
-          address_line: formData.address_line,
-          city: formData.city,
-          state: formData.state,
-        })
-        .eq("user_id", userId);
-
-      const [userRes, providerRes] = await Promise.all([
-        userUpdatePromise,
-        providerUpdatePromise,
-      ]);
-
-      if (userRes.error) throw userRes.error;
-      if (providerRes.error) throw providerRes.error;
-
+      await providerService.updateMe(formData);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
       toast.error("Erro ao atualizar o perfil. Tente novamente.");
@@ -217,6 +189,38 @@ export function Profile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
+            <div className="space-y-2">
+              <Label>Logo do Negócio</Label>
+              <div 
+                onClick={handleDropzoneClick}
+                className="border-2 border-dashed border-slate-200 hover:border-sky-500 hover:bg-slate-50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer group max-w-sm"
+              >
+                {formData.avatar_url ? (
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden group-hover:opacity-90 transition-opacity">
+                     <img src={formData.avatar_url} alt="Logo Preview" className="w-full h-full object-cover" />
+                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                       <UploadCloud className="w-6 h-6 text-white" />
+                     </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                      <ImageIcon className="text-slate-400 h-6 w-6" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-700">Adicionar Logo</p>
+                    <p className="text-xs text-slate-500 mt-1">PNG ou JPG (Max. 2MB)</p>
+                  </>
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="business_name" className="text-sm font-medium text-slate-700">

@@ -1,7 +1,8 @@
 const CreateProductUseCase = require('../useCases/products/CreateProductUseCase');
 const listProviderProductsUseCase = require('../useCases/products/ListProviderProductsUseCase');
 const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
-
+const listActiveProductsUseCase = require('../useCases/products/ListActiveProductsUseCase');
+const getProductDetailsUseCase = require('../useCases/products/GetProductDetailsUseCase');
 class ProductController {
   
   getOptions(req, res) {
@@ -9,11 +10,32 @@ class ProductController {
       const categories = [
         "Alimentação", "Higiene", "Farmácia", "Acessórios", "Conforto", "Beleza", "Roupas"
       ];
-      const petTypes = ["Cães", "Gatos", "Outros"];
+      const petTypes = ["Todos","Cães", "Gatos", "Outros"];
       
       return res.status(200).json({ categories, petTypes });
     } catch (error) {
       console.error("[ProductController] Erro em getOptions:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async listActive(req, res) {
+    try {
+      const products = await listActiveProductsUseCase.execute();
+      return res.status(200).json(products);
+    } catch (error) {
+      console.error("[ProductController] Erro em listActive:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getDetails(req, res) {
+    try {
+      const { id } = req.params;
+      const product = await getProductDetailsUseCase.execute(id);
+      return res.status(200).json(product);
+    } catch (error) {
+      console.error("[ProductController] Erro em getDetails:", error);
       return res.status(500).json({ error: error.message });
     }
   }

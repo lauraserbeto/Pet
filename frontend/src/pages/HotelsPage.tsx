@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { providerService } from "../lib/services/providerService";
 import { useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -27,6 +28,36 @@ export function HotelsPage() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"rating" | "price" | "distance">("rating");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [apiHotels, setApiHotels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    providerService.fetchAllProviders()
+      .then(data => {
+        const activeHotels = data.filter((p: any) => p.role_id === 4 && p.status === 'ACTIVE');
+        setApiHotels(
+          activeHotels.map((h: any) => ({
+            id: h.id,
+            name: h.business_name || h.full_name,
+            rating: 5.0, // Mock
+            reviews: Math.floor(Math.random() * 100) + 10,
+            price: 150, // Mock fallback
+            image: "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80",
+            accepts: { dog: true, cat: true },
+            distance: "3.0 km",
+            address: h.address_line || "São Paulo, SP",
+            amenities: ["Wi-Fi", "Área Verde", "Supervisão 24h"],
+            openNow: true,
+          }))
+        );
+        setLoading(false);
+      })
+      .catch(() => {
+        setApiHotels(hotels);
+        setLoading(false);
+      });
+  }, []);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
@@ -90,10 +121,10 @@ export function HotelsPage() {
       address: "Rua da Saúde, 88",
       amenities: ["Wi-Fi", "Day Care", "Área Verde"],
       openNow: true,
-    },
+    }
   ];
 
-  const filtered = hotels
+  const filtered = apiHotels
     .filter((h) =>
       h.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -189,7 +220,7 @@ export function HotelsPage() {
         {/* Sort & Count Bar */}
         <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-slate-100 flex items-center justify-between mb-4">
           <p className="text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">{filtered.length}</span>{" "}
+            <span className="font-semibold text-slate-900">{loading ? "..." : filtered.length}</span>{" "}
             {filtered.length === 1 ? "hotel encontrado" : "hotéis encontrados"}
           </p>
           <div className="flex items-center gap-1">

@@ -7,6 +7,7 @@ import { HotelsPage } from "../pages/HotelsPage";
 import { HotelDetailsPage } from "../pages/HotelDetailsPage";
 import { WalkersPage } from "../pages/WalkersPage";
 import { WalkerDetailsPage } from "../pages/WalkerDetailsPage";
+import { StorePage } from "../pages/StorePage";
 import { Overview } from "../pages/dashboard/Overview";
 import { Schedule } from "../pages/dashboard/Schedule";
 import { Customers } from "../pages/dashboard/Customers";
@@ -113,6 +114,10 @@ export const router = createBrowserRouter([
             Component: ProductDetailPage,
           },
         ],
+      },
+      {
+        path: "store/:id",
+        Component: StorePage,
       },
       {
         path: "cart",

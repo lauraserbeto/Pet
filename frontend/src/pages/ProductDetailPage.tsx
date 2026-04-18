@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { toast } from "sonner";
 import { useCart } from "../components/cart/CartContext";
+import { productService } from "../lib/services/productService";
 import {
   Star,
   Heart,
@@ -365,9 +366,10 @@ function Stars({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const product = allProducts.find((p) => p.id === Number(id)) ?? allProducts[0];
-  const gallery = [product.image, ...extraGallery];
-
+  
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(variants[0]);
@@ -376,6 +378,52 @@ export function ProductDetailPage() {
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        if(!id) return;
+        const data = await productService.fetchProductDetails(id);
+        const mappedProduct = {
+          ...data,
+          brand: data.provider?.business_name || "Desconhecido",
+          rating: 4.8, // Mocked details
+          reviews: 150, // Mocked details
+          image: data.image_url || extraGallery[0],
+          badge: "Oferta",
+          originalPrice: (Number(data.price) * 1.2), // Mock applied
+        };
+        setProduct(mappedProduct);
+      } catch (err) {
+        toast.error("Erro ao carregar os detalhes do produto.");
+        const fallback = allProducts.find((p) => p.id === Number(id)) ?? allProducts[0];
+        setProduct(fallback);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (loading || !product) {
+    return <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)] text-[var(--color-primary-600)]">Carregando produto...</div>;
+  }
+
+  const gallery = [product.image, ...extraGallery];
+  
+  const storeInfoData = product.provider ? {
+    id: product.provider.id,
+    name: product.provider.business_name,
+    rating: 4.8,
+    reviews: 1256,
+    products: 15,
+    followers: "2k",
+    responseTime: "< 1 hora",
+    location: "São Paulo, SP",
+    since: product.provider.created_at ? new Date(product.provider.created_at).getFullYear().toString() : "2024",
+    logo: product.provider.user?.avatar_url || storeInfo.logo,
+  } : storeInfo;
 
   const specs = specifications[product.category] || specifications.alimentacao;
   const description = productDescriptions[product.id] || productDescriptions[1];
@@ -747,17 +795,17 @@ export function ProductDetailPage() {
               <div className="relative h-24 sm:h-28 bg-gradient-to-br from-[var(--color-primary-400)] to-amber-400">
                 <div className="absolute -bottom-8 left-5">
                   <div className="h-16 w-16 rounded-xl border-4 border-white shadow-lg overflow-hidden bg-white">
-                    <ImageWithFallback src={storeInfo.logo} alt={storeInfo.name} className="w-full h-full object-cover" />
+                    <ImageWithFallback src={storeInfoData.logo} alt={storeInfoData.name} className="w-full h-full object-cover" />
                   </div>
                 </div>
               </div>
               <div className="pt-10 pb-5 px-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-bold text-slate-900 font-[family-name:var(--font-display)]">{storeInfo.name}</h3>
+                    <h3 className="font-bold text-slate-900 font-[family-name:var(--font-display)]">{storeInfoData.name}</h3>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <Stars rating={storeInfo.rating} size="sm" />
-                      <span className="text-xs text-slate-500 ml-1">{storeInfo.rating} ({storeInfo.reviews})</span>
+                      <Stars rating={storeInfoData.rating} size="sm" />
+                      <span className="text-xs text-slate-500 ml-1">{storeInfoData.rating} ({storeInfoData.reviews})</span>
                     </div>
                   </div>
                   <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-full">
@@ -768,10 +816,10 @@ export function ProductDetailPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-2 mt-4">
                   {[
-                    { label: "Produtos", value: storeInfo.products },
-                    { label: "Seguidores", value: storeInfo.followers },
-                    { label: "Resposta", value: storeInfo.responseTime },
-                    { label: "Desde", value: storeInfo.since },
+                    { label: "Produtos", value: storeInfoData.products },
+                    { label: "Seguidores", value: storeInfoData.followers },
+                    { label: "Resposta", value: storeInfoData.responseTime },
+                    { label: "Desde", value: storeInfoData.since },
                   ].map((s) => (
                     <div key={s.label} className="bg-slate-50 rounded-lg p-2.5 text-center">
                       <p className="text-xs font-bold text-slate-800">{s.value}</p>
@@ -781,10 +829,10 @@ export function ProductDetailPage() {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <button className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold rounded-xl text-sm transition-colors">
+                  <Link to={`/store/${storeInfoData.id || 1}`} className="flex-1 flex items-center justify-center gap-1.5 h-10 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold rounded-xl text-sm transition-colors">
                     <Store className="h-4 w-4" />
                     Visitar Loja
-                  </button>
+                  </Link>
                   <button className="h-10 w-10 shrink-0 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-colors">
                     <MessageCircle className="h-4 w-4 text-slate-400" />
                   </button>

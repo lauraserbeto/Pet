@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import {
@@ -27,13 +27,14 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { toast } from "sonner";
+import { productService } from "../lib/services/productService";
 
 /* ═══════════════════════════════════════════════
    DATA
    ═══════════════════════════════════════════════ */
 
 type Product = {
-  id: number;
+  id: string | number;
   name: string;
   brand: string;
   price: number;
@@ -250,8 +251,40 @@ export function ShoppingPage() {
   const [selectedPrice, setSelectedPrice] = useState("all");
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string | number>>(new Set());
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const [apiProducts, setApiProducts] = useState<Product[]>(products);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await productService.fetchAllPublicProducts();
+        
+        const mapped: Product[] = data.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          brand: p.provider_name || 'Desconhecida',
+          price: Number(p.price),
+          rating: 5.0, // Mocked details
+          reviews: 2,  // Mocked details
+          image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
+          category: p.category ? p.category.toLowerCase() : 'outros',
+          pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
+          badge: "Novo"
+        }));
+        
+        setApiProducts(mapped);
+      } catch (err: any) {
+        toast.error("Erro ao carregar os produtos. Mostrando catálogo offline.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
 
   // Sidebar section toggles
   const [openSections, setOpenSections] = useState({
@@ -269,7 +302,7 @@ export function ShoppingPage() {
       prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
     );
 
-  const toggleFavorite = (id: number) => {
+  const toggleFavorite = (id: string | number) => {
     setFavorites((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -304,7 +337,7 @@ export function ShoppingPage() {
 
   /* ─── Filtering + Sorting ─── */
   const filtered = useMemo(() => {
-    let result = [...products];
+    let result = [...apiProducts];
 
     if (search) {
       const q = search.toLowerCase();
@@ -344,7 +377,7 @@ export function ShoppingPage() {
     }
 
     return result;
-  }, [search, selectedCategory, selectedPet, selectedPrice, selectedBrands, sortBy]);
+  }, [search, selectedCategory, selectedPet, selectedPrice, selectedBrands, sortBy, apiProducts]);
 
   /* ─── Filter sidebar (shared for desktop & mobile drawer) ─── */
   const FilterContent = () => (
@@ -637,7 +670,7 @@ export function ShoppingPage() {
                 </button>
 
                 <p className="text-sm text-slate-500">
-                  <span className="font-semibold text-slate-800">{filtered.length}</span>{" "}
+                  <span className="font-semibold text-slate-800">{loading ? "Carregando..." : filtered.length}</span>{" "}
                   {filtered.length === 1 ? "produto" : "produtos"}
                 </p>
               </div>
