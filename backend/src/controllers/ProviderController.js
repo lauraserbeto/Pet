@@ -4,33 +4,43 @@ const updateProviderProfileUseCase = require('../useCases/providers/UpdateProvid
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
 
 class ProviderController {
+  // Validador de completitude em memória (JS) para estabilidade de tipagem
   #isProfileComplete(p) {
+    // Regras Básicas (Gerais)
+    // Flexibilizamos a foto (avatar_url): Se não tiver, ainda consideramos "completo" para listagem, 
+    // o frontend lida com o fallback.
     const hasBasicInfo = p.description && p.phone && p.city && p.zip_code;
-    const hasAvatar = p.user && p.user.avatar_url;
+    
+    if (!hasBasicInfo) return false;
 
-    if (!hasBasicInfo || !hasAvatar) return false;
-
-    const roleId = p.user.role_id;
+    // Regras por Role
+    const roleId = p.user?.role_id;
 
     if (roleId === 3) { // HOTEL
       const hasDailyRate = p.daily_rate && Number(p.daily_rate) > 0;
       const hasImages = Array.isArray(p.gallery_images) && p.gallery_images.length >= 1;
-      return hasDailyRate && hasImages;
+      return !!(hasDailyRate && hasImages);
     }
 
     if (roleId === 4) { // PET_SITTER
       const hasHourlyRate = p.hourly_rate && Number(p.hourly_rate) > 0;
-      return hasHourlyRate;
+      const hasRoles = Array.isArray(p.sitter_roles) && p.sitter_roles.length > 0;
+      return !!(hasHourlyRate && hasRoles);
     }
 
-    return true;
+    return true; // LOJISTA
+  }
+
+  // Lista os status que consideramos como "Aprovado/Visível"
+  #getApprovedStatus() {
+    return { in: ['APROVADO', 'ATIVO', 'ACTIVE'] };
   }
 
   async listHotels(req, res) {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'APROVADO',
+          status: this.#getApprovedStatus(),
           user: { role_id: 3 } // HOTEL
         },
         include: {
@@ -60,7 +70,7 @@ class ProviderController {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'APROVADO',
+          status: this.#getApprovedStatus(),
           user: { role_id: 4 } // PET_SITTER
         },
         include: {
@@ -90,7 +100,7 @@ class ProviderController {
     try {
       const providers = await prisma.provider.findMany({
         where: {
-          status: 'APROVADO',
+          status: this.#getApprovedStatus(),
           user: { role_id: 2 } // LOJISTA
         },
         include: {
