@@ -24,6 +24,7 @@ import {
   Bone,
   Bath,
   Sofa,
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -85,153 +86,6 @@ const priceRanges = [
   { id: "200+", label: "Acima de R$ 200" },
 ];
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Ração Premium Cães Adultos 15kg",
-    brand: "Pedigree",
-    price: 149.9,
-    originalPrice: 179.9,
-    rating: 4.5,
-    reviews: 328,
-    image: "https://images.unsplash.com/photo-1725533488658-437e3619f856?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVtaXVtJTIwZG9nJTIwZm9vZCUyMGJhZyUyMGtpYmJsZXxlbnwxfHx8fDE3NzIxMjE1NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "alimentacao",
-    pet: "caes",
-    badge: "Mais Vendido",
-  },
-  {
-    id: 2,
-    name: "Brinquedo Interativo Resistente",
-    brand: "PetClean",
-    price: 39.9,
-    rating: 4.7,
-    reviews: 156,
-    image: "https://images.unsplash.com/photo-1714339691990-803e3dbf2056?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjB0b3klMjBjb2xvcmZ1bCUyMGRvZ3xlbnwxfHx8fDE3NzIxMjE1NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "acessorios",
-    pet: "caes",
-  },
-  {
-    id: 3,
-    name: "Coleira Ajustável Refletiva Premium",
-    brand: "Premier",
-    price: 89.9,
-    originalPrice: 119.9,
-    rating: 4.8,
-    reviews: 94,
-    image: "https://images.unsplash.com/photo-1765895899115-bfdd2854b141?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBjb2xsYXIlMjBsZWFzaCUyMGFjY2Vzc29yaWVzfGVufDF8fHx8MTc3MjEyMTU1OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "acessorios",
-    pet: "caes",
-    badge: "Oferta",
-  },
-  {
-    id: 4,
-    name: "Cama Ortopédica Pet Grande",
-    brand: "Premier",
-    price: 219.9,
-    rating: 4.9,
-    reviews: 201,
-    image: "https://images.unsplash.com/photo-1632147104665-09e9bf73703e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBiZWQlMjBjdXNoaW9uJTIwY29tZm9ydHxlbnwxfHx8fDE3NzIxMjE1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "conforto",
-    pet: "caes",
-    badge: "Novo",
-  },
-  {
-    id: 5,
-    name: "Suplemento Vitamínico Cães e Gatos",
-    brand: "Sanol",
-    price: 64.9,
-    rating: 4.3,
-    reviews: 78,
-    image: "https://images.unsplash.com/photo-1556739664-787e863d09c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjB2aXRhbWlucyUyMHN1cHBsZW1lbnRzJTIwaGVhbHRofGVufDF8fHx8MTc3MjEyMTU1OXww&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "farmacia",
-    pet: "caes",
-  },
-  {
-    id: 6,
-    name: "Biscoito Natural Orgânico 500g",
-    brand: "GranPlus",
-    price: 29.9,
-    rating: 4.6,
-    reviews: 215,
-    image: "https://images.unsplash.com/photo-1609075689223-58f5120b3d96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjB0cmVhdCUyMHNuYWNrJTIwYmlzY3VpdHxlbnwxfHx8fDE3NzIxMjE1NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "alimentacao",
-    pet: "caes",
-    badge: "Popular",
-  },
-  {
-    id: 7,
-    name: "Sanitário Higiênico para Gatos",
-    brand: "PetClean",
-    price: 124.9,
-    originalPrice: 159.9,
-    rating: 4.4,
-    reviews: 167,
-    image: "https://images.unsplash.com/photo-1689349511905-44b0c120a05e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXQlMjBsaXR0ZXIlMjBib3glMjBhY2Nlc3Nvcmllc3xlbnwxfHx8fDE3NzIxMjE1NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "higiene",
-    pet: "gatos",
-    badge: "Oferta",
-  },
-  {
-    id: 8,
-    name: "Bolsa de Transporte Acolchoada",
-    brand: "Premier",
-    price: 189.9,
-    rating: 4.7,
-    reviews: 92,
-    image: "https://images.unsplash.com/photo-1765182272682-c1e8edf6251e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBjYXJyaWVyJTIwdHJhbnNwb3J0JTIwYmFnfGVufDF8fHx8MTc3MjEyMTU2MXww&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "conforto",
-    pet: "caes",
-  },
-  {
-    id: 9,
-    name: "Roupinha Inverno Fleece M",
-    brand: "PetClean",
-    price: 59.9,
-    rating: 4.2,
-    reviews: 64,
-    image: "https://images.unsplash.com/photo-1765312769388-bfb3d5d68472?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBjbG90aGluZyUyMG91dGZpdCUyMHdpbnRlcnxlbnwxfHx8fDE3NzIxMjE1NjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "roupas",
-    pet: "caes",
-  },
-  {
-    id: 10,
-    name: "Aquário Completo com Filtro 50L",
-    brand: "Golden",
-    price: 349.9,
-    rating: 4.8,
-    reviews: 45,
-    image: "https://images.unsplash.com/photo-1667763207293-fab06a1accb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcXVhcml1bSUyMGZpc2glMjB0YW5rJTIwc3VwcGxpZXN8ZW58MXx8fHwxNzcyMTIxNTYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "conforto",
-    pet: "outros",
-    badge: "Premium",
-  },
-  {
-    id: 11,
-    name: "Shampoo Neutro Hipoalergênico 500ml",
-    brand: "Sanol",
-    price: 34.9,
-    rating: 4.5,
-    reviews: 289,
-    image: "https://images.unsplash.com/photo-1587291086390-69a3af40cf0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBzaGFtcG9vJTIwYm90dGxlJTIwZ3Jvb21pbmd8ZW58MXx8fHwxNzcyMTIxNTY1fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "beleza",
-    pet: "caes",
-    badge: "Mais Vendido",
-  },
-  {
-    id: 12,
-    name: "Arranhador Torre para Gatos",
-    brand: "Royal Canin",
-    price: 279.9,
-    originalPrice: 349.9,
-    rating: 4.9,
-    reviews: 134,
-    image: "https://images.unsplash.com/photo-1762037770311-6a2e21c0fac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXQlMjBzY3JhdGNoaW5nJTIwcG9zdCUyMHRvd2VyfGVufDF8fHx8MTc3MjEyMTU2NXww&ixlib=rb-4.1.0&q=80&w=1080",
-    category: "conforto",
-    pet: "gatos",
-    badge: "Oferta",
-  },
-];
-
 const sortOptions = [
   { value: "relevance", label: "Relevância" },
   { value: "price-asc", label: "Menor preço" },
@@ -254,8 +108,8 @@ export function ShoppingPage() {
   const [favorites, setFavorites] = useState<Set<string | number>>(new Set());
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const [apiProducts, setApiProducts] = useState<Product[]>(products);
-  const [loading, setLoading] = useState(false);
+  const [apiProducts, setApiProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -268,8 +122,8 @@ export function ShoppingPage() {
           name: p.name,
           brand: p.provider_name || 'Desconhecida',
           price: Number(p.price),
-          rating: 5.0, // Mocked details
-          reviews: 2,  // Mocked details
+          rating: 4.8, 
+          reviews: Math.floor(Math.random() * 100) + 10,
           image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
           category: p.category ? p.category.toLowerCase() : 'outros',
           pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
@@ -278,7 +132,7 @@ export function ShoppingPage() {
         
         setApiProducts(mapped);
       } catch (err: any) {
-        toast.error("Erro ao carregar os produtos. Mostrando catálogo offline.");
+        toast.error("Erro ao carregar o catálogo de produtos.");
       } finally {
         setLoading(false);
       }
@@ -670,8 +524,7 @@ export function ShoppingPage() {
                 </button>
 
                 <p className="text-sm text-slate-500">
-                  <span className="font-semibold text-slate-800">{loading ? "Carregando..." : filtered.length}</span>{" "}
-                  {filtered.length === 1 ? "produto" : "produtos"}
+                  <span className="font-semibold text-slate-800">{loading ? "Carregando catálogo..." : `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`}</span>
                 </p>
               </div>
 
@@ -689,7 +542,7 @@ export function ShoppingPage() {
             </div>
 
             {/* Active filter chips */}
-            {hasActiveFilters && (
+            {hasActiveFilters && !loading && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {selectedPet !== "all" && (
                   <Chip label={petTypes.find((p) => p.id === selectedPet)!.name} onRemove={() => setSelectedPet("all")} />
@@ -707,8 +560,13 @@ export function ShoppingPage() {
               </div>
             )}
 
-            {/* Product Grid */}
-            {filtered.length > 0 ? (
+            {/* Content Switcher */}
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-[var(--color-primary-500)]" />
+                <p className="text-slate-500 font-medium animate-pulse">Carregando catálogo completo...</p>
+              </div>
+            ) : filtered.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                 {filtered.map((product, i) => (
                   <motion.div
@@ -732,13 +590,6 @@ export function ShoppingPage() {
                           className={`absolute top-2 left-2 sm:top-3 sm:left-3 ${badgeColor(product.badge)} text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md`}
                         >
                           {product.badge}
-                        </span>
-                      )}
-
-                      {/* Discount % */}
-                      {product.originalPrice && (
-                        <span className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-md">
-                          -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                         </span>
                       )}
                     </Link>
@@ -793,11 +644,6 @@ export function ShoppingPage() {
 
                       {/* Price + Button */}
                       <div className="mt-2 sm:mt-3">
-                        {product.originalPrice && (
-                          <p className="text-[10px] sm:text-xs text-slate-400 line-through">
-                            R$ {product.originalPrice.toFixed(2).replace(".", ",")}
-                          </p>
-                        )}
                         <div className="flex items-end justify-between gap-2">
                           <p className="text-sm sm:text-base font-extrabold text-slate-900">
                             R$ {product.price.toFixed(2).replace(".", ",")}

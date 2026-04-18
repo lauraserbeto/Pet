@@ -6,6 +6,11 @@ class UpdateProviderProfileUseCase {
     const {
       description,
       avatar_url,
+      phone,
+      zip_code,
+      address_line,
+      city,
+      state,
       allowed_animals,
       amenities,
       gallery_images,
@@ -29,6 +34,11 @@ class UpdateProviderProfileUseCase {
     const providerData = {};
 
     if (description !== undefined)     providerData.description = description;
+    if (phone !== undefined)           providerData.phone = phone;
+    if (zip_code !== undefined)        providerData.zip_code = zip_code;
+    if (address_line !== undefined)    providerData.address_line = address_line;
+    if (city !== undefined)            providerData.city = city;
+    if (state !== undefined)           providerData.state = state;
     if (operating_hours !== undefined) providerData.operating_hours = operating_hours;
     if (allowed_animals !== undefined) providerData.allowed_animals = allowed_animals;
     if (amenities !== undefined)       providerData.amenities = amenities;
