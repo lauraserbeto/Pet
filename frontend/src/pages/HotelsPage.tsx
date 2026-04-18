@@ -57,13 +57,10 @@ export function HotelsPage() {
   };
 
   useEffect(() => {
-    providerService.fetchAllProviders()
+    providerService.fetchHotels()
       .then(data => {
-        // Role 3 = HOTEL, status = ACTIVE
-        const activeHotels = data.filter((p: any) => p.role_id === 3 && p.status === 'ATIVO');
-        
         setApiHotels(
-          activeHotels.map((h: any) => {
+          data.map((h: any) => {
             const gallery = Array.isArray(h.gallery_images) ? h.gallery_images : [];
             const allowed = Array.isArray(h.allowed_animals) ? h.allowed_animals : [];
             const amenities = Array.isArray(h.amenities) ? h.amenities : [];

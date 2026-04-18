@@ -4,23 +4,33 @@ const updateProviderProfileUseCase = require('../useCases/providers/UpdateProvid
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
 
 class ProviderController {
-  // Filtro base para provedores "Completos" e "Ativos"
-  #getPublicBaseFilter() {
-    return {
-      status: 'ATIVO',
-      description: { not: null },
-      phone: { not: null },
-      zip_code: { not: null },
-      city: { not: null },
-    };
+  #isProfileComplete(p) {
+    const hasBasicInfo = p.description && p.phone && p.city && p.zip_code;
+    const hasAvatar = p.user && p.user.avatar_url;
+
+    if (!hasBasicInfo || !hasAvatar) return false;
+
+    const roleId = p.user.role_id;
+
+    if (roleId === 3) { // HOTEL
+      const hasDailyRate = p.daily_rate && Number(p.daily_rate) > 0;
+      const hasImages = Array.isArray(p.gallery_images) && p.gallery_images.length >= 1;
+      return hasDailyRate && hasImages;
+    }
+
+    if (roleId === 4) { // PET_SITTER
+      const hasHourlyRate = p.hourly_rate && Number(p.hourly_rate) > 0;
+      return hasHourlyRate;
+    }
+
+    return true;
   }
 
   async listHotels(req, res) {
     try {
-      const hotels = await prisma.provider.findMany({
+      const providers = await prisma.provider.findMany({
         where: {
-          ...this.#getPublicBaseFilter(),
-          daily_rate: { gt: 0 },
+          status: 'ATIVO',
           user: { role_id: 3 } // HOTEL
         },
         include: {
@@ -28,6 +38,7 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
+              role_id: true
             }
           },
           services: {
@@ -36,7 +47,9 @@ class ProviderController {
           }
         }
       });
-      return res.status(200).json(hotels);
+
+      const completeHotels = providers.filter(p => this.#isProfileComplete(p));
+      return res.status(200).json(completeHotels);
     } catch (error) {
       console.error("[ProviderController] listHotels:", error);
       return res.status(500).json({ error: 'Erro ao listar hotéis' });
@@ -45,10 +58,9 @@ class ProviderController {
 
   async listSitters(req, res) {
     try {
-      const sitters = await prisma.provider.findMany({
+      const providers = await prisma.provider.findMany({
         where: {
-          ...this.#getPublicBaseFilter(),
-          hourly_rate: { gt: 0 },
+          status: 'ATIVO',
           user: { role_id: 4 } // PET_SITTER
         },
         include: {
@@ -56,6 +68,7 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
+              role_id: true
             }
           },
           services: {
@@ -64,7 +77,9 @@ class ProviderController {
           }
         }
       });
-      return res.status(200).json(sitters);
+
+      const completeSitters = providers.filter(p => this.#isProfileComplete(p));
+      return res.status(200).json(completeSitters);
     } catch (error) {
       console.error("[ProviderController] listSitters:", error);
       return res.status(500).json({ error: 'Erro ao listar pet sitters' });
@@ -73,9 +88,9 @@ class ProviderController {
 
   async listStores(req, res) {
     try {
-      const stores = await prisma.provider.findMany({
+      const providers = await prisma.provider.findMany({
         where: {
-          ...this.#getPublicBaseFilter(),
+          status: 'ATIVO',
           user: { role_id: 2 } // LOJISTA
         },
         include: {
@@ -83,6 +98,7 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
+              role_id: true
             }
           },
           _count: {
@@ -90,7 +106,9 @@ class ProviderController {
           }
         }
       });
-      return res.status(200).json(stores);
+
+      const completeStores = providers.filter(p => this.#isProfileComplete(p));
+      return res.status(200).json(completeStores);
     } catch (error) {
       console.error("[ProviderController] listStores:", error);
       return res.status(500).json({ error: 'Erro ao listar lojas' });
