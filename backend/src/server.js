@@ -13,7 +13,7 @@ const providerRoutes = require('./routes/providerRoutes');
 
 // Middlewares Globais
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://petplus-frontend.vercel.app'], 
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://petplus-frontend.vercel.app', 'https://petplus.vercel.app'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true

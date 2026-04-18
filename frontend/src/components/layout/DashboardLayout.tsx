@@ -1,4 +1,4 @@
-import { Bell, Search, Home, Loader2, User, Globe, LogOut, Menu, X } from "lucide-react";
+import { Bell, Search, Home, Loader2, User, Globe, LogOut, Menu, X, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Avatar } from "../../components/ui/avatar";
@@ -6,6 +6,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
+import { providerService } from "../../lib/services/providerService";
 import { cn } from "../../lib/utils";
 
 export function DashboardLayout() {
@@ -19,6 +20,9 @@ export function DashboardLayout() {
   const [displayName, setDisplayName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
+  // Completeness State
+  const [completeness, setCompleteness] = useState<{ isComplete: boolean; missingFields: string[] } | null>(null);
+
   // Header State
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -53,6 +57,16 @@ export function DashboardLayout() {
         }
         
         setDisplayName(finalName);
+
+        // Somente parceiros (3=HOTEL, 4=PET_SITTER) precisam verificar completitude
+        if (user.role_id === 3 || user.role_id === 4) {
+          try {
+            const comp = await providerService.fetchCompleteness();
+            setCompleteness(comp);
+          } catch (err) {
+            console.error("Erro ao carregar completitude:", err);
+          }
+        }
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
       } finally {
@@ -91,6 +105,21 @@ export function DashboardLayout() {
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  const fieldLabels: Record<string, string> = {
+    description: "Descrição",
+    phone: "Telefone",
+    avatar_url: "Foto de Perfil",
+    zip_code: "CEP",
+    city: "Cidade",
+    operating_hours: "Horário de Funcionamento",
+    daily_rate: "Valor da Diária",
+    allowed_animals: "Animais Aceitos",
+    amenities: "Comodidades",
+    gallery_images: "Imagens da Galeria (mínimo 3)",
+    hourly_rate: "Valor da Hora",
+    sitter_roles: "Tipos de Serviço"
   };
 
   if (isLoading) {
@@ -242,6 +271,36 @@ export function DashboardLayout() {
             </div>
           </div>
         </header>
+
+        {/* Completeness Alert Banner */}
+        {completeness && !completeness.isComplete && (
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 sm:px-6">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg text-amber-600 mt-0.5">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-semibold text-amber-900 text-sm sm:text-base">
+                    Seu perfil ainda não está visível para os tutores.
+                  </p>
+                  <p className="text-amber-700 text-xs sm:text-sm mt-0.5">
+                    Complete as informações obrigatórias para ser publicado: 
+                    <span className="font-medium ml-1">
+                      {completeness.missingFields.map(f => fieldLabels[f] || f).join(", ")}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <Link to="/dashboard/perfil">
+                <Button variant="outline" size="sm" className="bg-white border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800 transition-all flex-shrink-0 gap-2">
+                  Completar Perfil
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Scrollable Content Area */}
         <main ref={scrollRef} className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-slate-50/50">

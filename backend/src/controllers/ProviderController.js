@@ -87,6 +87,63 @@ class ProviderController {
     }
   }
 
+  async getCompleteness(req, res) {
+    try {
+      const userId = req.userId;
+      const provider = await prisma.provider.findUnique({
+        where: { user_id: userId },
+        include: { user: true }
+      });
+
+      if (!provider) {
+        return res.status(404).json({ error: 'Provedor não encontrado' });
+      }
+
+      const missingFields = [];
+      const roleName = provider.user.role_id === 3 ? 'HOTEL' : (provider.user.role_id === 4 ? 'PET_SITTER' : 'OTHER');
+
+      // Campos Obrigatórios Gerais
+      if (!provider.description) missingFields.push('description');
+      if (!provider.phone) missingFields.push('phone');
+      if (!provider.user.avatar_url) missingFields.push('avatar_url');
+      if (!provider.zip_code) missingFields.push('zip_code');
+      if (!provider.city) missingFields.push('city');
+      if (!provider.operating_hours || Object.keys(provider.operating_hours).length === 0) missingFields.push('operating_hours');
+
+      // Campos Obrigatórios por Role
+      if (roleName === 'HOTEL') {
+        if (!provider.daily_rate || Number(provider.daily_rate) <= 0) missingFields.push('daily_rate');
+        
+        const allowedAnimals = provider.allowed_animals || [];
+        if (Array.isArray(allowedAnimals) && allowedAnimals.length < 1) missingFields.push('allowed_animals');
+        else if (!Array.isArray(allowedAnimals)) missingFields.push('allowed_animals');
+
+        const amenities = provider.amenities || [];
+        if (Array.isArray(amenities) && amenities.length < 1) missingFields.push('amenities');
+        else if (!Array.isArray(amenities)) missingFields.push('amenities');
+
+        const galleryImages = provider.gallery_images || [];
+        if (Array.isArray(galleryImages) && galleryImages.length < 3) missingFields.push('gallery_images');
+        else if (!Array.isArray(galleryImages)) missingFields.push('gallery_images');
+
+      } else if (roleName === 'PET_SITTER') {
+        if (!provider.hourly_rate || Number(provider.hourly_rate) <= 0) missingFields.push('hourly_rate');
+        
+        const sitterRoles = provider.sitter_roles || [];
+        if (Array.isArray(sitterRoles) && sitterRoles.length < 1) missingFields.push('sitter_roles');
+        else if (!Array.isArray(sitterRoles)) missingFields.push('sitter_roles');
+      }
+
+      return res.status(200).json({
+        isComplete: missingFields.length === 0,
+        missingFields
+      });
+    } catch (error) {
+      console.error("[ProviderController] Erro em getCompleteness:", error);
+      return res.status(500).json({ error: 'Erro ao verificar completitude do perfil' });
+    }
+  }
+
   // Atualiza status do provedor
   async updateStatus(req, res) {
     try {

@@ -6,6 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 // Define as rotas (Temporariamente sem middleware de auth forte para fins de simplificação, mas idealmente teria um verifyAdmin)
 router.get('/', ProviderController.listPartners);
 router.get('/me', authMiddleware, ProviderController.getMe);
+router.get('/completeness', authMiddleware, ProviderController.getCompleteness);
 router.put('/me', authMiddleware, ProviderController.updateMe);
 router.put('/profile', authMiddleware, ProviderController.updateProfile); // Novo endpoint de vitrine
 router.get('/:id', ProviderController.getDetails);

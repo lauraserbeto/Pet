@@ -46,29 +46,53 @@ export function HotelDetailsPage() {
     if (!id) return;
     providerService.fetchProviderDetails(id)
       .then(data => {
+        const gallery = Array.isArray(data.gallery_images) ? data.gallery_images : [];
+        const amenities = Array.isArray(data.amenities) ? data.amenities : [];
+        const allowed = Array.isArray(data.allowed_animals) ? data.allowed_animals : [];
+        
+        let policies: string[] = [];
+        if (data.rules_policies) {
+            try {
+                // Tenta fazer parse se for JSON stringified
+                const parsed = JSON.parse(data.rules_policies);
+                policies = Array.isArray(parsed) ? parsed : [data.rules_policies];
+            } catch {
+                // Se não for JSON, quebra por linhas
+                policies = data.rules_policies.split('\n').filter((l: string) => l.trim().length > 0);
+            }
+        }
+
+        const formatOperatingHours = (oh: any) => {
+            if (!oh || typeof oh !== 'object') return "Horário não informado";
+            const daysMap: Record<string, string> = {
+                segunda: "Seg", terca: "Ter", quarta: "Qua", quinta: "Qui", sexta: "Sex", sabado: "Sab", domingo: "Dom"
+            };
+            const activeDays = Object.entries(oh)
+                .filter(([_, config]: [string, any]) => !config.closed && config.open && config.close)
+                .map(([day, config]: [string, any]) => `${daysMap[day] || day}: ${config.open}-${config.close}`);
+            
+            return activeDays.length > 0 ? activeDays.join(" • ") : "Fechado temporariamente";
+        };
+
         setApiHotel({
           name: data.business_name || data.user.full_name,
           distance: "3.0 km",
-          address: data.address_line || "Endereço não informado",
+          address: `${data.city || 'Cidade'}, ${data.state || 'UF'}`,
           price: data.daily_rate ? Number(data.daily_rate) : 150,
-          rating: 4.8,
-          reviews: 50,
+          rating: 5.0,
+          reviews: 12,
           description: data.description || "O melhor lugar para seu pet.",
-          images: (data.gallery_images && data.gallery_images.length > 0) ? data.gallery_images : [
-            data.user.avatar_url || "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&auto=format&fit=crop&q=80",
-            "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=900&auto=format&fit=crop&q=80"
+          images: gallery.length > 0 ? gallery : [
+            data.user.avatar_url || "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&auto=format&fit=crop&q=80"
           ],
-          amenities: (data.amenities && data.amenities.length > 0) ? data.amenities.map((a: string) => ({
-            icon: a.toLowerCase().includes('verde') ? 'tree' : a.toLowerCase().includes('wi') ? 'wifi' : a.toLowerCase().includes('superv') ? 'shield' : 'paw',
+          amenities: amenities.map((a: string) => ({
+            icon: a.toLowerCase().includes('verde') ? 'tree' : a.toLowerCase().includes('wi-fi') ? 'wifi' : a.toLowerCase().includes('superv') ? 'shield' : 'paw',
             label: a
-          })) : [
-            { icon: "tree", label: "Área Verde" },
-            { icon: "shield", label: "Supervisão 24h" }
-          ],
-          acceptsDogs: data.allowed_animals?.includes('Cachorro') || data.allowed_animals?.includes('Sem restrição') || false,
-          acceptsCats: data.allowed_animals?.includes('Gato') || data.allowed_animals?.includes('Sem restrição') || false,
-          openHours: data.operating_hours || "08:00 — 20:00",
-          policies: data.rules_policies ? [data.rules_policies] : ["Carteira de vacinação obrigatória"],
+          })),
+          acceptsDogs: allowed.includes('Cachorro') || allowed.includes('Sem restrição'),
+          acceptsCats: allowed.includes('Gato') || allowed.includes('Sem restrição'),
+          openHours: formatOperatingHours(data.operating_hours),
+          policies: policies.length > 0 ? policies : ["Consulte as regras com o parceiro"],
           reviewsList: []
         });
         setLoading(false);
@@ -79,62 +103,11 @@ export function HotelDetailsPage() {
       });
   }, [id]);
 
-  const mockHotel = {
-    name: "Hotel São Roque",
-    distance: "3.3 km",
-    address: "Rua 33, Bairro Verde",
-    price: 190,
-    rating: 5.0,
-    reviews: 64,
-    description:
-      "No Hotel São Roque, seu cãozinho é tratado com carinho e atenção! Oferecemos hospedagem de alto padrão, creche diurna e muito amor para seu pet se sentir em casa. Nosso espaço conta com área verde ampla, supervisão veterinária e monitoramento 24h.",
-    images: [
-      "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=900&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=900&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1647249893022-9287c83b8cc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZXQlMjBob3RlbCUyMGludGVyaW9yJTIwbW9kZXJufGVufDF8fHx8MTc3MjAyOTczNHww&ixlib=rb-4.1.0&q=80&w=1080",
-    ],
-    amenities: [
-      { icon: "tree", label: "Área Verde" },
-      { icon: "shield", label: "Supervisão 24h" },
-      { icon: "wifi", label: "Webcam ao vivo" },
-      { icon: "paw", label: "Pet Friendly" },
-    ],
-    acceptsDogs: true,
-    acceptsCats: false,
-    openHours: "08:00 — 20:00",
-    policies: [
-      "Check-in a partir das 08h",
-      "Check-out até às 18h",
-      "Carteira de vacinação obrigatória",
-      "Animais sociáveis (avaliação prévia)",
-    ],
-    reviewsList: [
-      {
-        name: "Maria S.",
-        rating: 5,
-        text: "Meu cachorro amou! Voltou super feliz. Equipe atenciosa.",
-        date: "2 semanas atrás",
-      },
-      {
-        name: "Carlos R.",
-        rating: 5,
-        text: "Lugar impecável, meu pet foi muito bem cuidado.",
-        date: "1 mês atrás",
-      },
-      {
-        name: "Ana P.",
-        rating: 4,
-        text: "Ótimo espaço, preço justo. Recomendo!",
-        date: "1 mês atrás",
-      },
-    ],
-  };
-
-  const hotel = apiHotel || mockHotel;
+  const hotel = apiHotel;
 
   // Autoplay logic
   useEffect(() => {
-    if (isPaused) {
+    if (!hotel || isPaused || hotel.images.length <= 1) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -146,14 +119,12 @@ export function HotelDetailsPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPaused, hotel.images.length]);
+  }, [isPaused, hotel?.images.length]);
 
-  // Reset timer when user manually picks an image
   const handleManualSelect = (index: number) => {
     setActiveImage(index);
-    // Reset the interval so the next auto-advance waits the full duration
     if (timerRef.current) clearInterval(timerRef.current);
-    if (!isPaused) {
+    if (!isPaused && hotel.images.length > 1) {
       timerRef.current = setInterval(() => {
         setActiveImage((prev) => (prev + 1) % hotel.images.length);
       }, AUTOPLAY_INTERVAL);
@@ -176,7 +147,22 @@ export function HotelDetailsPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)] text-[var(--color-primary-600)]">Carregando hotel...</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
+        <div className="h-12 w-12 border-4 border-[var(--color-primary-200)] border-t-[var(--color-primary-600)] rounded-full animate-spin"></div>
+        <p className="font-bold text-slate-600 animate-pulse">Carregando detalhes do hotel...</p>
+      </div>
+    );
+  }
+
+  if (!hotel) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
+        <PawPrint className="h-16 w-16 text-slate-300" />
+        <h2 className="text-xl font-bold text-slate-800">Hotel não encontrado</h2>
+        <Button onClick={() => navigate('/hotels')}>Voltar para a listagem</Button>
+      </div>
+    );
   }
 
   return (
@@ -271,7 +257,7 @@ export function HotelDetailsPage() {
           {/* Thumbnails row */}
           <div className="flex items-center justify-between px-4 pb-4">
             <div className="flex gap-2">
-              {hotel.images.map((img: string, i: number) => (
+              {hotel.images.slice(0, 5).map((img: string, i: number) => (
                 <button
                   key={i}
                   className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${
@@ -292,18 +278,19 @@ export function HotelDetailsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Pause/Play */}
-              <button
-                onClick={() => setIsPaused(!isPaused)}
-                className="flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1.5 rounded-full hover:bg-black/70 transition-colors"
-                aria-label={isPaused ? "Continuar slideshow" : "Pausar slideshow"}
-              >
-                {isPaused ? (
-                  <Play className="h-3 w-3" />
-                ) : (
-                  <Pause className="h-3 w-3" />
-                )}
-              </button>
+              {hotel.images.length > 1 && (
+                <button
+                  onClick={() => setIsPaused(!isPaused)}
+                  className="flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1.5 rounded-full hover:bg-black/70 transition-colors"
+                  aria-label={isPaused ? "Continuar slideshow" : "Pausar slideshow"}
+                >
+                  {isPaused ? (
+                    <Play className="h-3 w-3" />
+                  ) : (
+                    <Pause className="h-3 w-3" />
+                  )}
+                </button>
+              )}
               {/* Counter */}
               <div className="flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-[10px] font-medium px-2.5 py-1.5 rounded-full">
                 <Camera className="h-3 w-3" />
@@ -345,8 +332,8 @@ export function HotelDetailsPage() {
                   ({hotel.reviews})
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-sm text-slate-500">
-                <Clock className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1 text-[11px] text-slate-500 max-w-[200px] text-right">
+                <Clock className="h-3 w-3 shrink-0" />
                 {hotel.openHours}
               </div>
             </div>
@@ -354,33 +341,33 @@ export function HotelDetailsPage() {
 
           {/* Pet acceptance + Price */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                   hotel.acceptsDogs
                     ? "bg-emerald-50 text-emerald-600"
                     : "bg-red-50 text-red-500"
                 }`}
               >
-                <Dog className="h-3.5 w-3.5" />
+                <Dog className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {hotel.acceptsDogs ? "Aceita Cães" : "Não aceita Cães"}
               </div>
               <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                   hotel.acceptsCats
                     ? "bg-emerald-50 text-emerald-600"
                     : "bg-red-50 text-red-500"
                 }`}
               >
-                <Cat className="h-3.5 w-3.5" />
+                <Cat className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {hotel.acceptsCats ? "Aceita Gatos" : "Não aceita Gatos"}
               </div>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-extrabold text-slate-900">
+              <p className="text-xl sm:text-2xl font-extrabold text-slate-900">
                 R${hotel.price}
               </p>
-              <p className="text-[11px] text-slate-400">por noite</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-400">por noite</p>
             </div>
           </div>
         </motion.div>
@@ -414,7 +401,7 @@ export function HotelDetailsPage() {
               <h2 className="font-bold text-slate-900 mb-2 font-[family-name:var(--font-display)]">
                 Sobre o hotel
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                 {hotel.description}
               </p>
             </div>
@@ -425,9 +412,9 @@ export function HotelDetailsPage() {
                 Comodidades
               </h2>
               <div className="grid grid-cols-2 gap-3">
-                {hotel.amenities.map((am: { icon: string; label: string }) => (
+                {hotel.amenities.map((am: { icon: string; label: string }, idx: number) => (
                   <div
-                    key={am.label}
+                    key={`${am.label}-${idx}`}
                     className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-100"
                   >
                     <div className="p-2 rounded-lg bg-[var(--color-primary-100)] text-[var(--color-primary-600)]">
@@ -438,6 +425,9 @@ export function HotelDetailsPage() {
                     </span>
                   </div>
                 ))}
+                {hotel.amenities.length === 0 && (
+                    <p className="text-xs text-slate-400 italic">Nenhuma comodidade informada</p>
+                )}
               </div>
             </div>
 
@@ -504,38 +494,10 @@ export function HotelDetailsPage() {
               </div>
             </div>
 
-            {/* Review Cards */}
-            {hotel.reviewsList.map((review: any, i: number) => (
-              <div
-                key={i}
-                className="bg-white border border-slate-100 rounded-xl p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[var(--color-primary-100)] flex items-center justify-center text-[var(--color-primary-600)] font-bold text-sm">
-                      {review.name[0]}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {review.name}
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        {review.date}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-0.5">
-                    {[...Array(review.rating)].map((_: any, j: number) => (
-                      <Star
-                        key={j}
-                        className="h-3 w-3 fill-amber-400 text-amber-400"
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-sm text-slate-600">{review.text}</p>
-              </div>
-            ))}
+            <div className="text-center py-8">
+                <Star className="h-8 w-8 text-slate-200 mx-auto mb-2" />
+                <p className="text-sm text-slate-400">Ainda não há avaliações detalhadas para este hotel.</p>
+            </div>
           </motion.div>
         )}
       </div>

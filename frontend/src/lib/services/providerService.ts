@@ -33,6 +33,21 @@ export interface ProviderDetails {
 }
 
 export const providerService = {
+  async fetchCompleteness(): Promise<{ isComplete: boolean; missingFields: string[] }> {
+    const response = await fetch(`${API_URL}/providers/completeness`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Erro ao buscar completude do perfil');
+    }
+
+    const data = await response.json();
+    return data;
+  },
+
   async fetchProviderDetails(id: string): Promise<ProviderDetails> {
     const response = await fetch(`${API_URL}/providers/${id}`, {
       method: 'GET',

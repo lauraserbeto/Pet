@@ -32,32 +32,64 @@ export function HotelsPage() {
   const [apiHotels, setApiHotels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isOpenNow = (operatingHours: any) => {
+    if (!operatingHours || typeof operatingHours !== 'object') return false;
+    
+    const now = new Date();
+    const days = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+    const currentDay = days[now.getDay()];
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    
+    const dayConfig = operatingHours[currentDay];
+    if (!dayConfig || dayConfig.closed) return false;
+    
+    if (dayConfig.open && dayConfig.close) {
+      const [openH, openM] = dayConfig.open.split(':').map(Number);
+      const [closeH, closeM] = dayConfig.close.split(':').map(Number);
+      
+      const openTime = openH * 60 + openM;
+      const closeTime = closeH * 60 + closeM;
+      
+      return currentTime >= openTime && currentTime <= closeTime;
+    }
+    
+    return false;
+  };
+
   useEffect(() => {
     providerService.fetchAllProviders()
       .then(data => {
-        const activeHotels = data.filter((p: any) => p.role_id === 4 && p.status === 'ACTIVE');
+        // Role 3 = HOTEL, status = ACTIVE
+        const activeHotels = data.filter((p: any) => p.role_id === 3 && p.status === 'ATIVO');
+        
         setApiHotels(
-          activeHotels.map((h: any) => ({
-            id: h.id,
-            name: h.business_name || h.user?.full_name || "Hotel Pet",
-            rating: 5.0, // Mock
-            reviews: Math.floor(Math.random() * 100) + 10,
-            price: h.daily_rate ? Number(h.daily_rate) : 150,
-            image: (h.gallery_images && h.gallery_images.length > 0) ? h.gallery_images[0] : (h.user?.avatar_url || "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80"),
-            accepts: { 
-               dog: h.allowed_animals?.includes('Cachorro') || h.allowed_animals?.includes('Sem restrição') || false, 
-               cat: h.allowed_animals?.includes('Gato') || h.allowed_animals?.includes('Sem restrição') || false 
-            },
-            distance: "3.0 km",
-            address: h.address_line || "São Paulo, SP",
-            amenities: h.amenities?.length > 0 ? h.amenities : ["Wi-Fi", "Área Verde", "Supervisão 24h"],
-            openNow: true,
-          }))
+          activeHotels.map((h: any) => {
+            const gallery = Array.isArray(h.gallery_images) ? h.gallery_images : [];
+            const allowed = Array.isArray(h.allowed_animals) ? h.allowed_animals : [];
+            const amenities = Array.isArray(h.amenities) ? h.amenities : [];
+
+            return {
+              id: h.id,
+              name: h.business_name || h.user?.full_name || "Hotel Pet",
+              rating: 5.0, // Mock enquanto não temos sistema de avaliações
+              reviews: Math.floor(Math.random() * 50) + 5,
+              price: h.daily_rate ? Number(h.daily_rate) : 150,
+              image: gallery.length > 0 ? gallery[0] : (h.user?.avatar_url || "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80"),
+              accepts: { 
+                 dog: allowed.includes('Cachorro') || allowed.includes('Sem restrição') || false, 
+                 cat: allowed.includes('Gato') || allowed.includes('Sem restrição') || false 
+              },
+              distance: "3.0 km",
+              address: `${h.city || 'Cidade'}, ${h.state || 'UF'}`,
+              amenities: amenities.length > 0 ? amenities.slice(0, 3) : ["Pet Friendly", "Segurança"],
+              openNow: isOpenNow(h.operating_hours),
+            };
+          })
         );
         setLoading(false);
       })
-      .catch(() => {
-        setApiHotels(hotels);
+      .catch(err => {
+        console.error("Erro ao buscar hotéis:", err);
         setLoading(false);
       });
   }, []);
@@ -67,65 +99,6 @@ export function HotelsPage() {
       prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
     );
   };
-
-  const hotels = [
-    {
-      id: "hotel-amigato",
-      name: "Hotel Amigato",
-      rating: 5.0,
-      reviews: 120,
-      price: 120,
-      image:
-        "https://images.unsplash.com/photo-1548366086-7f1b76106622?w=600&auto=format&fit=crop&q=80",
-      accepts: { dog: true, cat: true },
-      distance: "2.5 km",
-      address: "Rua das Palmeiras, 42",
-      amenities: ["Wi-Fi", "Área Verde", "Supervisão 24h"],
-      openNow: true,
-    },
-    {
-      id: "hotel-brendinha",
-      name: "Hotel Brendinha",
-      rating: 4.7,
-      reviews: 90,
-      price: 135,
-      image:
-        "https://images.unsplash.com/photo-1596272875729-ed2c21d50c4a?w=600&auto=format&fit=crop&q=80",
-      accepts: { dog: true, cat: true },
-      distance: "3.2 km",
-      address: "Av. Central, 180",
-      amenities: ["Wi-Fi", "Piscina", "Webcam"],
-      openNow: true,
-    },
-    {
-      id: "hotel-sao-roque",
-      name: "Hotel São Roque",
-      rating: 5.0,
-      reviews: 64,
-      price: 190,
-      image:
-        "https://images.unsplash.com/photo-1647249893022-9287c83b8cc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZXQlMjBob3RlbCUyMGludGVyaW9yJTIwbW9kZXJufGVufDF8fHx8MTc3MjAyOTczNHww&ixlib=rb-4.1.0&q=80&w=1080",
-      accepts: { dog: true, cat: false },
-      distance: "3.3 km",
-      address: "Rua 33, Bairro Verde",
-      amenities: ["Área Verde", "Supervisão 24h"],
-      openNow: false,
-    },
-    {
-      id: "hotel-tia-tati",
-      name: "Hotel Tia Tati",
-      rating: 4.5,
-      reviews: 113,
-      price: 130,
-      image:
-        "https://images.unsplash.com/photo-1600821986515-3ef5b0f29f39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBkYXljYXJlJTIwcGxheSUyMGFyZWElMjBpbmRvb3J8ZW58MXx8fHwxNzcyMDI5NzM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      accepts: { dog: true, cat: true },
-      distance: "1.8 km",
-      address: "Rua da Saúde, 88",
-      amenities: ["Wi-Fi", "Day Care", "Área Verde"],
-      openNow: true,
-    }
-  ];
 
   const filtered = apiHotels
     .filter((h) =>
@@ -349,11 +322,11 @@ export function HotelsPage() {
                             key={amenity}
                             className="inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-50 px-2 py-1 rounded-md"
                           >
-                            {amenity === "Wi-Fi" && <Wifi className="h-3 w-3" />}
-                            {amenity === "Área Verde" && (
+                            {amenity.toLowerCase().includes("wi-fi") && <Wifi className="h-3 w-3" />}
+                            {amenity.toLowerCase().includes("verde") && (
                               <TreePine className="h-3 w-3" />
                             )}
-                            {amenity === "Supervisão 24h" && (
+                            {amenity.toLowerCase().includes("superv") && (
                               <Shield className="h-3 w-3" />
                             )}
                             {amenity}
@@ -408,7 +381,7 @@ export function HotelsPage() {
             </motion.div>
           ))}
 
-          {filtered.length === 0 && (
+          {!loading && filtered.length === 0 && (
             <div className="text-center py-16">
               <Dog className="h-12 w-12 text-slate-300 mx-auto mb-4" />
               <h3 className="font-semibold text-slate-600 mb-1">
