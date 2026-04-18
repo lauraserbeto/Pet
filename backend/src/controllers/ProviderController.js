@@ -88,8 +88,10 @@ class ProviderController {
         }
       });
 
-      const completeSitters = providers.filter(p => this.#isProfileComplete(p));
-      return res.status(200).json(completeSitters);
+      // --- BYPASS DE DEBUG ---
+      // Retornando diretamente o que vem do Prisma para validar se o registro existe no banco.
+      // const completeSitters = providers.filter(p => this.#isProfileComplete(p));
+      return res.status(200).json(providers);
     } catch (error) {
       console.error("[ProviderController] listSitters:", error);
       return res.status(500).json({ error: 'Erro ao listar pet sitters' });
