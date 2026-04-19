@@ -4,7 +4,7 @@ const AuthController = require('../controllers/AuthController');
 
 /**
  * @swagger
- * /Auth/Register:
+ * /api/v1/auth/register:
  *   post:
  *     summary: Cadastra um novo usuário (Tutor ou Parceiro)
  *     tags: [Auth]
@@ -33,7 +33,7 @@ router.post('/register', AuthController.register);
 
 /**
  * @swagger
- * /Auth/Login:
+ * /api/v1/auth/login:
  *   post:
  *     summary: Realiza o login do usuário
  *     tags: [Auth]
@@ -58,7 +58,7 @@ router.post('/login', AuthController.login);
 
 /**
  * @swagger
- * /Auth/ForgotPassword:
+ * /api/v1/auth/forgot-password:
  *   post:
  *     summary: Solicita recuperação de senha por e-mail
  *     tags: [Auth]
@@ -79,7 +79,7 @@ router.post('/forgot-password', AuthController.forgotPassword);
 
 /**
  * @swagger
- * /Auth/ResetPassword:
+ * /api/v1/auth/reset-password:
  *   post:
  *     summary: Redefine a senha usando o token recebido por e-mail
  *     tags: [Auth]
@@ -102,4 +102,4 @@ router.post('/forgot-password', AuthController.forgotPassword);
  */
 router.post('/reset-password', AuthController.resetPassword);
 
-module.exports = router;
+module.exports = router;
