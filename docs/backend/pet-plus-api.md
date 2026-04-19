@@ -18,6 +18,17 @@ Contém arquivos de configuração global. Exemplos incluem:
 - Configurações do Swagger para documentação automática da API.
 - Variáveis de ambiente e middlewares globais de configuração.
 
+---
+
+## 📚 Documentação da API (Swagger)
+
+A API Pet+ utiliza o **Swagger** para fornecer uma interface interativa de documentação. Através dela, é possível visualizar todos os endpoints disponíveis, seus parâmetros e realizar testes diretamente.
+
+- **Documentação Local:** [http://localhost:3000/swagger](http://localhost:3000/swagger)
+- **Documentação em Produção:** [https://pet-plus-production.up.railway.app/swagger](https://pet-plus-production.up.railway.app/swagger)
+
+---
+
 #### `domain/`
 Define as **entidades** e os **tipos puros** do sistema. Representa o núcleo do negócio, independente de frameworks ou bancos de dados. Aqui ficam as regras que definem o que é um "Pet", um "Usuário" ou um "Agendamento".
 

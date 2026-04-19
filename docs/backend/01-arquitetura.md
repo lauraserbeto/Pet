@@ -22,4 +22,5 @@ O backend do Pet+ segue princípios de separação de responsabilidades (Separat
 ## Padronização
 - **Endpoints:** Todos os endpoints são versionados com o prefixo `/api/v1`.
 - **JSON:** A comunicação é feita estritamente via JSON.
+- **Documentação:** O sistema utiliza **Swagger (OpenAPI 3.0)** para documentação interativa em `/swagger`.
 - **Erros:** O sistema utiliza códigos de status HTTP apropriados (200, 201, 400, 401, 403, 404, 500).

@@ -11,6 +11,10 @@ const swaggerOptions = {
     },
     servers: [
       {
+        url: `https://pet-plus-production.up.railway.app`,
+        description: 'Servidor de Produção',
+      },
+      {
         url: `http://localhost:${process.env.PORT || 3000}`,
         description: 'Servidor Local',
       },

@@ -57,9 +57,18 @@ npx prisma generate
 - Inicie o servidor:
 ```bash
 npm start
-```
-- A API estará disponível em `http://localhost:3000` e a documentação em `/api-docs`.
+- A API estará disponível em `http://localhost:3000` e a documentação interativa (Swagger) em `/swagger`.
 
+---
+
+## 📚 Documentação da API (Swagger)
+
+O projeto utiliza **Swagger (OpenAPI 3.0)** para documentação automática dos endpoints, permitindo testes interativos diretamente pelo navegador.
+
+- **Local:** [http://localhost:3000/swagger](http://localhost:3000/swagger)
+- **Produção:** [https://pet-plus-production.up.railway.app/swagger](https://pet-plus-production.up.railway.app/swagger)
+
+---
 ### 3. Configuração do Frontend
 ```bash
 cd ../frontend

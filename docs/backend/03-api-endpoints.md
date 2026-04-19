@@ -4,6 +4,15 @@ A API segue o padrão RESTful e está disponível sob o prefixo `/api/v1`.
 
 ---
 
+## 📚 Documentação Interativa (Swagger)
+
+A documentação detalhada de cada endpoint, incluindo esquemas de entrada/saída e testes em tempo real, está disponível via Swagger:
+
+- **Local:** [http://localhost:3000/swagger](http://localhost:3000/swagger)
+- **Produção:** [https://pet-plus-production.up.railway.app/swagger](https://pet-plus-production.up.railway.app/swagger)
+
+---
+
 ## 🔐 Autenticação (`/auth`)
 
 - **POST `/register`**: Cadastro de novos usuários (Tutor ou Parceiro).
