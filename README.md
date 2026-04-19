@@ -1,6 +1,6 @@
 # 🐾 Pet+ | Marketplace & Gestão Pet
 
-O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para conectar tutores de pets a uma rede qualificada de prestadores de serviços. O ecossistema abrange desde a compra de produtos (Lojistas) até a contratação de serviços especializados como Hotéis, Daycare e Pet Sitters.
+O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para conectar tutores de pets a uma rede qualificada de prestadores de serviços. O ecossistema abrange desde a compra de produtos (Lojistas) até a contratação de serviços especializados como Hotéis e Pet Sitters.
 
 ---
 
@@ -92,8 +92,3 @@ VITE_API_URL="http://localhost:3000/api/v1"
 3. **Hotel:** Gestão de vagas, daycare e hospedagem.
 4. **Pet Sitter:** Prestação de serviços de passeio e cuidados domiciliares.
 5. **Tutor:** Cliente final que consome produtos e serviços.
-
----
-
-## 📄 Licença
-Este projeto está sob a licença ISC.
