@@ -19,7 +19,7 @@ Estar **`APROVADO`** não é o único requisito para aparecer na vitrine. O sist
 ### Requisitos Gerais (Para todos os Provedores)
 - Ter descrição (`description`) preenchida.
 - Ter telefone (`phone`) válido.
-- Ter localização (CEP e Cidade) configurada.
+- Ter localização (CEP e Cidade) configurada (Integrado com **ViaCEP** para preenchimento automático).
 
 ### Requisitos Específicos por Categoria
 - **Hotel:** 
@@ -29,7 +29,7 @@ Estar **`APROVADO`** não é o único requisito para aparecer na vitrine. O sist
   - Deve ter taxa por hora (`hourly_rate`) > 0.
   - Deve ter pelo menos **1 papel/serviço** selecionado (Ex: Sitter, Walker).
 
-> **Lógica de Backend:** O endpoint `/api/v1/providers/hotels` (e similares) filtra automaticamente apenas os registros que cumprem `status IN ['APROVADO', 'ATIVO']` **E** passam no validador de completitude.
+> **Segurança e Validação (Roadmap):** Em ambiente de produção, o sistema integrará com a **Brasil API** para realizar a validação automática e rigorosa de CPF e CNPJ durante o onboarding, prevenindo cadastros fraudulentos e garantindo que os dados de cada parceiro sejam autênticos.
 
 ---
 

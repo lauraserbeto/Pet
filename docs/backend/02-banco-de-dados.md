@@ -1,6 +1,11 @@
 # 02. Banco de Dados
 
-O Pet+ utiliza o **PostgreSQL** com o **Prisma ORM**. O esquema é projetado para suportar múltiplos tipos de prestadores de serviço com extensibilidade.
+O Pet+ utiliza o **PostgreSQL** hospedado no **Railway** com o **Prisma ORM**. O esquema é projetado para suportar múltiplos tipos de prestadores de serviço com extensibilidade.
+
+## Infraestrutura
+- **Provedor:** Railway (PostgreSQL 16+)
+- **ORM:** Prisma v5+
+- **Migrações:** Gerenciadas via Prisma Migrate
 
 ## Principais Entidades
 

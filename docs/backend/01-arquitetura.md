@@ -8,7 +8,7 @@ O backend do Pet+ segue princípios de separação de responsabilidades (Separat
 - **`routes/`**: Define os endpoints da API e vincula-os aos controladores.
 - **`controllers/`**: Responsável pela interface HTTP. Ele recebe a requisição, valida dados básicos e delega a lógica para os Use Cases.
 - **`useCases/`**: Contém o "Coração do Negócio". Cada arquivo representa uma ação específica do sistema (ex: `RegisterUserUseCase`).
-- **`services/`**: Serviços transversais que não pertencem a uma entidade específica (ex: Integração com APIs externas, Envio de E-mail).
+- **`services/`**: Serviços transversais que não pertencem a uma entidade específica (ex: Integração com APIs externas como **ViaCEP** e futuramente **Brasil API**).
 - **`middlewares/`**: Funções de interceptação (ex: `authMiddleware` para verificar JWT, `adminMiddleware` para permissões).
 - **`repositories/`**: Abstração opcional para o Prisma, garantindo que o restante do app não precise saber detalhes das queries SQL.
 

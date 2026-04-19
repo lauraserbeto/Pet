@@ -41,3 +41,31 @@ O ponto de entrada (entry point) da aplicação. É um arquivo limpo que:
 4. Inicia a escuta na porta configurada.
 
 ---
+
+## 🔌 Serviços Externos e Integrações
+
+### Consulta de CEP (ViaCEP)
+O sistema integra-se com a API do **ViaCEP** no frontend para facilitar o cadastro de endereços, garantindo que a base de dados do PostgreSQL receba informações consistentes de Cidade, Estado e Logradouro.
+
+### Validação Cadastral (Brasil API - Roadmap)
+Para a versão de produção, está planejada a integração com a **Brasil API**. Esta integração permitirá:
+- Validação real de CPF/CNPJ de parceiros.
+- Consulta de dados cadastrais de empresas (Lojistas/Hotéis).
+- Aumento da camada de segurança no processo de onboarding.
+
+---
+
+## ☁️ Infraestrutura e Deploy
+
+A aplicação Pet+ está distribuída em ambientes de nuvem modernos:
+
+### Frontend
+- **Hospedagem:** [Vercel](https://vercel.com/).
+- **URL de Produção:** [https://petplus.vercel.app/](https://petplus.vercel.app/).
+- **CI/CD:** Deploy automático a cada push na branch principal.
+
+### Backend
+- **Hospedagem API:** [Railway](https://railway.com/) (Node.js runtime).
+- **Banco de Dados:** PostgreSQL (Instância gerenciada no Railway).
+- **ORM:** Prisma (Client & Migrate).
+- **CI/CD:** Integrado ao repositório GitHub para deploy automático no Railway.

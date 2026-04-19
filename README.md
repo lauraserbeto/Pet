@@ -2,12 +2,15 @@
 
 O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para conectar tutores de pets a uma rede qualificada de prestadores de serviços. O ecossistema abrange desde a compra de produtos (Lojistas) até a contratação de serviços especializados como Hotéis, Daycare e Pet Sitters.
 
+**URL de Produção:** [https://petplus.vercel.app/](https://petplus.vercel.app/)
+
 ---
 
 ## 🚀 Tech Stack
 
 ### Frontend
 - **Framework:** [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Hospedagem:** [Vercel](https://vercel.com/)
 - **Linguagem:** TypeScript
 - **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/)
 - **Animações:** [Framer Motion](https://www.framer.com/motion/) + [GSAP](https://gsap.com/)
@@ -17,7 +20,7 @@ O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para con
 ### Backend
 - **Runtime:** [Node.js](https://nodejs.org/) (Express)
 - **ORM:** [Prisma](https://www.prisma.io/)
-- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/)
+- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) (Hospedado via [Railway](https://railway.com/))
 - **Documentação:** [Swagger](https://swagger.io/)
 - **Segurança:** JWT, BcryptJS, Middlewares de Role-Based Access Control (RBAC)
 
@@ -27,8 +30,7 @@ O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para con
 
 Antes de começar, você precisará ter instalado em sua máquina:
 - [Node.js](https://nodejs.org/en/) (v18 ou superior)
-- [PostgreSQL](https://www.postgresql.org/) 
-
+- [PostgreSQL](https://www.postgresql.org/) (ou utilizar uma instância no Railway)
 
 ---
 
@@ -45,7 +47,8 @@ cd Pet
 cd backend
 npm install
 ```
-- Crie um arquivo `.env` baseado no `.env.example` (veja seção abaixo).
+- Crie um arquivo `.env` baseado no `.env.example`.
+- Certifique-se de configurar a `DATABASE_URL` corretamente (local ou Railway).
 - Execute as migrações do banco de dados:
 ```bash
 npx prisma migrate dev
@@ -71,17 +74,25 @@ npm run dev
 
 ### Backend (`/backend/.env`)
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/petplus"
+DATABASE_URL="postgresql://user:password@host:port/database" # URL do PostgreSQL (Local ou Railway)
 JWT_SECRET="sua_chave_secreta_aqui"
 PORT=3000
 ```
 
 ### Frontend (`/frontend/.env.local`)
 ```env
-VITE_SUPABASE_URL="sua_url_do_supabase"
-VITE_SUPABASE_ANON_KEY="sua_chave_anon_do_supabase"
 VITE_API_URL="http://localhost:3000/api/v1"
 ```
+
+---
+
+## 🔌 Integrações Externas
+
+### Atuais
+- **[ViaCEP](https://viacep.com.br/):** Utilizado para consulta automática de endereços a partir do CEP no cadastro de usuários e parceiros.
+
+### Planejadas (Produção)
+- **[Brasil API](https://brasilapi.com.br/):** Implementação futura para validação rigorosa de CPF e CNPJ de parceiros durante o onboarding, garantindo a integridade dos dados cadastrais.
 
 ---
 
