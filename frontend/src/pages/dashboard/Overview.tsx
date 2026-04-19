@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { userService } from "../../lib/services/userService";
+import { providerService } from "../../lib/services/providerService";
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -66,27 +67,22 @@ export function Overview() {
     async function fetchDashboardData() {
       try {
         setIsLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session) return;
+        // 1. Tentar pegar do localStorage primeiro para rapidez
+        const storedUser = localStorage.getItem("petplus_user");
+        if (storedUser) {
+            setUserData(JSON.parse(storedUser));
+        }
 
-        const { data: user } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-
+        // 2. Buscar dados atualizados da API
+        const user = await userService.getMe();
         if (user) {
           setUserData(user);
+          localStorage.setItem("petplus_user", JSON.stringify(user));
 
-          // If provider (role 2, 3, or 4), fetch provider data
+          // Se for provedor (role 2, 3, ou 4), busca dados do provedor
           if ([2, 3, 4].includes(user.role_id)) {
-            const { data: provider } = await supabase
-              .from('providers')
-              .select('*')
-              .eq('user_id', session.user.id)
-              .single();
-              
+            const provider = await providerService.getMe();
             if (provider) setProviderData(provider);
           }
         }

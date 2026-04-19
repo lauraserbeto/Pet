@@ -1,71 +1,99 @@
-# 🐾 Pet+ 
+# 🐾 Pet+ | Marketplace & Gestão Pet
 
-Uma plataforma SaaS completa que conecta Tutores apaixonados aos melhores serviços pet da região, incluindo Lojistas, Hotéis e Pet Sitters.
+O **Pet+** é uma plataforma SaaS e Marketplace ponta a ponta projetada para conectar tutores de pets a uma rede qualificada de prestadores de serviços. O ecossistema abrange desde a compra de produtos (Lojistas) até a contratação de serviços especializados como Hotéis, Daycare e Pet Sitters.
 
-## 🏗️ Arquitetura do Projeto
+---
 
-Este repositório está dividido em duas partes principais:
+## 🚀 Tech Stack
 
-* **`/frontend`**: Aplicação SPA construída com React, Vite, Tailwind CSS e React Router. Responsável por toda a interface do usuário, painel administrativo (Dashboard) e fluxos de autenticação.
-* **`/backend`**: (Em construção) Serviços auxiliares em Node.js para processamento de webhooks, envio de e-mails transacionais e integrações de pagamento.
+### Frontend
+- **Framework:** [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Linguagem:** TypeScript
+- **Estilização:** [Tailwind CSS v4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/)
+- **Animações:** [Framer Motion](https://www.framer.com/motion/) + [GSAP](https://gsap.com/)
+- **Estado & UI:** React Hook Form, Sonner (Toasts), Lucide React (Icons)
+- **BaaS/Auth:** JWT + Node.js Backend
 
-## 🚀 Tecnologias Utilizadas
+### Backend
+- **Runtime:** [Node.js](https://nodejs.org/) (Express)
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/)
+- **Documentação:** [Swagger](https://swagger.io/)
+- **Segurança:** JWT, BcryptJS, Middlewares de Role-Based Access Control (RBAC)
 
-* **Frontend:** React 18, Vite, Tailwind CSS, Lucide React (Ícones), Sonner (Toasts).
-* **Backend/BaaS:** Supabase (PostgreSQL, Authentication, Row Level Security).
-* **Roteamento:** React Router DOM.
+---
 
-## ⚙️ Como executar o projeto localmente
+## 📋 Pré-requisitos
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/lauraserbeto/Pet
-   ```
-
-2. Navegue até a pasta frontend:
-   ```bash
-   cd frontend
-   ```
-
-3. Instale as dependências:
-   ```bash
-   yarn install
-   ```
-
-4. Inicie o servidor de desenvolvimento:
-   ```bash
-   yarn dev
-   ```
-
-## 🌐 Acessar o site em produção
-[https://petplus.vercel.app/](https://petplus.vercel.app/)
-
-## 🎨 Design System & Componentes
-
-O projeto segue um design system moderno baseado em Figma, com componentes reutilizáveis e tipografia consistente.
-
-* **Cores:** Definidas em `src/styles/index.css` (Variáveis `--color-primary-500`, `--color-secondary-500`, etc.).
-* **Fontes:** Inter (Google Fonts).
-* **Componentes de UI:** Localizados em `src/components/ui/` e `src/app/components/figma/`.
-
-## 🔐 Autenticação & Segurança
-
-O sistema utiliza o Supabase para autenticação de usuários. As regras de segurança (Row Level Security - RLS) estão implementadas no banco de dados para garantir que os dados sejam acessados apenas pelo usuário correto.
-
-## 🔐 Níveis de Acesso (Role IDs)
-O sistema possui controle de acesso rigoroso baseado nos seguintes papéis:
-
-1: Admin Master (Aprovações e Gestão)
-
-2: Lojista (Produtos e Pedidos)
-
-3: Hotel (Vagas e Reservas)
-
-4: Pet Sitter (Agenda e Raio de Atendimento)
-
-5: Tutor (Visão pública e compras)
+Antes de começar, você precisará ter instalado em sua máquina:
+- [Node.js](https://nodejs.org/en/) (v18 ou superior)
+- [PostgreSQL](https://www.postgresql.org/) 
 
 
-## 📱 Responsividade
+---
 
-O layout é totalmente responsivo, adaptando-se perfeitamente a dispositivos móveis, tablets e desktops.
+## 🛠️ Instalação e Execução
+
+### 1. Clone o Repositório
+```bash
+git clone https://github.com/lauraserbeto/Pet
+cd Pet
+```
+
+### 2. Configuração do Backend
+```bash
+cd backend
+npm install
+```
+- Crie um arquivo `.env` baseado no `.env.example` (veja seção abaixo).
+- Execute as migrações do banco de dados:
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+- Inicie o servidor:
+```bash
+npm start
+```
+- A API estará disponível em `http://localhost:3000` e a documentação em `/api-docs`.
+
+### 3. Configuração do Frontend
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+- O frontend estará disponível em `http://localhost:5173`.
+
+---
+
+## 🔐 Variáveis de Ambiente
+
+### Backend (`/backend/.env`)
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/petplus"
+JWT_SECRET="sua_chave_secreta_aqui"
+PORT=3000
+```
+
+### Frontend (`/frontend/.env.local`)
+```env
+VITE_SUPABASE_URL="sua_url_do_supabase"
+VITE_SUPABASE_ANON_KEY="sua_chave_anon_do_supabase"
+VITE_API_URL="http://localhost:3000/api/v1"
+```
+
+---
+
+## 👥 Níveis de Acesso (Roles)
+
+1. **Admin Master:** Gestão de plataforma e aprovação de parceiros.
+2. **Lojista:** Gestão de catálogo de produtos e vendas.
+3. **Hotel:** Gestão de vagas, daycare e hospedagem.
+4. **Pet Sitter:** Prestação de serviços de passeio e cuidados domiciliares.
+5. **Tutor:** Cliente final que consome produtos e serviços.
+
+---
+
+## 📄 Licença
+Este projeto está sob a licença ISC.

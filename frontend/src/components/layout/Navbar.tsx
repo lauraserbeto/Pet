@@ -15,12 +15,14 @@ import {
   ShoppingCart,
   Loader2,
   Calendar,
+  ChevronDown,
+  User,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
-import { supabase } from "../../lib/supabase";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 import logo from "../../assets/pet+/logo2.png";
 
@@ -120,9 +122,11 @@ export function Navbar() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
-    // Agora usando a authService centralizada
     import("../../lib/services/authService").then(({ authService }) => {
       authService.logout();
+      // authService.logout already does window.location.href = "/login"
+      // but if we wanted to change it for tutors, we could handle it here.
+      // Since the service uses window.location, it's a hard redirect. 
     });
   };
 
@@ -214,48 +218,76 @@ export function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-[var(--color-primary-200)] transition-all focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setUserDropdownOpen(!userDropdownOpen);
+                      }
+                    }}
+                    aria-expanded={userDropdownOpen}
+                    aria-haspopup="true"
+                    className={cn(
+                      "flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-200 outline-none",
+                      userDropdownOpen 
+                        ? "bg-white border-[var(--color-primary-200)] shadow-md ring-4 ring-[var(--color-primary-50)]" 
+                        : "bg-slate-50 border-slate-200 hover:border-[var(--color-primary-200)] hover:bg-white hover:shadow-sm"
+                    )}
                   >
-                    <div className="h-9 w-9 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-sm font-bold">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
                       {initials}
                     </div>
+                    <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">
+                      {userName.split(" ")[0]}
+                    </span>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-slate-400 transition-transform duration-200",
+                      userDropdownOpen && "rotate-180 text-[var(--color-primary-500)]"
+                    )} />
                   </button>
 
-                  {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
-                      <div className="px-4 py-3 border-b border-slate-100">
-                        <p className="font-bold text-slate-900 text-sm">{userName}</p>
-                        <p className="text-xs text-slate-500">{userEmail}</p>
-                      </div>
+                  <AnimatePresence>
+                    {userDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50"
+                      >
+                        <div className="px-4 py-3 border-b border-slate-100">
+                          <p className="font-bold text-slate-900 text-sm">{userName}</p>
+                          <p className="text-xs text-slate-500">{userEmail}</p>
+                        </div>
 
-                      <div className="py-1">
-                        {tutorMenuItems.map((item) => (
-                          <Link
-                            key={item.name}
-                            to={item.href}
-                            onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                        <div className="py-1">
+                          {tutorMenuItems.map((item) => (
+                            <Link
+                              key={item.name}
+                              to={item.href}
+                              onClick={() => setUserDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
+                              <item.icon className="h-4 w-4" />
+                              {item.name}
+                            </Link>
+                          ))}
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-1">
+                          <button
+                            onClick={() => {
+                              setUserDropdownOpen(false);
+                              setShowLogoutModal(true);
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
-                            <item.icon className="h-4 w-4" />
-                            {item.name}
-                          </Link>
-                        ))}
-                      </div>
-
-                      <div className="border-t border-slate-100 pt-1">
-                        <button
-                          onClick={() => {
-                            setUserDropdownOpen(false);
-                            setShowLogoutModal(true);
-                          }}
-                          className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Sair da conta
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                            <LogOut className="h-4 w-4" />
+                            Sair da conta
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
@@ -349,8 +381,8 @@ export function Navbar() {
               ) : isTutor && (
                 // Tutor Mobile
                 <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3 mb-2 px-4">
-                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold">
+                  <div className="flex items-center gap-3 mb-2 px-4 pt-2">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold shadow-sm">
                       {initials}
                     </div>
                     <div>
@@ -359,17 +391,19 @@ export function Navbar() {
                     </div>
                   </div>
                   
-                  {tutorMenuItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={closeMobile}
-                      className="flex items-center gap-3 px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
-                    >
-                      <item.icon className="h-5 w-5 text-slate-400" />
-                      {item.name}
-                    </Link>
-                  ))}
+                  <div className="flex flex-col gap-1">
+                    {tutorMenuItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        onClick={closeMobile}
+                        className="flex items-center gap-3 px-4 py-3 text-base font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+                      >
+                        <item.icon className="h-5 w-5 text-slate-400" />
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
                   
                   <div className="mt-2 px-4">
                     <button

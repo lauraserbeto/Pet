@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase";
+import { userService } from "../../lib/services/userService";
 import { API_URL, getHeaders } from "../../lib/api";
 import { toast } from "sonner";
 import { Camera, MapPin, Lock, Loader2, Plus, Edit2, Trash2 } from "lucide-react";
@@ -36,28 +36,22 @@ export function TutorProfile() {
 
   const loadProfile = async () => {
     try {
-      const userStr = localStorage.getItem("petplus_user");
-      if (!userStr) return;
+      setLoadingInitial(true);
       
-      const sessionUser = JSON.parse(userStr);
-      setUser(sessionUser);
-
-      // Fetch user personal data from Backend
-      const res = await fetch(`${API_URL}/users/me`, {
-        headers: getHeaders()
-      });
-
-      if (res.ok) {
-        const userData = await res.json();
+      // Fetch user personal data from Backend API
+      const userData = await userService.getMe();
+      if (userData) {
+        setUser(userData);
         setFullName(userData.full_name || "");
         setPhone(userData.phone || "");
         setAvatarUrl(userData.avatar_url || "");
+        localStorage.setItem("petplus_user", JSON.stringify(userData));
       }
 
       await loadAddresses();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao carregar perfil:", error);
-      toast.error("Erro ao carregar dados do perfil");
+      toast.error("Erro ao carregar dados do perfil", { description: error.message });
     } finally {
       setLoadingInitial(false);
     }
@@ -89,10 +83,15 @@ export function TutorProfile() {
         body: JSON.stringify({ full_name: fullName, phone })
       });
 
-      if (!res.ok) throw new Error("Erro");
+      if (!res.ok) throw new Error("Erro ao atualizar dados.");
+      
+      const updatedUser = { ...user, full_name: fullName, phone };
+      setUser(updatedUser);
+      localStorage.setItem("petplus_user", JSON.stringify(updatedUser));
+      
       toast.success("Dados pessoais atualizados!");
-    } catch (error) {
-      toast.error("Erro ao atualizar dados.");
+    } catch (error: any) {
+      toast.error("Erro ao atualizar dados.", { description: error.message });
     } finally {
       setIsSavingPersonal(false);
     }
@@ -101,41 +100,22 @@ export function TutorProfile() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0 || !user) return;
     const file = e.target.files[0];
-    setIsUploading(true);
     
+    // TODO: Implementar upload para o nosso backend próprio
+    toast.info("Upload de imagem em manutenção", { 
+        description: "Estamos migrando nosso serviço de armazenamento." 
+    });
+    
+    /* 
+    setIsUploading(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
-      const url = publicUrlData.publicUrl;
-
-      // Update users table
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ avatar_url: url })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(url);
-      toast.success("Foto de perfil atualizada!");
+       // Chamada para a nova API de upload
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao fazer upload da foto.");
+       toast.error("Erro ao fazer upload da foto.");
     } finally {
-      setIsUploading(false);
+       setIsUploading(false);
     }
+    */
   };
 
   const handleSaveAddress = async (e: React.FormEvent) => {
@@ -158,15 +138,15 @@ export function TutorProfile() {
         });
       }
       
-      if (!res.ok) throw new Error("Erro");
+      if (!res.ok) throw new Error("Erro ao salvar endereço.");
       
       toast.success(editingAddressId ? "Endereço atualizado!" : "Endereço adicionado!");
       setShowAddressForm(false);
       setEditingAddressId(null);
       setAddressForm({ cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" });
       loadAddresses();
-    } catch (error) {
-      toast.error("Erro ao salvar endereço.");
+    } catch (error: any) {
+      toast.error("Erro ao salvar endereço.", { description: error.message });
     } finally {
       setIsSavingAddress(false);
     }
@@ -179,11 +159,11 @@ export function TutorProfile() {
         method: "DELETE",
         headers: getHeaders()
       });
-      if (!res.ok) throw new Error("Erro");
+      if (!res.ok) throw new Error("Erro ao excluir endereço.");
       toast.success("Endereço excluído!");
-      if (user) loadAddresses();
-    } catch (error) {
-      toast.error("Erro ao excluir endereço.");
+      loadAddresses();
+    } catch (error: any) {
+      toast.error("Erro ao excluir endereço.", { description: error.message });
     }
   };
 
@@ -202,8 +182,8 @@ export function TutorProfile() {
       toast.error("As senhas não coincidem!");
       return;
     }
-    if (newPassword.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres.");
+    if (newPassword.length < 8) {
+      toast.error("A senha deve ter pelo menos 8 caracteres.");
       return;
     }
     setIsSavingPassword(true);
@@ -213,12 +193,12 @@ export function TutorProfile() {
         headers: getHeaders(),
         body: JSON.stringify({ newPassword })
       });
-      if (!res.ok) throw new Error("Erro");
+      if (!res.ok) throw new Error("Erro ao atualizar senha.");
       toast.success("Senha atualizada com sucesso!");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      toast.error("Erro ao atualizar senha.");
+    } catch (error: any) {
+      toast.error("Erro ao atualizar senha.", { description: error.message });
     } finally {
       setIsSavingPassword(false);
     }
@@ -233,17 +213,17 @@ export function TutorProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-[family-name:var(--font-body)]">
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Meu Perfil</h1>
+          <h1 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">Meu Perfil</h1>
           <p className="text-slate-500 mt-2">Gerencie suas informações, endereços e segurança.</p>
         </div>
 
         {/* --- Dados Pessoais --- */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 mb-6">
+            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 mb-6 font-[family-name:var(--font-display)]">
               <Camera className="w-5 h-5 text-[var(--color-primary-500)]" />
               Dados Pessoais & Foto
             </h2>
@@ -330,7 +310,7 @@ export function TutorProfile() {
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 sm:p-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 font-[family-name:var(--font-display)]">
                 <MapPin className="w-5 h-5 text-[var(--color-primary-500)]" />
                 Meus Endereços
               </h2>
@@ -420,7 +400,7 @@ export function TutorProfile() {
         {/* --- Segurança --- */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 sm:p-8">
-            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 mb-6">
+            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 mb-6 font-[family-name:var(--font-display)]">
               <Lock className="w-5 h-5 text-[var(--color-primary-500)]" />
               Segurança
             </h2>
@@ -432,7 +412,7 @@ export function TutorProfile() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                 />
               </div>
               <div>

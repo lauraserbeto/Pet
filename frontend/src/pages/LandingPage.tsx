@@ -36,6 +36,8 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { useCart } from "../components/cart/CartContext";
+import { HeroSearch } from "../components/layout/HeroSearch";
+import { AnimatedHeroIllustration } from "../components/layout/AnimatedHeroIllustration";
 
 /* ═══════════════════════════════════════════════
    PRODUCT DATA
@@ -592,86 +594,98 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           1. HERO
           ═══════════════════════════════════════════════ */}
-      <section className="relative bg-[var(--color-secondary-50)] pt-16 pb-20 md:pt-24 md:pb-24 lg:pt-24 lg:pb-32 overflow-hidden">
+      <section className="relative bg-white pt-16 pb-20 md:pt-24 md:pb-24 lg:pt-24 lg:pb-30 overflow-hidden">
+        {/* Background Decorative Elements */}
+        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[600px] h-[600px] bg-orange-50 rounded-full blur-3xl opacity-60 z-0" />
+        <div className="absolute bottom-1/4 left-0 -ml-24 w-[400px] h-[400px] bg-teal-50 rounded-full blur-3xl opacity-60 z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:32px_32px] opacity-30 z-0" />
+
         <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <Badge
-                variant="secondary"
-                className="px-4 py-1 text-sm font-medium rounded-full bg-white text-[var(--color-secondary-700)] shadow-sm"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+            {/* Left Column: Content */}
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.15
+                  }
+                }
+              }}
+              className="space-y-10"
+            >
+
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="space-y-4"
               >
-                A melhor plataforma para seu pet
-              </Badge>
-              <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)]">
-                Cuidado completo para quem você{" "}
-                <span className="text-[var(--color-primary-500)]">mais ama</span>.
-              </h1>
-              <p className="text-lg text-slate-600 max-w-xl">
-                Encontre hotéis pet, pet sitters e os melhores produtos no nosso
-                Shopping. Agende serviços, compare preços e garanta o bem-estar
-                do seu melhor amigo.
-              </p>
-
-              <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-100 max-w-lg">
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="O que seu pet precisa?"
-                      className="pl-9 border-0 bg-slate-50 focus-visible:ring-0"
-                    />
-                  </div>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Localização"
-                      className="pl-9 border-0 bg-slate-50 focus-visible:ring-0"
-                    />
-                  </div>
-                  <Button size="lg" className="w-full md:w-auto">
-                    Buscar
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-6 text-sm text-slate-500 font-medium">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-[var(--color-secondary-500)]" />
-                  Profissionais Verificados
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-[var(--color-secondary-500)]" />
-                  Agendamento Online
-                </div>
-              </div>
-            </div>
-            <div className="relative lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1719292606971-0916fc62f5b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnb2xkZW4lMjByZXRyaWV2ZXIlMjBkb2clMjBoYXBweXxlbnwxfHx8fDE3NzE4ODA5NjN8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Happy Dog"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-8 left-8 right-8 text-white">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="h-8 w-8 rounded-full border-2 border-white bg-slate-200"
+                <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.1]">
+                  Cuidado completo para quem é{" "}
+                  <span className="relative inline-block">
+                    <span className="relative z-10 text-[var(--color-primary-500)]">família</span>
+                    <motion.svg
+                      viewBox="0 0 200 20"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ delay: 1, duration: 0.8 }}
+                      className="absolute -bottom-2 left-0 w-full h-3 text-orange-200 -z-0"
+                    >
+                      <path
+                        d="M0 10 Q 50 0 100 10 T 200 10"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        strokeLinecap="round"
                       />
-                    ))}
+                    </motion.svg>
+                  </span>.
+                </h1>
+                <p className="text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar e a felicidade do seu melhor amigo em um só lugar.                </p>
+              </motion.div>
+
+              <HeroSearch />
+
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1 }
+                }}
+                className="flex flex-wrap items-center gap-8 pt-4"
+              >
+                <div className="flex items-center gap-3 group translate-y-0 hover:-translate-y-1 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
+                    <Shield className="h-6 w-6" />
                   </div>
-                  <span className="text-sm font-medium">
-                    +2.000 tutores satisfeitos
-                  </span>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">Segurança Total</p>
+                    <p className="text-xs text-slate-400">Parceiros verificados</p>
+                  </div>
                 </div>
-              </div>
+                <div className="flex items-center gap-3 group translate-y-0 hover:-translate-y-1 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
+                    <Calendar className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">Agendamento Fácil</p>
+                    <p className="text-xs text-slate-400">Online e instantâneo</p>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Column: Animated Illustration */}
+            <div className="relative">
+              <AnimatedHeroIllustration />
             </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-[var(--color-primary-100)] rounded-full blur-3xl opacity-50 z-0" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-[var(--color-secondary-100)] rounded-full blur-3xl opacity-50 z-0" />
       </section>
 
       {/* ═══════════════════════════════════════════════

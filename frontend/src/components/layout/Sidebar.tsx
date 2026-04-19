@@ -18,7 +18,7 @@ import { NavLink, Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Avatar } from "../../components/ui/avatar";
-import { supabase } from "../../lib/supabase";
+
 import { cn } from "../../lib/utils";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import logo from "../../assets/pet+/logo2.png";

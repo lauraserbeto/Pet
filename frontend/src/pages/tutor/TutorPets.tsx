@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase";
+import { petService } from "../../lib/services/petService";
 import { toast } from "sonner";
-import { Loader2, Plus, PawPrint, Calendar, Activity, X } from "lucide-react";
+import { Loader2, Plus, PawPrint, Calendar, Activity, X, Trash2 } from "lucide-react";
 
 export function TutorPets() {
-  const [user, setUser] = useState<any>(null);
   const [pets, setPets] = useState<any[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
   
@@ -26,22 +25,12 @@ export function TutorPets() {
 
   const loadPets = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      setUser(session.user);
-
-      const { data, error } = await supabase
-        .from("pets")
-        .select("*")
-        .eq("tutor_id", session.user.id)
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setPets(data);
-      }
-    } catch (error) {
+      setLoadingInitial(true);
+      const data = await petService.listMyPets();
+      setPets(data);
+    } catch (error: any) {
       console.error(error);
-      toast.error("Erro ao carregar pets.");
+      toast.error("Erro ao carregar pets.", { description: error.message });
     } finally {
       setLoadingInitial(false);
     }
@@ -49,14 +38,15 @@ export function TutorPets() {
 
   const handleSavePet = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from("pets")
-        .insert([{ ...formData, tutor_id: user.id }]);
+      const payload = {
+          ...formData,
+          weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
+          birth_date: formData.birth_date ? new Date(formData.birth_date).toISOString() : null
+      };
 
-      if (error) throw error;
+      await petService.createPet(payload);
       
       toast.success("Pet adicionado com sucesso!");
       setShowModal(false);
@@ -64,11 +54,23 @@ export function TutorPets() {
         name: "", species: "Cachorro", breed: "", birth_date: "", weight_kg: "", medical_notes: ""
       });
       loadPets();
-    } catch (error) {
-      toast.error("Erro ao adicionar pet.");
+    } catch (error: any) {
+      toast.error("Erro ao adicionar pet.", { description: error.message });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleDeletePet = async (id: string) => {
+      if (!confirm("Tem certeza que deseja remover este pet?")) return;
+      
+      try {
+          await petService.deletePet(id);
+          toast.success("Pet removido com sucesso.");
+          loadPets();
+      } catch (error: any) {
+          toast.error("Erro ao remover pet.", { description: error.message });
+      }
   };
 
   if (loadingInitial) {
@@ -80,11 +82,11 @@ export function TutorPets() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-[family-name:var(--font-body)]">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Meus Pets</h1>
+            <h1 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">Meus Pets</h1>
             <p className="text-slate-500 mt-2">Gerencie e acompanhe o perfil do seu melhor amigo.</p>
           </div>
           <button
@@ -100,7 +102,7 @@ export function TutorPets() {
             <div className="h-16 w-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-4">
               <PawPrint size={32} />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">Nenhum pet cadastrado</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2 font-[family-name:var(--font-display)]">Nenhum pet cadastrado</h3>
             <p className="text-slate-500 max-w-sm">Adicione seu primeiro pet para começar a usufruir de todos os serviços da Pet+.</p>
           </div>
         ) : (
@@ -115,15 +117,21 @@ export function TutorPets() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-slate-800">{pet.name}</h3>
-                      <p className="text-sm font-medium text-slate-500">{pet.species} • {pet.breed}</p>
+                      <p className="text-sm font-medium text-slate-500">{pet.species} • {pet.breed || 'SRD'}</p>
                     </div>
                   </div>
+                  <button 
+                    onClick={() => handleDeletePet(pet.id)}
+                    className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                  >
+                      <Trash2 size={18} />
+                  </button>
                 </div>
                 
                 <div className="space-y-3 mt-6">
                   <div className="flex items-center justify-between text-sm bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     <span className="text-slate-500 flex items-center gap-1.5"><Activity className="w-4 h-4 text-slate-400"/> Peso</span>
-                    <span className="font-semibold text-slate-700">{pet.weight} kg</span>
+                    <span className="font-semibold text-slate-700">{pet.weight_kg || '0'} kg</span>
                   </div>
                   <div className="flex items-center justify-between text-sm bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     <span className="text-slate-500 flex items-center gap-1.5"><Calendar className="w-4 h-4 text-slate-400"/> Nasc.</span>
@@ -148,7 +156,7 @@ export function TutorPets() {
             >
               <X className="w-5 h-5"/>
             </button>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2 font-[family-name:var(--font-display)]">
               <PawPrint className="text-[var(--color-primary-500)]" />
               Novo Pet
             </h2>
