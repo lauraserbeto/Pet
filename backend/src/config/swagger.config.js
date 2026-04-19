@@ -11,7 +11,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `https://pet-plus-production.up.railway.app`,
+        url: `https://api-petplus.up.railway.app`,
         description: 'Servidor de Produção',
       },
       {
