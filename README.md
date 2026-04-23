@@ -67,7 +67,7 @@ npm start
 O projeto utiliza **Swagger (OpenAPI 3.0)** para documentação automática dos endpoints, permitindo testes interativos diretamente pelo navegador.
 
 - **Local:** [http://localhost:3000/swagger](http://localhost:3000/swagger)
-- **Produção:** [https://pet-plus-production.up.railway.app/swagger](https://pet-plus-production.up.railway.app/swagger)
+- **Produção:** [https://api-petplus.up.railway.app/api-docs/swagger](https://api-petplus.up.railway.app/api-docs/swagger)
 
 ---
 
