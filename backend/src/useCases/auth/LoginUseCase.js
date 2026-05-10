@@ -16,6 +16,14 @@ class LoginUseCase {
       throw new Error('E-mail ou senha inválidos.');
     }
 
+    // --- BLOQUEIO PARA PARCEIROS REJEITADOS ---
+    if (user.provider?.status === 'REJEITADO') {
+        const reason = user.provider.rejection_reason || 'Sem motivo especificado pelo administrador.';
+        const error = new Error(`Seu cadastro de parceiro foi recusado. Motivo: ${reason}`);
+        error.statusCode = 403;
+        throw error;
+    }
+
     // --- BLOQUEIO DE LOGIN PARA PET SITTER EM ANÁLISE ---
     // Se for role 4 (PET_SITTER) e o status do provedor for PENDENTE, bloqueamos o login.
     if (user.role_id === 4 && user.provider?.status === 'PENDENTE' && user.onboarding_step === 'INCOMPLETE') {

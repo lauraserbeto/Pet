@@ -29,6 +29,20 @@ router.get('/', ProductController.listActive);
 
 /**
  * @swagger
+ * /api/v1/products/provider:
+ *   get:
+ *     summary: Lista produtos do lojista autenticado
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de produtos do lojista
+ */
+router.get('/provider', authMiddleware, ProductController.listByProvider);
+
+/**
+ * @swagger
  * /api/v1/products/{id}:
  *   get:
  *     summary: Detalhes de um produto específico
@@ -46,20 +60,6 @@ router.get('/', ProductController.listActive);
 router.get('/:id', ProductController.getDetails);
 
 router.use(authMiddleware);
-
-/**
- * @swagger
- * /api/v1/products/provider:
- *   get:
- *     summary: Lista produtos do lojista autenticado
- *     tags: [Products]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Lista de produtos do lojista
- */
-router.get('/provider', ProductController.listByProvider);
 
 /**
  * @swagger

@@ -97,15 +97,11 @@ class UserController {
         }
       });
 
-      // 2. Atualizar o onboarding_step do User e o status do Provider
+      // 2. Atualizar o onboarding_step do User
       await prisma.$transaction([
         prisma.user.update({
           where: { id: req.userId },
           data: { onboarding_step: 'IN_REVIEW' }
-        }),
-        prisma.provider.update({
-          where: { user_id: req.userId },
-          data: { status: 'PENDENTE' }
         })
       ]);
 
