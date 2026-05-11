@@ -180,7 +180,7 @@ A continuidade de uso da Plataforma após a vigência das alterações implica a
     content: `Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da Comarca de São Paulo/SP como competente para dirimir quaisquer controvérsias decorrentes destes Termos, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
 
 **Canais de contato**:
-• E-mail: termos@petmais.com.br
+• E-mail: termos@petplus.com.br
 • Central de Ajuda: disponível na Plataforma (seção "Ajuda")
 • Endereço: Av. Paulista, 1000, 10° andar — São Paulo/SP — CEP 01310-100
 
@@ -390,10 +390,10 @@ export function TermsPage() {
             Ao utilizar a plataforma Pet+, você declara estar ciente e de acordo com todos
             os termos acima. Caso tenha dúvidas, entre em contato pelo e-mail{" "}
             <a
-              href="mailto:termos@petmais.com.br"
+              href="mailto:termos@petplus.com.br"
               className="text-[var(--color-primary-600)] font-medium hover:underline"
             >
-              termos@petmais.com.br
+              termos@petplus.com.br
             </a>
             .
           </p>

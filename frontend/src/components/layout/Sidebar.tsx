@@ -21,7 +21,7 @@ import { Avatar } from "../../components/ui/avatar";
 
 import { cn } from "../../lib/utils";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
-import logo from "../../assets/pet+/logo2.png";
+import logo from "../../assets/pet+/logo2-branco.png";
 
 
 interface SidebarProps {

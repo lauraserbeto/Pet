@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
+import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 export function WalkersPage() {
   const navigate = useNavigate();
@@ -211,7 +212,11 @@ export function WalkersPage() {
 
         {/* Walker Cards */}
         <div className="space-y-4 pb-8">
-          {filtered.map((walker, index) => (
+          {loading ? (
+            <HamsterLoader message="Buscando Pet Sitters na sua região..." size="sm" />
+          ) : (
+            <>
+              {filtered.map((walker, index) => (
             <motion.div
               key={walker.id}
               initial={{ opacity: 0, y: 20 }}
@@ -361,6 +366,8 @@ export function WalkersPage() {
                 Tente ajustar os filtros ou a busca
               </p>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

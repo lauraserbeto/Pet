@@ -26,6 +26,7 @@ import {
   Sofa,
   Loader2,
 } from "lucide-react";
+import { HamsterLoader } from "../components/ui/HamsterLoader";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
@@ -562,10 +563,7 @@ export function ShoppingPage() {
 
             {/* Content Switcher */}
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <Loader2 className="h-10 w-10 animate-spin text-[var(--color-primary-500)]" />
-                <p className="text-slate-500 font-medium animate-pulse">Carregando catálogo completo...</p>
-              </div>
+              <HamsterLoader message="Carregando catálogo completo..." size="sm" />
             ) : filtered.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                 {filtered.map((product, i) => (

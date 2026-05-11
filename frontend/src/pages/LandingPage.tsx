@@ -283,7 +283,7 @@ function ProductCard({ product }: { product: Product }) {
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className="group flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-shadow overflow-hidden"
+      className="group flex flex-col bg-white rounded-2xl border border-slate-100/60 shadow-sm hover:shadow-xl transition-shadow overflow-hidden"
     >
       {/* Image */}
       <Link to={`/shopping/${product.id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
@@ -378,7 +378,7 @@ function ProductCard({ product }: { product: Product }) {
             addItem(product);
             toast.success(`${product.name} adicionado ao carrinho!`);
           }}
-          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary-500)] text-white text-sm font-semibold hover:bg-[var(--color-primary-600)] active:scale-[0.98] transition-all"
+          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-orange-400 text-white text-sm font-semibold hover:from-[var(--color-primary-600)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-md shadow-orange-500/20"
         >
           <ShoppingCart className="h-4 w-4" />
           Adicionar
@@ -572,6 +572,184 @@ function CountdownTimer() {
 }
 
 /* ═══════════════════════════════════════════════
+   HERO CAROUSEL
+   ═══════════════════════════════════════════════ */
+
+const heroSlides = [
+  {
+    id: 1,
+    badge: "Pet+",
+    title: "Cuidado completo para quem é ",
+    highlight: "família",
+    description: "De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar do seu melhor amigo em um só lugar.",
+    image: "https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    color: "from-orange-50 to-amber-100",
+    blobColor: "bg-orange-400",
+    ctaText: "Explorar Serviços",
+    ctaLink: "/walkers",
+    features: [
+      { icon: Shield, title: "Segurança Total", subtitle: "Parceiros verificados" },
+      { icon: Calendar, title: "Agendamento Fácil", subtitle: "Online e instantâneo" }
+    ]
+  },
+  {
+    id: 2,
+    badge: "Shopping",
+    title: "Ofertas exclusivas no ",
+    highlight: "Shopping Pet",
+    description: "As melhores marcas com descontos imperdíveis. Ração, brinquedos, acessórios e farmácia com entrega rápida na sua porta.",
+    image: "https://images.unsplash.com/photo-1597843786411-a7fa8ad44a95?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    color: "from-purple-50 to-indigo-100",
+    blobColor: "bg-purple-400",
+    ctaText: "Acessar Loja",
+    ctaLink: "/shopping",
+    features: [
+      { icon: Zap, title: "Entrega Rápida", subtitle: "Para toda a cidade" },
+      { icon: Tag, title: "Melhores Preços", subtitle: "Ofertas diárias" }
+    ]
+  },
+  {
+    id: 3,
+    badge: "Serviços",
+    title: "Encontre o Pet Sitter ou ",
+    highlight: "Hotel ideal",
+    description: "Viaje tranquilo ou trabalhe sem preocupações. Conectamos você aos melhores cuidadores e hotéis verificados da região.",
+    image: "https://images.unsplash.com/photo-1494947665470-20322015e3a8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    color: "from-teal-50 to-emerald-100",
+    blobColor: "bg-teal-400",
+    ctaText: "Buscar Hotéis",
+    ctaLink: "/hotels",
+    features: [
+      { icon: Hotel, title: "Hospedagem", subtitle: "Conforto garantido" },
+      { icon: PawPrint, title: "Pet Sitters", subtitle: "Cuidados em casa" }
+    ]
+  }
+];
+
+function HeroCarousel() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const slide = heroSlides[currentSlide];
+
+  return (
+    <div className="relative w-full overflow-hidden bg-white min-h-[600px] md:min-h-[700px] flex items-center pt-16 md:pt-0">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={slide.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className={`absolute inset-0 bg-gradient-to-br ${slide.color} opacity-40`}
+        />
+      </AnimatePresence>
+
+      {/* Animated Blobs */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`blob-${slide.id}`}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 0.3, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.2 }}
+          transition={{ duration: 1.5 }}
+          className={`absolute -top-24 -right-24 w-[500px] h-[500px] rounded-full blur-[100px] ${slide.blobColor}`}
+        />
+      </AnimatePresence>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:32px_32px] opacity-30 z-0 pointer-events-none" />
+
+      <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10 py-12 md:py-24">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`content-${slide.id}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center"
+          >
+            {/* Content */}
+            <div className="space-y-8">
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.1]">
+                {slide.title}
+                <span className="relative inline-block text-[var(--color-primary-600)]">
+                  {slide.highlight}
+                  <svg viewBox="0 0 200 20" className="absolute -bottom-2 left-0 w-full h-3 text-[var(--color-primary-200)] -z-0">
+                    <path d="M0 10 Q 50 0 100 10 T 200 10" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+                  </svg>
+                </span>.
+              </h1>
+              <p className="text-lg sm:text-xl text-slate-600 max-w-xl leading-relaxed font-medium">
+                {slide.description}
+              </p>
+              
+              <div className="flex flex-wrap items-center gap-4">
+                <Link to={slide.ctaLink}>
+                  <Button size="lg" className="bg-slate-900 text-white hover:bg-slate-800 shadow-xl rounded-xl px-10 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95">
+                    {slide.ctaText}
+                  </Button>
+                </Link>
+                <Link to="/shopping">
+                  <Button size="lg" variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm rounded-xl px-8 h-14 text-base font-semibold">
+                    Ver Catálogo
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-8 pt-6">
+                {slide.features.map((feat, i) => (
+                  <div key={i} className="flex items-center gap-3 group">
+                    <div className="p-3 rounded-xl bg-white/60 backdrop-blur-sm text-slate-700 shadow-sm border border-white/40 group-hover:scale-110 transition-transform">
+                      <feat.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{feat.title}</p>
+                      <p className="text-xs text-slate-500">{feat.subtitle}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="relative">
+              <motion.div 
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="relative aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50"
+              >
+                <img src={slide.image} alt={slide.highlight} className="w-full h-full object-cover" />
+              </motion.div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Pagination */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+        {heroSlides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            className={`h-2.5 rounded-full transition-all ${
+              i === currentSlide ? "w-8 bg-[var(--color-primary-600)]" : "w-2.5 bg-slate-300 hover:bg-slate-400"
+            }`}
+            aria-label={`Ir para slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    LANDING PAGE
    ═══════════════════════════════════════════════ */
 
@@ -594,150 +772,9 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           1. HERO
           ═══════════════════════════════════════════════ */}
-      <section className="relative bg-white pt-16 pb-20 md:pt-24 md:pb-24 lg:pt-24 lg:pb-30 overflow-hidden">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[600px] h-[600px] bg-orange-50 rounded-full blur-3xl opacity-60 z-0" />
-        <div className="absolute bottom-1/4 left-0 -ml-24 w-[400px] h-[400px] bg-teal-50 rounded-full blur-3xl opacity-60 z-0" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:32px_32px] opacity-30 z-0" />
+      <HeroCarousel />
 
-        <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
-            {/* Left Column: Content */}
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.15
-                  }
-                }
-              }}
-              className="space-y-10"
-            >
-
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-                className="space-y-4"
-              >
-                <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.1]">
-                  Cuidado completo para quem é{" "}
-                  <span className="relative inline-block">
-                    <span className="relative z-10 text-[var(--color-primary-500)]">família</span>
-                    <motion.svg
-                      viewBox="0 0 200 20"
-                      initial={{ pathLength: 0, opacity: 0 }}
-                      animate={{ pathLength: 1, opacity: 1 }}
-                      transition={{ delay: 1, duration: 0.8 }}
-                      className="absolute -bottom-2 left-0 w-full h-3 text-orange-200 -z-0"
-                    >
-                      <path
-                        d="M0 10 Q 50 0 100 10 T 200 10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                      />
-                    </motion.svg>
-                  </span>.
-                </h1>
-                <p className="text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
-De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar e a felicidade do seu melhor amigo em um só lugar.                </p>
-              </motion.div>
-
-              <HeroSearch />
-
-              <motion.div 
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: { opacity: 1 }
-                }}
-                className="flex flex-wrap items-center gap-8 pt-4"
-              >
-                <div className="flex items-center gap-3 group translate-y-0 hover:-translate-y-1 transition-transform">
-                  <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-                    <Shield className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">Segurança Total</p>
-                    <p className="text-xs text-slate-400">Parceiros verificados</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 group translate-y-0 hover:-translate-y-1 transition-transform">
-                  <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-                    <Calendar className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">Agendamento Fácil</p>
-                    <p className="text-xs text-slate-400">Online e instantâneo</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* Right Column: Animated Illustration */}
-            <div className="relative">
-              <AnimatedHeroIllustration />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════
-          2. SERVIÇOS — 3 Cards
-          ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
-              Tudo que seu pet precisa
-            </h2>
-            <p className="mt-4 text-slate-600">
-              Navegue por categorias e encontre o serviço ideal.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Hotelaria",
-                icon: Hotel,
-                color: "bg-blue-100 text-blue-600",
-                href: "/hotels",
-              },
-              {
-                name: "Pet Sitter",
-                icon: PawPrint,
-                color: "bg-orange-100 text-orange-600",
-                href: "/walkers",
-              },
-              {
-                name: "Shopping",
-                icon: ShoppingBag,
-                color: "bg-green-100 text-green-600",
-                href: "/shopping",
-              },
-            ].map((cat) => (
-              <Link key={cat.name} to={cat.href}>
-                <div className="flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-slate-100 bg-white hover:shadow-lg hover:border-[var(--color-primary-200)] transition-all group cursor-pointer">
-                  <div
-                    className={`p-4 rounded-full ${cat.color} mb-4 group-hover:scale-110 transition-transform`}
-                  >
-                    <cat.icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                    {cat.name}
-                  </h3>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* ═══════════════════════════════════════════════
           3. DESTAQUES DA SEMANA — Carousel Progressivo
@@ -777,11 +814,14 @@ De cuidados especializados aos melhores produtos. Encontre tudo o que você prec
         </div>
       </section>
 
-      {/* ══════════════��════════════════════════════════
-          4. CATEGORIAS POPULARES — Circular visual
+      {/* ═══════════════════════════════════════════════
+          4. CATEGORIAS POPULARES — Cards Visuais Premium
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 sm:py-20 bg-slate-50 overflow-hidden">
+        {/* Background blob for depth */}
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-purple-100 rounded-full blur-[100px] opacity-60 -translate-y-1/2 pointer-events-none" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Navegue"
             badgeIcon={Sparkles}
@@ -824,146 +864,81 @@ De cuidados especializados aos melhores produtos. Encontre tudo o que você prec
       </section>
 
       {/* ═══════════════════════════════════════════════
-          5. NOSSOS SERVIÇOS — Hotéis & Pet Sitters
+          2. SERVIÇOS — 3 Cards
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            badge="Serviços"
-            badgeIcon={Hotel}
-            title="Mais que um Shopping"
-            subtitle="Conheça nossos serviços exclusivos para o bem-estar do seu pet."
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Hotel Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-            >
-              <Link
-                to="/hotels"
-                className="group block bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all"
-              >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1641851962761-43d3c1a34360?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBwZXQlMjBob3RlbCUyMHN1aXRlJTIwcm9vbXxlbnwxfHx8fDE3NzI2MjQ3NjV8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Hotel Pet"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                      <Hotel className="h-3.5 w-3.5" />
-                      Hotelaria Pet
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-xl font-bold font-[family-name:var(--font-display)]">
-                      Hotelaria Pet Premium
-                    </h3>
-                    <p className="text-sm text-white/80 mt-1">
-                      O melhor cuidado enquanto você viaja
-                    </p>
-                  </div>
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
+              Tudo que seu pet precisa
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Navegue por categorias e encontre o serviço ideal.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              {
+                name: "Hotelaria",
+                icon: Hotel,
+                color: "text-blue-600",
+                bg: "bg-blue-50",
+                desc: "Hospedagem segura e confortável para o seu pet",
+                href: "/hotels",
+                image: "https://images.unsplash.com/photo-1516222338250-863216ce01ea?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              },
+              {
+                name: "Pet Sitter",
+                icon: PawPrint,
+                color: "text-orange-600",
+                bg: "bg-orange-50",
+                desc: "Cuidadores verificados na sua casa ou na deles",
+                href: "/walkers",
+                image: "https://images.unsplash.com/photo-1553322378-eb94e5966b0c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              },
+              {
+                name: "Shopping",
+                icon: ShoppingBag,
+                color: "text-emerald-600",
+                bg: "bg-emerald-50",
+                desc: "Rações, brinquedos e tudo para o dia a dia",
+                href: "/shopping",
+                image: "https://images.unsplash.com/photo-1684176025658-7befca57913f?q=80&w=1176&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              },
+            ].map((cat) => (
+              <Link key={cat.name} to={cat.href} className="group relative block rounded-[2.5rem] overflow-hidden bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-slate-100">
+                <div className="h-48 overflow-hidden relative">
+                   <ImageWithFallback 
+                     src={cat.image} 
+                     className="w-full h-full object-cover" 
+                     alt={cat.name} 
+                   />
+                   <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
                 </div>
-                <div className="p-5 space-y-4">
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    Encontre hotéis pet verificados com suítes confortáveis, monitoramento 24h, 
-                    alimentação personalizada e muito carinho para seu melhor amigo.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {["Suítes Premium", "Monitoramento 24h", "Veterinário", "Área de Lazer"].map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[11px] font-medium bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                
+                <div className="relative z-20 px-8 pb-8 -mt-10">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${cat.bg} ${cat.color} shadow-lg ring-4 ring-white transition-transform group-hover:scale-110 duration-500`}>
+                    <cat.icon className="h-8 w-8" />
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-1.5">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="text-sm font-bold text-slate-900">4.9</span>
-                      <span className="text-xs text-slate-400">(+200 avaliações)</span>
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary-600)] group-hover:text-[var(--color-primary-700)] transition-colors">
-                      Explorar hotéis
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
+                  <h3 className="text-2xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-slate-600 font-medium leading-relaxed">
+                    {cat.desc}
+                  </p>
+                  
+                  <div className={`mt-6 flex items-center gap-2 text-sm font-bold ${cat.color} opacity-80 group-hover:opacity-100 transition-opacity`}>
+                    Explorar <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
                   </div>
                 </div>
               </Link>
-            </motion.div>
-
-            {/* Pet Sitter Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-            >
-              <Link
-                to="/walkers"
-                className="group block bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all"
-              >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <ImageWithFallback
-                    src="https://images.unsplash.com/photo-1647479459036-6ec472a43e8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBwZXQlMjBzaXR0ZXIlMjB3YWxraW5nJTIwZG9ncyUyMHBhcmt8ZW58MXx8fHwxNzcyNjI0NzY2fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Pet Sitter"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute top-4 left-4">
-                    <span className="inline-flex items-center gap-1.5 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                      <PawPrint className="h-3.5 w-3.5" />
-                      Pet Sitter
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-xl font-bold font-[family-name:var(--font-display)]">
-                      Pet Sitters Certificados
-                    </h3>
-                    <p className="text-sm text-white/80 mt-1">
-                      Profissionais de confiança perto de você
-                    </p>
-                  </div>
-                </div>
-                <div className="p-5 space-y-4">
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    Conecte-se com pet sitters verificados e experientes. Passeios, 
-                    hospedagem domiciliar, day care e cuidados especiais com todo carinho.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {["Verificados", "Passeios", "Hospedagem", "Day Care"].map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[11px] font-medium bg-orange-50 text-orange-600 px-2.5 py-1 rounded-lg"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-1.5">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="text-sm font-bold text-slate-900">4.8</span>
-                      <span className="text-xs text-slate-400">(+150 avaliações)</span>
-                    </div>
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary-600)] group-hover:text-[var(--color-primary-700)] transition-colors">
-                      Encontrar pet sitters
-                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
+            ))}
           </div>
         </div>
       </section>
+
+      
+      
 
       {/* ═══════════════════════════════════════════════
           6. CTA PARCEIROS
@@ -1087,11 +1062,11 @@ De cuidados especializados aos melhores produtos. Encontre tudo o que você prec
           </div>
 
           {/* Instagram Grid */}
-          <div className="text-center mb-8">
+          {/* <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
               <Instagram className="h-5 w-5 text-pink-500" />
               <span>
-                Siga <span className="text-[var(--color-primary-600)]">@petmais</span>{" "}
+                Siga <span className="text-[var(--color-primary-600)]">@petplus</span>{" "}
                 no Instagram
               </span>
             </div>
@@ -1119,88 +1094,11 @@ De cuidados especializados aos melhores produtos. Encontre tudo o que você prec
                 </div>
               </motion.div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════
-          8. NEWSLETTER / OFERTAS — Banner de captura
-          ═══════════════════════════════════════════════ */}
-      <section className="relative py-16 sm:py-20 bg-gradient-to-br from-[var(--color-primary-600)] via-[var(--color-primary-500)] to-amber-500 overflow-hidden">
-        {/* Decorative shapes */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -ml-16 -mb-16" />
-        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-
-        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full mb-5">
-              <Gift className="h-4 w-4 text-white" />
-              <span className="text-sm font-semibold text-white">
-                Oferta Exclusiva
-              </span>
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white mb-3 font-[family-name:var(--font-display)]">
-              Ganhe 15% OFF na primeira compra
-            </h2>
-            <p className="text-white/80 mb-3 max-w-xl mx-auto">
-              Cadastre seu e-mail e receba ofertas exclusivas, novidades e um
-              cupom especial de boas-vindas. Válido por tempo limitado!
-            </p>
-
-            {/* Scarcity trigger */}
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
-              <Zap className="h-4 w-4 text-yellow-300" />
-              <span className="text-sm text-white/90">
-                <strong className="text-yellow-300">247 pessoas</strong>{" "}
-                se cadastraram nas últimas 24h
-              </span>
-            </div>
-
-            {/* Email form */}
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 max-w-lg mx-auto">
-              <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="Seu melhor e-mail"
-                  className="w-full pl-10 pr-4 py-3.5 rounded-xl bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/50"
-                />
-              </div>
-              <button
-                onClick={() => {
-                  if (!newsletterEmail.trim() || !newsletterEmail.includes("@")) {
-                    toast.error("Informe um e-mail válido.");
-                    return;
-                  }
-                  toast.success("Cadastro realizado! Verifique seu e-mail para o cupom.");
-                  setNewsletterEmail("");
-                }}
-                className="px-8 py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 shadow-lg"
-              >
-                <Tag className="h-4 w-4" />
-                Quero meu cupom
-              </button>
-            </div>
-
-            <p className="text-xs text-white/50 mt-4">
-              Sem spam. Cancele quando quiser. Consulte nossa{" "}
-              <Link to="/privacy" className="underline hover:text-white/80">
-                Política de Privacidade
-              </Link>
-              .
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      
     </div>
   );
 }

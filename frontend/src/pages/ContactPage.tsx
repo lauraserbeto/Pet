@@ -71,8 +71,8 @@ const contactChannels = [
   {
     icon: Mail,
     label: "E-mail",
-    value: "contato@petmais.com.br",
-    href: "mailto:contato@petmais.com.br",
+    value: "contato@petplus.com.br",
+    href: "mailto:contato@petplus.com.br",
     color: "bg-blue-50 text-blue-600",
   },
   {

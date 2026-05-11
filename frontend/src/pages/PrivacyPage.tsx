@@ -151,7 +151,7 @@ Após o término do período de retenção, os dados serão eliminados ou anonim
 • **Revogação do consentimento**: a qualquer momento, sem custos;
 • **Oposição**: ao tratamento de dados quando houver descumprimento da LGPD.
 
-Para exercer seus direitos, envie uma solicitação para **privacidade@petmais.com.br**. Responderemos em até 15 dias úteis.`,
+Para exercer seus direitos, envie uma solicitação para **privacidade@petplus.com.br**. Responderemos em até 15 dias úteis.`,
   },
   {
     id: "menores",
@@ -196,7 +196,7 @@ A data da última atualização será sempre exibida no topo desta Política. Re
 
 **Encarregado de Dados**:
 • Nome: Departamento de Privacidade — Pet+ Inc.
-• E-mail: privacidade@petmais.com.br
+• E-mail: privacidade@petplus.com.br
 • Endereço: Av. Paulista, 1000, 10° andar — São Paulo/SP — CEP 01310-100
 
 Você pode entrar em contato com nosso Encarregado para:
@@ -419,10 +419,10 @@ export function PrivacyPage() {
             Para exercer seus direitos ou tirar dúvidas sobre o tratamento de seus dados,
             entre em contato com nosso Encarregado de Dados pelo e-mail{" "}
             <a
-              href="mailto:privacidade@petmais.com.br"
+              href="mailto:privacidade@petplus.com.br"
               className="text-[var(--color-secondary-600)] font-medium hover:underline"
             >
-              privacidade@petmais.com.br
+              privacidade@petplus.com.br
             </a>
             .
           </p>

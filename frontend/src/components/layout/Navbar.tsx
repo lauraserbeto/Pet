@@ -17,6 +17,8 @@ import {
   Calendar,
   ChevronDown,
   User,
+  Search,
+  MapPin,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -157,31 +159,50 @@ export function Navbar() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
             {/* ── Logo + Desktop Nav ── */}
-            <div className="flex items-center">
-              <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-                <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-18 w-auto" />
-              </Link>
-              <div className="hidden md:ml-10 md:flex md:space-x-8">
-                {publicNavItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={cn(
-                        "inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-900 border-b-2 border-transparent transition-colors",
-                        isActive && "border-[var(--color-primary-500)] text-slate-900"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
+            <div className="flex items-center justify-between flex-1">
+              <div className="flex items-center flex-1">
+                <Link to="/" className="flex flex-shrink-0 items-center gap-2">
+                  <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-16 w-auto" />
+                </Link>
+                
+                {/* ── Navbar Search (Desktop) ── */}
+                <div className="hidden lg:flex flex-1 max-w-lg mx-12">
+                  <div className="relative w-full group">
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-slate-400 group-focus-within:text-[var(--color-primary-500)] transition-colors" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Buscar hotéis, walkers, produtos..."
+                      className="block w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-full focus:bg-white focus:ring-4 focus:ring-[var(--color-primary-50)] focus:border-[var(--color-primary-300)] transition-all outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden md:flex items-center gap-10">
+                <div className="flex md:space-x-10">
+                  {publicNavItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={cn(
+                          "inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-900 border-b-2 border-transparent transition-colors whitespace-nowrap",
+                          isActive && "border-[var(--color-primary-500)] text-slate-900"
+                        )}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             {/* ── Desktop Right Side ── */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-6 ml-10">
               {isLoading ? (
                 // Texto simples de carregamento para termos certeza que ele sai daqui
                 <span className="text-sm text-slate-400">Carregando perfil...</span>
@@ -304,7 +325,18 @@ export function Navbar() {
         {/* ── Mobile Menu Overlay ── */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full z-50 bg-white border-b border-slate-100 shadow-xl overflow-y-auto" style={{ maxHeight: "calc(100vh - 4rem)" }}>
-          <div className="px-4 pt-2 pb-6 flex flex-col gap-4">
+          <div className="px-4 pt-4 pb-6 flex flex-col gap-4">
+            {/* Mobile Search */}
+            <div className="relative w-full group">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar no Pet+..."
+                className="block w-full pl-10 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white outline-none"
+              />
+            </div>
             
             {/* Navegação Pública (Itens do menu) */}
             <div className="flex flex-col gap-2 pt-4">

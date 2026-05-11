@@ -1,5 +1,6 @@
-import { PawPrint } from "lucide-react";
 import { Link } from "react-router";
+import logoBranco from "../../assets/pet+/logo2-branco.png";
+import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 
 export function Footer() {
   return (
@@ -7,11 +8,10 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-               <div className="bg-[var(--color-primary-500)] p-1.5 rounded-lg">
-                <PawPrint className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white font-[family-name:var(--font-display)]">Pet+</span>
+            <div className="flex items-center gap-2">
+              <Link to="/">
+                <ImageWithFallback src={logoBranco} alt="Pet+" className="h-20 w-auto" />
+              </Link>
             </div>
             <p className="text-sm text-slate-400">
               Conectando tutores aos melhores serviços e produtos para seus pets.

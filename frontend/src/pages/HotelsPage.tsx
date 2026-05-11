@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
+import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 export function HotelsPage() {
   const navigate = useNavigate();
@@ -213,7 +214,11 @@ export function HotelsPage() {
 
         {/* Hotel Cards */}
         <div className="space-y-4 pb-8">
-          {filtered.map((hotel, index) => (
+          {loading ? (
+            <HamsterLoader message="Buscando hotéis disponíveis..." size="sm" />
+          ) : (
+            <>
+              {filtered.map((hotel, index) => (
             <motion.div
               key={hotel.id}
               initial={{ opacity: 0, y: 20 }}
@@ -388,6 +393,8 @@ export function HotelsPage() {
                 Tente ajustar os filtros ou a busca
               </p>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>
