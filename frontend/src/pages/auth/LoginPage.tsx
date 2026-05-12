@@ -19,10 +19,11 @@ import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback"
 
 import logo from "../../assets/pet+/logo2-branco.png";
 
-import { authService } from "@/lib/services/authService";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading]       = useState(false);
   const [email, setEmail]               = useState("");
@@ -45,7 +46,10 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const data = await authService.login({ email, password });
+      // login() do AuthContext faz POST /auth/login, grava token e sincroniza
+      // o estado React — evita a dessincronização que forçava F5 para
+      // ProtectedRoute reconhecer a sessão.
+      const user = await login({ email, password });
 
       // Lembrar de mim: salva ou remove o e-mail
       if (rememberMe) {
@@ -58,9 +62,9 @@ export function LoginPage() {
         description: "Redirecionando...",
       });
 
-      const userRoleId = data.user.role_id;
-      const onboardingStep = data.user.onboarding_step;
-      const providerStatus = data.user.provider_status;
+      const userRoleId = user.role_id;
+      const onboardingStep = user.onboarding_step;
+      const providerStatus = user.provider_status;
 
       if (userRoleId === 4 && onboardingStep !== "COMPLETED") {
         navigate("/onboarding/sitter");
