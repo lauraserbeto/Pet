@@ -30,6 +30,7 @@ import { HamsterLoader } from "../components/ui/HamsterLoader";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 /* ═══════════════════════════════════════════════
    DATA
@@ -106,7 +107,7 @@ export function ShoppingPage() {
   const [selectedPrice, setSelectedPrice] = useState("all");
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
-  const [favorites, setFavorites] = useState<Set<string | number>>(new Set());
+  const { isFavorite, toggle: toggleFavoriteCtx } = useFavorites();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
@@ -158,17 +159,7 @@ export function ShoppingPage() {
     );
 
   const toggleFavorite = (id: string | number) => {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-        toast("Removido dos favoritos");
-      } else {
-        next.add(id);
-        toast.success("Adicionado aos favoritos!");
-      }
-      return next;
-    });
+    void toggleFavoriteCtx("PRODUCT", String(id));
   };
 
   const addToCart = (product: Product) => {
@@ -599,7 +590,7 @@ export function ShoppingPage() {
                     >
                       <Heart
                         className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
-                          favorites.has(product.id)
+                          isFavorite("PRODUCT", String(product.id))
                             ? "fill-red-500 text-red-500"
                             : "text-slate-400"
                         }`}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { providerService } from "../lib/services/providerService";
+import { useFavorites } from "../contexts/FavoritesContext";
 import { useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -24,8 +25,8 @@ import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 export function WalkersPage() {
   const navigate = useNavigate();
+  const { isFavorite, toggle: toggleFavoriteCtx } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"rating" | "price" | "distance">("rating");
   const [activeService, setActiveService] = useState("todos");
   const [showFilters, setShowFilters] = useState(false);
@@ -63,9 +64,7 @@ export function WalkersPage() {
   }, []);
 
   const toggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
+    void toggleFavoriteCtx("SITTER", id);
   };
 
   const serviceFilters = [
@@ -326,14 +325,14 @@ export function WalkersPage() {
                           toggleFavorite(walker.id);
                         }}
                         aria-label={
-                          favorites.includes(walker.id)
+                          isFavorite("SITTER", walker.id)
                             ? "Remover dos favoritos"
                             : "Favoritar"
                         }
                       >
                         <Heart
                           className={`h-4 w-4 transition-colors ${
-                            favorites.includes(walker.id)
+                            isFavorite("SITTER", walker.id)
                               ? "fill-red-500 text-red-500"
                               : "text-slate-400"
                           }`}

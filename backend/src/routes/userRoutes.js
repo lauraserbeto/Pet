@@ -3,6 +3,11 @@ const router = express.Router();
 const UserController = require('../controllers/UserController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/adminMiddleware');
+const validate = require('../middlewares/validate');
+const {
+  updateProfileSchema,
+  changePasswordSchema,
+} = require('../schemas/userSchemas');
 
 router.use(authMiddleware);
 
@@ -38,7 +43,7 @@ router.get('/me', UserController.getMe);
  *       200:
  *         description: Perfil atualizado
  */
-router.put('/me', UserController.updateProfile);
+router.put('/me', validate({ body: updateProfileSchema }), UserController.updateProfile);
 
 /**
  * @swagger
@@ -63,7 +68,11 @@ router.put('/me', UserController.updateProfile);
  *       200:
  *         description: Senha atualizada
  */
-router.patch('/me/password', UserController.updatePassword);
+router.patch(
+  '/me/password',
+  validate({ body: changePasswordSchema }),
+  UserController.updatePassword
+);
 
 /**
  * @swagger

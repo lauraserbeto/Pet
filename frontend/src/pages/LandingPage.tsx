@@ -375,7 +375,17 @@ function ProductCard({ product }: { product: Product }) {
         {/* CTA */}
         <button
           onClick={() => {
-            addItem(product);
+            // NOTE: LandingPage usa Product mock (id: number); cart server rejeita
+            // ids não-UUID com 422. Quando integrado ao catálogo real, basta
+            // garantir que `product.id` venha como UUID do backend.
+            addItem({
+              id: String(product.id),
+              name: product.name,
+              brand: product.brand,
+              price: product.price,
+              originalPrice: product.originalPrice,
+              image: product.image,
+            });
             toast.success(`${product.name} adicionado ao carrinho!`);
           }}
           className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-orange-400 text-white text-sm font-semibold hover:from-[var(--color-primary-600)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-md shadow-orange-500/20"

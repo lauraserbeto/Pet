@@ -5,6 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 
 const prisma = require('./config/database');
 const swaggerDocs = require('./config/swagger.config');
+const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 
@@ -51,8 +52,15 @@ app.get('/api/health', async (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/users', require('./routes/userRoutes'));
+app.use('/api/v1/users/me/pets', require('./routes/petRoutes'));
 app.use('/api/v1/addresses', require('./routes/addressRoutes'));
 app.use('/api/v1/products', require('./routes/productsRoutes'));
+app.use('/api/v1/favorites', require('./routes/favoriteRoutes'));
+app.use('/api/v1/cart', require('./routes/cartRoutes'));
+
+// 404 + Error Handler (devem ser os últimos)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // INICIALIZAÇÃO
 const PORT = process.env.PORT || 3000;
