@@ -101,7 +101,7 @@ export function CartPage() {
                 >
                   <div className="flex gap-4">
                     {/* Image */}
-                    <Link to={`/shopping/${item.id}`} className="shrink-0">
+                    <Link to={`/shopping/${item.product_id}`} className="shrink-0">
                       <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-xl overflow-hidden bg-slate-100">
                         <ImageWithFallback
                           src={item.image}
@@ -117,7 +117,7 @@ export function CartPage() {
                         {item.brand}
                       </p>
                       <Link
-                        to={`/shopping/${item.id}`}
+                        to={`/shopping/${item.product_id}`}
                         className="text-sm font-semibold text-slate-800 line-clamp-2 hover:text-[var(--color-primary-600)] transition-colors font-[family-name:var(--font-display)]"
                       >
                         {item.name}

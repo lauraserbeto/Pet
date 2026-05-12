@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const AddressController = require('../controllers/AddressController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const validate = require('../middlewares/validate');
+const {
+  createAddressSchema,
+  updateAddressSchema,
+  addressIdParamsSchema,
+} = require('../schemas/addressSchemas');
 
 router.use(authMiddleware);
 
@@ -15,7 +21,7 @@ router.use(authMiddleware);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de endereços
+ *         description: Lista de endereços (default primeiro)
  */
 router.get('/', AddressController.getAddresses);
 
@@ -27,32 +33,19 @@ router.get('/', AddressController.getAddresses);
  *     tags: [Addresses]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               cep:
- *                 type: string
- *               street:
- *                 type: string
- *               number:
- *                 type: string
- *               complement:
- *                 type: string
- *               neighborhood:
- *                 type: string
- *               city:
- *                 type: string
- *               state:
- *                 type: string
  *     responses:
  *       201:
- *         description: Endereço cadastrado
+ *         description: Endereço cadastrado (1º endereço é definido como default automaticamente)
+ *       409:
+ *         description: Limite de endereços atingido
+ *       422:
+ *         description: CEP inválido ou não encontrado
  */
-router.post('/', AddressController.createAddress);
+router.post(
+  '/',
+  validate({ body: createAddressSchema }),
+  AddressController.createAddress
+);
 
 /**
  * @swagger
@@ -68,17 +61,41 @@ router.post('/', AddressController.createAddress);
  *         required: true
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
+ *           format: uuid
  *     responses:
  *       200:
  *         description: Endereço atualizado
  */
-router.put('/:id', AddressController.updateAddress);
+router.put(
+  '/:id',
+  validate({ params: addressIdParamsSchema, body: updateAddressSchema }),
+  AddressController.updateAddress
+);
+
+/**
+ * @swagger
+ * /api/v1/addresses/{id}/default:
+ *   patch:
+ *     summary: Define este endereço como principal
+ *     tags: [Addresses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Endereço marcado como principal
+ */
+router.patch(
+  '/:id/default',
+  validate({ params: addressIdParamsSchema }),
+  AddressController.setDefault
+);
 
 /**
  * @swagger
@@ -94,10 +111,17 @@ router.put('/:id', AddressController.updateAddress);
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
  *     responses:
- *       200:
+ *       204:
  *         description: Endereço removido
+ *       409:
+ *         description: Não pode excluir único endereço com pedidos em andamento
  */
-router.delete('/:id', AddressController.deleteAddress);
+router.delete(
+  '/:id',
+  validate({ params: addressIdParamsSchema }),
+  AddressController.deleteAddress
+);
 
 module.exports = router;

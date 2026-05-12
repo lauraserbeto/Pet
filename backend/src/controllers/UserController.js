@@ -1,5 +1,24 @@
 const prisma = require('../config/database');
 const bcrypt = require('bcryptjs');
+const AppError = require('../utils/AppError');
+
+const PROFILE_SELECT = {
+  id: true,
+  full_name: true,
+  email: true,
+  phone: true,
+  avatar_url: true,
+  role_id: true,
+  onboarding_step: true,
+  created_at: true,
+};
+
+function pickDefined(obj, keys) {
+  return keys.reduce((acc, key) => {
+    if (obj[key] !== undefined && obj[key] !== '') acc[key] = obj[key];
+    return acc;
+  }, {});
+}
 
 class UserController {
   // Retorna os dados do próprio usuário (utilizado no Perfil)
@@ -41,43 +60,64 @@ class UserController {
     }
   }
 
-  // Atualiza os dados pessoais (nome e telefone e foto)
-  async updateProfile(req, res) {
+  // Atualiza os dados pessoais (nome, telefone e avatar)
+  // Email é imutável por esta rota e é ignorado se enviado.
+  async updateProfile(req, res, next) {
     try {
-      const { full_name, phone, avatar_url } = req.body;
+      const data = pickDefined(req.body, ['full_name', 'phone', 'avatar_url']);
+
+      if (Object.keys(data).length === 0) {
+        throw AppError.badRequest('Nenhum campo válido para atualizar');
+      }
 
       const user = await prisma.user.update({
         where: { id: req.userId },
-        data: { full_name, phone, avatar_url }
+        data,
+        select: PROFILE_SELECT,
       });
 
-      return res.status(200).json({ message: 'Perfil atualizado com sucesso' });
+      return res.status(200).json(user);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao atualizar dados pessoais' });
+      return next(error);
     }
   }
 
-  // Atualiza a senha
-  async updatePassword(req, res) {
+  // Atualiza a senha — requer senha atual válida
+  async updatePassword(req, res, next) {
     try {
-      const { newPassword } = req.body;
+      const { currentPassword, newPassword } = req.body;
 
-      if (!newPassword || newPassword.length < 6) {
-        return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
+      const user = await prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { password_hash: true },
+      });
+
+      if (!user?.password_hash) {
+        throw AppError.unauthorized('Usuário não possui senha definida');
+      }
+
+      const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!isValid) {
+        throw AppError.unauthorized('Senha atual incorreta');
       }
 
       const password_hash = await bcrypt.hash(newPassword, 10);
 
-      await prisma.user.update({
-        where: { id: req.userId },
-        data: { password_hash }
-      });
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: req.userId },
+          data: { password_hash },
+        }),
+        // invalida todos os tokens de reset pendentes
+        prisma.passwordResetToken.updateMany({
+          where: { user_id: req.userId, used: false },
+          data: { used: true },
+        }),
+      ]);
 
-      return res.status(200).json({ message: 'Senha atualizada com sucesso' });
+      return res.status(204).send();
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao atualizar senha' });
+      return next(error);
     }
   }
 

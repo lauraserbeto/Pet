@@ -1,51 +1,51 @@
-import { API_URL, getHeaders } from "../api";
+import { httpClient } from "../httpClient";
+
+export type PetSpecies = "DOG" | "CAT" | "OTHER";
+
+export type Pet = {
+  id: string;
+  tutor_id: string;
+  name: string;
+  species: PetSpecies;
+  breed?: string | null;
+  weight_kg?: number | null;
+  birth_date?: string | null;
+  medical_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PetInput = {
+  name: string;
+  species: PetSpecies;
+  breed?: string;
+  weight_kg?: number | null;
+  birth_date?: string | null;
+  medical_notes?: string;
+};
+
+const BASE = "/users/me/pets";
 
 export const petService = {
-  // Lista pets do tutor logado
-  async listMyPets() {
-    const response = await fetch(`${API_URL}/users/me/pets`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao buscar seus pets.");
-    }
-
-    return data;
+  list() {
+    return httpClient.get<Pet[]>(BASE);
   },
-
-  // Adiciona um novo pet
-  async createPet(payload: any) {
-    const response = await fetch(`${API_URL}/users/me/pets`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao cadastrar pet.");
-    }
-
-    return data;
+  get(id: string) {
+    return httpClient.get<Pet>(`${BASE}/${id}`);
   },
+  create(payload: PetInput) {
+    return httpClient.post<Pet>(BASE, payload);
+  },
+  update(id: string, payload: Partial<PetInput>) {
+    return httpClient.put<Pet>(`${BASE}/${id}`, payload);
+  },
+  remove(id: string) {
+    return httpClient.delete<void>(`${BASE}/${id}`);
+  },
+};
 
-  // Remove um pet
-  async deletePet(id: string) {
-    const response = await fetch(`${API_URL}/users/me/pets/${id}`, {
-      method: "DELETE",
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Erro ao remover pet.");
-    }
-
-    return true;
-  }
+export const SPECIES_LABEL: Record<PetSpecies, string> = {
+  DOG: "Cachorro",
+  CAT: "Gato",
+  OTHER: "Outro",
 };

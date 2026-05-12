@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { providerService } from "../lib/services/providerService";
+import { useFavorites } from "../contexts/FavoritesContext";
 import { useNavigate } from "react-router";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -25,8 +26,8 @@ import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 export function HotelsPage() {
   const navigate = useNavigate();
+  const { isFavorite, toggle: toggleFavoriteCtx } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"rating" | "price" | "distance">("rating");
   const [showFilters, setShowFilters] = useState(false);
 
@@ -94,9 +95,7 @@ export function HotelsPage() {
   }, []);
 
   const toggleFavorite = (id: string) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
+    void toggleFavoriteCtx("HOTEL", id);
   };
 
   const filtered = apiHotels
@@ -249,14 +248,14 @@ export function HotelsPage() {
                         toggleFavorite(hotel.id);
                       }}
                       aria-label={
-                        favorites.includes(hotel.id)
+                        isFavorite("HOTEL", hotel.id)
                           ? "Remover dos favoritos"
                           : "Adicionar aos favoritos"
                       }
                     >
                       <Heart
                         className={`h-4 w-4 transition-colors ${
-                          favorites.includes(hotel.id)
+                          isFavorite("HOTEL", hotel.id)
                             ? "fill-red-500 text-red-500"
                             : "text-slate-600"
                         }`}

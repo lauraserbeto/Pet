@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
+import { useFavorites } from "../contexts/FavoritesContext";
 import {
   Star,
   Heart,
@@ -144,12 +145,13 @@ function Stars({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  
+  const { isFavorite: isFav, toggle: toggleFav } = useFavorites();
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "delivery">("desc");
+  const isFavorite = product ? isFav("PRODUCT", String(product.id)) : false;
 
   const relatedScrollRef = useRef<HTMLDivElement>(null);
 
@@ -193,8 +195,8 @@ export function ProductDetailPage() {
   };
 
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    toast(isFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos!");
+    if (!product) return;
+    void toggleFav("PRODUCT", String(product.id));
   };
 
   const scrollRelated = (dir: "left" | "right") => {

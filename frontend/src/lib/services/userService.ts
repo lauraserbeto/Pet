@@ -1,84 +1,79 @@
-import { API_URL, getHeaders } from "../api";
+import { httpClient } from "../httpClient";
+import type { AuthUser } from "../../contexts/AuthContext";
+
+export type UpdateProfileDTO = {
+  full_name?: string;
+  phone?: string;
+  avatar_url?: string;
+};
+
+export type ChangePasswordDTO = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type SitterEvaluationPayload = {
+  experience_details: unknown;
+  environment_photos: string[];
+  quiz_answers: unknown;
+};
+
+export type SitterEvaluationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export type SitterEvaluation = {
+  id: string;
+  user_id: string;
+  status: SitterEvaluationStatus;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  experience_details: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  environment_photos: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  quiz_answers: any;
+  feedback?: string;
+  created_at: string;
+  user?: { full_name: string; email: string };
+};
 
 export const userService = {
   // Retorna os dados do próprio usuário
-  async getMe() {
-    const response = await fetch(`${API_URL}/users/me`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+  getMe() {
+    return httpClient.get<AuthUser>("/users/me");
+  },
 
-    const data = await response.json();
+  // Atualiza nome, telefone e avatar; retorna o usuário atualizado
+  updateMe(payload: UpdateProfileDTO) {
+    return httpClient.put<AuthUser>("/users/me", payload);
+  },
 
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao buscar dados do usuário.");
-    }
-
-    return data;
+  // Atualiza a senha (requer senha atual)
+  changePassword(payload: ChangePasswordDTO) {
+    return httpClient.patch<void>("/users/me/password", payload);
   },
 
   // Envia avaliação para ser Sitter
-  async submitSitterEvaluation(payload: {
-    experience_details: any;
-    environment_photos: string[];
-    quiz_answers: any;
-  }) {
-    const response = await fetch(`${API_URL}/users/me/evaluations`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao enviar a avaliação. Tente novamente.");
-    }
-
-    return data;
+  submitSitterEvaluation(payload: SitterEvaluationPayload) {
+    return httpClient.post("/users/me/evaluations", payload);
   },
 
   // --- MÉTODOS DE ADMINISTRADOR ---
 
-  // Busca avaliações filtradas por status
-  async getEvaluations(status: 'PENDING' | 'APPROVED' | 'REJECTED' = 'PENDING') {
-    const response = await fetch(`${API_URL}/users/admin/evaluations?status=${status}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao buscar avaliações.");
-    }
-
-    return data;
+  getEvaluations(status: SitterEvaluationStatus = "PENDING") {
+    return httpClient.get<SitterEvaluation[]>(`/users/admin/evaluations`, { query: { status } });
   },
 
-  // Busca avaliações pendentes (legado, redireciona para getEvaluations)
-  async getPendingEvaluations() {
-    return this.getEvaluations('PENDING');
+  getPendingEvaluations() {
+    return this.getEvaluations("PENDING");
   },
 
-  // Revisa avaliação (Aprova ou Rejeita)
-  async reviewEvaluation(
+  reviewEvaluation(
     id: string,
-    status: 'APPROVED' | 'REJECTED',
+    status: Exclude<SitterEvaluationStatus, "PENDING">,
     feedback?: string
   ) {
-    const response = await fetch(`${API_URL}/users/admin/evaluations/${id}`, {
-      method: "PATCH",
-      headers: getHeaders(),
-      body: JSON.stringify({ status, feedback }),
+    return httpClient.patch<{ message: string }>(`/users/admin/evaluations/${id}`, {
+      status,
+      feedback,
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Erro ao processar avaliação.");
-    }
-
-    return data;
-  }
+  },
 };
