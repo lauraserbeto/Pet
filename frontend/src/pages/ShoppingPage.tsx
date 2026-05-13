@@ -31,6 +31,7 @@ import { Link } from "react-router";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { useCart } from "../components/cart/CartContext";
 
 /* ═══════════════════════════════════════════════
    DATA
@@ -108,6 +109,7 @@ export function ShoppingPage() {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
   const { isFavorite, toggle: toggleFavoriteCtx } = useFavorites();
+  const { addItem } = useCart();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
@@ -163,6 +165,14 @@ export function ShoppingPage() {
   };
 
   const addToCart = (product: Product) => {
+    void addItem({
+      id: String(product.id),
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: product.image,
+    });
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
 

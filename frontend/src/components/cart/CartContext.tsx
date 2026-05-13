@@ -48,7 +48,7 @@ export type CartAddInput = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (item: CartAddInput) => Promise<void>;
+  addItem: (item: CartAddInput, quantity?: number) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -239,10 +239,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   /* -------- API pública -------- */
 
   const addItem = useCallback(
-    async (input: CartAddInput) => {
+    async (input: CartAddInput, quantity: number = 1) => {
+      const qty = Math.max(1, Math.min(99, Math.floor(quantity)));
       if (isAuthenticated) {
         try {
-          await addMutation.mutateAsync({ product_id: input.id, quantity: 1 });
+          await addMutation.mutateAsync({ product_id: input.id, quantity: qty });
         } catch (err) {
           const message = err instanceof ApiError ? err.message : "Erro ao adicionar ao carrinho";
           toast.error(message);
@@ -254,10 +255,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const existing = prev.find((i) => i.id === input.id);
         if (existing) {
           return prev.map((i) =>
-            i.id === input.id ? { ...i, quantity: Math.min(99, i.quantity + 1) } : i
+            i.id === input.id ? { ...i, quantity: Math.min(99, i.quantity + qty) } : i
           );
         }
-        return [...prev, { ...input, quantity: 1 }];
+        return [...prev, { ...input, quantity: qty }];
       });
     },
     [isAuthenticated, addMutation]
