@@ -20,7 +20,10 @@ O **Pet+** vai além de um simples e-commerce. É um ecossistema completo e cent
 - 🛍️ **Marketplace Integrado:** Compra e venda de produtos pet através de lojistas cadastrados.
 - 🏨 **Booking de Serviços:** Agendamento simplificado de Hotéis, Daycare e Pet Sitters.
 - 🔐 **Sistema Multi-Tenant:** Arquitetura robusta de Role-Based Access Control (RBAC) para diferentes perfis de usuários.
-- 📍 **Automação de Endereços:** Integração com ViaCEP para preenchimento ágil durante os cadastros.
+- 📍 **Automação de Endereços:** Integração com ViaCEP para preenchimento ágil durante os cadastros, com validação server-side e endereço principal por usuário.
+- 🛒 **Carrinho Persistente:** Funciona offline (anônimo, via localStorage) e sincroniza com o servidor ao logar. Inclui snapshot de preço, validação de estoque e limites configuráveis.
+- ❤️ **Favoritos Polimórficos:** Tutores podem favoritar produtos, hotéis ou pet sitters em uma única tabela, com idempotência e validação de tipo.
+- 👤 **Visão do Tutor End-to-End:** Perfil (com foto em base64), endereços, pets, favoritos e carrinho integrados com formulários validados via Zod + React Hook Form.
 
 ---
 
@@ -37,17 +40,22 @@ A aplicação foi construída visando performance, escalabilidade e uma excelent
 
 ### 🖥️ Frontend
 * **Core:** [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/) + TypeScript
+* **Estado remoto:** [TanStack Query](https://tanstack.com/query) (cache, refetch, optimistic updates)
+* **Estado global:** Context API (`AuthContext`, `FavoritesContext`, `CartContext`)
+* **Formulários:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) + `@hookform/resolvers`
 * **Styling & UI:** [Tailwind CSS v4](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/)
 * **Animações:** [Framer Motion](https://www.framer.com/motion/) + [GSAP](https://gsap.com/)
-* **Ecosystem:** React Hook Form, Sonner (Toasts), Lucide React
+* **Ecosystem:** Sonner (Toasts), Lucide React
 * **Hospedagem:** [Vercel](https://vercel.com/)
 
 ### ⚙️ Backend
-* **Core:** [Node.js](https://nodejs.org/) + Express + TypeScript
+* **Core:** [Node.js](https://nodejs.org/) + Express
 * **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) (via [Railway](https://railway.com/))
 * **ORM:** [Prisma](https://www.prisma.io/)
+* **Validação:** [Zod](https://zod.dev/) via middleware `validate({ body?, query?, params? })`
+* **Tratamento de erros:** `AppError` + `errorHandler` central com shape padronizado
 * **Segurança:** JWT, BcryptJS, Middlewares de RBAC customizados
-* **Documentação:** [Swagger](https://swagger.io/)
+* **Documentação:** [Swagger](https://swagger.io/) (OpenAPI 3.0) — gerado automaticamente via JSDoc nas rotas
 
 ---
 
@@ -93,25 +101,42 @@ npm install
 ```
 - Crie um arquivo `.env` baseado no `.env.example`.
 - Certifique-se de configurar a `DATABASE_URL` corretamente (local ou Railway).
-- Execute as migrações do banco de dados:
+- Sincronize o schema do banco de dados:
 ```bash
-npx prisma migrate dev
+npx prisma db push
 npx prisma generate
 ```
+> Esse comando cria/atualiza as tabelas (`addresses.is_default`, `favorites`, `carts`, `cart_items`) a partir do `schema.prisma`. SQLs complementares opcionais (índices parciais, CHECKs, backfills) ficam em `backend/prisma/migrations/manual/`.
+
 - Inicie o servidor:
 ```bash
 npm start
 ```
-- A API estará disponível em `http://localhost:3000` e a documentação interativa (Swagger) em `/swagger`.
+- A API estará disponível em `http://localhost:3000` e a documentação interativa (Swagger) em `/api-docs`.
 
 ---
 
 ## 📚 Documentação da API (Swagger)
 
-O projeto utiliza Swagger (OpenAPI 3.0) para documentação automática dos endpoints, permitindo testes interativos diretamente pelo navegador.
+O projeto utiliza Swagger (OpenAPI 3.0) para documentação automática dos endpoints, permitindo testes interativos diretamente pelo navegador. A geração é feita por `swagger-jsdoc` a partir das anotações `@swagger` nas próprias rotas (`backend/src/routes/*.js`) — novos endpoints aparecem no Swagger sem configuração adicional.
 
-- **Local:** [http://localhost:3000/api-docs/swagger](http://localhost:3000/swagger)
-- **Produção:** [https://api-petplus.up.railway.app/api-docs/swagger](https://api-petplus.up.railway.app/api-docs/swagger)
+- **Local:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+- **Produção:** [https://api-petplus.up.railway.app/api-docs](https://api-petplus.up.railway.app/api-docs)
+
+### 📋 Documentação adicional
+
+Documentação técnica detalhada por área em `docs/`:
+
+- **[Especificação da Visão do Tutor](docs/visao-tutor-spec.md)** — hand-off completo da integração frontend × backend dos fluxos do Tutor (Perfil, Endereços, Pets, Favoritos, Carrinho)
+- [Arquitetura do Backend](docs/backend/01-arquitetura.md)
+- [Banco de Dados](docs/backend/02-banco-de-dados.md)
+- [Endpoints da API](docs/backend/03-api-endpoints.md)
+- [Segurança e Testes](docs/backend/04-seguranca-e-testes.md)
+- [Arquitetura do Frontend](docs/frontend/01-arquitetura.md)
+- [Visão geral funcional](docs/funcional/01-visao-geral.md)
+- [Perfis de usuário](docs/funcional/02-perfis-de-usuario.md)
+- [Regras de negócio](docs/funcional/03-regras-de-negocio.md)
+- [Plano de integração com checklist](integration-plan/tutor-integration-plan.md)
 
 ---
 
