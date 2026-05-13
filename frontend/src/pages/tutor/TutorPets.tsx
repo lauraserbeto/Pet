@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Plus, PawPrint, Calendar, Activity, X, Trash2, Edit2 } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 
 import { ApiError } from "../../lib/httpClient";
 import { usePets } from "../../lib/hooks/usePets";
@@ -115,7 +116,7 @@ export function TutorPets() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)]" />
+        <HamsterLoader message="Carregando seus pets..." />
       </div>
     );
   }

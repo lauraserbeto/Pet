@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ChevronRight,
 } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 
 interface AccountInfo {
   full_name: string;
@@ -88,7 +89,7 @@ export function Account() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <HamsterLoader size="sm" />
       </div>
     );
   }

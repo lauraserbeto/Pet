@@ -28,6 +28,7 @@ import {
   Save,
   X,
 } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 
 interface OperatingHour {
   open: boolean;
@@ -377,7 +378,7 @@ export function PublicProfile() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        <HamsterLoader size="sm" message="Carregando perfil público..." />
       </div>
     );
   }

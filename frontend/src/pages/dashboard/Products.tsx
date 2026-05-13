@@ -21,6 +21,7 @@ import {
   DialogDescription
 } from "../../components/ui/dialog";
 import { Search, Plus, Filter, Package, AlertCircle, Trash2, Edit2, Loader2, UploadCloud, Image as ImageIcon } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 import { productService, Product, CreateProductDTO } from "../../lib/services/productService";
 
@@ -406,10 +407,7 @@ export function Products() {
 
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-               <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#F58B05]" />
-               <p>Carregando catálogo de produtos...</p>
-            </div>
+            <HamsterLoader size="sm" message="Carregando catálogo de produtos..." />
           ) : filteredProducts.length === 0 ? (
              <div className="flex flex-col items-center justify-center h-64 text-center px-4">
                 <Package className="h-12 w-12 text-slate-300 mb-4" />

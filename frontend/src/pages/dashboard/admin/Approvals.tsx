@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { API_URL, getHeaders } from "../../../lib/api";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, XCircle, Store, Bed, MapPin, User, AlertTriangle, Search, Loader2, Ban, RefreshCcw } from "lucide-react";
+import { HamsterLoader } from "../../../components/ui/HamsterLoader";
 import { toast } from "sonner";
 import { Card, CardContent } from "../../../components/ui/card";
 
@@ -187,7 +188,7 @@ export function Approvals() {
   if (loadingContext) {
     return (
       <div className="flex h-full items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin h-8 w-8 text-primary-500" />
+        <HamsterLoader size="sm" message="Carregando aprovações..." />
       </div>
     );
   }
@@ -262,9 +263,7 @@ export function Approvals() {
       </div>
 
       {loadingData ? (
-        <div className="flex justify-center p-12">
-          <Loader2 className="animate-spin h-8 w-8 text-primary-500" />
-        </div>
+        <HamsterLoader size="sm" message="Buscando parceiros..." />
       ) : filteredPartners.length === 0 ? (
         <Card className="border-dashed shadow-sm">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
