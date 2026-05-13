@@ -21,10 +21,8 @@ import { Link } from "react-router";
 
 /* ─── Data ─── */
 const milestones = [
-  { year: "2022", text: "Ideia nasce da dificuldade em encontrar hotéis pet confiáveis." },
-  { year: "2023", text: "Primeiros parceiros cadastrados e lançamento da versão beta." },
-  { year: "2024", text: "Mais de 500 parceiros e 10 mil tutores ativos na plataforma." },
-  { year: "2025", text: "Expansão nacional com Pet Sitter, Shopping e app mobile." },
+  { year: "2023", text: "Identificamos a carência de um hub centralizado para o setor pet. Nossa solução une a curadoria de serviços confiáveis a uma ferramenta de gestão estratégica de fornecedores." },
+  { year: "2025", text: "Criação de nossa plataforma web." },
 ];
 
 const values = [
@@ -43,7 +41,7 @@ const values = [
   {
     icon: Users,
     title: "Comunidade",
-    description: "Conectamos tutores apaixonados a profissionais dedicados ao cuidado animal.",
+    description: "Conectamos tutores apaixonados a profissionais rigorosamente selecionados e dedicados ao cuidado animal.",
     color: "bg-teal-50 text-teal-500",
   },
   {
@@ -82,7 +80,7 @@ const goals = [
   {
     icon: TrendingUp,
     title: "1 milhão de tutores",
-    description: "Meta de alcançar 1 milhão de tutores ativos até o final de 2027.",
+    description: "Meta de alcançar 1 milhão de tutores ativos até o final de 2030.",
   },
   {
     icon: Globe,
@@ -332,9 +330,9 @@ export function AboutPage() {
               De uma ideia a milhares de pets felizes
             </h2>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-500 leading-relaxed px-2">
-              A Pet+ nasceu da experiência real de um tutor que não encontrava
-              serviços confiáveis para seu companheiro. Hoje, conectamos milhares
-              de famílias a profissionais apaixonados.
+              O Pet+ nasceu da visão de quatro graduandos de Engenharia de Software que, ao identificarem as lacunas e a fragmentação do mercado pet, decidiram aplicar a tecnologia para simplificar esse universo. O que começou como um projeto acadêmico focado em solucionar problemas reais, transformou-se em uma experiência digital integrada que converte a complexidade do setor em facilidade.
+
+              Por meio de uma plataforma web acessível, conectamos o desejo de cuidado dos tutores à eficiência operacional de parceiros e especialistas. Somos o ponto de encontro onde a gestão inteligente encontra a dedicação animal, promovendo um mercado mais organizado, profissional e confiável.
             </p>
           </motion.div>
 
@@ -355,9 +353,8 @@ export function AboutPage() {
                   viewport={{ once: true, margin: "-60px" }}
                   variants={fadeUp}
                   custom={i}
-                  className={`relative md:flex md:items-center md:mb-16 last:md:mb-0 ${
-                    i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                  }`}
+                  className={`relative md:flex md:items-center md:mb-16 last:md:mb-0 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                    }`}
                 >
                   {/* ── Mobile: dot + card ── */}
                   <div className="md:hidden flex items-start gap-4 pl-1">
@@ -375,9 +372,8 @@ export function AboutPage() {
                   {/* ── Desktop: alternating sides ── */}
                   <div className="hidden md:block md:w-1/2 md:px-10">
                     <div
-                      className={`bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${
-                        i % 2 === 0 ? "md:text-right" : "md:text-left"
-                      }`}
+                      className={`bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${i % 2 === 0 ? "md:text-right" : "md:text-left"
+                        }`}
                     >
                       <span className="inline-block bg-gradient-to-r from-[var(--color-primary-500)] to-amber-400 text-white font-extrabold text-sm px-3 py-1 rounded-lg mb-3">
                         {m.year}
@@ -680,11 +676,10 @@ export function AboutPage() {
                         {[...Array(5)].map((_, j) => (
                           <Star
                             key={j}
-                            className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                              j < t.rating
-                                ? "fill-amber-400 text-amber-400"
-                                : "fill-slate-200 text-slate-200"
-                            }`}
+                            className={`h-4 w-4 sm:h-5 sm:w-5 ${j < t.rating
+                              ? "fill-amber-400 text-amber-400"
+                              : "fill-slate-200 text-slate-200"
+                              }`}
                           />
                         ))}
                       </div>
@@ -737,11 +732,10 @@ export function AboutPage() {
                 <button
                   key={i}
                   onClick={() => setCarouselIndex(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === carouselIndex
-                      ? "w-5 sm:w-6 bg-[var(--color-primary-500)]"
-                      : "w-2 bg-slate-300 hover:bg-slate-400"
-                  }`}
+                  className={`h-2 rounded-full transition-all ${i === carouselIndex
+                    ? "w-5 sm:w-6 bg-[var(--color-primary-500)]"
+                    : "w-2 bg-slate-300 hover:bg-slate-400"
+                    }`}
                   aria-label={`Ir para slide ${i + 1}`}
                 />
               ))}
