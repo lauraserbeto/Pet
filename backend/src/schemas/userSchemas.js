@@ -34,7 +34,27 @@ const changePasswordSchema = z
     path: ['newPassword'],
   });
 
+// Avatar em base64 (data URL). Limite ~2.7MB de string ≈ 2MB de imagem.
+// Após decodificar base64 (~75% do tamanho da string), ainda fica abaixo do
+// limite global de 50mb do express.json definido em server.js.
+const AVATAR_MAX_CHARS = 2_700_000;
+
+const uploadAvatarSchema = z
+  .object({
+    image: z
+      .string()
+      .min(1, 'Imagem obrigatória')
+      .max(AVATAR_MAX_CHARS, 'Imagem muito grande (máx ~2MB)')
+      .regex(
+        /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/i,
+        'Formato inválido. Envie uma data URL base64 (JPEG, PNG ou WebP).'
+      ),
+  })
+  .strict();
+
 module.exports = {
   updateProfileSchema,
   changePasswordSchema,
+  uploadAvatarSchema,
+  AVATAR_MAX_CHARS,
 };

@@ -27,6 +27,14 @@ export function useProfile() {
     mutationFn: (payload: ChangePasswordDTO) => userService.changePassword(payload),
   });
 
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (image: string) => userService.uploadAvatar(image),
+    onSuccess: (updatedUser: AuthUser) => {
+      queryClient.setQueryData(profileQueryKey, updatedUser);
+      setUser(updatedUser);
+    },
+  });
+
   return {
     profile: query.data,
     isLoading: query.isLoading,
@@ -37,5 +45,7 @@ export function useProfile() {
     isUpdatingProfile: updateMutation.isPending,
     changePassword: changePasswordMutation.mutateAsync,
     isChangingPassword: changePasswordMutation.isPending,
+    uploadAvatar: uploadAvatarMutation.mutateAsync,
+    isUploadingAvatar: uploadAvatarMutation.isPending,
   };
 }
