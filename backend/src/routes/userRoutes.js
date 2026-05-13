@@ -7,6 +7,7 @@ const validate = require('../middlewares/validate');
 const {
   updateProfileSchema,
   changePasswordSchema,
+  uploadAvatarSchema,
 } = require('../schemas/userSchemas');
 
 router.use(authMiddleware);
@@ -72,6 +73,36 @@ router.patch(
   '/me/password',
   validate({ body: changePasswordSchema }),
   UserController.updatePassword
+);
+
+/**
+ * @swagger
+ * /api/v1/users/me/avatar:
+ *   post:
+ *     summary: Atualiza a foto de perfil (base64 data URL)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 description: data URL no formato `data:image/<jpeg|png|webp>;base64,...`
+ *     responses:
+ *       200:
+ *         description: Avatar atualizado, retorna o usuário
+ *       422:
+ *         description: Formato inválido ou imagem muito grande
+ */
+router.post(
+  '/me/avatar',
+  validate({ body: uploadAvatarSchema }),
+  UserController.uploadAvatar
 );
 
 /**

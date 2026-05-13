@@ -3,6 +3,8 @@ import { toast } from "sonner";
 
 export interface CepData {
   address_line: string;
+  neighborhood: string;
+  complement: string;
   city: string;
   state: string;
 }
@@ -39,6 +41,8 @@ export function useCepLookup(): UseCepLookupReturn {
 
       return {
         address_line: data.logradouro ?? "",
+        neighborhood: data.bairro ?? "",
+        complement: data.complemento ?? "",
         city: data.localidade ?? "",
         state: data.uf ?? "",
       };

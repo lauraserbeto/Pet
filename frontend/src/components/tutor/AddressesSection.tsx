@@ -8,7 +8,13 @@ import { HamsterLoader } from "../ui/HamsterLoader";
 import { ApiError } from "../../lib/httpClient";
 import { useAddresses } from "../../lib/hooks/useAddresses";
 import { useCepLookup } from "../../lib/hooks/useCepLookup";
+import { formatCep, CEP_MASKED_REGEX } from "../../lib/utils/masks";
 import type { Address } from "../../lib/services/addressService";
+
+/** Indicador visual de campo obrigatório */
+function RequiredMark() {
+  return <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>;
+}
 
 const UF_LIST = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
@@ -20,7 +26,7 @@ const addressSchema = z.object({
   cep: z
     .string()
     .trim()
-    .regex(/^\d{5}-?\d{3}$/, "CEP inválido (00000-000)"),
+    .regex(CEP_MASKED_REGEX, "CEP inválido (use 00000-000)"),
   rua: z.string().trim().min(2, "Rua é obrigatória").max(255),
   numero: z.string().trim().min(1, "Número é obrigatório").max(20),
   complemento: z.string().trim().max(255).optional().or(z.literal("")),
@@ -29,6 +35,7 @@ const addressSchema = z.object({
   estado: z
     .string()
     .trim()
+    .min(2, "UF é obrigatória")
     .toUpperCase()
     .refine((v) => (UF_LIST as readonly string[]).includes(v), "UF inválida"),
 });
@@ -83,6 +90,8 @@ export function AddressesSection() {
       const result = await lookupCep(cleaned);
       if (result) {
         if (result.address_line) setValue("rua", result.address_line, { shouldValidate: true });
+        if (result.neighborhood) setValue("bairro", result.neighborhood, { shouldValidate: true });
+        if (result.complement) setValue("complemento", result.complement, { shouldValidate: true });
         if (result.city) setValue("cidade", result.city, { shouldValidate: true });
         if (result.state) setValue("estado", result.state, { shouldValidate: true });
       }
@@ -181,18 +190,27 @@ export function AddressesSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  CEP {isFetchingCep && <Loader2 className="inline w-3 h-3 animate-spin ml-1" />}
+                  CEP<RequiredMark />
+                  {isFetchingCep && <Loader2 className="inline w-3 h-3 animate-spin ml-1" />}
                 </label>
                 <input
                   type="text"
-                  {...register("cep")}
-                  className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                  inputMode="numeric"
+                  maxLength={9}
                   placeholder="00000-000"
+                  {...register("cep", {
+                    onChange: (e) => {
+                      e.target.value = formatCep(e.target.value);
+                    },
+                  })}
+                  className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
                 {errors.cep && <p className="text-xs text-red-500 mt-1">{errors.cep.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Rua</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Rua<RequiredMark />
+                </label>
                 <input
                   type="text"
                   {...register("rua")}
@@ -201,7 +219,9 @@ export function AddressesSection() {
                 {errors.rua && <p className="text-xs text-red-500 mt-1">{errors.rua.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Número</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Número<RequiredMark />
+                </label>
                 <input
                   type="text"
                   {...register("numero")}
@@ -218,7 +238,9 @@ export function AddressesSection() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Bairro</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Bairro<RequiredMark />
+                </label>
                 <input
                   type="text"
                   {...register("bairro")}
@@ -228,7 +250,9 @@ export function AddressesSection() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Cidade</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Cidade<RequiredMark />
+                  </label>
                   <input
                     type="text"
                     {...register("cidade")}
@@ -239,7 +263,9 @@ export function AddressesSection() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">UF</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    UF<RequiredMark />
+                  </label>
                   <select
                     {...register("estado")}
                     className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] bg-white"

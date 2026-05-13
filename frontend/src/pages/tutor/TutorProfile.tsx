@@ -10,15 +10,14 @@ import { ApiError } from "../../lib/httpClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProfile } from "../../lib/hooks/useProfile";
 import { AddressesSection } from "../../components/tutor/AddressesSection";
-
-const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+import { formatPhone, PHONE_MASKED_REGEX } from "../../lib/utils/masks";
 
 const personalSchema = z.object({
   full_name: z.string().trim().min(2, "Nome deve ter ao menos 2 caracteres").max(150),
   phone: z
     .string()
     .trim()
-    .regex(phoneRegex, "Telefone inválido. Use (00) 00000-0000")
+    .regex(PHONE_MASKED_REGEX, "Telefone inválido. Use (00) 00000-0000")
     .or(z.literal("")),
 });
 type PersonalForm = z.infer<typeof personalSchema>;
@@ -52,6 +51,8 @@ export function TutorProfile() {
     isUpdatingProfile,
     changePassword,
     isChangingPassword,
+    uploadAvatar,
+    isUploadingAvatar,
   } = useProfile();
 
   const currentUser = profile ?? user;
@@ -89,13 +90,42 @@ export function TutorProfile() {
     }
   });
 
-  const [isUploading] = useState(false);
+  const AVATAR_ACCEPTED_MIMES = ["image/jpeg", "image/png", "image/webp"];
+  const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    // Upload pendente: definir storage (Cloudinary/S3) — ver tutor-integration-plan.md §1 Fase 1
-    toast.info("Upload de imagem em manutenção", {
-      description: "Estamos migrando nosso serviço de armazenamento.",
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permite re-selecionar o mesmo arquivo
+
+    if (!file) return;
+
+    if (!AVATAR_ACCEPTED_MIMES.includes(file.type)) {
+      toast.error("Formato inválido", {
+        description: "Envie uma imagem JPEG, PNG ou WebP.",
+      });
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      toast.error("Imagem muito grande", {
+        description: "O arquivo deve ter no máximo 2 MB.",
+      });
+      return;
+    }
+
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
     });
+
+    try {
+      await uploadAvatar(dataUrl);
+      toast.success("Foto de perfil atualizada!");
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Erro ao enviar a foto.";
+      toast.error(message);
+    }
   };
 
   const {
@@ -162,7 +192,7 @@ export function TutorProfile() {
                       <Camera size={40} />
                     </div>
                   )}
-                  {isUploading && (
+                  {isUploadingAvatar && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                       <Loader2 className="w-6 h-6 animate-spin text-white" />
                     </div>
@@ -181,7 +211,7 @@ export function TutorProfile() {
                     accept="image/*"
                     className="hidden"
                     onChange={handleAvatarUpload}
-                    disabled={isUploading}
+                    disabled={isUploadingAvatar}
                   />
                 </div>
               </div>
@@ -216,9 +246,15 @@ export function TutorProfile() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
                   <input
                     type="text"
-                    {...regPersonal("phone")}
-                    className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
+                    inputMode="numeric"
+                    maxLength={15}
                     placeholder="(00) 00000-0000"
+                    {...regPersonal("phone", {
+                      onChange: (e) => {
+                        e.target.value = formatPhone(e.target.value);
+                      },
+                    })}
+                    className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
                   />
                   {personalErrors.phone && (
                     <p className="text-sm text-red-500 mt-1">{personalErrors.phone.message}</p>

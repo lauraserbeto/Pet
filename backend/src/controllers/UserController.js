@@ -82,6 +82,26 @@ class UserController {
     }
   }
 
+  // Upload de avatar via base64 data URL.
+  // NOTA: armazenamos a string base64 inline em `avatar_url` (campo Text).
+  // Trade-off conhecido: aumenta o payload do `/users/me` em ~2MB no pior caso.
+  // Migrar para storage externo (Cloudinary/S3) é dívida registrada no plano.
+  async uploadAvatar(req, res, next) {
+    try {
+      const { image } = req.body;
+
+      const user = await prisma.user.update({
+        where: { id: req.userId },
+        data: { avatar_url: image },
+        select: PROFILE_SELECT,
+      });
+
+      return res.status(200).json(user);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   // Atualiza a senha — requer senha atual válida
   async updatePassword(req, res, next) {
     try {

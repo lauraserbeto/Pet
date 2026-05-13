@@ -51,6 +51,11 @@ export const userService = {
     return httpClient.patch<void>("/users/me/password", payload);
   },
 
+  // Upload do avatar como base64 data URL (formato `data:image/...;base64,...`)
+  uploadAvatar(image: string) {
+    return httpClient.post<AuthUser>("/users/me/avatar", { image });
+  },
+
   // Envia avaliação para ser Sitter
   submitSitterEvaluation(payload: SitterEvaluationPayload) {
     return httpClient.post("/users/me/evaluations", payload);
