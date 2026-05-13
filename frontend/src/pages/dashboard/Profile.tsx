@@ -28,6 +28,7 @@ import {
   Save,
   X
 } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 
 interface ProfileFormState {
   full_name: string;
@@ -232,10 +233,7 @@ export function Profile() {
   if (isLoading) {
     return (
       <div className="flex h-full min-h-[400px] items-center justify-center">
-        <div className="flex flex-col items-center gap-2 text-zinc-500 font-[family-name:var(--font-sans)]">
-          <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-          <p>Carregando perfil...</p>
-        </div>
+        <HamsterLoader size="sm" message="Carregando perfil..." />
       </div>
     );
   }

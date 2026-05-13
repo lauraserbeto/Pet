@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Camera, Lock, Loader2 } from "lucide-react";
+import { HamsterLoader } from "../../components/ui/HamsterLoader";
 
 import { ApiError } from "../../lib/httpClient";
 import { useAuth } from "../../contexts/AuthContext";
@@ -124,7 +125,7 @@ export function TutorProfile() {
   if (loadingInitial) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)]" />
+        <HamsterLoader message="Carregando seu perfil..." />
       </div>
     );
   }

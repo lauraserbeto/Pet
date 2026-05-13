@@ -5,6 +5,7 @@ import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { useCart } from "../components/cart/CartContext";
 import {
   Star,
   Heart,
@@ -146,6 +147,7 @@ function Stars({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { isFavorite: isFav, toggle: toggleFav } = useFavorites();
+  const { addItem } = useCart();
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -191,6 +193,17 @@ export function ProductDetailPage() {
   }
 
   const addToCart = () => {
+    if (!product) return;
+    void addItem(
+      {
+        id: String(product.id),
+        name: product.name,
+        brand: product.provider?.business_name ?? product.provider_name ?? "",
+        price: Number(product.price) || 0,
+        image: product.image_url ?? "",
+      },
+      quantity
+    );
     toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`);
   };
 

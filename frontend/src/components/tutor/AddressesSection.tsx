@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { MapPin, Plus, Edit2, Trash2, Loader2, Star, CheckCircle2 } from "lucide-react";
+import { HamsterLoader } from "../ui/HamsterLoader";
 import { ApiError } from "../../lib/httpClient";
 import { useAddresses } from "../../lib/hooks/useAddresses";
 import { useCepLookup } from "../../lib/hooks/useCepLookup";
@@ -277,9 +278,7 @@ export function AddressesSection() {
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-          </div>
+          <HamsterLoader size="sm" message="Carregando endereços..." />
         ) : addresses.length === 0 ? (
           <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
             Nenhum endereço cadastrado.

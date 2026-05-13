@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Eye, CheckCircle2, XCircle, Clock, Image as ImageIcon, Search, Loader2 } from 'lucide-react';
+import { HamsterLoader } from '../../components/ui/HamsterLoader';
 import { userService } from '../../lib/services/userService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
@@ -169,9 +170,7 @@ export const SitterEvaluations = () => {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center p-12">
-                        <Loader2 className="animate-spin h-8 w-8 text-primary-500" />
-                    </div>
+                    <HamsterLoader size="sm" message="Carregando avaliações..." />
                 ) : filteredEvaluations.length === 0 ? (
                     <Card className="border-dashed shadow-sm">
                         <CardContent className="flex flex-col items-center justify-center py-16 text-center">

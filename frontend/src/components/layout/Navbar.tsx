@@ -42,6 +42,31 @@ const tutorMenuItems = [
   { name: "Meus Pedidos", href: "/tutor/pedidos", icon: ShoppingBag },
 ];
 
+function CartIconButton({ variant = "desktop" }: { variant?: "desktop" | "mobile" }) {
+  const { totalItems } = useCart();
+  const label = `Carrinho${totalItems > 0 ? ` com ${totalItems} ${totalItems === 1 ? "item" : "itens"}` : ""}`;
+  return (
+    <Link
+      to="/cart"
+      aria-label={label}
+      title={label}
+      className={cn(
+        "relative inline-flex items-center justify-center transition-all",
+        variant === "desktop"
+          ? "h-10 w-10 rounded-full bg-slate-50 border border-slate-200 hover:bg-white hover:border-[var(--color-primary-200)] hover:shadow-sm text-slate-600 hover:text-slate-900"
+          : "h-10 w-10 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+      )}
+    >
+      <ShoppingCart className="h-5 w-5" />
+      {totalItems > 0 && (
+        <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-[var(--color-primary-500)] text-white text-[10px] font-bold flex items-center justify-center shadow-md ring-2 ring-white">
+          {totalItems > 99 ? "99+" : totalItems}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -144,7 +169,8 @@ export function Navbar() {
   const isTutor = roleId === 5 || (sessionUser && roleId === null);
   const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4;
 
-  const { totalItems } = useCart();
+  // Cart visível para anônimos e tutores. Escondido para dashboard users (admin/lojista/hotel/walker)
+  const showCart = !isLoading && (!sessionUser || isTutor);
 
   return (
     <>
@@ -202,7 +228,8 @@ export function Navbar() {
             </div>
 
             {/* ── Desktop Right Side ── */}
-            <div className="hidden md:flex items-center gap-6 ml-10">
+            <div className="hidden md:flex items-center gap-4 ml-10">
+              {showCart && <CartIconButton variant="desktop" />}
               {isLoading ? (
                 // Texto simples de carregamento para termos certeza que ele sai daqui
                 <span className="text-sm text-slate-400">Carregando perfil...</span>
@@ -314,8 +341,9 @@ export function Navbar() {
             </div>
 
             {/* Mobile Menu Toggle... Omitido para economizar espaço aqui mas está funcional no código */}
-            <div className="-mr-2 flex items-center md:hidden gap-2">
-               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">
+            <div className="-mr-2 flex items-center md:hidden gap-1">
+              {showCart && <CartIconButton variant="mobile" />}
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
