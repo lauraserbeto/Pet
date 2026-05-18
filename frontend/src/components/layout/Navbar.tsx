@@ -8,6 +8,7 @@ import {
   Hotel,
   Footprints,
   Info,
+  Briefcase,
   LogIn,
   LogOut,
   ChevronRight,
@@ -33,6 +34,7 @@ const publicNavItems = [
   { name: "Pet Sitter", href: "/walkers", icon: Footprints },
   { name: "Shopping", href: "/shopping", icon: ShoppingBag },
   { name: "Sobre Nós", href: "/about", icon: Info },
+  { name: "Parceiros", href: "/partners", icon: Briefcase },
 ];
 
 const tutorMenuItems = [

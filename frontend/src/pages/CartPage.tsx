@@ -24,6 +24,7 @@ export function CartPage() {
   const navigate = useNavigate();
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [itemToRemove, setItemToRemove] = useState<any | null>(null);
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === "PETMAIS15") {
@@ -127,7 +128,13 @@ export function CartPage() {
                         {/* Qty controls */}
                         <div className="flex items-center gap-1 bg-slate-50 rounded-lg border border-slate-100">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => {
+                              if (item.quantity === 1) {
+                                setItemToRemove(item);
+                              } else {
+                                updateQuantity(item.id, item.quantity - 1);
+                              }
+                            }}
                             className="p-1.5 hover:bg-slate-100 rounded-l-lg transition-colors"
                           >
                             <Minus className="h-3.5 w-3.5 text-slate-500" />
@@ -159,10 +166,7 @@ export function CartPage() {
 
                     {/* Remove */}
                     <button
-                      onClick={() => {
-                        removeItem(item.id);
-                        toast.success("Item removido do carrinho");
-                      }}
+                      onClick={() => setItemToRemove(item)}
                       className="self-start p-2 rounded-full hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="h-4 w-4 text-slate-400 hover:text-red-500 transition-colors" />
@@ -281,6 +285,64 @@ export function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {itemToRemove && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setItemToRemove(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs"
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-slate-100 shadow-xl relative z-10 text-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4 mx-auto">
+                <Trash2 className="h-5 w-5 text-orange-500" />
+              </div>
+
+              <h3 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
+                Remover este item?
+              </h3>
+              
+              <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed font-semibold">
+                Você quer retirar <span className="text-slate-800 font-bold">"{itemToRemove.name}"</span> do seu carrinho?
+              </p>
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl h-11 border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                  onClick={() => setItemToRemove(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl h-11 bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-md shadow-orange-500/10"
+                  onClick={async () => {
+                    await removeItem(itemToRemove.id);
+                    setItemToRemove(null);
+                    toast.success("Item removido do carrinho");
+                  }}
+                >
+                  Remover
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

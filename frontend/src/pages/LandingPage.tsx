@@ -951,28 +951,28 @@ export default function LandingPage() {
       
 
       {/* ═══════════════════════════════════════════════
-          6. CTA PARCEIROS
+          6. CTA PARCEIROS - LIGHT COMPACT ENTRYWAY
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-[var(--color-primary-600)] text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6 font-[family-name:var(--font-display)]">
-            Você tem um Pet Shop ou Clínica?
+      <section className="py-16 bg-slate-50 border-y border-slate-100 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-3xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-4">
+            Você tem um Pet Shop, Clínica ou é Cuidador?
           </h2>
-          <p className="text-lg text-[var(--color-primary-100)] mb-8 max-w-2xl mx-auto">
-            Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos,
-            clientes e produtos em um só lugar.
+          <p className="text-slate-600 mb-8 max-w-2xl mx-auto font-medium">
+            Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos, atração de clientes e faturamento em uma única plataforma inteligente.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" variant="secondary" className="font-bold">
-              Cadastrar meu Negócio
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-transparent border-white text-white hover:bg-white/10"
-            >
-              Saiba Mais
-            </Button>
+            <Link to="/partners">
+              <Button size="lg" className="bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] font-bold shadow-md shadow-primary-500/10">
+                Conhecer Área de Parceiros
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button size="lg" variant="outline" className="bg-transparent border-slate-200 text-slate-700 hover:bg-slate-50">
+                Saiba Mais
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

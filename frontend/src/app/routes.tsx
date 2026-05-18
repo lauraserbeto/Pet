@@ -40,6 +40,7 @@ import { TutorPets } from "../pages/tutor/TutorPets";
 import { TutorAppointments } from "../pages/tutor/TutorAppointments";
 import { TutorOrders } from "../pages/tutor/TutorOrders";
 import { NotFound } from "../pages/NotFound";
+import { PartnersPage } from "../pages/PartnersPage";
 
 export const router = createBrowserRouter([
   {
@@ -146,6 +147,10 @@ export const router = createBrowserRouter([
       {
         path: "about",
         Component: AboutPage,
+      },
+      {
+        path: "partners",
+        Component: PartnersPage,
       },
       {
         path: "terms",
