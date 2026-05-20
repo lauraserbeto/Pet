@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pet+ — Apresentação Projeto Integrador VI</title>
+  <link rel="icon" href="assets/logo.png" />
+
+  <!-- Mesmas fontes do produto (Nunito + Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+<body>
+
+<!-- ───────────────────────── SVG SPRITE (Lucide-style icons) ───────────────────────── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-paw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="6.5" cy="14" r="2"/><circle cx="15.5" cy="14" r="2"/>
+      <path d="M14.5 19.5c-1 1.5-2 2-3 2s-2-.5-3-2c-1.5-2.5-1-5 1-6.5 1.5-1 3.5-1 5 0 2 1.5 2.5 4 1 6.5z"/>
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <symbol id="i-hotel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 21V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v13"/><path d="M2 21h20"/><path d="M10 9h.01"/><path d="M14 9h.01"/><path d="M10 13h.01"/><path d="M14 13h.01"/><path d="M10 17h4"/>
+    </symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+    </symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>
+    </symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </symbol>
+    <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/>
+    </symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+    </symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+    </symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+    </symbol>
+    <symbol id="i-bone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 10c.7-.7 1.69 0 2.5 0a2.5 2.5 0 1 0 0-5 .5.5 0 0 1-.5-.5 2.5 2.5 0 1 0-5 0c0 .81.7 1.8 0 2.5l-7 7c-.7.7-1.69 0-2.5 0a2.5 2.5 0 0 0 0 5c.28 0 .5.22.5.5a2.5 2.5 0 1 0 5 0c0-.81-.7-1.8 0-2.5Z"/>
+    </symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>
+    </symbol>
+    <symbol id="i-bath" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><line x1="10" x2="8" y1="5" y2="7"/><line x1="2" x2="22" y1="12" y2="12"/><line x1="7" x2="7" y1="19" y2="21"/><line x1="17" x2="17" y1="19" y2="21"/>
+    </symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+    </symbol>
+    <symbol id="i-pill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>
+    </symbol>
+    <symbol id="i-sofa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/>
+    </symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>
+    </symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+    </symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </symbol>
+    <symbol id="i-trend-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+    </symbol>
+    <symbol id="i-trend-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>
+    </symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>
+    </symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 14v4a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-4"/><path d="M17 14 12 4 7 14"/><path d="M9 14h6"/>
+    </symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+    </symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+    </symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>
+    </symbol>
+    <symbol id="i-rocket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </symbol>
+    <symbol id="i-graduation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+    </symbol>
+    <symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/>
+    </symbol>
+    <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/>
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"/><path d="M12 5v14"/>
+    </symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ───────────────────────── DECK ───────────────────────── -->
+<div class="deck" id="deck">
+
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+  <div class="speaker-hint">
+    Pressione <kbd>S</kbd> p/ notas · <kbd>F</kbd> fullscreen · <kbd>←</kbd> <kbd>→</kbd> navegar
+  </div>
+
+  <div class="stage" id="stage">
+
+    <!-- Contador global (único, fora dos slides) -->
+    <div class="slide-counter global-counter">
+      <span class="current" id="counter-current">01</span><span>/</span><span id="counter-total">12</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 1 — CAPA
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide cover active" data-slide="1">
+      <div class="cover-content">
+        <div class="logo-stack">
+          <img src="assets/logo.png" alt="Pet+" />
+          <span class="wordmark">Pet<span class="plus">+</span></span>
+        </div>
+
+        <h1 class="tagline">A casa do seu pet,<br/>numa <span class="highlight">plataforma só</span>.</h1>
+        <p class="subtagline">Compras, hotelaria e cuidadores que você confia.<br/>Tudo num lugar — para tutores e para parceiros.</p>
+
+        <div class="credits">
+          <span class="team">Marcel Filho · Laura Serbêto · Layssa Fernandes</span>
+          <span class="meta">UniEVANGÉLICA · Engenharia de Computação · 6º período</span>
+          <span class="meta">Projeto Integrador VI · 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 2 — PROBLEMA
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="2">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> O Problema</span>
+        <h2 class="title">O mercado pet brasileiro<br/>é gigante. A experiência ainda é <span class="highlight">fragmentada</span>.</h2>
+      </div>
+
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="icon"><svg><use href="#i-search"/></svg></div>
+          <div class="pain-title">"Onde deixar o pet?"</div>
+          <div class="pain-text">Tutor que viaja precisa caçar hotel ou sitter em grupo de WhatsApp, sem garantia de segurança ou comparação real.</div>
+          <div class="pain-quote">"Já procurei hotel pet no Google e cada um pede coisa diferente. Eu só queria comparar."</div>
+        </div>
+
+        <div class="pain-card">
+          <div class="icon"><svg><use href="#i-bag"/></svg></div>
+          <div class="pain-title">"Confio nessa loja?"</div>
+          <div class="pain-text">Compras de ração, brinquedos e medicamentos espalhadas em sites genéricos, sem curadoria nem foco em pets.</div>
+          <div class="pain-quote">"Comprei ração errada em marketplace generalista e tive que devolver. Nunca mais."</div>
+        </div>
+
+        <div class="pain-card">
+          <div class="icon"><svg><use href="#i-store"/></svg></div>
+          <div class="pain-title">"Como gero clientes?"</div>
+          <div class="pain-text">Pequenos lojistas, hotéis e cuidadores dependem de indicação e planilha — sem canal próprio, sem painel, sem escala.</div>
+          <div class="pain-quote">"Tenho uma agenda boa, mas só quem já conhece pessoalmente sabe que existo."</div>
+        </div>
+      </div>
+
+      <div class="market-stat">
+        <div class="stat-number">R$ 77 bi</div>
+        <div class="stat-text">O mercado pet brasileiro é o <strong>3º maior do mundo</strong> e movimenta <strong>R$ 77 bilhões por ano</strong> (Abinpet) — com mais de <strong>149 milhões</strong> de pets no país.</div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 3 — SOLUÇÃO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="3">
+      <div class="slide-header" style="text-align:center; align-items:center;">
+        <span class="eyebrow" style="margin-left:auto;margin-right:auto;"><span class="dot"></span> A Solução</span>
+      </div>
+
+      <div class="solution-block">
+        <h2>O Pet+ é o <span class="highlight">ponto de encontro</span> entre quem cuida do pet e quem oferece esse cuidado.</h2>
+      </div>
+
+      <div class="diagram">
+        <div class="diagram-side">
+          <div class="entity-card tutor">
+            <div class="e-icon"><svg><use href="#i-user"/></svg></div>
+            <div class="e-info">
+              <div class="e-title">Tutores</div>
+              <div class="e-desc">Compram, agendam e cuidam num só lugar</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diagram-center">
+          <img src="assets/logo.png" alt="Pet+"/>
+        </div>
+
+        <div class="diagram-side">
+          <div class="entity-card hotel">
+            <div class="e-icon"><svg><use href="#i-hotel"/></svg></div>
+            <div class="e-info">
+              <div class="e-title">Hotéis Pet</div>
+              <div class="e-desc">Recebem reservas com perfil completo</div>
+            </div>
+          </div>
+          <div class="entity-card sitter">
+            <div class="e-icon"><svg><use href="#i-paw"/></svg></div>
+            <div class="e-info">
+              <div class="e-title">Pet Sitters</div>
+              <div class="e-desc">Cuidadores treinados e verificados</div>
+            </div>
+          </div>
+          <div class="entity-card lojista">
+            <div class="e-icon"><svg><use href="#i-store"/></svg></div>
+            <div class="e-info">
+              <div class="e-title">Lojistas</div>
+              <div class="e-desc">Vendem na vitrine do marketplace</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 4 — PERFIS
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="4">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Perfis Atendidos</span>
+        <h2 class="title">Cinco perfis. <span class="highlight">Cinco jornadas</span>.<br/>Uma só plataforma.</h2>
+        <p class="lead">Cada perfil tem sua própria tela inicial, suas próprias permissões e sua própria forma de gerar valor para o ecossistema.</p>
+      </div>
+
+      <div class="persona-grid">
+        <div class="persona tutor">
+          <div class="p-icon"><svg><use href="#i-user"/></svg></div>
+          <div class="p-name">Tutor</div>
+          <div class="p-desc">Descobre serviços, compra produtos, reserva hospedagem e gerencia o histórico dos pets.</div>
+          <span class="p-tag">Usuário central</span>
+        </div>
+        <div class="persona lojista">
+          <div class="p-icon"><svg><use href="#i-store"/></svg></div>
+          <div class="p-name">Lojista</div>
+          <div class="p-desc">Cadastra produtos, recebe pedidos, acompanha vendas e relatórios em painel próprio.</div>
+          <span class="p-tag">Parceiro</span>
+        </div>
+        <div class="persona hotel">
+          <div class="p-icon"><svg><use href="#i-hotel"/></svg></div>
+          <div class="p-name">Hotel Pet</div>
+          <div class="p-desc">Mantém perfil público com galeria, agenda e diárias. Recebe reservas diretas pela plataforma.</div>
+          <span class="p-tag">Parceiro</span>
+        </div>
+        <div class="persona sitter">
+          <div class="p-icon"><svg><use href="#i-paw"/></svg></div>
+          <div class="p-name">Pet Sitter</div>
+          <div class="p-desc">Passa pela Escola de Heróis, monta perfil verificado e oferece sitter, dog walker e day care.</div>
+          <span class="p-tag">Parceiro</span>
+        </div>
+        <div class="persona admin">
+          <div class="p-icon"><svg><use href="#i-shield-check"/></svg></div>
+          <div class="p-name">Administrador</div>
+          <div class="p-desc">Aprova parceiros, gerencia qualidade e mantém a confiança da comunidade Pet+.</div>
+          <span class="p-tag">Operação</span>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 5 — DEMO: VITRINE DO TUTOR
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="5">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Demo 1 · Vitrine</span>
+        <h2 class="title">A casa do tutor: <span class="highlight">explorar, descobrir, comprar</span>.</h2>
+      </div>
+
+      <div class="demo-grid">
+        <!-- BROWSER MOCKUP -->
+        <div class="browser-mock">
+          <div class="browser-bar">
+            <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="url">petplus.vercel.app</div>
+          </div>
+          <div class="browser-content">
+            <!-- Hero -->
+            <div class="hero-mini">
+              <span class="h-eyebrow">Pet+</span>
+              <h3>Cuidado completo para quem é <span class="accent">família</span>.</h3>
+              <p>De cuidados especializados aos melhores produtos. Tudo o que seu pet precisa, num só lugar.</p>
+              <div class="cta-row">
+                <span class="btn-primary">Explorar Serviços</span>
+                <span class="btn-outline">Ver Catálogo</span>
+              </div>
+            </div>
+
+            <!-- Categorias -->
+            <div class="mini-section-header" style="margin-top:8px;">
+              <div>
+                <span class="badge-flame"><svg style="width:10px;height:10px"><use href="#i-sparkles"/></svg> Navegue</span>
+                <h4>Categorias Populares</h4>
+              </div>
+              <span class="see-all">Ver todas <svg style="width:10px;height:10px"><use href="#i-arrow-right"/></svg></span>
+            </div>
+            <div class="categories-row">
+              <div class="cat" style="--ring-c1:#fbbf24; --ring-c2:#f97316"><div class="cat-ring"><svg><use href="#i-bone"/></svg></div><span class="cat-name">Alimentação</span></div>
+              <div class="cat" style="--ring-c1:#f472b6; --ring-c2:#e11d48"><div class="cat-ring"><svg><use href="#i-sparkles"/></svg></div><span class="cat-name">Brinquedos</span></div>
+              <div class="cat" style="--ring-c1:#38bdf8; --ring-c2:#3b82f6"><div class="cat-ring"><svg><use href="#i-bath"/></svg></div><span class="cat-name">Higiene</span></div>
+              <div class="cat" style="--ring-c1:#a78bfa; --ring-c2:#8b5cf6"><div class="cat-ring"><svg><use href="#i-tag"/></svg></div><span class="cat-name">Acessórios</span></div>
+              <div class="cat" style="--ring-c1:#34d399; --ring-c2:#10b981"><div class="cat-ring"><svg><use href="#i-sofa"/></svg></div><span class="cat-name">Conforto</span></div>
+              <div class="cat" style="--ring-c1:#4ade80; --ring-c2:#10b981"><div class="cat-ring"><svg><use href="#i-pill"/></svg></div><span class="cat-name">Farmácia</span></div>
+              <div class="cat" style="--ring-c1:#e879f9; --ring-c2:#d946ef"><div class="cat-ring"><svg><use href="#i-shirt"/></svg></div><span class="cat-name">Roupas</span></div>
+            </div>
+
+            <!-- Section: Destaques -->
+            <div class="mini-section-header" style="margin-top:24px;">
+              <div>
+                <span class="badge-flame"><svg style="width:10px;height:10px"><use href="#i-flame"/></svg> Promoção</span>
+                <h4>Destaques da Semana</h4>
+              </div>
+              <span class="see-all">Ver Shopping <svg style="width:10px;height:10px"><use href="#i-arrow-right"/></svg></span>
+            </div>
+
+            <!-- Products: dados reais da landing -->
+            <div class="product-grid">
+              <div class="product-card">
+                <div class="p-image" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">🦴
+                  <span class="badge-discount"><svg style="width:8px;height:8px"><use href="#i-zap"/></svg>-21%</span>
+                  <span class="badge-tag best">Mais Vendido</span>
+                  <span class="fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span>
+                </div>
+                <div class="p-body">
+                  <span class="p-brand">Royal Canin</span>
+                  <span class="p-name">Ração Premium Cães Adultos 15kg</span>
+                  <div class="p-rating"><span class="stars">★★★★★</span><span class="count">(328)</span></div>
+                  <div class="p-price-row">
+                    <span class="p-price-old">R$ 189,90</span>
+                    <span class="p-price">R$ 149,90</span>
+                  </div>
+                  <span class="p-cta"><svg style="width:12px;height:12px"><use href="#i-cart"/></svg> Adicionar</span>
+                </div>
+              </div>
+
+              <div class="product-card">
+                <div class="p-image" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe);">🦮
+                  <span class="badge-discount"><svg style="width:8px;height:8px"><use href="#i-zap"/></svg>-25%</span>
+                  <span class="badge-tag offer">Oferta</span>
+                  <span class="fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span>
+                </div>
+                <div class="p-body">
+                  <span class="p-brand">Premier</span>
+                  <span class="p-name">Coleira Refletiva Premium Ajustável</span>
+                  <div class="p-rating"><span class="stars">★★★★★</span><span class="count">(94)</span></div>
+                  <div class="p-price-row">
+                    <span class="p-price-old">R$ 119,90</span>
+                    <span class="p-price">R$ 89,90</span>
+                  </div>
+                  <span class="p-cta"><svg style="width:12px;height:12px"><use href="#i-cart"/></svg> Adicionar</span>
+                </div>
+              </div>
+
+              <div class="product-card">
+                <div class="p-image" style="background:linear-gradient(135deg,#ccfbf1,#99f6e4);">🛏️
+                  <span class="badge-discount"><svg style="width:8px;height:8px"><use href="#i-zap"/></svg>-24%</span>
+                  <span class="badge-tag new">Novo</span>
+                  <span class="fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span>
+                </div>
+                <div class="p-body">
+                  <span class="p-brand">Premier</span>
+                  <span class="p-name">Cama Ortopédica Pet Grande</span>
+                  <div class="p-rating"><span class="stars">★★★★★</span><span class="count">(201)</span></div>
+                  <div class="p-price-row">
+                    <span class="p-price-old">R$ 289,90</span>
+                    <span class="p-price">R$ 219,90</span>
+                  </div>
+                  <span class="p-cta"><svg style="width:12px;height:12px"><use href="#i-cart"/></svg> Adicionar</span>
+                </div>
+              </div>
+
+              <div class="product-card">
+                <div class="p-image" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8);">🎾
+                  <span class="fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span>
+                </div>
+                <div class="p-body">
+                  <span class="p-brand">PetClean</span>
+                  <span class="p-name">Brinquedo Interativo Resistente</span>
+                  <div class="p-rating"><span class="stars">★★★★★</span><span class="count">(156)</span></div>
+                  <div class="p-price-row">
+                    <span class="p-price">R$ 39,90</span>
+                  </div>
+                  <span class="p-cta"><svg style="width:12px;height:12px"><use href="#i-cart"/></svg> Adicionar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Callouts -->
+        <div class="callout-list">
+          <div class="callout">
+            <span class="c-tag">Hero rotativo</span>
+            <div class="c-title">Três mensagens-chave em loop</div>
+            <div class="c-text">"Cuidado pra família" · "Shopping com ofertas" · "Hotéis e Sitters". O tutor vê todas as ofertas da plataforma sem precisar clicar.</div>
+          </div>
+          <div class="callout">
+            <span class="c-tag">Vitrine real</span>
+            <div class="c-title">Catálogo com marcas e descontos</div>
+            <div class="c-text">Ração Royal Canin, Cama Premier, Coleira Refletiva — produtos reais, com badges, avaliações e botão de compra direto.</div>
+          </div>
+          <div class="callout">
+            <span class="c-tag">Identidade Pet+</span>
+            <div class="c-title">Design coerente e calmo</div>
+            <div class="c-text">Paleta laranja, tipografia Nunito + Inter, cards arredondados. Não é template — é marca.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 6 — DEMO: HOTÉIS E PET SITTERS
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="6">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Demo 2 · Serviços</span>
+        <h2 class="title">Hotéis e cuidadores <span class="highlight">verificados</span> — e fáceis de comparar.</h2>
+      </div>
+
+      <div class="split-demo">
+        <!-- HOTÉIS -->
+        <div class="demo-col hotel-col">
+          <h4>
+            <span class="col-icon"><svg style="width:18px;height:18px"><use href="#i-hotel"/></svg></span>
+            Hotéis Pet
+          </h4>
+
+          <div class="partner-card" style="--bg1:#dbeafe; --bg2:#93c5fd;">
+            <div class="pc-img">🏨<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Hotel Patinhas Carinhosas</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> Goiânia, GO · 3,0 km</span>
+                <span class="dot-sep">·</span>
+                <span style="color:#059669;font-weight:600;">Aberto agora</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Verificado</span>
+                <span class="tag">Pet Friendly</span>
+                <span class="tag">Wi-Fi · 24h</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg><span class="star"></span> 5,0 · 38 aval.</span>
+                <span class="pc-price">R$ 150 <small>/diária</small></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="partner-card" style="--bg1:#fef3c7; --bg2:#fde047;">
+            <div class="pc-img">🐕‍🦺<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Hospedaria Quintal Feliz</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> Anápolis, GO · 5,2 km</span>
+                <span class="dot-sep">·</span>
+                <span style="color:#059669;font-weight:600;">Aberto agora</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Verificado</span>
+                <span class="tag">Área externa</span>
+                <span class="tag">Cães e gatos</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg> 4,9 · 22 aval.</span>
+                <span class="pc-price">R$ 120 <small>/diária</small></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="partner-card" style="--bg1:#ccfbf1; --bg2:#5eead4;">
+            <div class="pc-img">🌳<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Pousada do Rex</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> Brasília, DF · 8,7 km</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Verificado</span>
+                <span class="tag">Câmeras 24h</span>
+                <span class="tag">Banho incluso</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg> 4,8 · 47 aval.</span>
+                <span class="pc-price">R$ 180 <small>/diária</small></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SITTERS -->
+        <div class="demo-col sitter-col">
+          <h4>
+            <span class="col-icon"><svg style="width:18px;height:18px"><use href="#i-paw"/></svg></span>
+            Pet Sitters & Dog Walkers
+          </h4>
+
+          <div class="partner-card" style="--bg1:#fce7f3; --bg2:#f9a8d4;">
+            <div class="pc-img">🧑‍🦰<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Rafael Costa</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> 2,0 km</span>
+                <span class="dot-sep">·</span>
+                <span>3 anos · 40 pets cuidados</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Escola de Heróis</span>
+                <span class="tag">Pet Sitter</span>
+                <span class="tag">Dog Walker</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg> 5,0 · 18 aval.</span>
+                <span class="pc-price">R$ 50 <small>/hora</small></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="partner-card" style="--bg1:#dbeafe; --bg2:#93c5fd;">
+            <div class="pc-img">👩‍🦱<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Juliana Mendes</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> 4,1 km</span>
+                <span class="dot-sep">·</span>
+                <span>5 anos · 89 pets</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Escola de Heróis</span>
+                <span class="tag">Day Care</span>
+                <span class="tag">Pet Sitter</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg> 4,9 · 36 aval.</span>
+                <span class="pc-price">R$ 60 <small>/hora</small></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="partner-card" style="--bg1:#fef3c7; --bg2:#fde047;">
+            <div class="pc-img">🧔<span class="pc-fav"><svg style="width:14px;height:14px"><use href="#i-heart"/></svg></span></div>
+            <div class="pc-body">
+              <div class="pc-name">Marcos Lima</div>
+              <div class="pc-meta">
+                <span><svg style="width:11px;height:11px;vertical-align:-2px;color:#94a3b8"><use href="#i-map-pin"/></svg> 6,5 km</span>
+                <span class="dot-sep">·</span>
+                <span>2 anos · 27 pets</span>
+              </div>
+              <div class="pc-tags">
+                <span class="tag verified"><svg style="width:9px;height:9px"><use href="#i-shield-check"/></svg> Escola de Heróis</span>
+                <span class="tag">Dog Walker</span>
+              </div>
+              <div class="pc-footer">
+                <span class="pc-rating"><svg style="width:14px;height:14px;color:var(--amber)"><use href="#i-star"/></svg> 4,8 · 12 aval.</span>
+                <span class="pc-price">R$ 40 <small>/hora</small></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature-pill"><span class="fp-number">Filtros</span><span class="fp-label">Distância, preço, avaliação, animal aceito</span></div>
+        <div class="feature-pill"><span class="fp-number">Favoritos</span><span class="fp-label">Marca e volta depois sem perder a lista</span></div>
+        <div class="feature-pill"><span class="fp-number">Perfil completo</span><span class="fp-label">Galeria, horários, comodidades, descrição</span></div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 7 — DEMO: CARRINHO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="7">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Demo 3 · Carrinho</span>
+        <h2 class="title">Um carrinho que <span class="highlight">não se perde</span>.</h2>
+        <p class="lead">O tutor monta o carrinho antes mesmo de fazer login. Quando entra na conta, tudo é preservado.</p>
+      </div>
+
+      <div class="cart-mock">
+        <!-- ITENS -->
+        <div class="cart-items">
+          <div class="cart-header">
+            <h4>Meu Carrinho</h4>
+            <span class="item-count">3 itens</span>
+          </div>
+
+          <div class="cart-item">
+            <div class="ci-img" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">🦴</div>
+            <div>
+              <div class="ci-brand">Royal Canin</div>
+              <div class="ci-name">Ração Premium Cães Adultos 15kg</div>
+              <div class="ci-controls">
+                <div class="qty"><button><svg style="width:12px;height:12px"><use href="#i-minus"/></svg></button><span>1</span><button><svg style="width:12px;height:12px"><use href="#i-plus"/></svg></button></div>
+                <button style="color:var(--slate-400)"><svg style="width:14px;height:14px"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="ci-price">
+              <div class="ci-price-old">R$ 189,90</div>
+              <div class="ci-price-now">R$ 149,90</div>
+            </div>
+          </div>
+
+          <div class="cart-item">
+            <div class="ci-img" style="background:linear-gradient(135deg,#ccfbf1,#99f6e4);">🛏️</div>
+            <div>
+              <div class="ci-brand">Premier</div>
+              <div class="ci-name">Cama Ortopédica Pet Grande</div>
+              <div class="ci-controls">
+                <div class="qty"><button><svg style="width:12px;height:12px"><use href="#i-minus"/></svg></button><span>1</span><button><svg style="width:12px;height:12px"><use href="#i-plus"/></svg></button></div>
+                <button style="color:var(--slate-400)"><svg style="width:14px;height:14px"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="ci-price">
+              <div class="ci-price-old">R$ 289,90</div>
+              <div class="ci-price-now">R$ 219,90</div>
+            </div>
+          </div>
+
+          <div class="cart-item">
+            <div class="ci-img" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8);">🎾</div>
+            <div>
+              <div class="ci-brand">PetClean</div>
+              <div class="ci-name">Brinquedo Interativo Resistente</div>
+              <div class="ci-controls">
+                <div class="qty"><button><svg style="width:12px;height:12px"><use href="#i-minus"/></svg></button><span>2</span><button><svg style="width:12px;height:12px"><use href="#i-plus"/></svg></button></div>
+                <button style="color:var(--slate-400)"><svg style="width:14px;height:14px"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="ci-price">
+              <div class="ci-price-now">R$ 79,80</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div class="cart-summary">
+          <h5>Resumo do pedido</h5>
+
+          <div class="coupon-applied">
+            <svg style="width:14px;height:14px"><use href="#i-check"/></svg>
+            Cupom PETMAIS15 aplicado · 15%
+          </div>
+
+          <div class="summary-line"><span>Subtotal (4 itens)</span><strong>R$ 449,70</strong></div>
+          <div class="summary-line discount"><span>Desconto (15%)</span><strong>− R$ 67,45</strong></div>
+          <div class="summary-line shipping-free"><span>Frete</span><strong>Grátis</strong></div>
+          <div style="font-size:11px;color:var(--slate-400);margin-top:-4px;">Frete grátis acima de R$ 199</div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span class="lbl">Total</span>
+            <span class="val">R$ 382,25</span>
+          </div>
+
+          <button class="btn-checkout">Finalizar Compra <svg style="width:14px;height:14px"><use href="#i-arrow-right"/></svg></button>
+
+          <div class="cart-trust">
+            <div class="trust-item"><svg><use href="#i-shield-check"/></svg> Pagamento 100% seguro</div>
+            <div class="trust-item"><svg><use href="#i-truck"/></svg> Entrega rápida em Goiânia</div>
+            <div class="trust-item"><svg><use href="#i-rotate"/></svg> Troca grátis em 7 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-highlight">
+        <div class="fh-icon"><svg><use href="#i-package"/></svg></div>
+        <div>
+          <div class="fh-title">Carrinho híbrido — funciona antes do login</div>
+          <div class="fh-text">Adicionou produtos sem estar logado? Sem problema. Quando o tutor entra na conta, o carrinho é mesclado com o que ele já tinha salvo. Zero atrito, zero perda.</div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 8 — DEMO: DASHBOARD PARCEIRO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="8">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Demo 4 · Painel do Parceiro</span>
+        <h2 class="title">O parceiro deixa o caderno para trás. Ganha <span class="highlight">dados</span>.</h2>
+      </div>
+
+      <div class="dashboard-mock">
+        <div class="dash-header">
+          <div>
+            <h4>Visão Geral</h4>
+            <div class="greet">Bem-vinda, Patinhas Carinhosas! Aqui está o resumo do seu negócio hoje.</div>
+          </div>
+          <span class="btn-new">+ Novo Agendamento</span>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi b1">
+            <div class="kpi-row">
+              <span class="kpi-label">Receita Total (Mês)</span>
+              <div class="kpi-icon"><svg><use href="#i-dollar"/></svg></div>
+            </div>
+            <div class="kpi-value">R$ 12.450</div>
+            <span class="kpi-trend up"><svg style="width:10px;height:10px"><use href="#i-trend-up"/></svg> +12.5% vs. mês anterior</span>
+          </div>
+          <div class="kpi b2">
+            <div class="kpi-row">
+              <span class="kpi-label">Agendamentos</span>
+              <div class="kpi-icon"><svg><use href="#i-calendar"/></svg></div>
+            </div>
+            <div class="kpi-value">142</div>
+            <span class="kpi-trend up"><svg style="width:10px;height:10px"><use href="#i-trend-up"/></svg> +4% vs. semana</span>
+          </div>
+          <div class="kpi b3">
+            <div class="kpi-row">
+              <span class="kpi-label">Novos Clientes</span>
+              <div class="kpi-icon"><svg><use href="#i-users"/></svg></div>
+            </div>
+            <div class="kpi-value">24</div>
+            <span class="kpi-trend down"><svg style="width:10px;height:10px"><use href="#i-trend-down"/></svg> −2% vs. mês</span>
+          </div>
+          <div class="kpi b4">
+            <div class="kpi-row">
+              <span class="kpi-label">Ticket Médio</span>
+              <div class="kpi-icon"><svg><use href="#i-bag"/></svg></div>
+            </div>
+            <div class="kpi-value">R$ 87,50</div>
+            <span class="kpi-trend up"><svg style="width:10px;height:10px"><use href="#i-trend-up"/></svg> +5.2% vs. mês</span>
+          </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="ch-title">Receita Semanal</div>
+            <div class="ch-sub">Últimos 7 dias · acompanhe o desempenho financeiro</div>
+            <svg class="chart-svg" viewBox="0 0 560 180" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-revenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3699D2" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#3699D2" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid -->
+              <line x1="40" y1="20"  x2="540" y2="20"  stroke="#e2e8f0" stroke-dasharray="3 3"/>
+              <line x1="40" y1="60"  x2="540" y2="60"  stroke="#e2e8f0" stroke-dasharray="3 3"/>
+              <line x1="40" y1="100" x2="540" y2="100" stroke="#e2e8f0" stroke-dasharray="3 3"/>
+              <line x1="40" y1="140" x2="540" y2="140" stroke="#e2e8f0" stroke-dasharray="3 3"/>
+              <!-- Y labels -->
+              <text x="32" y="24"  text-anchor="end" font-size="10" fill="#94a3b8">R$3.5k</text>
+              <text x="32" y="64"  text-anchor="end" font-size="10" fill="#94a3b8">R$2.5k</text>
+              <text x="32" y="104" text-anchor="end" font-size="10" fill="#94a3b8">R$1.5k</text>
+              <text x="32" y="144" text-anchor="end" font-size="10" fill="#94a3b8">R$500</text>
+              <!-- Area -->
+              <path
+                d="M 60 110 L 140 70 L 220 130 L 300 90 L 380 60 L 460 30 L 540 80 L 540 160 L 60 160 Z"
+                fill="url(#grad-revenue)" />
+              <!-- Stroke -->
+              <path
+                d="M 60 110 L 140 70 L 220 130 L 300 90 L 380 60 L 460 30 L 540 80"
+                stroke="#3699D2" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- Points -->
+              <g fill="#3699D2">
+                <circle cx="60"  cy="110" r="4"/><circle cx="140" cy="70"  r="4"/>
+                <circle cx="220" cy="130" r="4"/><circle cx="300" cy="90"  r="4"/>
+                <circle cx="380" cy="60"  r="4"/><circle cx="460" cy="30"  r="4"/>
+                <circle cx="540" cy="80"  r="4"/>
+              </g>
+              <!-- X labels -->
+              <g font-size="10" fill="#94a3b8" text-anchor="middle">
+                <text x="60"  y="172">Seg</text><text x="140" y="172">Ter</text>
+                <text x="220" y="172">Qua</text><text x="300" y="172">Qui</text>
+                <text x="380" y="172">Sex</text><text x="460" y="172">Sáb</text>
+                <text x="540" y="172">Dom</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="chart-card">
+            <div class="ch-title">Serviços Populares</div>
+            <div class="ch-sub">Distribuição dos atendimentos</div>
+            <div class="pie-content">
+              <svg class="pie-svg" viewBox="0 0 100 100">
+                <!-- 4 segmentos: 45 Hospedagem, 30 Passeio, 15 Day Care, 10 Sitter -->
+                <circle r="14" cx="50" cy="50" fill="none" stroke="#3699D2"
+                        stroke-width="20" stroke-dasharray="39.6 87.96" transform="rotate(-90 50 50)"/>
+                <circle r="14" cx="50" cy="50" fill="none" stroke="#F58B05"
+                        stroke-width="20" stroke-dasharray="26.4 87.96" stroke-dashoffset="-39.6" transform="rotate(-90 50 50)"/>
+                <circle r="14" cx="50" cy="50" fill="none" stroke="#10B981"
+                        stroke-width="20" stroke-dasharray="13.2 87.96" stroke-dashoffset="-66.0" transform="rotate(-90 50 50)"/>
+                <circle r="14" cx="50" cy="50" fill="none" stroke="#6366F1"
+                        stroke-width="20" stroke-dasharray="8.8 87.96" stroke-dashoffset="-79.2" transform="rotate(-90 50 50)"/>
+                <text x="50" y="55" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="11" fill="#0f172a">100%</text>
+              </svg>
+              <div class="pie-legend">
+                <div class="lg-row"><span class="lg-name"><span class="dot" style="background:#3699D2"></span>Hospedagem</span><span class="lg-val">45%</span></div>
+                <div class="lg-row"><span class="lg-name"><span class="dot" style="background:#F58B05"></span>Passeio</span><span class="lg-val">30%</span></div>
+                <div class="lg-row"><span class="lg-name"><span class="dot" style="background:#10B981"></span>Day Care</span><span class="lg-val">15%</span></div>
+                <div class="lg-row"><span class="lg-name"><span class="dot" style="background:#6366F1"></span>Pet Sitter</span><span class="lg-val">10%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AGENDAMENTOS -->
+        <div class="appointments-card">
+          <div class="ac-header">
+            <h5>Próximos Agendamentos · Hoje</h5>
+            <span class="ac-link">Ver todos</span>
+          </div>
+          <div class="apt-row">
+            <div class="apt-left">
+              <div class="apt-avatar">🐕</div>
+              <div>
+                <div class="apt-name">Rex <span class="owner">(Carlos Silva)</span></div>
+                <div class="apt-service"><svg style="width:10px;height:10px;vertical-align:-1px"><use href="#i-activity"/></svg> Hospedagem</div>
+              </div>
+            </div>
+            <div class="apt-right">
+              <span class="apt-time"><svg class="clk" style="width:11px;height:11px"><use href="#i-clock"/></svg> 09:00</span>
+              <span class="apt-status confirmed">Confirmado</span>
+            </div>
+          </div>
+          <div class="apt-row">
+            <div class="apt-left">
+              <div class="apt-avatar">🐩</div>
+              <div>
+                <div class="apt-name">Luna <span class="owner">(Ana Costa)</span></div>
+                <div class="apt-service"><svg style="width:10px;height:10px;vertical-align:-1px"><use href="#i-activity"/></svg> Passeio</div>
+              </div>
+            </div>
+            <div class="apt-right">
+              <span class="apt-time"><svg class="clk" style="width:11px;height:11px"><use href="#i-clock"/></svg> 10:30</span>
+              <span class="apt-status pending">Pendente</span>
+            </div>
+          </div>
+          <div class="apt-row">
+            <div class="apt-left">
+              <div class="apt-avatar">🐶</div>
+              <div>
+                <div class="apt-name">Thor <span class="owner">(Marcos Lima)</span></div>
+                <div class="apt-service"><svg style="width:10px;height:10px;vertical-align:-1px"><use href="#i-activity"/></svg> Day Care</div>
+              </div>
+            </div>
+            <div class="apt-right">
+              <span class="apt-time"><svg class="clk" style="width:11px;height:11px"><use href="#i-clock"/></svg> 11:15</span>
+              <span class="apt-status done">Concluído</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 9 — CONFIANÇA POR DESIGN
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="9">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Confiança por Design</span>
+        <h2 class="title">Ninguém entra no Pet+ <span class="highlight">sem passar pelo filtro</span>.</h2>
+      </div>
+
+      <div class="trust-split">
+        <!-- ADMIN APPROVAL -->
+        <div class="trust-col">
+          <div class="tc-header">
+            <span class="tc-pill" style="background:#ede9fe;color:#7c3aed;">
+              <svg style="width:12px;height:12px"><use href="#i-shield-check"/></svg> Painel Administrador
+            </span>
+            <div class="tc-title">Aprovação manual de parceiros</div>
+            <div class="tc-sub">Cada lojista, hotel ou pet sitter passa por análise antes de aparecer na plataforma.</div>
+          </div>
+
+          <div class="tabs-row">
+            <div class="tab active">Novos · 7</div>
+            <div class="tab">Aprovados · 24</div>
+            <div class="tab">Recusados · 3</div>
+          </div>
+
+          <div class="approval-row">
+            <div class="ar-contact">
+              <div class="name">Ana Souza</div>
+              <div class="email">ana.souza@email.com</div>
+            </div>
+            <div>
+              <div class="ar-biz">Patinhas Carinhosas Hotel</div>
+              <span class="type-pill"><svg style="width:10px;height:10px"><use href="#i-hotel"/></svg> Hotel</span>
+            </div>
+            <div class="ar-actions">
+              <span class="btn-reject"><svg style="width:10px;height:10px"><use href="#i-x"/></svg> Recusar</span>
+              <span class="btn-approve"><svg style="width:10px;height:10px"><use href="#i-check"/></svg> Aprovar</span>
+            </div>
+          </div>
+
+          <div class="approval-row">
+            <div class="ar-contact">
+              <div class="name">Rafael Costa</div>
+              <div class="email">rafael.costa@email.com</div>
+            </div>
+            <div>
+              <div class="ar-biz">Pet Sitter Goiânia</div>
+              <span class="type-pill"><svg style="width:10px;height:10px"><use href="#i-paw"/></svg> Pet Sitter</span>
+            </div>
+            <div class="ar-actions">
+              <span class="btn-reject"><svg style="width:10px;height:10px"><use href="#i-x"/></svg> Recusar</span>
+              <span class="btn-approve"><svg style="width:10px;height:10px"><use href="#i-check"/></svg> Aprovar</span>
+            </div>
+          </div>
+
+          <div class="approval-row">
+            <div class="ar-contact">
+              <div class="name">Fernanda Oliveira</div>
+              <div class="email">fernanda.o@email.com</div>
+            </div>
+            <div>
+              <div class="ar-biz">Pet Store Anápolis</div>
+              <span class="type-pill"><svg style="width:10px;height:10px"><use href="#i-store"/></svg> Lojista</span>
+            </div>
+            <div class="ar-actions">
+              <span class="btn-reject"><svg style="width:10px;height:10px"><use href="#i-x"/></svg> Recusar</span>
+              <span class="btn-approve"><svg style="width:10px;height:10px"><use href="#i-check"/></svg> Aprovar</span>
+            </div>
+          </div>
+
+          <div class="quiz-cta">
+            <div class="cta-text">Documento, CNPJ, descrição do negócio</div>
+            <div class="cta-sub">Análise feita por humano. Não há aprovação automática.</div>
+          </div>
+        </div>
+
+        <!-- ESCOLA DE HERÓIS -->
+        <div class="trust-col">
+          <div class="tc-header">
+            <span class="tc-pill" style="background:var(--color-primary-50);color:var(--color-primary-700);">
+              <svg style="width:12px;height:12px"><use href="#i-graduation"/></svg> Escola de Heróis
+            </span>
+            <div class="tc-title">Quiz obrigatório para Pet Sitters</div>
+            <div class="tc-sub">Currículo → ambiente → quiz. Só vira sitter quem passa nos três.</div>
+          </div>
+
+          <div class="quiz-content">
+            <div class="quiz-step-bar">
+              <span class="step-bar-text">Passo 3 de 3 · Escola</span>
+              <div class="step-bar-fill"><div class="fill"></div></div>
+            </div>
+
+            <div class="quiz-q">
+              <div class="q-text">1. O que fazer se um cachorro hospede engasgar com um osso de brinquedo?</div>
+              <div class="q-options">
+                <div class="q-opt"><span class="opt-letter">A</span>Dar tapas fortes nas costas e gritar</div>
+                <div class="q-opt correct"><span class="opt-letter">B</span>Manobra de Heimlich canina + veterinário</div>
+                <div class="q-opt"><span class="opt-letter">C</span>Oferecer água em copo para beber</div>
+              </div>
+            </div>
+
+            <div class="quiz-q">
+              <div class="q-text">2. Como lidar com ansiedade de separação em um cão?</div>
+              <div class="q-options">
+                <div class="q-opt"><span class="opt-letter">A</span>Abraçá-lo e chorar junto</div>
+                <div class="q-opt"><span class="opt-letter">B</span>Prendê-lo num quarto até cansar de latir</div>
+                <div class="q-opt correct"><span class="opt-letter">C</span>Ignorar o choro, atividade mental e rotina segura</div>
+              </div>
+            </div>
+
+            <div class="quiz-q">
+              <div class="q-text">3. Briga feia entre dois cães em casa: qual a ação correta?</div>
+              <div class="q-options">
+                <div class="q-opt correct"><span class="opt-letter">A</span>Separar com objeto físico, nunca com as mãos</div>
+                <div class="q-opt"><span class="opt-letter">B</span>Gritar e jogar água gelada</div>
+                <div class="q-opt"><span class="opt-letter">C</span>Tentar puxar pela coleira</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quiz-cta">
+            <div class="cta-text">Heimlich canina · Ansiedade · Emergências</div>
+            <div class="cta-sub">Tutor confia o pet a quem o Pet+ aprovou.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 10 — DIFERENCIAIS
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="10">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Diferenciais</span>
+        <h2 class="title">Por que o Pet+ não é <span class="highlight">só mais uma plataforma</span>?</h2>
+      </div>
+
+      <div class="diff-grid">
+        <div class="diff-card">
+          <div class="diff-num">01</div>
+          <div class="diff-body">
+            <div class="diff-icon"><svg><use href="#i-layers"/></svg></div>
+            <div class="diff-title">Plataforma única</div>
+            <div class="diff-text">Não é só shopping. Não é só hospedagem. É os dois — com pet sitters, lojas e hotéis num só fluxo. O tutor faz tudo sem trocar de app.</div>
+          </div>
+        </div>
+
+        <div class="diff-card">
+          <div class="diff-num">02</div>
+          <div class="diff-body">
+            <div class="diff-icon"><svg><use href="#i-shield-check"/></svg></div>
+            <div class="diff-title">Confiança por design</div>
+            <div class="diff-text">Aprovação manual de parceiros + Escola de Heróis para sitters. Quem aparece na lista passou por um filtro — humano, não algoritmo.</div>
+          </div>
+        </div>
+
+        <div class="diff-card">
+          <div class="diff-num">03</div>
+          <div class="diff-body">
+            <div class="diff-icon"><svg><use href="#i-trend-up"/></svg></div>
+            <div class="diff-title">Pronto para o parceiro</div>
+            <div class="diff-text">Dashboard com KPIs, gráficos, agenda e meta mensal. O parceiro entra e gerencia o negócio — não precisa exportar planilha.</div>
+          </div>
+        </div>
+
+        <div class="diff-card">
+          <div class="diff-num">04</div>
+          <div class="diff-body">
+            <div class="diff-icon"><svg><use href="#i-globe"/></svg></div>
+            <div class="diff-title">No ar agora</div>
+            <div class="diff-text">Não é protótipo nem mockup. Pode acessar petplus.vercel.app e usar de verdade — cadastrar, comprar, navegar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 11 — STATUS + ROADMAP + MODELO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide" data-slide="11">
+      <div class="slide-header">
+        <span class="eyebrow"><span class="dot"></span> Status, Roadmap e Modelo</span>
+        <h2 class="title">O que está <span class="highlight">pronto</span>, o que vem, e como sustenta.</h2>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-col done">
+          <span class="sc-eyebrow"><svg style="width:12px;height:12px"><use href="#i-check"/></svg> Pronto agora</span>
+          <h3>Já entregue</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Cadastro multi-perfil (5 papéis distintos)</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Vitrine de produtos com categorias e filtros</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Carrinho híbrido + checkout com cupom</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Busca de hotéis e pet sitters com perfil completo</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Dashboard de parceiro com gráficos e agenda</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Painel admin de aprovação</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-check"/></svg></div>Onboarding de pet sitter (Escola de Heróis)</div>
+          </div>
+        </div>
+
+        <div class="status-col next">
+          <span class="sc-eyebrow"><svg style="width:12px;height:12px"><use href="#i-rocket"/></svg> Próximos passos</span>
+          <h3>Roadmap</h3>
+          <div class="checklist">
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>Sistema de avaliações reais (tutor avalia parceiro)</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>Integração com gateways de pagamento (Pix, cartão)</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>Notificações em tempo real (push e e-mail)</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>App mobile nativo (iOS e Android)</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>Geolocalização para sitters disponíveis ao redor</div>
+            <div class="check-item"><div class="check-icon"><svg><use href="#i-arrow-right"/></svg></div>Chat tutor ↔ parceiro dentro da plataforma</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="business-model">
+        <h3><span class="bm-icon"><svg style="width:18px;height:18px"><use href="#i-dollar"/></svg></span> Como o Pet+ sustenta o ecossistema</h3>
+        <div class="bm-grid">
+          <div class="bm-item">
+            <div class="bm-num">01</div>
+            <div class="bm-title">Comissão por venda</div>
+            <div class="bm-desc">Pequena porcentagem em cada transação do marketplace de produtos.</div>
+          </div>
+          <div class="bm-item">
+            <div class="bm-num">02</div>
+            <div class="bm-title">Taxa de reserva</div>
+            <div class="bm-desc">Percentual sobre cada hospedagem ou serviço de pet sitter contratado.</div>
+          </div>
+          <div class="bm-item">
+            <div class="bm-num">03</div>
+            <div class="bm-title">Plano Pet+ Pro</div>
+            <div class="bm-desc">Assinatura mensal para parceiros com destaque, anúncios e ferramentas avançadas.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SLIDE 12 — FECHAMENTO
+         ═══════════════════════════════════════════════════════════ -->
+    <section class="slide thanks" data-slide="12">
+      <div class="thanks-content">
+        <div class="big-thanks">Obrigado.</div>
+        <p class="sub">Pet+ está no ar agora — pronto para receber tutores, lojistas, hotéis e cuidadores.</p>
+
+        <div class="contact-card">
+          <div class="logo-mini">
+            <img src="assets/logo.png" alt="Pet+"/>
+            <span>Pet<span class="plus">+</span></span>
+          </div>
+
+          <div class="links">
+            <span class="link url"><svg><use href="#i-link"/></svg> petplus.vercel.app</span>
+            <span class="link"><svg><use href="#i-instagram"/></svg> @petplusbr</span>
+          </div>
+
+          <div class="team-names">
+            Marcel Filho · Laura Serbêto · Layssa Fernandes
+          </div>
+          <div class="team-names" style="font-size:13px;font-weight:500;">
+            UniEVANGÉLICA · Engenharia de Computação · 6º período
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-watermark"><img src="assets/logo.png" alt=""/><span>Pet+</span></div>
+    </section>
+
+  </div>
+  <!-- /stage -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SPEAKER NOTES OVERLAY
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="speaker-overlay" id="speaker-overlay">
+    <div class="sp-header">
+      <div class="sp-title" id="sp-title">—</div>
+      <div class="sp-meta" id="sp-meta"></div>
+    </div>
+    <div class="sp-body" id="sp-body"></div>
+  </div>
+
+</div>
+<!-- /deck -->
+
+<script src="scripts/speaker-notes.js"></script>
+<script src="scripts/navigation.js"></script>
+
+</body>
+</html>
+
+
