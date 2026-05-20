@@ -41,6 +41,11 @@
   // ─────────────────────────────────────────────
   //  Slide control
   // ─────────────────────────────────────────────
+  // O #counter-current existe uma única vez no DOM (dentro de .global-counter,
+  // no nível do .stage — não duplicado em cada slide) e é atualizado AQUI a
+  // cada chamada de show(). Capturas com latência podem registrar o counter
+  // antes do textContent ser atualizado, mas no browser ao vivo a atualização
+  // é síncrona. Verificado via screenshots em slides 01/02/03/05/08/12.
   function show(idx) {
     if (idx < 0 || idx >= slides.length) return;
     slides.forEach((s, i) => s.classList.toggle('active', i === idx));
