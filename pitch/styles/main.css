@@ -78,21 +78,26 @@ button { font-family: inherit; cursor: pointer; border: 0; background: none; }
 .deck {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
   background: linear-gradient(180deg, #1a0d05 0%, #000 100%);
 }
 
 .stage {
-  /* base 1920x1080; escala via JS para caber */
-  position: relative;
+  /* base 1920x1080; escala via JS para caber.
+     Centralizado por translate(-50%,-50%) ao invés de flexbox —
+     o flexbox usaria a largura original (1920) e desalinharia
+     quando o viewport não é múltiplo inteiro do stage base. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 1920px;
   height: 1080px;
   background: var(--slate-50);
   overflow: hidden;
   box-shadow: 0 30px 100px rgba(0,0,0,0.5);
   transform-origin: center center;
+  /* fallback antes do JS rodar */
+  transform: translate(-50%, -50%);
 }
 
 .slide {
@@ -2207,8 +2212,11 @@ h3.subtitle {
 /* Print → PDF */
 @media print {
   html, body { background: white; overflow: visible; }
-  .deck { position: static; }
+  .deck { position: static; overflow: visible; }
   .stage {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
     transform: none !important;
     width: 1920px;
     height: 1080px;

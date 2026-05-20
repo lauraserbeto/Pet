@@ -29,7 +29,10 @@
     const ww = window.innerWidth;
     const wh = window.innerHeight;
     const scale = Math.min(ww / sw, wh / sh);
-    stage.style.transform = `scale(${scale})`;
+    // Centralizar via translate(-50%,-50%) combinado com scale na mesma
+    // propriedade — evita que o flexbox use a largura original (1920px)
+    // e desalinhe o stage quando o viewport é menor que o stage base.
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
   }
 
   window.addEventListener('resize', fitStage);
