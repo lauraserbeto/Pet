@@ -441,6 +441,10 @@ h3.subtitle {
   font-size: 56px;
   color: var(--color-primary-600);
   line-height: 1;
+  /* Sem isso, o flex container comprimia "R$ 77 bi" e forçava a
+     quebra de linha antes do "bi" quando o texto à direita era longo. */
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .market-stat .stat-text {
   font-size: 20px;
