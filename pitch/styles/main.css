@@ -524,19 +524,24 @@ h3.subtitle {
 .diagram-center {
   width: 220px; height: 220px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-glow), 0 0 0 16px rgba(249,115,22,0.08);
+  box-shadow:
+    0 0 0 6px #ffffff,
+    0 0 0 8px var(--color-primary-200),
+    0 0 0 22px rgba(249,115,22,0.08),
+    var(--shadow-glow);
   position: relative;
 }
-/* Logo Pet+ já é um círculo laranja com patinha branca:
-   ocupa o círculo inteiro com ~14px de respiro em cada lado. */
+/* Logo Pet+ é um disco laranja com pata branca; deixar respiro branco ao redor
+   garante contraste entre o laranja do logo e o fundo da seção. */
 .diagram-center img {
-  width: 192px;
-  height: 192px;
+  width: 188px;
+  height: 188px;
   display: block;
+  filter: drop-shadow(0 6px 14px rgba(249,115,22,0.25));
 }
 
 .diagram-center::before, .diagram-center::after {
