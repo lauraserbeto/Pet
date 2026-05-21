@@ -11,7 +11,7 @@ window.SPEAKER_NOTES = [
     speaker: 'Marcel',
     duration: '~30s',
     bullets: [
-      'Bom dia, banca. Somos Marcel, Laura, Layssa e Vitor, alunos do 6º período de Engenharia de Computação da UniEVANGÉLICA.',
+      'Bom dia, banca. Somos Marcel, Laura, Layssa e Vitor, alunos do 6º período de Engenharia de Software da UniEVANGÉLICA.',
       'O projeto que vamos apresentar hoje é o Pet+ — uma plataforma que integra tudo o que um tutor de pet precisa num só lugar.',
       'Em 10 minutos vamos contar o problema que identificamos, como resolvemos, e mostrar a plataforma que está no ar agora em petplus.vercel.app.'
     ],
