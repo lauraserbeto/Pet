@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    PET+ PITCH DECK — Speaker Notes
    3-5 bullets por slide. Cronometragem total: ~10-12min.
-   Rodízio: Marcel (M) / Laura (L) / Layssa (Ly).
+   Rodízio: Marcel (M) / Laura (L) / Layssa (Ly) / Vitor (V).
    ═══════════════════════════════════════════════════════════════ */
 
 window.SPEAKER_NOTES = [
@@ -11,7 +11,7 @@ window.SPEAKER_NOTES = [
     speaker: 'Marcel',
     duration: '~30s',
     bullets: [
-      'Bom dia, banca. Somos Marcel, Laura e Layssa, alunos do 6º período de Engenharia de Computação da UniEVANGÉLICA.',
+      'Bom dia, banca. Somos Marcel, Laura, Layssa e Vitor, alunos do 6º período de Engenharia de Computação da UniEVANGÉLICA.',
       'O projeto que vamos apresentar hoje é o Pet+ — uma plataforma que integra tudo o que um tutor de pet precisa num só lugar.',
       'Em 10 minutos vamos contar o problema que identificamos, como resolvemos, e mostrar a plataforma que está no ar agora em petplus.vercel.app.'
     ],
@@ -77,7 +77,7 @@ window.SPEAKER_NOTES = [
   // ── 6. Hotéis e Sitters ──
   {
     title: 'Demo — Hotéis e Pet Sitters',
-    speaker: 'Marcel',
+    speaker: 'Vitor',
     duration: '~90s',
     bullets: [
       'À esquerda, a busca de hotéis: nome, foto, distância, comodidades, diária e avaliação. À direita, a mesma lógica para pet sitters — só que com tarifa por hora e tipos de serviço (sitter, dog walker, day care).',
@@ -91,7 +91,7 @@ window.SPEAKER_NOTES = [
   // ── 7. Carrinho ──
   {
     title: 'Demo — Carrinho que funciona offline',
-    speaker: 'Laura',
+    speaker: 'Vitor',
     duration: '~75s',
     bullets: [
       'O carrinho do Pet+ tem uma característica que poucas plataformas têm: o tutor pode montar tudo antes mesmo de fazer login.',
@@ -162,10 +162,10 @@ window.SPEAKER_NOTES = [
   // ── 12. Fechamento ──
   {
     title: 'Obrigado',
-    speaker: 'Trio',
+    speaker: 'Quarteto',
     duration: '~20s',
     bullets: [
-      'O Pet+ é uma plataforma feita por três alunos de engenharia que entenderam que tecnologia bem aplicada resolve problema real.',
+      'O Pet+ é uma plataforma feita por quatro alunos de engenharia que entenderam que tecnologia bem aplicada resolve problema real.',
       'Está no ar em petplus.vercel.app. Nosso Instagram é @petplusbr, sigam pra acompanhar os próximos lançamentos.',
       'Obrigado pela atenção. Estamos abertos para perguntas.'
     ],

@@ -47,7 +47,7 @@ open /Users/marcelfilho/Pet/pitch/index.html
 
 Pressione `S` em qualquer slide. Um overlay sobe na parte inferior com:
 
-- **Speaker designado** (Marcel, Laura ou Layssa)
+- **Speaker designado** (Marcel, Laura, Layssa ou Vitor)
 - **Cronometragem sugerida**
 - **3–5 talking points** em linguagem natural
 - **Frase de transição** para o próximo slide
@@ -82,18 +82,18 @@ Pensada para uma janela de **10–12 minutos** (com folga para arguição depois
 
 | #  | Slide                                  | Tempo | Speaker  |
 | -- | -------------------------------------- | ----- | -------- |
-| 01 | Capa                                   | ~30s  | Marcel   |
-| 02 | Problema                               | ~60s  | Laura    |
-| 03 | Solução                                | ~45s  | Laura    |
-| 04 | Perfis (5 jornadas)                    | ~45s  | Layssa   |
-| 05 | Demo · Vitrine                         | ~90s  | Marcel   |
-| 06 | Demo · Hotéis e Pet Sitters            | ~90s  | Marcel   |
-| 07 | Demo · Carrinho                        | ~75s  | Laura    |
-| 08 | Demo · Dashboard do parceiro           | ~90s  | Layssa   |
-| 09 | Confiança · Admin + Escola de Heróis   | ~75s  | Layssa   |
-| 10 | Diferenciais                           | ~75s  | Marcel   |
-| 11 | Status, Roadmap e Modelo               | ~75s  | Laura    |
-| 12 | Fechamento                             | ~20s  | Trio     |
+| 01 | Capa                                   | ~30s  | Marcel    |
+| 02 | Problema                               | ~60s  | Laura     |
+| 03 | Solução                                | ~45s  | Laura     |
+| 04 | Perfis (5 jornadas)                    | ~45s  | Layssa    |
+| 05 | Demo · Vitrine                         | ~90s  | Marcel    |
+| 06 | Demo · Hotéis e Pet Sitters            | ~90s  | Vitor     |
+| 07 | Demo · Carrinho                        | ~75s  | Vitor     |
+| 08 | Demo · Dashboard do parceiro           | ~90s  | Layssa    |
+| 09 | Confiança · Admin + Escola de Heróis   | ~75s  | Layssa    |
+| 10 | Diferenciais                           | ~75s  | Marcel    |
+| 11 | Status, Roadmap e Modelo               | ~75s  | Laura     |
+| 12 | Fechamento                             | ~20s  | Quarteto  |
 |    | **Total**                              | **~10min50s** |  |
 
 ---
