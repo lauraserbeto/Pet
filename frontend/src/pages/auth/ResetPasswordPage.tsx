@@ -15,7 +15,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { authService } from "@/lib/services/authService";
-import logo from "../../assets/pet+/logo2-branco.png";
+import logo from "../../assets/pet+/logo-horizontal.png";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 
 interface PasswordCheck {

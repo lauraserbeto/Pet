@@ -36,12 +36,12 @@ O logotipo está disponível em variantes localizadas em `frontend/src/assets/pe
 
 | Arquivo | Uso recomendado |
 |---|---|
-| `logo.png` | Versão base |
-| `logo1.png` | Variante alternativa |
-| `logo2.png` | **Logo principal (usado na Navbar)** — fundos claros |
-| `logo2-branco.png` | **Versão branca (usada no Footer e Sidebar)** — fundos escuros |
-| `logo2-2version.png` | Variação 2 |
-| `logo2-3version.png` | Variação 3 |
+| `logo-horizontal.png` | **Logo principal (usado na Navbar, Footer, Sidebar e Telas de Autenticação)** — formato horizontal de alta legibilidade |
+| `logo-vertical.png` | **Variante vertical** — recomendada para layouts centralizados ou proporções quadradas/altas |
+| `icon.png` (em `public/`) | **Favicon** — ícone oficial usado na aba do navegador |
+| `icon-branco.png` | Variante de ícone com fundo branco circular |
+| `icon-transparente.png` | Variante de ícone com fundo transparente |
+| `identidade-visual.png` | Arquivo geral de referência da identidade visual do projeto |
 
 **Dimensões em uso:**
 - Navbar (header público): `h-16` (≈64px)
@@ -67,38 +67,38 @@ Cor de destaque da marca. Usada em CTAs, links ativos, badges, gradientes de ava
 
 | Token | Valor HEX | Preview |
 |---|---|---|
-| `--color-primary-50` | `#fff7ed` | ░░ Plano de fundo de hover/seleção sutil |
-| `--color-primary-100` | `#ffedd5` | ░░ Badge default (background) |
-| `--color-primary-200` | `#fed7aa` | ▒▒ Hover de badge / borda hover |
-| `--color-primary-300` | `#fdba74` | ▒▒ Borda em foco de input/search |
-| `--color-primary-400` | `#fb923c` | ▓▓ Borda focus de input / topo do gradient avatar |
-| `--color-primary-500` | `#f97316` | ██ **Cor base da marca** — botões primários, ícones de destaque |
-| `--color-primary-600` | `#ea580c` | ██ Hover do botão primário, link button, base do gradient avatar |
-| `--color-primary-700` | `#c2410c` | ██ Texto sobre badges claros |
-| `--color-primary-800` | `#9a3412` | ██ Reservado para profundidade |
-| `--color-primary-900` | `#7c2d12` | ██ Reservado para alto contraste |
+| `--color-primary-50` | `#fff8eb` | ░░ Plano de fundo de hover/seleção sutil |
+| `--color-primary-100` | `#fdecd1` | ░░ Badge default (background) |
+| `--color-primary-200` | `#fcd9a3` | ▒▒ Hover de badge / borda hover |
+| `--color-primary-300` | `#fbbd68` | ▒▒ Borda em foco de input/search |
+| `--color-primary-400` | `#f99c2b` | ▓▓ Borda focus de input / topo do gradient avatar |
+| `--color-primary-500` | `#f58b05` | ██ **Cor base da marca** — botões primários, ícones de destaque |
+| `--color-primary-600` | `#d67000` | ██ Hover do botão primário, link button, base do gradient avatar |
+| `--color-primary-700` | `#b35602` | ██ Texto sobre badges claros |
+| `--color-primary-800` | `#8f4107` | ██ Reservado para profundidade |
+| `--color-primary-900` | `#75330a` | ██ Reservado para alto contraste |
 
 **Uso comum:**
 ```tsx
 className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white"
 ```
 
-### 2.2 Secondary — Trust Teal 🟢
+### 2.2 Secondary — Trust Blue 🔵
 
 Cor de apoio que transmite confiança e tranquilidade. Usada em variantes secundárias de botões/badges.
 
 | Token | Valor HEX |
 |---|---|
-| `--color-secondary-50` | `#f0fdfa` |
-| `--color-secondary-100` | `#ccfbf1` |
-| `--color-secondary-200` | `#99f6e4` |
-| `--color-secondary-300` | `#5eead4` |
-| `--color-secondary-400` | `#2dd4bf` |
-| `--color-secondary-500` | `#14b8a6` — **base** |
-| `--color-secondary-600` | `#0d9488` — hover |
-| `--color-secondary-700` | `#0f766e` — texto sobre badge |
-| `--color-secondary-800` | `#115e59` |
-| `--color-secondary-900` | `#134e4a` |
+| `--color-secondary-50` | `#f0f7fb` |
+| `--color-secondary-100` | `#e0f0f8` |
+| `--color-secondary-200` | `#c4e9f2` |
+| `--color-secondary-300` | `#93d4eb` |
+| `--color-secondary-400` | `#57b7e3` |
+| `--color-secondary-500` | `#3699d2` — **base** |
+| `--color-secondary-600` | `#267ab0` — hover |
+| `--color-secondary-700` | `#206390` — texto sobre badge |
+| `--color-secondary-800` | `#1d5378` |
+| `--color-secondary-900` | `#1b4562` |
 
 ### 2.3 Neutros — Slate ⚫
 
@@ -333,7 +333,7 @@ Implementados em `frontend/src/components/ui/`. Stack: **shadcn/ui** sobre **Rad
 | Variante | Visual | Caso de uso |
 |---|---|---|
 | `default` | Laranja sólido (primary-500 → hover 600) | **CTA principal** |
-| `secondary` | Teal sólido (secondary-500) | Ações alternativas |
+| `secondary` | Azul sólido (secondary-500) | Ações alternativas |
 | `destructive` | Vermelho (red-500) | Excluir / sair |
 | `outline` | Borda slate-200, fundo branco | Ações neutras |
 | `ghost` | Sem fundo, hover slate-100 | Toolbar, ícones |
@@ -622,12 +622,11 @@ frontend/
 │   └── images/
 └── src/assets/
     ├── pet+/                         (logos institucionais)
-    │   ├── logo.png
-    │   ├── logo1.png
-    │   ├── logo2.png                 ← logo principal
-    │   ├── logo2-branco.png          ← logo para fundos escuros
-    │   ├── logo2-2version.png
-    │   ├── logo2-3version.png
+    │   ├── logo-horizontal.png       ← logo principal (horizontal)
+    │   ├── logo-vertical.png         ← variante vertical
+    │   ├── icon-branco.png           ← variante com fundo branco
+    │   ├── icon-transparente.png     ← variante com fundo transparente
+    │   ├── identidade-visual.png     ← referência geral da marca
     │   └── pets.jpg
     ├── paw_pattern.png               (padrão de pegadas)
     ├── paw_pattern_bg.png            (padrão de pegadas - background)
@@ -655,8 +654,8 @@ A landing page utiliza imagens de **Unsplash** (URLs assinadas) para produtos e 
 
 | Eixo | Decisão |
 |---|---|
-| **Cor primária** | 🟠 Laranja `#f97316` (primary-500) — gera calor e ação |
-| **Cor secundária** | 🟢 Teal `#14b8a6` (secondary-500) — gera confiança |
+| **Cor primária** | 🟠 Laranja `#f58b05` (primary-500) — gera calor e ação |
+| **Cor secundária** | 🔵 Azul `#3699d2` (secondary-500) — gera confiança |
 | **Neutro principal** | Slate (50-900) |
 | **Fonte de display** | Nunito (600-800) — para títulos, botões, badges |
 | **Fonte de corpo** | Inter (400-700) — para conteúdo |

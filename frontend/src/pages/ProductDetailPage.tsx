@@ -192,9 +192,9 @@ export function ProductDetailPage() {
     );
   }
 
-  const addToCart = () => {
+  const addToCart = async () => {
     if (!product) return;
-    void addItem(
+    const added = await addItem(
       {
         id: String(product.id),
         name: product.name,
@@ -204,7 +204,9 @@ export function ProductDetailPage() {
       },
       quantity
     );
-    toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`);
+    if (added) {
+      toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`);
+    }
   };
 
   const toggleFavorite = () => {

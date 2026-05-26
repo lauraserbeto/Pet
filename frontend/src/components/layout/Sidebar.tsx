@@ -21,7 +21,8 @@ import { Avatar } from "../../components/ui/avatar";
 
 import { cn } from "../../lib/utils";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
-import logo from "../../assets/pet+/logo2-branco.png";
+import logo from "../../assets/pet+/logo-horizontal.png";
+import logoCollapsed from "../../assets/pet+/icon-transparente.png";
 
 
 interface SidebarProps {
@@ -80,8 +81,12 @@ export function Sidebar({
       </button>
 
       <div className={cn("p-6", isCollapsed && "px-4")}>
-         <Link to="/" onClick={onLinkClick} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <ImageWithFallback src={logo} alt="Pet+ Logo" className={cn("h-24 w-auto transition-all", isCollapsed && "h-12")} />
+         <Link to="/" onClick={onLinkClick} className={cn("flex items-center gap-2 hover:opacity-90 transition-opacity", isCollapsed && "justify-center")}>
+          <ImageWithFallback 
+            src={isCollapsed ? logoCollapsed : logo} 
+            alt="Pet+ Logo" 
+            className="h-20 w-auto object-contain transition-all" 
+          />
          </Link>
       </div>
 

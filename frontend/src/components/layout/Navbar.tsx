@@ -27,12 +27,23 @@ import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import logo from "../../assets/pet+/logo2.png";
+import logo from "../../assets/pet+/logo-horizontal.png";
 
 const publicNavItems = [
   { name: "Hotéis", href: "/hotels", icon: Hotel },
   { name: "Pet Sitter", href: "/walkers", icon: Footprints },
   { name: "Shopping", href: "/shopping", icon: ShoppingBag },
+  { name: "Sobre Nós", href: "/about", icon: Info },
+  { name: "Parceiros", href: "/partners", icon: Briefcase },
+];
+
+const primaryNavItems = [
+  { name: "Hotéis", href: "/hotels", icon: Hotel },
+  { name: "Pet Sitter", href: "/walkers", icon: Footprints },
+  { name: "Shopping", href: "/shopping", icon: ShoppingBag },
+];
+
+const secondaryNavItems = [
   { name: "Sobre Nós", href: "/about", icon: Info },
   { name: "Parceiros", href: "/partners", icon: Briefcase },
 ];
@@ -72,8 +83,10 @@ function CartIconButton({ variant = "desktop" }: { variant?: "desktop" | "mobile
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -141,6 +154,9 @@ export function Navbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setUserDropdownOpen(false);
       }
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target as Node)) {
+        setMoreDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -153,9 +169,6 @@ export function Navbar() {
     
     import("../../lib/services/authService").then(({ authService }) => {
       authService.logout();
-      // authService.logout already does window.location.href = "/login"
-      // but if we wanted to change it for tutors, we could handle it here.
-      // Since the service uses window.location, it's a hard redirect. 
     });
   };
 
@@ -185,164 +198,229 @@ export function Navbar() {
         )}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between items-center">
-            {/* ── Logo + Desktop Nav ── */}
-            <div className="flex items-center justify-between flex-1">
-              <div className="flex items-center flex-1">
-                <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-                  <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-16 w-auto" />
-                </Link>
-                
-                {/* ── Navbar Search (Desktop) ── */}
-                <div className="hidden lg:flex flex-1 max-w-lg mx-12">
-                  <div className="relative w-full group">
-                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                      <Search className="h-4 w-4 text-slate-400 group-focus-within:text-[var(--color-primary-500)] transition-colors" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Buscar hotéis, walkers, produtos..."
-                      className="block w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-full focus:bg-white focus:ring-4 focus:ring-[var(--color-primary-50)] focus:border-[var(--color-primary-300)] transition-all outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
+          <div className="flex h-16 items-center justify-between gap-4">
+            
+            {/* ── Left Side: Logo ── */}
+            <div className="flex items-center shrink-0">
+              <Link to="/" className="flex items-center">
+                <ImageWithFallback 
+                  src={logo} 
+                  alt="Pet+ Logo" 
+                  className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-102" 
+                />
+              </Link>
+            </div>
 
-              <div className="hidden md:flex items-center gap-10">
-                <div className="flex md:space-x-10">
-                  {publicNavItems.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        className={cn(
-                          "inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-500 hover:text-slate-900 border-b-2 border-transparent transition-colors whitespace-nowrap",
-                          isActive && "border-[var(--color-primary-500)] text-slate-900"
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    );
-                  })}
+            {/* ── Center: Search Bar (Desktop) ── */}
+            <div className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-4 transition-all duration-300">
+              <div className="relative w-full group">
+                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-slate-400 group-focus-within:text-[var(--color-primary-500)] transition-colors" />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Buscar hotéis, walkers, produtos..."
+                  className="block w-full pl-11 pr-4 py-2.5 text-sm bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-full focus:bg-white focus:ring-4 focus:ring-[var(--color-primary-50)] focus:border-[var(--color-primary-300)] transition-all outline-none"
+                />
               </div>
             </div>
 
-            {/* ── Desktop Right Side ── */}
-            <div className="hidden md:flex items-center gap-4 ml-10">
-              {showCart && <CartIconButton variant="desktop" />}
-              {isLoading ? (
-                // Texto simples de carregamento para termos certeza que ele sai daqui
-                <span className="text-sm text-slate-400">Carregando perfil...</span>
-              ) : !sessionUser ? (
-                // Not Logged In
-                <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 p-1 rounded-full shadow-sm">
-                  <Link 
-                    to="/login"
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-full transition-all"
-                  >
-                    <LogIn size={16} />
-                    Entrar
-                  </Link>
-                  <Link 
-                    to="/register"
-                    className="bg-[var(--color-primary-500)] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[var(--color-primary-600)] shadow-md shadow-primary-500/20 transition-all transform hover:scale-105"
-                  >
-                    Cadastrar
-                  </Link>
-                </div>
-              ) : isDashboardUser ? (
-                // Admin, Manager, Hotel, Walker
-                <>
-                  <Link to="/dashboard">
-                    <Button variant="default">Ir para o Dashboard</Button>
-                  </Link>
-                  <Button variant="ghost" className="text-slate-500 hover:text-red-600" onClick={() => setShowLogoutModal(true)}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
-                  </Button>
-                </>
-              ) : isTutor && (
-                // Tutor
-                <div className="relative" ref={dropdownRef}>
+            {/* ── Right Side: Nav Links + Actions ── */}
+            <div className="hidden md:flex items-center gap-6 shrink-0">
+              {/* Primary Navigation Links */}
+              <nav className="flex items-center gap-6 lg:gap-8" aria-label="Main Navigation">
+                {primaryNavItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "relative py-1 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors whitespace-nowrap",
+                        isActive && "text-[var(--color-primary-600)]"
+                      )}
+                    >
+                      {item.name}
+                      {isActive && (
+                        <motion.div
+                          layoutId="navbar-active-indicator"
+                          className="absolute bottom-[-18px] left-0 right-0 h-0.5 bg-[var(--color-primary-500)] rounded-full"
+                          transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+
+                {/* Institutional Dropdown (Sobre Nós, Parceiros) */}
+                <div className="relative" ref={moreDropdownRef}>
                   <button
-                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setUserDropdownOpen(!userDropdownOpen);
+                        setMoreDropdownOpen(!moreDropdownOpen);
                       }
                     }}
-                    aria-expanded={userDropdownOpen}
-                    aria-haspopup="true"
                     className={cn(
-                      "flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-200 outline-none",
-                      userDropdownOpen 
-                        ? "bg-white border-[var(--color-primary-200)] shadow-md ring-4 ring-[var(--color-primary-50)]" 
-                        : "bg-slate-50 border-slate-200 hover:border-[var(--color-primary-200)] hover:bg-white hover:shadow-sm"
+                      "flex items-center gap-1.5 py-1 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors outline-none",
+                      moreDropdownOpen && "text-slate-900"
                     )}
+                    aria-expanded={moreDropdownOpen}
+                    aria-haspopup="true"
                   >
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                      {initials}
-                    </div>
-                    <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">
-                      {userName.split(" ")[0]}
-                    </span>
+                    Mais
                     <ChevronDown className={cn(
                       "h-4 w-4 text-slate-400 transition-transform duration-200",
-                      userDropdownOpen && "rotate-180 text-[var(--color-primary-500)]"
+                      moreDropdownOpen && "rotate-180 text-[var(--color-primary-500)]"
                     )} />
                   </button>
 
                   <AnimatePresence>
-                    {userDropdownOpen && (
+                    {moreDropdownOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50"
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 origin-top-right"
                       >
-                        <div className="px-4 py-3 border-b border-slate-100">
-                          <p className="font-bold text-slate-900 text-sm">{userName}</p>
-                          <p className="text-xs text-slate-500">{userEmail}</p>
-                        </div>
-
-                        <div className="py-1">
-                          {tutorMenuItems.map((item) => (
-                            <Link
-                              key={item.name}
-                              to={item.href}
-                              onClick={() => setUserDropdownOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
-                            >
-                              <item.icon className="h-4 w-4" />
-                              {item.name}
-                            </Link>
-                          ))}
-                        </div>
-
-                        <div className="border-t border-slate-100 pt-1">
-                          <button
-                            onClick={() => {
-                              setUserDropdownOpen(false);
-                              setShowLogoutModal(true);
-                            }}
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        {secondaryNavItems.map((item) => (
+                          <Link
+                            key={item.name}
+                            to={item.href}
+                            onClick={() => setMoreDropdownOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                           >
-                            <LogOut className="h-4 w-4" />
-                            Sair da conta
-                          </button>
-                        </div>
+                            <item.icon className="h-4 w-4 text-slate-400" />
+                            {item.name}
+                          </Link>
+                        ))}
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
-              )}
+              </nav>
+
+              {/* Vertical divider to separate Navigation and Actions */}
+              <div className="h-5 w-px bg-slate-200" aria-hidden="true" />
+
+              {/* Cart & Authentication */}
+              <div className="flex items-center gap-4">
+                {showCart && <CartIconButton variant="desktop" />}
+                
+                {isLoading ? (
+                  <span className="text-sm text-slate-400 font-semibold">...</span>
+                ) : !sessionUser ? (
+                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/80 p-1 rounded-full shadow-sm">
+                    <Link 
+                      to="/login"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-full transition-all"
+                    >
+                      <LogIn size={16} />
+                      Entrar
+                    </Link>
+                    <Link 
+                      to="/register"
+                      className="bg-[var(--color-primary-500)] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[var(--color-primary-600)] shadow-md shadow-primary-500/20 transition-all transform hover:scale-105"
+                    >
+                      Cadastrar
+                    </Link>
+                  </div>
+                ) : isDashboardUser ? (
+                  <div className="flex items-center gap-3">
+                    <Link to="/dashboard">
+                      <Button variant="default">Ir para o Dashboard</Button>
+                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="text-slate-500 hover:text-red-600" 
+                      onClick={() => setShowLogoutModal(true)}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sair
+                    </Button>
+                  </div>
+                ) : isTutor && (
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setUserDropdownOpen(!userDropdownOpen);
+                        }
+                      }}
+                      aria-expanded={userDropdownOpen}
+                      aria-haspopup="true"
+                      className={cn(
+                        "flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-200 outline-none",
+                        userDropdownOpen 
+                          ? "bg-white border-[var(--color-primary-200)] shadow-md ring-4 ring-[var(--color-primary-50)]" 
+                          : "bg-slate-50 border-slate-200 hover:border-[var(--color-primary-200)] hover:bg-white hover:shadow-sm"
+                      )}
+                    >
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        {initials}
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">
+                        {userName.split(" ")[0]}
+                      </span>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 text-slate-400 transition-transform duration-200",
+                        userDropdownOpen && "rotate-180 text-[var(--color-primary-500)]"
+                      )} />
+                    </button>
+
+                    <AnimatePresence>
+                      {userDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50"
+                        >
+                          <div className="px-4 py-3 border-b border-slate-100">
+                            <p className="font-bold text-slate-900 text-sm">{userName}</p>
+                            <p className="text-xs text-slate-500">{userEmail}</p>
+                          </div>
+
+                          <div className="py-1">
+                            {tutorMenuItems.map((item) => (
+                              <Link
+                                key={item.name}
+                                to={item.href}
+                                onClick={() => setUserDropdownOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                              >
+                                <item.icon className="h-4 w-4" />
+                                {item.name}
+                              </Link>
+                            ))}
+                          </div>
+
+                          <div className="border-t border-slate-100 pt-1">
+                            <button
+                              onClick={() => {
+                                setUserDropdownOpen(false);
+                                setShowLogoutModal(true);
+                              }}
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                              <LogOut className="h-4 w-4" />
+                              Sair da conta
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Mobile Menu Toggle... Omitido para economizar espaço aqui mas está funcional no código */}
+            {/* Mobile Menu Toggle */}
             <div className="-mr-2 flex items-center md:hidden gap-1">
               {showCart && <CartIconButton variant="mobile" />}
               <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">

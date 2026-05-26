@@ -4,20 +4,26 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Checkbox } from "../../components/ui/checkbox";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import { PawPrint, ArrowLeft, Eye, EyeOff, Mail, Lock, Star, ShieldCheck, Clock } from "lucide-react";
+  PawPrint,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Star,
+  ShieldCheck,
+  Clock,
+  Bone,
+  Heart,
+  Sparkles,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 
-import logo from "../../assets/pet+/logo2-branco.png";
+import iconTransparente from "../../assets/pet+/logo-horizontal.png";
+import heroCarePets from "../../assets/imgs/hero_care_pets.png";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -99,221 +105,252 @@ export function LoginPage() {
   };
 
   return (
-    // h-screen + overflow-hidden: tudo cabe na viewport sem scroll
-    <div className="h-screen overflow-hidden flex font-[family-name:var(--font-body)]">
+    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center font-[family-name:var(--font-body)]">
 
-      {/* ── Painel esquerdo — Branding (apenas desktop) ── */}
-      <div className="hidden lg:flex lg:w-[45%] relative flex-shrink-0">
-        {/* Overlay gradiente sobre a foto */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary-700)]/90 via-[var(--color-primary-600)]/80 to-[var(--color-primary-800)]/95 z-10" />
+      {/* ── Animated Background ── */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFF8EB] via-[#FFF1D6] to-[#FFE8C2]" />
+      
+      {/* Mesh gradient overlay */}
+      <div className="absolute inset-0 opacity-60"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 20% 80%, rgba(245,139,5,0.12) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 60% at 80% 20%, rgba(54,153,210,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 40% at 50% 50%, rgba(245,139,5,0.06) 0%, transparent 60%)
+          `
+        }}
+      />
 
-        {/* Foto: cão em hospitalidade pet profissional */}
-        <ImageWithFallback
-          src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=1080&ixid=M3wxMjA3fDB8MXxzZWFyY2h8Mnx8ZG9nJTIwaG90ZWwlMjBwcm9mZXNzaW9uYWx8ZW58MXx8fHwxNzE3MDAwMDAwfDA&ixlib=rb-4.1.0&q=85&w=900"
-          alt="Cão confortável em hotel pet profissional"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+      {/* Dot pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(#d4a373_0.8px,transparent_0.8px)] [background-size:28px_28px] opacity-[0.08] pointer-events-none" />
 
-        <div className="relative z-20 flex flex-col justify-between p-12 text-white h-full">
-          {/* Logo */}
-          <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-            <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-32 w-auto" />
-          </Link>
+      {/* ── Floating Organic Blobs ── */}
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], rotate: [0, 8, 0], x: [0, 15, 0] }}
+        transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }}
+        className="absolute -top-24 -left-24 w-[400px] h-[400px] bg-[var(--color-primary-200)]/30 blur-3xl pointer-events-none"
+        style={{ borderRadius: "60% 40% 50% 50% / 40% 60% 40% 60%" }}
+      />
+      <motion.div
+        animate={{ scale: [1, 1.2, 1], rotate: [0, -6, 0], x: [0, -20, 0] }}
+        transition={{ repeat: Infinity, duration: 14, ease: "easeInOut" }}
+        className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-[var(--color-secondary-200)]/20 blur-3xl pointer-events-none"
+        style={{ borderRadius: "40% 60% 30% 70% / 50% 40% 60% 50%" }}
+      />
+      <motion.div
+        animate={{ scale: [1, 1.1, 1], y: [0, -10, 0] }}
+        transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
+        className="absolute top-1/3 -right-16 w-[250px] h-[250px] bg-[var(--color-primary-300)]/15 blur-2xl pointer-events-none"
+        style={{ borderRadius: "50% 50% 40% 60% / 60% 40% 50% 50%" }}
+      />
 
-          {/* Headline */}
-          <div className="space-y-5">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.5 }}
-            >
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1 text-xs font-semibold mb-4 shadow">
-                <Star className="h-3.5 w-3.5 text-yellow-300 fill-yellow-300" />
-                Plataforma em lançamento — acesso antecipado
-              </div>
-              <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] leading-tight drop-shadow-md">
-                Tudo que seu pet
-                <br />
-                precisa, em um
-                <br />
-                só lugar.
-              </h2>
-              <p className="mt-4 text-white/85 text-base max-w-xs leading-relaxed">
-                Conectamos tutores a pet sitters, hotéis e cuidadores de confiança
-                na sua região.
-              </p>
-            </motion.div>
+      {/* ── Floating Decorative Icons ── */}
+      <motion.div
+        animate={{ y: [0, -14, 0], rotate: [15, 22, 15] }}
+        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        className="absolute top-[8%] left-[8%] text-[var(--color-primary-300)]/40 pointer-events-none hidden md:block"
+      >
+        <PawPrint className="h-10 w-10" />
+      </motion.div>
+      <motion.div
+        animate={{ y: [0, 10, 0], rotate: [-10, -5, -10] }}
+        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.5 }}
+        className="absolute top-[15%] right-[12%] text-[var(--color-primary-400)]/25 pointer-events-none hidden md:block"
+      >
+        <PawPrint className="h-8 w-8" />
+      </motion.div>
+      <motion.div
+        animate={{ rotate: [-25, -18, -25] }}
+        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        className="absolute bottom-[18%] left-[6%] text-[var(--color-primary-300)]/30 pointer-events-none hidden md:block"
+      >
+        <Bone className="h-14 w-14" />
+      </motion.div>
+      <motion.div
+        animate={{ scale: [1, 1.25, 1] }}
+        transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+        className="absolute bottom-[12%] right-[8%] text-rose-300/30 pointer-events-none hidden md:block"
+      >
+        <Heart className="h-8 w-8" />
+      </motion.div>
+      <motion.div
+        animate={{ y: [0, -8, 0], rotate: [0, 10, 0] }}
+        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
+        className="absolute top-[60%] left-[3%] text-amber-300/25 pointer-events-none hidden lg:block"
+      >
+        <Star className="h-7 w-7" />
+      </motion.div>
+      <motion.div
+        animate={{ y: [0, 6, 0], scale: [1, 1.15, 1] }}
+        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 2 }}
+        className="absolute top-[5%] right-[35%] text-[var(--color-primary-200)]/35 pointer-events-none hidden lg:block"
+      >
+        <Sparkles className="h-6 w-6" />
+      </motion.div>
 
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4 }}
-              className="grid grid-cols-3 gap-3"
-            >
-              {[
-                { icon: ShieldCheck, label: "Cadastro",   value: "Grátis" },
-                { icon: Star,        label: "Acesso",     value: "Beta"   },
-                { icon: Clock,       label: "Suporte",    value: "Online" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-xl p-3 text-center shadow"
-                >
-                  <stat.icon className="h-4 w-4 text-white/70 mx-auto mb-1" />
-                  <p className="text-base font-extrabold font-[family-name:var(--font-display)] leading-none">{stat.value}</p>
-                  <p className="text-[10px] text-white/60 mt-0.5 uppercase tracking-wide">{stat.label}</p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Social proof avatars */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
-              className="flex items-center gap-3"
-            >
-              <div className="flex -space-x-2.5">
-                {["bg-orange-300","bg-amber-400","bg-rose-300","bg-sky-300"].map((color, i) => (
-                  <div
-                    key={i}
-                    className={`w-8 h-8 rounded-full ${color} border-2 border-white/40 flex items-center justify-center text-white text-xs font-bold shadow`}
-                  >
-                    {["A","M","R","J"][i]}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-semibold drop-shadow">Primeiros usuários</p>
-                <p className="text-xs text-white/65">fazem parte do acesso antecipado</p>
-              </div>
-            </motion.div>
-          </div>
-
-          <p className="text-xs text-white/40">© 2026 Pet+. Todos os direitos reservados.</p>
+      {/* ── Hero pet image (desktop only, bottom-left) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.4 }}
+        className="absolute bottom-0 left-0 w-[320px] h-[320px] xl:w-[420px] xl:h-[420px] pointer-events-none hidden lg:block"
+      >
+        <div className="relative w-full h-full">
+          {/* Yellow blob behind pet */}
+          <motion.div
+            animate={{ scale: [1, 1.06, 1], rotate: [0, 3, 0] }}
+            transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+            className="absolute bottom-4 left-4 w-[85%] h-[85%] bg-[var(--color-primary-200)]/40"
+            style={{ borderRadius: "60% 40% 55% 45% / 45% 55% 45% 55%" }}
+          />
+          <img
+            src={heroCarePets}
+            alt="Pet feliz"
+            className="relative w-full h-full object-contain z-10"
+            style={{ filter: "drop-shadow(0 10px 25px rgba(0,0,0,0.1))" }}
+          />
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── Painel direito — Formulário ── */}
-      <div className="flex-1 flex items-center justify-center bg-slate-50 px-4 sm:px-8 overflow-y-auto">
+      {/* ── Main Content ── */}
+      <div className="relative z-10 flex flex-col items-center w-full max-w-md px-4 sm:px-6 py-8">
+
+        {/* Logo + Brand */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45 }}
-          className="w-full max-w-sm space-y-5"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center mb-6"
         >
-          {/* Logo mobile */}
-          <div className="flex flex-col items-center lg:hidden">
-            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="bg-[var(--color-primary-500)] p-2 rounded-xl shadow-lg shadow-orange-200">
-                <PawPrint className="h-7 w-7 text-white" />
-              </div>
-              <span className="text-2xl font-extrabold text-slate-900 tracking-tight font-[family-name:var(--font-display)]">
-                Pet<span className="text-[var(--color-primary-500)]">+</span>
-              </span>
-            </Link>
-          </div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <ImageWithFallback
+              src={iconTransparente}
+              alt="Pet+ Icon"
+              className="h-24 transition-transform group-hover:scale-105"
+            />
+          </Link>
+        </motion.div>
 
-          <Card className="w-full border-slate-200 shadow-xl shadow-slate-200/60">
-            <CardHeader className="space-y-0.5 pb-4 pt-6">
-              <CardTitle className="text-xl font-extrabold text-center font-[family-name:var(--font-display)]">
-                Bem-vindo de volta 
-              </CardTitle>
-              <CardDescription className="text-center text-sm">
-                Acesse sua conta Pet+
-              </CardDescription>
-            </CardHeader>
+        {/* ── Glassmorphism Card ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="w-full"
+        >
+          <div className="relative bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl shadow-[0_8px_40px_rgba(245,139,5,0.08),0_2px_12px_rgba(0,0,0,0.04)] p-6 sm:p-8">
+            
+            {/* Subtle glow accent */}
+            <div className="absolute -top-px left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-[var(--color-primary-400)] to-transparent rounded-full" />
 
-            <CardContent className="pb-2">
-              <form onSubmit={handleSignIn} className="space-y-3">
-                {/* E-mail */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">E-mail</Label>
-                  <div className="relative overflow-visible">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-9 h-10"
-                    />
-                  </div>
-                </div>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
+                Bem-vindo de volta
+              </h1>
+              <p className="text-sm text-slate-500 mt-1">
+                Acesse sua conta Pet+ e cuide do seu melhor amigo
+              </p>
+            </div>
 
-                {/* Senha */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Senha</Label>
-                    <Link
-                      to="/recuperar-senha"
-                      className="text-xs font-medium text-[var(--color-primary-600)] hover:underline"
-                    >
-                      Esqueceu a senha?
-                    </Link>
-                  </div>
-                  <div className="relative overflow-visible">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-9 pr-10 h-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Lembrar */}
-                <div className="flex items-center space-x-2 pt-0.5">
-                  <Checkbox
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={(c) => setRememberMe(c === true)}
+            <form onSubmit={handleSignIn} className="space-y-4">
+              {/* E-mail */}
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">E-mail</Label>
+                <div className="relative overflow-visible">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-11 bg-white/80 border-slate-200/80 rounded-xl focus:ring-2 focus:ring-[var(--color-primary-300)] focus:border-[var(--color-primary-400)] transition-all"
                   />
-                  <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer select-none">
-                    Lembrar de mim
-                  </label>
                 </div>
+              </div>
 
-                {/* Erro */}
-                {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg animate-in fade-in slide-in-from-top-1">
-                    {error}
-                  </div>
-                )}
+              {/* Senha */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Senha</Label>
+                  <Link
+                    to="/recuperar-senha"
+                    className="text-xs font-medium text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                </div>
+                <div className="relative overflow-visible">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-11 h-11 bg-white/80 border-slate-200/80 rounded-xl focus:ring-2 focus:ring-[var(--color-primary-300)] focus:border-[var(--color-primary-400)] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] h-10 font-semibold mt-1"
-                  disabled={isLoading}
+              {/* Lembrar */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(c) => setRememberMe(c === true)}
+                />
+                <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer select-none">
+                  Lembrar de mim
+                </label>
+              </div>
+
+              {/* Erro */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 text-sm p-3 rounded-xl"
                 >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Entrando...
-                    </div>
-                  ) : "Entrar"}
-                </Button>
-              </form>
-            </CardContent>
+                  {error}
+                </motion.div>
+              )}
 
-            <CardFooter className="flex flex-col gap-3 pt-2 pb-5">
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] hover:from-[var(--color-primary-600)] hover:to-[var(--color-primary-700)] h-11 font-bold rounded-xl shadow-lg shadow-orange-200/50 transition-all hover:shadow-xl hover:shadow-orange-200/60 hover:scale-[1.01] active:scale-[0.99] text-base"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Entrando...
+                  </div>
+                ) : "Entrar"}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-slate-200/80" />
+              <span className="text-xs text-slate-400 font-medium">ou</span>
+              <div className="flex-1 h-px bg-slate-200/80" />
+            </div>
+
+            {/* Footer links */}
+            <div className="space-y-3">
               <div className="text-center text-sm text-slate-600">
                 Novo por aqui?{" "}
-                <Link to="/register" className="font-semibold text-[var(--color-primary-600)] hover:underline">
+                <Link to="/register" className="font-bold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors">
                   Crie sua conta grátis
                 </Link>
               </div>
@@ -321,12 +358,17 @@ export function LoginPage() {
                 to="/"
                 className="flex items-center justify-center text-sm text-slate-400 hover:text-slate-700 group transition-colors"
               >
-                <ArrowLeft className="mr-1 h-3 w-3 group-hover:-translate-x-1 transition-transform" />
+                <ArrowLeft className="mr-1.5 h-3.5 w-3.5 group-hover:-translate-x-1 transition-transform" />
                 Voltar para o início
               </Link>
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         </motion.div>
+
+        {/* Copyright */}
+        <p className="text-[10px] text-slate-400/60 mt-4">
+          © 2026 Pet+. Todos os direitos reservados.
+        </p>
       </div>
     </div>
   );

@@ -82,7 +82,7 @@ export function Overview() {
 
           // Se for provedor (role 2, 3, ou 4), busca dados do provedor
           if ([2, 3, 4].includes(user.role_id)) {
-            const provider = await providerService.getMe();
+            const provider = await providerService.fetchMe();
             if (provider) setProviderData(provider);
           }
         }

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import logoBranco from "../../assets/pet+/logo2-branco.png";
+import logo from "../../assets/pet+/logo-horizontal.png";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 
 export function Footer() {
@@ -10,7 +10,7 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2">
               <Link to="/">
-                <ImageWithFallback src={logoBranco} alt="Pet+" className="h-20 w-auto" />
+                <ImageWithFallback src={logo} alt="Pet+" className="h-20 w-auto" />
               </Link>
             </div>
             <p className="text-sm text-slate-400">

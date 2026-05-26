@@ -3,6 +3,27 @@ import { Link } from "react-router";
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { toast } from "sonner";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
+
+// Import local assets for services section
+import petSitterImg from "../assets/imgs/c5143ed5-35e8-48be-97b7-d281b9de4a15.png";
+import petShopImg from "../assets/imgs/450b354e-1b6f-4f83-9dcf-84ed5d9ac6be.png";
+import hotelImg from "../assets/imgs/26376cf8-e893-4f9d-a14c-69c5063c4a73.png";
+
+// Import local assets for popular categories
+import catAlimentacao from "../assets/imgs/cat_alimentacao.png";
+import catBrinquedos from "../assets/imgs/cat_brinquedos.png";
+import catHigiene from "../assets/imgs/cat_higiene.png";
+import catAcessorios from "../assets/imgs/cat_acessorios.png";
+import catConforto from "../assets/imgs/cat_conforto.png";
+import catFarmacia from "../assets/imgs/cat_farmacia.png";
+import catRoupas from "../assets/imgs/cat_roupas.png";
+
+// Import local assets for hero section
+import heroCarePets from "../assets/imgs/hero_care_pets.png";
+import heroShopDog from "../assets/imgs/hero_shop_dog.png";
+import heroServicePet from "../assets/imgs/hero_service_pet.png";
+import ctaPartnerHotel from "../assets/imgs/cta_partner_hotel.png";
+
 import {
   Search,
   MapPin,
@@ -31,6 +52,8 @@ import {
   Shirt,
   Bath,
   Sofa,
+  Store,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -38,13 +61,14 @@ import { Badge } from "../components/ui/badge";
 import { useCart } from "../components/cart/CartContext";
 import { HeroSearch } from "../components/layout/HeroSearch";
 import { AnimatedHeroIllustration } from "../components/layout/AnimatedHeroIllustration";
+import { productService } from "../lib/services/productService";
 
 /* ═══════════════════════════════════════════════
    PRODUCT DATA
    ═══════════════════════════════════════════════ */
 
 type Product = {
-  id: number;
+  id: string | number;
   name: string;
   brand: string;
   price: number;
@@ -57,82 +81,7 @@ type Product = {
   soldCount?: number;
 };
 
-const weeklyHighlights: Product[] = [
-  {
-    id: 1,
-    name: "Ração Premium Cães Adultos 15kg",
-    brand: "Royal Canin",
-    price: 149.9,
-    originalPrice: 189.9,
-    rating: 4.8,
-    reviews: 328,
-    image:
-      "https://images.unsplash.com/photo-1725533488658-437e3619f856?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcmVtaXVtJTIwZG9nJTIwZm9vZCUyMGJhZyUyMGtpYmJsZXxlbnwxfHx8fDE3NzIxMjE1NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    badge: "Mais Vendido",
-    discount: 21,
-  },
-  {
-    id: 3,
-    name: "Coleira Refletiva Premium Ajustável",
-    brand: "Premier",
-    price: 89.9,
-    originalPrice: 119.9,
-    rating: 4.7,
-    reviews: 94,
-    image:
-      "https://images.unsplash.com/photo-1765895899115-bfdd2854b141?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBjb2xsYXIlMjBsZWFzaCUyMGFjY2Vzc29yaWVzfGVufDF8fHx8MTc3MjEyMTU1OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    badge: "Oferta",
-    discount: 25,
-  },
-  {
-    id: 4,
-    name: "Cama Ortopédica Pet Grande",
-    brand: "Premier",
-    price: 219.9,
-    originalPrice: 289.9,
-    rating: 4.9,
-    reviews: 201,
-    image:
-      "https://images.unsplash.com/photo-1632147104665-09e9bf73703e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBiZWQlMjBjdXNoaW9uJTIwY29tZm9ydHxlbnwxfHx8fDE3NzIxMjE1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    badge: "Novo",
-    discount: 24,
-  },
-  {
-    id: 2,
-    name: "Brinquedo Interativo Resistente",
-    brand: "PetClean",
-    price: 39.9,
-    rating: 4.6,
-    reviews: 156,
-    image:
-      "https://images.unsplash.com/photo-1714339691990-803e3dbf2056?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjB0b3klMjBjb2xvcmZ1bCUyMGRvZ3xlbnwxfHx8fDE3NzIxMjE1NTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  },
-  {
-    id: 5,
-    name: "Suplemento Vitamínico Cães e Gatos",
-    brand: "Sanol",
-    price: 54.9,
-    originalPrice: 69.9,
-    rating: 4.5,
-    reviews: 78,
-    image:
-      "https://images.unsplash.com/photo-1770836037793-95bdbf190f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjBwZXQlMjBoZWFsdGglMjBjaGVja3VwfGVufDF8fHx8MTc3MjQyODU2NHww&ixlib=rb-4.1.0&q=80&w=1080",
-    discount: 21,
-  },
-  {
-    id: 6,
-    name: "Roupa Pet Fashion Inverno",
-    brand: "PetStyle",
-    price: 79.9,
-    originalPrice: 99.9,
-    rating: 4.4,
-    reviews: 62,
-    image:
-      "https://images.unsplash.com/photo-1630438994394-3deff7a591bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwZnJlbmNoJTIwYnVsbGRvZyUyMHN3ZWF0ZXIlMjBvdXRmaXR8ZW58MXx8fHwxNzcyNDYzNDkwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    badge: "Oferta",
-    discount: 20,
-  },
-];
+
 
 
 
@@ -141,64 +90,64 @@ const popularCategories = [
     id: "alimentacao",
     name: "Alimentação",
     icon: Bone,
-    image:
-      "https://images.unsplash.com/photo-1734654901149-02a9a5f7993b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBmb29kJTIwYm93bCUyMHByZW1pdW0lMjBraWJibGV8ZW58MXx8fHwxNzcyNDYzNDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catAlimentacao,
     count: 186,
     color: "from-amber-400 to-orange-500",
+    pastelBg: "bg-[#FFF4E6]",
   },
   {
     id: "brinquedos",
     name: "Brinquedos",
     icon: Sparkles,
-    image:
-      "https://images.unsplash.com/photo-1744710835733-936ab49ee0b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXQlMjBwbGF5aW5nJTIwdG95JTIwY29sb3JmdWx8ZW58MXx8fHwxNzcyNDYzNDg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catBrinquedos,
     count: 124,
     color: "from-pink-400 to-rose-500",
+    pastelBg: "bg-[#FFF0F6]",
   },
   {
     id: "higiene",
     name: "Higiene",
     icon: Bath,
-    image:
-      "https://images.unsplash.com/photo-1597595735781-6a57fb8e3e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2clMjBncm9vbWluZyUyMHNhbG9uJTIwYmF0aHxlbnwxfHx8fDE3NzI0Mjg1NjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catHigiene,
     count: 98,
     color: "from-sky-400 to-blue-500",
+    pastelBg: "bg-[#E6F7FF]",
   },
   {
     id: "acessorios",
     name: "Acessórios",
     icon: Tag,
-    image:
-      "https://images.unsplash.com/photo-1710683941590-fd4f339f0c7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBhY2Nlc3NvcmllcyUyMGNvbGxhciUyMGxlYXNoJTIwc3R5bGlzaHxlbnwxfHx8fDE3NzI0NjM0ODd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catAcessorios,
     count: 142,
     color: "from-violet-400 to-purple-500",
+    pastelBg: "bg-[#F3F0FF]",
   },
   {
     id: "conforto",
     name: "Conforto",
     icon: Sofa,
-    image:
-      "https://images.unsplash.com/photo-1632147104665-09e9bf73703e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3p5JTIwZG9nJTIwYmVkJTIwc2xlZXBpbmclMjBjdXNoaW9ufGVufDF8fHx8MTc3MjQ2MzQ4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catConforto,
     count: 76,
     color: "from-teal-400 to-emerald-500",
+    pastelBg: "bg-[#E6FFFA]",
   },
   {
     id: "farmacia",
     name: "Farmácia",
     icon: Pill,
-    image:
-      "https://images.unsplash.com/photo-1770836037793-95bdbf190f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjBwZXQlMjBoZWFsdGglMjBjaGVja3VwfGVufDF8fHx8MTc3MjQyODU2NHww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catFarmacia,
     count: 64,
     color: "from-green-400 to-emerald-500",
+    pastelBg: "bg-[#EAFDF5]",
   },
   {
     id: "roupas",
     name: "Roupas",
     icon: Shirt,
-    image:
-      "https://images.unsplash.com/photo-1769483167964-44e703deab9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBjbG90aGluZyUyMGZhc2hpb24lMjBkb2clMjBzdHlsaXNofGVufDF8fHx8MTc3MjQ2MzQ5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: catRoupas,
     count: 53,
     color: "from-fuchsia-400 to-pink-500",
+    pastelBg: "bg-[#FFF0FD]",
   },
 ];
 
@@ -281,16 +230,16 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
-      className="group flex flex-col bg-white rounded-2xl border border-slate-100/60 shadow-sm hover:shadow-xl transition-shadow overflow-hidden"
+      className="group flex flex-col h-full bg-white rounded-2xl border border-slate-200 hover:border-slate-300 transition-all overflow-hidden"
     >
       {/* Image */}
-      <Link to={`/shopping/${product.id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
+      <Link to={`/shopping/${product.id}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-50/50 p-2.5">
         <ImageWithFallback
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500"
         />
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -332,7 +281,7 @@ function ProductCard({ product }: { product: Product }) {
       </Link>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 p-4 gap-2">
+      <div className="flex flex-col flex-1 p-3 gap-1.5">
         <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">
           {product.brand}
         </p>
@@ -374,11 +323,11 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* CTA */}
         <button
-          onClick={() => {
+          onClick={async () => {
             // NOTE: LandingPage usa Product mock (id: number); cart server rejeita
             // ids não-UUID com 422. Quando integrado ao catálogo real, basta
             // garantir que `product.id` venha como UUID do backend.
-            addItem({
+            const added = await addItem({
               id: String(product.id),
               name: product.name,
               brand: product.brand,
@@ -386,9 +335,11 @@ function ProductCard({ product }: { product: Product }) {
               originalPrice: product.originalPrice,
               image: product.image,
             });
-            toast.success(`${product.name} adicionado ao carrinho!`);
+            if (added) {
+              toast.success(`${product.name} adicionado ao carrinho!`);
+            }
           }}
-          className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-orange-400 text-white text-sm font-semibold hover:from-[var(--color-primary-600)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-md shadow-orange-500/20"
+          className="mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-orange-400 text-white text-xs font-semibold hover:from-[var(--color-primary-600)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-sm"
         >
           <ShoppingCart className="h-4 w-4" />
           Adicionar
@@ -471,7 +422,7 @@ function HorizontalCarousel({
       {/* Scrollable area */}
       <div
         ref={scrollRef}
-        className={`flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 ${className}`}
+        className={`flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pt-2 pb-2 ${className}`}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
@@ -479,10 +430,10 @@ function HorizontalCarousel({
 
       {/* Gradient fades */}
       {canLeft && (
-        <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-slate-50 to-transparent pointer-events-none z-[5]" />
+        <div className="absolute left-0 top-2 bottom-2 w-8 bg-gradient-to-r from-slate-50 to-transparent pointer-events-none z-[5]" />
       )}
       {canRight && (
-        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-[5]" />
+        <div className="absolute right-0 top-2 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-[5]" />
       )}
     </div>
   );
@@ -500,7 +451,7 @@ function SectionHeader({
   action,
   actionHref,
 }: {
-  badge: string;
+  badge?: string;
   badgeIcon?: React.ElementType;
   title: string;
   subtitle: string;
@@ -510,10 +461,6 @@ function SectionHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
       <div>
-        <div className="inline-flex items-center gap-2 bg-[var(--color-primary-50)] text-[var(--color-primary-600)] px-3.5 py-1.5 rounded-full mb-3">
-          {BadgeIcon && <BadgeIcon className="h-3.5 w-3.5" />}
-          <span className="text-xs font-semibold">{badge}</span>
-        </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
           {title}
         </h2>
@@ -588,13 +535,13 @@ function CountdownTimer() {
 const heroSlides = [
   {
     id: 1,
-    badge: "Pet+",
     title: "Cuidado completo para quem é ",
     highlight: "família",
     description: "De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar do seu melhor amigo em um só lugar.",
-    image: "https://images.unsplash.com/photo-1623387641168-d9803ddd3f35?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    color: "from-orange-50 to-amber-100",
-    blobColor: "bg-orange-400",
+    image: heroCarePets,
+    bgColor: "bg-[#edf4de]", // Light pastel lime green
+    blobColor: "bg-[#cddba9]",
+    yellowBlobColor: "bg-[#fcd015]",
     ctaText: "Explorar Serviços",
     ctaLink: "/walkers",
     features: [
@@ -604,13 +551,14 @@ const heroSlides = [
   },
   {
     id: 2,
-    badge: "Shopping",
+    badgeText: "Ofertas Especiais",
     title: "Ofertas exclusivas no ",
     highlight: "Shopping Pet",
     description: "As melhores marcas com descontos imperdíveis. Ração, brinquedos, acessórios e farmácia com entrega rápida na sua porta.",
-    image: "https://images.unsplash.com/photo-1597843786411-a7fa8ad44a95?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    color: "from-purple-50 to-indigo-100",
-    blobColor: "bg-purple-400",
+    image: heroShopDog,
+    bgColor: "bg-[#eef2ff]", // Light pastel blue/indigo
+    blobColor: "bg-[#c7d2fe]",
+    yellowBlobColor: "bg-[#fb923c]", // Orange blob behind blue theme
     ctaText: "Acessar Loja",
     ctaLink: "/shopping",
     features: [
@@ -620,13 +568,14 @@ const heroSlides = [
   },
   {
     id: 3,
-    badge: "Serviços",
+    badgeText: "Hospedagem & Cuidados",
     title: "Encontre o Pet Sitter ou ",
     highlight: "Hotel ideal",
     description: "Viaje tranquilo ou trabalhe sem preocupações. Conectamos você aos melhores cuidadores e hotéis verificados da região.",
-    image: "https://images.unsplash.com/photo-1494947665470-20322015e3a8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    color: "from-teal-50 to-emerald-100",
-    blobColor: "bg-teal-400",
+    image: heroServicePet,
+    bgColor: "bg-[#fdf4e9]", // Light pastel peach/amber
+    blobColor: "bg-[#fed7aa]",
+    yellowBlobColor: "bg-[#4ade80]", // Pastel green blob behind peach theme
     ctaText: "Buscar Hotéis",
     ctaLink: "/hotels",
     features: [
@@ -649,7 +598,8 @@ function HeroCarousel() {
   const slide = heroSlides[currentSlide];
 
   return (
-    <div className="relative w-full overflow-hidden bg-white min-h-[600px] md:min-h-[700px] flex items-center pt-16 md:pt-0">
+    <div className="relative w-full overflow-hidden bg-white min-h-[calc(100vh-76px)] flex items-center pt-24 pb-16 lg:py-0">
+      {/* Dynamic Background Transition */}
       <AnimatePresence mode="wait">
         <motion.div
           key={slide.id}
@@ -657,24 +607,33 @@ function HeroCarousel() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
-          className={`absolute inset-0 bg-gradient-to-br ${slide.color} opacity-40`}
+          className={`absolute inset-0 ${slide.bgColor} transition-colors duration-700`}
         />
       </AnimatePresence>
 
-      {/* Animated Blobs */}
+      {/* Top Hanging Blobs */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={`blob-${slide.id}`}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.3, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.2 }}
-          transition={{ duration: 1.5 }}
-          className={`absolute -top-24 -right-24 w-[500px] h-[500px] rounded-full blur-[100px] ${slide.blobColor}`}
-        />
+          key={`top-blobs-${slide.id}`}
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 0.7, y: 0 }}
+          exit={{ opacity: 0, y: -40 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-x-0 top-0 h-[180px] overflow-hidden pointer-events-none z-0"
+        >
+          {/* Main center-left hanging blob */}
+          <div className={`absolute top-0 left-[35%] w-[160px] h-[70px] rounded-b-[40px] opacity-75 blur-[1px] transition-all duration-700 ${slide.blobColor}`} />
+          {/* Top-right hanging blob */}
+          <div className={`absolute top-0 right-[15%] w-[200px] h-[85px] rounded-b-[50px] opacity-60 blur-[2px] transition-all duration-700 ${slide.blobColor}`} />
+          {/* Subtle dots or bubbles */}
+          <div className={`absolute top-[40px] left-[32%] w-3 h-3 rounded-full opacity-60 transition-all duration-700 ${slide.blobColor}`} />
+          <div className={`absolute top-[80px] right-[25%] w-4 h-4 rounded-full opacity-50 transition-all duration-700 ${slide.blobColor}`} />
+        </motion.div>
       </AnimatePresence>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:32px_32px] opacity-30 z-0 pointer-events-none" />
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-16 relative z-10 py-12 md:py-24">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#f1f5f9_1px,transparent_1px)] [background-size:32px_32px] opacity-25 z-0 pointer-events-none" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 py-8 lg:py-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={`content-${slide.id}`}
@@ -682,11 +641,12 @@ function HeroCarousel() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-8 items-center"
           >
             {/* Content */}
-            <div className="space-y-8">
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.1]">
+            <div className="space-y-6">
+
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.15] filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]">
                 {slide.title}
                 <span className="relative inline-block text-[var(--color-primary-600)]">
                   {slide.highlight}
@@ -695,47 +655,79 @@ function HeroCarousel() {
                   </svg>
                 </span>.
               </h1>
-              <p className="text-lg sm:text-xl text-slate-600 max-w-xl leading-relaxed font-medium">
+              <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-xl leading-relaxed font-semibold">
                 {slide.description}
               </p>
               
               <div className="flex flex-wrap items-center gap-4">
                 <Link to={slide.ctaLink}>
-                  <Button size="lg" className="bg-slate-900 text-white hover:bg-slate-800 shadow-xl rounded-xl px-10 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95">
+                  <Button size="lg" className="bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] shadow-lg rounded-full px-10 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 border-none">
                     {slide.ctaText}
                   </Button>
                 </Link>
-                <Link to="/shopping">
-                  <Button size="lg" variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm rounded-xl px-8 h-14 text-base font-semibold">
-                    Ver Catálogo
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-8 pt-6">
-                {slide.features.map((feat, i) => (
-                  <div key={i} className="flex items-center gap-3 group">
-                    <div className="p-3 rounded-xl bg-white/60 backdrop-blur-sm text-slate-700 shadow-sm border border-white/40 group-hover:scale-110 transition-transform">
-                      <feat.icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{feat.title}</p>
-                      <p className="text-xs text-slate-500">{feat.subtitle}</p>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
-            {/* Image */}
-            <div className="relative">
-              <motion.div 
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white/50"
+            {/* Image Section with Blob, Lines, and Paws */}
+            <div className="relative flex items-center justify-center min-h-[300px] md:min-h-[460px]">
+              {/* Yellow organic blob behind the image */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`blob-bg-${slide.id}`}
+                  initial={{ opacity: 0, scale: 0.8, rotate: -20 }}
+                  animate={{ opacity: 0.9, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, rotate: 20 }}
+                  transition={{ duration: 0.8 }}
+                  className={`absolute w-[220px] h-[220px] min-[375px]:w-[280px] min-[375px]:h-[280px] sm:w-[340px] sm:h-[340px] md:w-[400px] md:h-[400px] transition-all duration-700 ${slide.yellowBlobColor} -z-10`}
+                  style={{ borderRadius: "60% 40% 60% 40% / 40% 60% 40% 60%" }}
+                />
+              </AnimatePresence>
+
+              {/* Decorative lines behind the pet */}
+              <div className="absolute right-[5%] top-[10%] w-[1px] h-[120px] bg-slate-400/20 rotate-[15deg] hidden sm:block" />
+              <div className="absolute right-[3%] top-[15%] w-[1px] h-[90px] bg-slate-400/20 rotate-[15deg] hidden sm:block" />
+
+              {/* Floating Paw Prints */}
+              <motion.div
+                animate={{ y: [0, -12, 0], rotate: [15, 20, 15] }}
+                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                className="absolute -top-6 right-[20%] text-slate-800/15"
               >
-                <img src={slide.image} alt={slide.highlight} className="w-full h-full object-cover" />
+                <PawPrint className="h-9 w-9" />
+              </motion.div>
+
+              <motion.div
+                animate={{ y: [0, 8, 0], rotate: [-10, -5, -10] }}
+                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.5 }}
+                className="absolute top-[12%] right-[5%] text-slate-800/10"
+              >
+                <PawPrint className="h-7 w-7" />
+              </motion.div>
+
+              {/* Faded bone icon bottom-left */}
+              <motion.div
+                animate={{ rotate: [-25, -20, -25] }}
+                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                className="absolute bottom-[8%] left-[5%] text-slate-800/15 hidden sm:block"
+              >
+                <Bone className="h-16 w-16" />
+              </motion.div>
+
+              {/* Cutout Image of Pets (using SVG chroma filter to remove white background cleanly) */}
+              <motion.div
+                key={`img-${slide.id}`}
+                initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: -30 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative w-[240px] h-[240px] min-[375px]:w-[290px] min-[375px]:h-[290px] sm:w-[350px] sm:h-[350px] md:w-[410px] md:h-[410px] z-10 flex items-center justify-center overflow-visible"
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.highlight}
+                  className="w-full h-full object-contain select-none"
+                  style={{ filter: "url(#remove-white) drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12))" }}
+                />
               </motion.div>
             </div>
           </motion.div>
@@ -755,6 +747,20 @@ function HeroCarousel() {
           />
         ))}
       </div>
+
+      {/* SVG Chromakey Filter to key out white background dynamically */}
+      <svg className="absolute w-0 h-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="remove-white">
+            <feColorMatrix type="matrix" values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              -1 -1 -1 3 0
+            " />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 }
@@ -777,6 +783,46 @@ export default function LandingPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const [highlights, setHighlights] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadHighlights = async () => {
+      try {
+        const data = await productService.fetchAllPublicProducts();
+        const now = new Date();
+        const mapped: Product[] = data.map((p: any) => {
+          let badge = undefined;
+          if (p.created_at) {
+            const createdAt = new Date(p.created_at);
+            const daysDiff = (now.getTime() - createdAt.getTime()) / (1000 * 3600 * 24);
+            if (daysDiff <= 7) {
+              badge = "Novo";
+            }
+          }
+          return {
+            id: p.id,
+            name: p.name,
+            brand: p.provider_name || 'Desconhecida',
+            price: Number(p.price),
+            rating: 4.8, 
+            reviews: Math.floor(Math.random() * 100) + 10,
+            image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
+            badge: badge
+          };
+        });
+        if (mapped.length > 0) {
+          setHighlights(mapped.slice(0, 8));
+        }
+      } catch (err: any) {
+        console.error("Erro ao carregar os produtos na landing page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadHighlights();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen font-[family-name:var(--font-body)]">
       {/* ═══════════════════════════════════════════════
@@ -784,57 +830,18 @@ export default function LandingPage() {
           ═══════════════════════════════════════════════ */}
       <HeroCarousel />
 
-      
-
-      {/* ═══════════════════════════════════════════════
-          3. DESTAQUES DA SEMANA — Carousel Progressivo
-          ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-slate-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            badge="Promoção"
-            badgeIcon={Flame}
-            title="Destaques da Semana"
-            subtitle="Produtos selecionados com descontos imperdíveis."
-            action="Ver todo o Shopping"
-            actionHref="/shopping"
-          />
-
-          {/* Timer bar */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-8 p-4 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-white" />
-              <span className="text-sm font-semibold text-white">
-                Ofertas encerram em:
-              </span>
-            </div>
-            <CountdownTimer />
-          </div>
-
-          <HorizontalCarousel>
-            {weeklyHighlights.map((product) => (
-              <div
-                key={product.id}
-                className="w-[260px] sm:w-[280px] shrink-0 snap-start"
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </HorizontalCarousel>
-        </div>
-      </section>
+      {/* Wrapper to standardize background color between Hero and Footer */}
+      <div className="bg-slate-50">
 
       {/* ═══════════════════════════════════════════════
           4. CATEGORIAS POPULARES — Cards Visuais Premium
           ═══════════════════════════════════════════════ */}
-      <section className="relative py-16 sm:py-20 bg-slate-50 overflow-hidden">
+      <section className="relative py-10 sm:py-14 overflow-hidden">
         {/* Background blob for depth */}
         <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-purple-100 rounded-full blur-[100px] opacity-60 -translate-y-1/2 pointer-events-none" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            badge="Navegue"
-            badgeIcon={Sparkles}
             title="Categorias Populares"
             subtitle="Encontre rapidamente o que seu pet precisa."
             action="Ver todas as categorias"
@@ -854,12 +861,21 @@ export default function LandingPage() {
                   to={`/shopping?category=${cat.id}`}
                   className="flex flex-col items-center gap-3 group"
                 >
-                  <div className="relative">
-                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden ring-2 ring-slate-100 group-hover:ring-[var(--color-primary-300)] transition-all shadow-sm group-hover:shadow-md">
-                      <ImageWithFallback
+                  <div className="relative flex items-center justify-center w-30 h-30 sm:w-30 sm:w-30">
+                    {/* Dashed outer border ring */}
+                    <div className="absolute inset-0 rounded-full border-2 border-dashed border-slate-200 group-hover:border-[var(--color-primary-500)] transition-colors duration-300" />
+                    
+                    {/* Sparkles / Shiny lines effect on hover */}
+                    <div className="absolute -top-1.5 -right-1.5 opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 pointer-events-none z-20">
+                      <Sparkles className="h-5 w-5 text-amber-500 fill-amber-300" />
+                    </div>
+
+                    {/* Inner circle with pastel bg or solid brand bg on hover */}
+                    <div className={`absolute w-[86%] h-[86%] rounded-full ${cat.pastelBg} group-hover:bg-[var(--color-primary-500)] transition-all duration-300 flex items-center justify-center overflow-visible`}>
+                      <img
                         src={cat.image}
                         alt={cat.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-[85%] h-[85%] object-contain transform group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300"
                       />
                     </div>
                   </div>
@@ -873,72 +889,83 @@ export default function LandingPage() {
         </div>
       </section>
 
+
       {/* ═══════════════════════════════════════════════
           2. SERVIÇOS — 3 Cards
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
-              Tudo que seu pet precisa
-            </h2>
-            <p className="mt-4 text-slate-600">
-              Navegue por categorias e encontre o serviço ideal.
-            </p>
-          </div>
+      <section className="py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            title="Tudo que seu pet precisa"
+            subtitle="Navegue por categorias e encontre o serviço ideal."
+          />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 name: "Hotelaria",
-                icon: Hotel,
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                desc: "Hospedagem segura e confortável para o seu pet",
+                bgColor: "bg-[#7148c4]",
+                gradient: "from-[#7148c4] via-[#7148c4]/30 to-transparent",
+                desc: "Hospedagem segura e confortável para o seu pet.",
                 href: "/hotels",
-                image: "https://images.unsplash.com/photo-1516222338250-863216ce01ea?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                image: hotelImg,
+                icon: PawPrint,
+                iconClass: "w-40 h-40 -bottom-10 -left-6 rotate-[15deg] opacity-10"
               },
               {
                 name: "Pet Sitter",
-                icon: PawPrint,
-                color: "text-orange-600",
-                bg: "bg-orange-50",
-                desc: "Cuidadores verificados na sua casa ou na deles",
+                bgColor: "bg-[#f57a26]",
+                gradient: "from-[#f57a26] via-[#f57a26]/20 to-transparent",
+                desc: "Cuidadores verificados na sua casa ou na deles.",
                 href: "/walkers",
-                image: "https://images.unsplash.com/photo-1553322378-eb94e5966b0c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                image: petSitterImg,
+                icon: PawPrint,
+                iconClass: "w-28 h-28 -bottom-4 left-4 -rotate-12 opacity-20"
               },
               {
                 name: "Shopping",
-                icon: ShoppingBag,
-                color: "text-emerald-600",
-                bg: "bg-emerald-50",
-                desc: "Rações, brinquedos e tudo para o dia a dia",
+                bgColor: "bg-[#2563eb]",
+                gradient: "from-[#2563eb] via-[#2563eb]/30 to-transparent",
+                desc: "Rações, brinquedos e tudo para o dia a dia.",
                 href: "/shopping",
-                image: "https://images.unsplash.com/photo-1684176025658-7befca57913f?q=80&w=1176&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                image: petShopImg,
+                icon: Bone,
+                iconClass: "w-32 h-32 -bottom-4 left-4 rotate-45 opacity-20"
               },
             ].map((cat) => (
-              <Link key={cat.name} to={cat.href} className="group relative block rounded-[2.5rem] overflow-hidden bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-slate-100">
-                <div className="h-48 overflow-hidden relative">
+              <Link key={cat.name} to={cat.href} className={`group relative block rounded-[2rem] overflow-hidden ${cat.bgColor} hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 min-h-[280px]`}>
+                
+                {/* Decorative blob */}
+                <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
+                
+                {/* Background watermark icon */}
+                <div className={`absolute ${cat.iconClass} transition-transform duration-500 group-hover:scale-105`}>
+                   <cat.icon className="w-full h-full text-white fill-white" />
+                </div>
+
+                {/* Right side image with gradient mask */}
+                <div className="absolute top-0 right-0 w-[60%] sm:w-[55%] h-full">
+                   <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} z-10 w-full`} />
                    <ImageWithFallback 
                      src={cat.image} 
-                     className="w-full h-full object-cover" 
+                     className="w-full h-full object-cover object-center" 
                      alt={cat.name} 
                    />
-                   <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none" />
                 </div>
                 
-                <div className="relative z-20 px-8 pb-8 -mt-10">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 ${cat.bg} ${cat.color} shadow-lg ring-4 ring-white transition-transform group-hover:scale-110 duration-500`}>
-                    <cat.icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-2xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-3 group-hover:text-[var(--color-primary-600)] transition-colors">
+                {/* Content */}
+                <div className="relative z-20 flex flex-col h-full p-6 sm:p-8 w-[65%] sm:w-[60%]">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white font-[family-name:var(--font-display)] mb-2 leading-tight">
                     {cat.name}
                   </h3>
-                  <p className="text-slate-600 font-medium leading-relaxed">
+                  <p className="text-white/95 font-medium text-sm sm:text-[15px] leading-relaxed mb-6">
                     {cat.desc}
                   </p>
                   
-                  <div className={`mt-6 flex items-center gap-2 text-sm font-bold ${cat.color} opacity-80 group-hover:opacity-100 transition-opacity`}>
-                    Explorar <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform duration-300" />
+                  <div className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-white">
+                    <span className="underline underline-offset-[5px] decoration-1 decoration-white/70 group-hover:decoration-white transition-colors">
+                      Explorar
+                    </span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform ml-1" />
                   </div>
                 </div>
               </Link>
@@ -948,31 +975,130 @@ export default function LandingPage() {
       </section>
 
       
+
+      {/* ═══════════════════════════════════════════════
+          3. DESTAQUES DA SEMANA — Carousel Progressivo
+          ═══════════════════════════════════════════════ */}
+      <section className="py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            title="Produtos em Destaque"
+            subtitle="Os produtos mais procurados pelos nossos clientes."
+            action="Ver todo o Shopping"
+            actionHref="/shopping"
+          />
+
+          {/* Timer bar */}
+          {/* <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-8 p-4 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-white" />
+              <span className="text-sm font-semibold text-white">
+                Ofertas encerram em:
+              </span>
+            </div>
+            <CountdownTimer />
+          </div> */}
+
+          <HorizontalCarousel>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16 w-full min-h-[200px] col-span-full">
+                <Loader2 className="h-8 w-8 text-[var(--color-primary-500)] animate-spin" />
+                <p className="mt-3 text-sm text-slate-500 font-semibold tracking-wide animate-pulse">
+                  Carregando produtos...
+                </p>
+              </div>
+            ) : highlights.length > 0 ? (
+              highlights.map((product) => (
+                <div
+                  key={product.id}
+                  className="w-[210px] sm:w-[230px] shrink-0 snap-start flex flex-col"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 w-full text-center text-slate-400 font-medium col-span-full">
+                Nenhum produto em destaque disponível no momento.
+              </div>
+            )}
+          </HorizontalCarousel>
+        </div>
+      </section>
+
+      
+
+      
+
+      
       
 
       {/* ═══════════════════════════════════════════════
-          6. CTA PARCEIROS - LIGHT COMPACT ENTRYWAY
+          6. CTA PARCEIROS - PREMIUM 3D
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 bg-slate-50 border-y border-slate-100 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-4">
-            Você tem um Pet Shop, Clínica ou é Cuidador?
-          </h2>
-          <p className="text-slate-600 mb-8 max-w-2xl mx-auto font-medium">
-            Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos, atração de clientes e faturamento em uma única plataforma inteligente.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/partners">
-              <Button size="lg" className="bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] font-bold shadow-md shadow-primary-500/10">
-                Conhecer Área de Parceiros
-              </Button>
-            </Link>
-            <Link to="/about">
-              <Button size="lg" variant="outline" className="bg-transparent border-slate-200 text-slate-700 hover:bg-slate-50">
-                Saiba Mais
-              </Button>
-            </Link>
+      <section className="py-10 sm:py-14 overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative bg-[#eef2ff] rounded-[2rem] sm:rounded-[2.5rem] py-8 px-6 sm:py-10 sm:px-10 lg:py-10 lg:px-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 border border-indigo-200/80">
+            
+            {/* Floaty Elements */}
+            <motion.div
+              animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-8 left-8 lg:left-16 text-indigo-300/40 z-0 hidden sm:block"
+            >
+              <PawPrint className="w-10 h-10" />
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 12, 0], rotate: [0, 10, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute bottom-8 right-8 lg:right-1/3 text-purple-300/40 z-0 hidden sm:block"
+            >
+              <Heart className="w-8 h-8" />
+            </motion.div>
+
+            {/* Left side: Text Content */}
+            <div className="flex-1 text-center lg:text-left relative z-10 order-2 lg:order-1">
+              
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-4 leading-tight">
+                Você tem um Pet Shop, Hotel ou é Cuidador?
+              </h2>
+              <p className="text-slate-600 text-base mb-6 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos, atração de clientes e faturamento em uma única plataforma inteligente.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <Link to="/partners" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold shadow-md shadow-primary-500/10 px-6 rounded-full h-11 text-sm">
+                    Conhecer Área de Parceiros
+                  </Button>
+                </Link>
+                <Link to="/about" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-6 rounded-full h-11 text-sm shadow-sm">
+                    Saiba Mais
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right side: 3D Image */}
+            <div className="flex-1 relative z-10 w-full max-w-[240px] sm:max-w-[280px] lg:max-w-[320px] mx-auto order-1 lg:order-2">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="relative aspect-square flex items-center justify-center"
+              >
+                {/* Image Backdrop Blob */}
+                <div className="absolute inset-0 bg-[#c7d2fe]/40 rounded-full blur-2xl opacity-60 mix-blend-multiply" />
+                
+                <ImageWithFallback
+                  src={ctaPartnerHotel}
+                  alt="Profissional trabalhando em hotel pet"
+                  className="relative z-10 w-full h-full object-contain drop-shadow-lg"
+                  style={{ filter: "url(#remove-white)" }}
+                />
+              </motion.div>
+            </div>
+            
           </div>
         </div>
       </section>
@@ -980,7 +1106,7 @@ export default function LandingPage() {
       {/* ═══════════════════════════════════════════════
           7. SOCIAL PROOF — Depoimentos + Instagram
           ═══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-20 bg-white overflow-hidden">
+      <section className="py-10 sm:py-14 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SectionHeader
             badge="Comunidade"
@@ -990,8 +1116,8 @@ export default function LandingPage() {
           />
 
           {/* Testimonials carousel */}
-          <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-6 sm:p-10 mb-12 sm:mb-16">
-            <Quote className="absolute top-6 left-6 h-10 w-10 text-[var(--color-primary-200)] opacity-60" />
+          <div className="relative bg-[#fff7ed] rounded-[2rem] sm:rounded-[2.5rem] border border-orange-200/80 p-6 sm:p-10 mb-12 sm:mb-16">
+            <Quote className="absolute top-6 left-6 h-10 w-10 text-orange-300 opacity-50" />
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -1108,7 +1234,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      
+      </div> {/* End of bg-slate-50 wrapper */}
     </div>
   );
 }

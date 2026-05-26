@@ -32,6 +32,13 @@ import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useCart } from "../components/cart/CartContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 
 /* ═══════════════════════════════════════════════
    DATA
@@ -106,7 +113,6 @@ export function ShoppingPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPet, setSelectedPet] = useState("all");
   const [selectedPrice, setSelectedPrice] = useState("all");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("relevance");
   const { isFavorite, toggle: toggleFavoriteCtx } = useFavorites();
   const { addItem } = useCart();
@@ -121,18 +127,29 @@ export function ShoppingPage() {
         setLoading(true);
         const data = await productService.fetchAllPublicProducts();
         
-        const mapped: Product[] = data.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          brand: p.provider_name || 'Desconhecida',
-          price: Number(p.price),
-          rating: 4.8, 
-          reviews: Math.floor(Math.random() * 100) + 10,
-          image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
-          category: p.category ? p.category.toLowerCase() : 'outros',
-          pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
-          badge: "Novo"
-        }));
+        const now = new Date();
+        const mapped: Product[] = data.map((p: any) => {
+          let badge = undefined;
+          if (p.created_at) {
+            const createdAt = new Date(p.created_at);
+            const daysDiff = (now.getTime() - createdAt.getTime()) / (1000 * 3600 * 24);
+            if (daysDiff <= 7) {
+              badge = "Novo";
+            }
+          }
+          return {
+            id: p.id,
+            name: p.name,
+            brand: p.provider_name || 'Desconhecida',
+            price: Number(p.price),
+            rating: 4.8, 
+            reviews: Math.floor(Math.random() * 100) + 10,
+            image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
+            category: p.category ? p.category.toLowerCase() : 'outros',
+            pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
+            badge: badge
+          };
+        });
         
         setApiProducts(mapped);
       } catch (err: any) {
@@ -149,23 +166,17 @@ export function ShoppingPage() {
     category: true,
     pet: true,
     price: true,
-    brand: true,
   });
 
   const toggleSection = (key: keyof typeof openSections) =>
     setOpenSections((s) => ({ ...s, [key]: !s[key] }));
 
-  const toggleBrand = (brand: string) =>
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    );
-
   const toggleFavorite = (id: string | number) => {
     void toggleFavoriteCtx("PRODUCT", String(id));
   };
 
-  const addToCart = (product: Product) => {
-    void addItem({
+  const addToCart = async (product: Product) => {
+    const added = await addItem({
       id: String(product.id),
       name: product.name,
       brand: product.brand,
@@ -173,14 +184,15 @@ export function ShoppingPage() {
       originalPrice: product.originalPrice,
       image: product.image,
     });
-    toast.success(`${product.name} adicionado ao carrinho!`);
+    if (added) {
+      toast.success(`${product.name} adicionado ao carrinho!`);
+    }
   };
 
   const clearFilters = () => {
     setSelectedCategory("all");
     setSelectedPet("all");
     setSelectedPrice("all");
-    setSelectedBrands([]);
     setSearch("");
   };
 
@@ -188,7 +200,6 @@ export function ShoppingPage() {
     selectedCategory !== "all" ||
     selectedPet !== "all" ||
     selectedPrice !== "all" ||
-    selectedBrands.length > 0 ||
     search.length > 0;
 
   /* ─── Filtering + Sorting ─── */
@@ -208,8 +219,6 @@ export function ShoppingPage() {
       result = result.filter((p) => p.category === selectedCategory);
     if (selectedPet !== "all")
       result = result.filter((p) => p.pet === selectedPet);
-    if (selectedBrands.length > 0)
-      result = result.filter((p) => selectedBrands.includes(p.brand));
     if (selectedPrice !== "all") {
       const [min, max] = selectedPrice.includes("+")
         ? [parseInt(selectedPrice), Infinity]
@@ -233,7 +242,7 @@ export function ShoppingPage() {
     }
 
     return result;
-  }, [search, selectedCategory, selectedPet, selectedPrice, selectedBrands, sortBy, apiProducts]);
+  }, [search, selectedCategory, selectedPet, selectedPrice, sortBy, apiProducts]);
 
   /* ─── Filter sidebar (shared for desktop & mobile drawer) ─── */
   const FilterContent = () => (
@@ -330,36 +339,7 @@ export function ShoppingPage() {
         )}
       </div>
 
-      {/* Brand */}
-      <div>
-        <button
-          onClick={() => toggleSection("brand")}
-          className="flex items-center justify-between w-full text-sm font-bold text-slate-800 mb-2"
-        >
-          Marca
-          <ChevronDown
-            className={`h-4 w-4 text-slate-400 transition-transform ${openSections.brand ? "rotate-180" : ""}`}
-          />
-        </button>
-        {openSections.brand && (
-          <div className="space-y-1">
-            {brands.map((brand) => (
-              <label
-                key={brand}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedBrands.includes(brand)}
-                  onChange={() => toggleBrand(brand)}
-                  className="h-4 w-4 rounded border-slate-300 text-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)]"
-                />
-                {brand}
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
+
 
       {hasActiveFilters && (
         <button
@@ -452,10 +432,10 @@ export function ShoppingPage() {
         </div>
       </section>
 
-      {/* ═══════ Pet Type Pills (mobile-visible, desktop too) ═══════ */}
-      <div className="sticky top-16 z-30 bg-white border-b border-slate-100 shadow-sm">
+      {/* ═══════ Pet Type Pills (mobile/tablet-only quick switcher) ═══════ */}
+      <div className="sticky top-16 z-30 bg-white border-b border-slate-100 shadow-sm lg:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center justify-center gap-2 py-3 overflow-x-auto scrollbar-hide">
             {petTypes.map((pt) => (
               <button
                 key={pt.id}
@@ -468,24 +448,6 @@ export function ShoppingPage() {
               >
                 <pt.icon className="h-4 w-4" />
                 {pt.name}
-              </button>
-            ))}
-
-            <div className="hidden sm:block h-6 w-px bg-slate-200 mx-1 shrink-0" />
-
-            {/* Category pills — horizontal on the same strip */}
-            {categories.filter(c => c.id !== "all").map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id === selectedCategory ? "all" : cat.id)}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors ${
-                  selectedCategory === cat.id
-                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] ring-1 ring-[var(--color-primary-200)]"
-                    : "bg-slate-50 text-slate-500 hover:bg-slate-100"
-                }`}
-              >
-                <cat.icon className="h-3.5 w-3.5" />
-                {cat.name}
               </button>
             ))}
           </div>
@@ -530,17 +492,18 @@ export function ShoppingPage() {
                 </p>
               </div>
 
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="self-start sm:self-auto text-sm bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-300)] shadow-sm"
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px] bg-white border-slate-200 rounded-xl shadow-sm text-slate-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Active filter chips */}
@@ -555,9 +518,7 @@ export function ShoppingPage() {
                 {selectedPrice !== "all" && (
                   <Chip label={priceRanges.find((p) => p.id === selectedPrice)!.label} onRemove={() => setSelectedPrice("all")} />
                 )}
-                {selectedBrands.map((b) => (
-                  <Chip key={b} label={b} onRemove={() => toggleBrand(b)} />
-                ))}
+
                 {search && <Chip label={`"${search}"`} onRemove={() => setSearch("")} />}
               </div>
             )}

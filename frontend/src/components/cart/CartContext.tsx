@@ -48,7 +48,7 @@ export type CartAddInput = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (item: CartAddInput, quantity?: number) => Promise<void>;
+  addItem: (item: CartAddInput, quantity?: number) => Promise<boolean>;
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -123,7 +123,7 @@ function fromAnonItem(item: AnonItem): CartItem {
 const cartQueryKey = ["cart"] as const;
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
 
   // Estado anônimo (apenas usado quando sem token)
@@ -239,16 +239,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   /* -------- API pública -------- */
 
   const addItem = useCallback(
-    async (input: CartAddInput, quantity: number = 1) => {
+    async (input: CartAddInput, quantity: number = 1): Promise<boolean> => {
+      if (user && user.role_id !== 1) {
+        toast.warning("Funcionalidade indisponível. Apenas clientes podem usar o carrinho.");
+        return false;
+      }
+
       const qty = Math.max(1, Math.min(99, Math.floor(quantity)));
       if (isAuthenticated) {
         try {
           await addMutation.mutateAsync({ product_id: input.id, quantity: qty });
+          return true;
         } catch (err) {
           const message = err instanceof ApiError ? err.message : "Erro ao adicionar ao carrinho";
           toast.error(message);
+          return false;
         }
-        return;
       }
       // Anônimo: agrega local
       setAnonItems((prev) => {
@@ -260,8 +266,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
         return [...prev, { ...input, quantity: qty }];
       });
+      return true;
     },
-    [isAuthenticated, addMutation]
+    [isAuthenticated, addMutation, user]
   );
 
   const removeItem = useCallback(

@@ -51,9 +51,6 @@ export function HamsterLoader({
         <p className="text-slate-600 font-semibold text-base tracking-wide animate-pulse">
           {message}
         </p>
-        <p className="text-slate-400 text-sm mt-1">
-          Só um segundinho 🐾
-        </p>
       </div>
     </div>
   );

@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   CircleDashed,
   Activity,
-  Calendar
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 
 // --- Dados Mockados ---
@@ -75,8 +76,21 @@ const formatDate = (dateString: string) => {
 export default function Finance() {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-6">
         
+        {/* Aviso de Dados Fictícios */}
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+          <div className="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0">
+            <AlertCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-amber-800 font-[family-name:var(--font-display)]">Ambiente de Demonstração</h4>
+            <p className="text-xs text-amber-600 mt-0.5 font-medium">
+              Esta tela ainda está utilizando dados fictícios para fins de apresentação de layout e ainda não foi integrada ao backend.
+            </p>
+          </div>
+        </div>
+
         {/* Header Section */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div>

@@ -95,10 +95,6 @@ export function PartnersPage() {
             
             {/* Left Copy */}
             <div className="lg:col-span-7 space-y-8 text-left">
-              <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 px-4 py-2 rounded-full shadow-sm">
-                <Briefcase className="h-4 w-4 text-orange-500" />
-                <span className="text-xs font-bold uppercase tracking-wider">Pet+ para Empresas</span>
-              </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight font-[family-name:var(--font-display)]">
                 Leve a gestão do seu <br />
@@ -176,10 +172,6 @@ export function PartnersPage() {
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-600 px-4 py-1.5 rounded-full shadow-sm">
-              <Shield className="h-3.5 w-3.5 text-orange-500" />
-              <span className="text-xs font-bold uppercase tracking-wider">Soluções Customizadas</span>
-            </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
               Uma ferramenta inteligente para <br />
               <span className="text-[var(--color-primary-500)]">cada tipo de negócio</span>

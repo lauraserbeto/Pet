@@ -20,10 +20,19 @@ import {
   DialogFooter,
   DialogDescription
 } from "../../components/ui/dialog";
-import { Search, Plus, Filter, Package, AlertCircle, Trash2, Edit2, Loader2, UploadCloud, Image as ImageIcon } from "lucide-react";
+import { Search, Plus, Filter, Package, AlertCircle, Trash2, Edit2, Loader2, UploadCloud, Image as ImageIcon, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 import { productService, Product, CreateProductDTO } from "../../lib/services/productService";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 
 export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,6 +41,9 @@ export function Products() {
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedPetType, setSelectedPetType] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -194,15 +206,59 @@ export function Products() {
     }).format(Number(value));
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Título do Documento
+    doc.setFontSize(16);
+    doc.text("Relatório de Produtos", 14, 20);
+    
+    // Subtítulo / Informações
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
+    doc.text(`Total de Produtos: ${filteredProducts.length}`, 14, 34);
+
+    // Preparando os dados da tabela
+    const tableColumn = ["Produto", "Categoria", "Tipo Pet", "SKU", "Preço", "Estoque"];
+    const tableRows = filteredProducts.map(product => [
+      product.name,
+      product.category,
+      product.pet_type || "-",
+      product.sku || "-",
+      formatCurrency(product.price),
+      product.stock_quantity > 0 ? `${product.stock_quantity} un.` : "Esgotado"
+    ]);
+
+    // Gerando a tabela
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [54, 153, 210] }, // Cor primária
+      alternateRowStyles: { fillColor: [248, 250, 252] } // slate-50
+    });
+
+    // Salvando o arquivo
+    doc.save("Meus_Produtos.pdf");
+  };
+
   const totalValue = products.reduce((acc, curr) => acc + Number(curr.price), 0);
   const lowStockCount = products.filter(p => p.stock_quantity > 0 && p.stock_quantity <= 5).length;
   const outOfStockCount = products.filter(p => p.stock_quantity === 0).length;
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      p.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesCategory = !selectedCategory || selectedCategory === "all" || p.category === selectedCategory;
+    const matchesPetType = !selectedPetType || selectedPetType === "all" || p.pet_type === selectedPetType;
+    
+    return matchesSearch && matchesCategory && matchesPetType;
+  });
 
   return (
     <div className="space-y-6">
@@ -213,8 +269,8 @@ export function Products() {
           <p className="text-slate-500">Gerencie seu estoque e catálogo de produtos.</p>
         </div>
         <div className="flex gap-2">
-           <Button variant="outline" className="hidden sm:flex">
-            <Package className="mr-2 h-4 w-4" /> Importar
+           <Button variant="outline" onClick={handleExportPDF} className="hidden sm:flex hover:bg-slate-50">
+            <FileDown className="mr-2 h-4 w-4" /> Exportar PDF
            </Button>
            
            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -399,11 +455,67 @@ export function Products() {
             />
           </div>
           <div className="flex gap-2">
-             <Button variant="outline" className="flex gap-2 bg-white">
+             <Button 
+               variant="outline" 
+               onClick={() => setShowFilters(prev => !prev)}
+               className={`flex gap-2 bg-white hover:bg-slate-50 transition-colors ${showFilters ? 'border-[var(--color-primary-400)] text-[var(--color-primary-600)] ring-1 ring-[var(--color-primary-200)]' : ''}`}
+             >
                <Filter className="h-4 w-4" /> Filtrar
+               {((selectedCategory !== "all" && selectedCategory !== "") || (selectedPetType !== "all" && selectedPetType !== "")) ? (
+                 <span className="h-2 w-2 rounded-full bg-[var(--color-primary-500)]" />
+               ) : null}
              </Button>
           </div>
         </div>
+
+        {showFilters && (
+          <div className="p-4 border-b border-slate-200 bg-slate-50/30 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+            <div className="space-y-1.5 flex flex-col">
+              <Label htmlFor="filter-category" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filtrar por Categoria</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger id="filter-category" className="bg-white border-slate-200">
+                  <SelectValue placeholder="Todas as categorias" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
+                  {options.categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5 flex flex-col">
+              <Label htmlFor="filter-pet-type" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filtrar por Tipo de Pet</Label>
+              <Select value={selectedPetType} onValueChange={setSelectedPetType}>
+                <SelectTrigger id="filter-pet-type" className="bg-white border-slate-200">
+                  <SelectValue placeholder="Todos os pets" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os pets</SelectItem>
+                  {options.petTypes.map(pt => (
+                    <SelectItem key={pt} value={pt}>{pt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2">
+              {((selectedCategory !== "all" && selectedCategory !== "") || (selectedPetType !== "all" && selectedPetType !== "")) && (
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setSelectedCategory("all");
+                    setSelectedPetType("all");
+                  }}
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50 w-full"
+                >
+                  Limpar Filtros
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
