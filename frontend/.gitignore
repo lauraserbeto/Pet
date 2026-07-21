@@ -1,5 +1,8 @@
 node_modules
 
+# Build output (gerado por `vite build`; a Vercel builda do fonte)
+dist
+
 # Playwright
 test-results
 playwright-report
