@@ -6,29 +6,32 @@ import { CartProvider } from "../components/cart/CartContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import { FavoritesProvider } from "../contexts/FavoritesContext";
 import { queryClient } from "../lib/queryClient";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <FavoritesProvider>
-          <CartProvider>
-            <RouterProvider router={router} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <FavoritesProvider>
+            <CartProvider>
+              <RouterProvider router={router} />
               <Toaster
-              position="bottom-right"
-              richColors
-              closeButton
-              toastOptions={{
-                style: {
-                  borderRadius: "12px",
-                  padding: "16px",
-                },
-              }}
-            />
-          </CartProvider>
-        </FavoritesProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+                position="bottom-right"
+                richColors
+                closeButton
+                toastOptions={{
+                  style: {
+                    borderRadius: "12px",
+                    padding: "16px",
+                  },
+                }}
+              />
+            </CartProvider>
+          </FavoritesProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

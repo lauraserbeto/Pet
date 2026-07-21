@@ -23,6 +23,10 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
 
 const TOKEN_KEY = "petplus_token";
 
+// Timeout padrão de requisição. Sem isso, uma API pendurada deixa o usuário
+// preso num spinner infinito (ver critério F9 — Resiliência de Rede).
+const DEFAULT_TIMEOUT_MS = 20000;
+
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
@@ -32,6 +36,8 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
   auth?: boolean;
   query?: Record<string, string | number | boolean | undefined | null>;
+  /** Sobrescreve o timeout padrão (ms). */
+  timeoutMs?: number;
 };
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -78,7 +84,15 @@ export async function request<T = unknown>(
   path: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { body, auth = true, query, headers: extraHeaders, ...init } = options;
+  const {
+    body,
+    auth = true,
+    query,
+    headers: extraHeaders,
+    timeoutMs,
+    signal: externalSignal,
+    ...init
+  } = options;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -90,11 +104,39 @@ export async function request<T = unknown>(
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(buildUrl(path, query), {
-    ...init,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  // Timeout de requisição + suporte a cancelamento externo (ex.: troca de rota
+  // no TanStack Query). O AbortController próprio garante que a requisição não
+  // fique pendente indefinidamente.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs ?? DEFAULT_TIMEOUT_MS);
+  if (externalSignal) {
+    if (externalSignal.aborted) controller.abort();
+    else externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(path, query), {
+      ...init,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    const name = (err as { name?: string })?.name;
+    // Aborto por cancelamento externo (rota trocada) → propaga p/ o chamador ignorar.
+    if (name === "AbortError" && externalSignal?.aborted) {
+      throw err;
+    }
+    // Aborto pelo nosso timeout.
+    if (name === "AbortError") {
+      throw new ApiError(0, "TIMEOUT", "Tempo de resposta esgotado. Verifique sua conexão e tente novamente.");
+    }
+    // Falha de rede (offline, DNS, servidor indisponível).
+    throw new ApiError(0, "NETWORK", "Falha de conexão com o servidor. Verifique sua internet e tente novamente.");
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (response.status === 401 && auth) {
     onUnauthorized?.();
