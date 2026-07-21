@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../config/env');
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -19,7 +20,7 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: 'Token mal formatado' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'secret_pet_plus', (err, decoded) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: 'Token inválido' });
 
     req.userId = decoded.id;

@@ -1,6 +1,7 @@
 const UserRepository = require('../../repositories/UserRepository');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../../config/env');
 
 class LoginUseCase {
   async execute(email, password) {
@@ -36,7 +37,7 @@ class LoginUseCase {
     // O secret deve estar no seu .env
     const token = jwt.sign(
       { id: user.id, role_id: user.role_id },
-      process.env.JWT_SECRET || 'secret_pet_plus',
+      JWT_SECRET,
       { expiresIn: '1d' } // Expira em 1 dia
     );
 

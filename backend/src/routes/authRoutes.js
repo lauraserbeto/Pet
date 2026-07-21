@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const AuthController = require('../controllers/AuthController');
+const validate = require('../middlewares/validate');
+const { registerSchema } = require('../schemas/authSchemas');
 
 /**
  * @swagger
@@ -29,7 +31,7 @@ const AuthController = require('../controllers/AuthController');
  *       400:
  *         description: Erro de validação ou e-mail já existente
  */
-router.post('/register', AuthController.register);
+router.post('/register', validate({ body: registerSchema }), AuthController.register);
 
 /**
  * @swagger

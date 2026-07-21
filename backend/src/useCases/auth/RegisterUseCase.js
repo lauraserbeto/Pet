@@ -3,15 +3,18 @@ const bcrypt = require('bcryptjs');
 const prisma = require('../../config/database');
 const DocumentVerificationService = require('../../services/DocumentVerificationService');
 
-// IDs de roles que OBRIGATORIAMENTE exigem CNPJ (Lojista e Hotel)
 const CNPJ_ONLY_ROLES = [2, 3];
-// IDs de roles com documento obrigatório (Lojista, Hotel, Pet Sitter)
 const COMMERCIAL_ROLES = [2, 3, 4];
+const SELF_SERVICE_ROLES = [2, 3, 4, 5];
 
 class RegisterUseCase {
   async execute({ full_name, email, password, role_id, business_name, document, document_type, terms_accepted }) {
     if (!full_name || !email || !password || !role_id) {
       throw new Error('Nome, e-mail, senha e tipo de usuário são obrigatórios.');
+    }
+
+    if (!SELF_SERVICE_ROLES.includes(Number(role_id))) {
+      throw new Error('Tipo de conta inválido para cadastro.');
     }
 
     if (password.length < 6) {
@@ -23,7 +26,6 @@ class RegisterUseCase {
       throw new Error('Este e-mail já está cadastrado em nossa plataforma.');
     }
 
-    // --- VALIDAÇÃO DE DOCUMENTO PARA CONTAS COMERCIAIS ---
     if (COMMERCIAL_ROLES.includes(role_id)) {
       if (!document) {
         throw new Error("O documento (CPF ou CNPJ) é obrigatório para contas comerciais.");
@@ -33,7 +35,6 @@ class RegisterUseCase {
         throw new Error("O tipo de documento (document_type) deve ser 'CPF' ou 'CNPJ'.");
       }
 
-      // VALIDAÇÃO DE SEGURANÇA: Lojistas e Hotéis DEVEM usar CNPJ
       if (CNPJ_ONLY_ROLES.includes(role_id) && document_type === 'CPF') {
         throw new Error("Lojistas e Hotéis devem obrigatoriamente utilizar CNPJ.");
       }
@@ -77,7 +78,9 @@ class RegisterUseCase {
       }
     });
 
-    const { password: _, ...userWithoutPassword } = newUser;
+    // Remove o hash de senha do retorno (o campo real é `password_hash`).
+    // Antes destruía `password` (inexistente), vazando o hash bcrypt na resposta.
+    const { password_hash: _omit, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
   }
 }
