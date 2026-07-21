@@ -17,3 +17,15 @@ test("landing page carrega e renderiza a navegação", async ({ page }) => {
   // Usuário deslogado enxerga o acesso ao login.
   await expect(page.getByRole("link", { name: /entrar/i }).first()).toBeVisible();
 });
+
+// Garante que o code splitting (React.lazy) funciona nos dois caminhos de Suspense:
+test("rota lazy standalone (/login) carrega o formulário", async ({ page }) => {
+  await page.goto("/login");
+  await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 15000 });
+});
+
+test("rota lazy sob layout (/products) renderiza sem cair no ErrorBoundary", async ({ page }) => {
+  await page.goto("/products");
+  await expect(page.locator("nav").first()).toBeVisible();
+  await expect(page.getByText(/algo deu errado/i)).toHaveCount(0);
+});

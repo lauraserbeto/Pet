@@ -1,63 +1,83 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter } from "react-router";
+
+// Shell e guardas ficam EAGER (necessários já no primeiro paint).
 import { Layout } from "../components/layout/Layout";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { LandingPage } from "../pages/LandingPage";
-import { StyleGuide } from "../pages/StyleGuide";
-import { HotelsPage } from "../pages/HotelsPage";
-import { HotelDetailsPage } from "../pages/HotelDetailsPage";
-import { WalkersPage } from "../pages/WalkersPage";
-import { WalkerDetailsPage } from "../pages/WalkerDetailsPage";
-import { StorePage } from "../pages/StorePage";
-import { Overview } from "../pages/dashboard/Overview";
-import { Schedule } from "../pages/dashboard/Schedule";
-import { Customers } from "../pages/dashboard/Customers";
-import { Products } from "../pages/dashboard/Products";
-import { Settings } from "../pages/dashboard/Settings";
-import { Approvals } from "../pages/dashboard/admin/Approvals";
-import { LoginPage } from "../pages/auth/LoginPage";
-import { RegisterPage } from "../pages/auth/RegisterPage";
-import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
-import { ResetPasswordPage } from "../pages/auth/ResetPasswordPage";
-import { AboutPage } from "../pages/AboutPage";
-import { ShoppingPage } from "../pages/ShoppingPage";
-import { ProductDetailPage } from "../pages/ProductDetailPage";
-import { TermsPage } from "../pages/TermsPage";
-import { PrivacyPage } from "../pages/PrivacyPage";
-import { ContactPage } from "../pages/ContactPage";
-import { CartPage } from "../pages/CartPage";
-import { CheckoutPage } from "../pages/CheckoutPage";
-import { CheckoutSuccessPage } from "../pages/CheckoutSuccessPage";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
-import { Profile } from "../pages/dashboard/Profile";
-import { Account } from "../pages/dashboard/Account";
-import { PublicProfile } from "../pages/dashboard/PublicProfile";
-import Finance from "@/pages/dashboard/Finance";
-import Orders from "@/pages/dashboard/Orders";
-import { PetSitterOnboarding } from "../pages/onboarding/PetSitterOnboarding";
-import { SitterEvaluations } from "@/pages/dashboard/SitterEvaluations";
-import { TutorProfile } from "../pages/tutor/TutorProfile";
-import { TutorPets } from "../pages/tutor/TutorPets";
-import { TutorAppointments } from "../pages/tutor/TutorAppointments";
-import { TutorOrders } from "../pages/tutor/TutorOrders";
 import { NotFound } from "../pages/NotFound";
-import { PartnersPage } from "../pages/PartnersPage";
+import { CustomLoader } from "../components/ui/loader";
+
+// Páginas em code splitting (React.lazy) — cada rota vira um chunk sob demanda,
+// tirando ~40 páginas do bundle inicial (antes um único chunk de ~2,1 MB).
+const LandingPage = lazy(() => import("../pages/LandingPage").then((m) => ({ default: m.LandingPage })));
+const StyleGuide = lazy(() => import("../pages/StyleGuide").then((m) => ({ default: m.StyleGuide })));
+const HotelsPage = lazy(() => import("../pages/HotelsPage").then((m) => ({ default: m.HotelsPage })));
+const HotelDetailsPage = lazy(() => import("../pages/HotelDetailsPage").then((m) => ({ default: m.HotelDetailsPage })));
+const WalkersPage = lazy(() => import("../pages/WalkersPage").then((m) => ({ default: m.WalkersPage })));
+const WalkerDetailsPage = lazy(() => import("../pages/WalkerDetailsPage").then((m) => ({ default: m.WalkerDetailsPage })));
+const StorePage = lazy(() => import("../pages/StorePage").then((m) => ({ default: m.StorePage })));
+const Overview = lazy(() => import("../pages/dashboard/Overview").then((m) => ({ default: m.Overview })));
+const Schedule = lazy(() => import("../pages/dashboard/Schedule").then((m) => ({ default: m.Schedule })));
+const Customers = lazy(() => import("../pages/dashboard/Customers").then((m) => ({ default: m.Customers })));
+const Products = lazy(() => import("../pages/dashboard/Products").then((m) => ({ default: m.Products })));
+const Settings = lazy(() => import("../pages/dashboard/Settings").then((m) => ({ default: m.Settings })));
+const Approvals = lazy(() => import("../pages/dashboard/admin/Approvals").then((m) => ({ default: m.Approvals })));
+const LoginPage = lazy(() => import("../pages/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import("../pages/auth/RegisterPage").then((m) => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })));
+const AboutPage = lazy(() => import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })));
+const ShoppingPage = lazy(() => import("../pages/ShoppingPage").then((m) => ({ default: m.ShoppingPage })));
+const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage").then((m) => ({ default: m.ProductDetailPage })));
+const TermsPage = lazy(() => import("../pages/TermsPage").then((m) => ({ default: m.TermsPage })));
+const PrivacyPage = lazy(() => import("../pages/PrivacyPage").then((m) => ({ default: m.PrivacyPage })));
+const ContactPage = lazy(() => import("../pages/ContactPage").then((m) => ({ default: m.ContactPage })));
+const CartPage = lazy(() => import("../pages/CartPage").then((m) => ({ default: m.CartPage })));
+const CheckoutPage = lazy(() => import("../pages/CheckoutPage").then((m) => ({ default: m.CheckoutPage })));
+const CheckoutSuccessPage = lazy(() => import("../pages/CheckoutSuccessPage").then((m) => ({ default: m.CheckoutSuccessPage })));
+const Account = lazy(() => import("../pages/dashboard/Account").then((m) => ({ default: m.Account })));
+const PublicProfile = lazy(() => import("../pages/dashboard/PublicProfile").then((m) => ({ default: m.PublicProfile })));
+const Finance = lazy(() => import("@/pages/dashboard/Finance"));
+const Orders = lazy(() => import("@/pages/dashboard/Orders"));
+const PetSitterOnboarding = lazy(() => import("../pages/onboarding/PetSitterOnboarding").then((m) => ({ default: m.PetSitterOnboarding })));
+const SitterEvaluations = lazy(() => import("@/pages/dashboard/SitterEvaluations").then((m) => ({ default: m.SitterEvaluations })));
+const TutorProfile = lazy(() => import("../pages/tutor/TutorProfile").then((m) => ({ default: m.TutorProfile })));
+const TutorPets = lazy(() => import("../pages/tutor/TutorPets").then((m) => ({ default: m.TutorPets })));
+const TutorAppointments = lazy(() => import("../pages/tutor/TutorAppointments").then((m) => ({ default: m.TutorAppointments })));
+const TutorOrders = lazy(() => import("../pages/tutor/TutorOrders").then((m) => ({ default: m.TutorOrders })));
+const PartnersPage = lazy(() => import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage })));
+
+// Fallback exibido enquanto o chunk da rota carrega.
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <CustomLoader />
+    </div>
+  );
+}
+
+// Envolve rotas SEM layout (que teria o Suspense no <Outlet/>) numa fronteira própria.
+const withSuspense = (node: ReactNode) => (
+  <Suspense fallback={<RouteFallback />}>{node}</Suspense>
+);
 
 export const router = createBrowserRouter([
   {
     path: "/login",
-    Component: LoginPage,
+    element: withSuspense(<LoginPage />),
   },
   {
     path: "/register",
-    Component: RegisterPage,
+    element: withSuspense(<RegisterPage />),
   },
   {
     path: "/recuperar-senha",
-    Component: ForgotPasswordPage,
+    element: withSuspense(<ForgotPasswordPage />),
   },
   {
     path: "/redefinir-senha",
-    Component: ResetPasswordPage,
+    element: withSuspense(<ResetPasswordPage />),
   },
   {
     path: "/",
@@ -74,38 +94,37 @@ export const router = createBrowserRouter([
       {
         path: "hotels",
         children: [
-            {
-                index: true,
-                Component: HotelsPage,
-            },
-            {
-                path: ":id",
-                Component: HotelDetailsPage
-            }
-        ]
+          {
+            index: true,
+            Component: HotelsPage,
+          },
+          {
+            path: ":id",
+            Component: HotelDetailsPage,
+          },
+        ],
       },
       {
         path: "walkers",
         children: [
-            {
-                index: true,
-                Component: WalkersPage,
-            },
-            {
-                path: ":id",
-                Component: WalkerDetailsPage
-            }
-        ]
+          {
+            index: true,
+            Component: WalkersPage,
+          },
+          {
+            path: ":id",
+            Component: WalkerDetailsPage,
+          },
+        ],
       },
       {
         path: "search",
-        Component: LandingPage, 
+        Component: LandingPage,
       },
       {
         path: "products",
         Component: ShoppingPage,
       },
-      
       {
         path: "shopping",
         children: [
@@ -200,7 +219,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/onboarding/sitter",
-    element: (
+    element: withSuspense(
       <ProtectedRoute>
         <PetSitterOnboarding />
       </ProtectedRoute>
@@ -214,51 +233,51 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-        {
-            index: true,
-            Component: Overview
-        },
-        {
-            path: "schedule",
-            Component: Schedule
-        },
-        {
-            path: "perfil",
-            Component: PublicProfile
-        },
-        {
-            path: "conta",
-            Component: Account
-        },
-        {
-            path: "financeiro",
-            Component: Finance
-        },
-        {
-            path: "orders",
-            Component: Orders
-        },
-        {
-            path: "customers",
-            Component: Customers
-        },
-        {
-            path: "products",
-            Component: Products
-        },
-        {
-            path: "settings",
-            Component: Settings
-        },
-        {
-            path: "aprovacoes",
-            Component: Approvals
-        },
-        {
-            path: "avaliacoes-sitters",
-            Component: SitterEvaluations
-        }
-    ]
+      {
+        index: true,
+        Component: Overview,
+      },
+      {
+        path: "schedule",
+        Component: Schedule,
+      },
+      {
+        path: "perfil",
+        Component: PublicProfile,
+      },
+      {
+        path: "conta",
+        Component: Account,
+      },
+      {
+        path: "financeiro",
+        Component: Finance,
+      },
+      {
+        path: "orders",
+        Component: Orders,
+      },
+      {
+        path: "customers",
+        Component: Customers,
+      },
+      {
+        path: "products",
+        Component: Products,
+      },
+      {
+        path: "settings",
+        Component: Settings,
+      },
+      {
+        path: "aprovacoes",
+        Component: Approvals,
+      },
+      {
+        path: "avaliacoes-sitters",
+        Component: SitterEvaluations,
+      },
+    ],
   },
   {
     path: "*",

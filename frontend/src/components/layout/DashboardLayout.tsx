@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Avatar } from "../../components/ui/avatar";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
 import { providerService } from "../../lib/services/providerService";
@@ -305,7 +305,15 @@ export function DashboardLayout() {
         {/* Scrollable Content Area */}
         <main ref={scrollRef} className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8 bg-slate-50/50">
            <div className="max-w-7xl mx-auto">
-             <Outlet />
+             <Suspense
+               fallback={
+                 <div className="flex items-center justify-center py-16">
+                   <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)]" />
+                 </div>
+               }
+             >
+               <Outlet />
+             </Suspense>
            </div>
         </main>
       </div>

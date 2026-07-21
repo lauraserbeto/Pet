@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { Outlet } from "react-router";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { ScrollToTop } from "../../app/components/ScrollToTop";
+import { CustomLoader } from "../ui/loader";
 
 export function Layout() {
   return (
@@ -9,7 +11,15 @@ export function Layout() {
       <ScrollToTop />
       <Navbar />
       <main className="flex-grow">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="flex min-h-[50vh] items-center justify-center">
+              <CustomLoader />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
     </div>
