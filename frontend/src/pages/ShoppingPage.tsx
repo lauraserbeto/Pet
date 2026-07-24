@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import {
   Search,
-  Star,
   ShoppingCart,
   Heart,
   SlidersHorizontal,
@@ -50,8 +49,6 @@ type Product = {
   brand: string;
   price: number;
   originalPrice?: number;
-  rating: number;
-  reviews: number;
   image: string;
   category: string;
   pet: string;
@@ -100,8 +97,6 @@ const sortOptions = [
   { value: "relevance", label: "Relevância" },
   { value: "price-asc", label: "Menor preço" },
   { value: "price-desc", label: "Maior preço" },
-  { value: "rating", label: "Melhor avaliação" },
-  { value: "reviews", label: "Mais avaliados" },
 ];
 
 /* ══════════════════════════════════════════════
@@ -142,8 +137,6 @@ export function ShoppingPage() {
             name: p.name,
             brand: p.provider_name || 'Desconhecida',
             price: Number(p.price),
-            rating: 4.8, 
-            reviews: Math.floor(Math.random() * 100) + 10,
             image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
             category: p.category ? p.category.toLowerCase() : 'outros',
             pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
@@ -232,12 +225,6 @@ export function ShoppingPage() {
         break;
       case "price-desc":
         result.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case "reviews":
-        result.sort((a, b) => b.reviews - a.reviews);
         break;
     }
 
@@ -580,24 +567,6 @@ export function ShoppingPage() {
                         {product.name}
                       </h3>
 
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mt-1.5 sm:mt-2">
-                        <div className="flex gap-0.5">
-                          {[...Array(5)].map((_, j) => (
-                            <Star
-                              key={j}
-                              className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${
-                                j < Math.floor(product.rating)
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "fill-slate-200 text-slate-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[10px] sm:text-xs text-slate-400">
-                          {product.rating} ({product.reviews})
-                        </span>
-                      </div>
 
                       {/* Spacer */}
                       <div className="flex-1" />

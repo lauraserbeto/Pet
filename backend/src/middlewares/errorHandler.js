@@ -4,7 +4,7 @@ function notFoundHandler(req, res, next) {
   next(AppError.notFound(`Rota não encontrada: ${req.method} ${req.originalUrl}`));
 }
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, _next) {
   // Zod errors (vindos do middleware validate)
   if (err?.name === 'ZodError') {
     const details = err.issues?.map((i) => ({
@@ -50,10 +50,12 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  // Fallback — erro inesperado
-  console.error('[UNHANDLED ERROR]', err);
+  // Fallback — erro inesperado. Loga com o correlation id (req.log vem do
+  // pino-http) e devolve o requestId ao cliente para rastreio no suporte.
+  const log = req.log || require('../config/logger');
+  log.error({ err }, 'Erro não tratado');
   return res.status(500).json({
-    error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor' },
+    error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor', requestId: req.id },
     message: 'Erro interno do servidor',
   });
 }

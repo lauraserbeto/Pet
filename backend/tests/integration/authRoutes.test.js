@@ -1,3 +1,4 @@
+process.env.LOG_LEVEL = 'silent'; // silencia logs de requisição durante os testes
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');

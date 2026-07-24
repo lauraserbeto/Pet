@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 
 // Import local assets for services section
-import petSitterImg from "../assets/imgs/c5143ed5-35e8-48be-97b7-d281b9de4a15.png";
-import petShopImg from "../assets/imgs/450b354e-1b6f-4f83-9dcf-84ed5d9ac6be.png";
-import hotelImg from "../assets/imgs/26376cf8-e893-4f9d-a14c-69c5063c4a73.png";
+import petSitterImg from "../assets/imgs/c5143ed5-35e8-48be-97b7-d281b9de4a15.webp";
+import petShopImg from "../assets/imgs/450b354e-1b6f-4f83-9dcf-84ed5d9ac6be.webp";
+import hotelImg from "../assets/imgs/26376cf8-e893-4f9d-a14c-69c5063c4a73.webp";
 
 // Import local assets for popular categories
 import catAlimentacao from "../assets/imgs/cat_alimentacao.png";
@@ -398,6 +398,7 @@ function HorizontalCarousel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 8 }}
             onClick={() => scroll("left")}
+            aria-label="Rolar para a esquerda"
             className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:shadow-xl transition-all hidden sm:flex"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -412,6 +413,7 @@ function HorizontalCarousel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -8 }}
             onClick={() => scroll("right")}
+            aria-label="Rolar para a direita"
             className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-white shadow-lg border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:shadow-xl transition-all hidden sm:flex"
           >
             <ChevronRight className="h-5 w-5" />
@@ -1171,6 +1173,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-center md:justify-end gap-3 mt-6">
               <button
                 onClick={prevTestimonial}
+                aria-label="Depoimento anterior"
                 className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -1180,6 +1183,7 @@ export default function LandingPage() {
                   <button
                     key={i}
                     onClick={() => setTestimonialIdx(i)}
+                    aria-label={`Ir para o depoimento ${i + 1}`}
                     className={`h-2 rounded-full transition-all ${
                       i === testimonialIdx
                         ? "w-6 bg-[var(--color-primary-500)]"
@@ -1190,6 +1194,7 @@ export default function LandingPage() {
               </div>
               <button
                 onClick={nextTestimonial}
+                aria-label="Próximo depoimento"
                 className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
               >
                 <ChevronRight className="h-4 w-4" />

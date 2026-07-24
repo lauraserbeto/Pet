@@ -2,20 +2,23 @@ require('dotenv').config();
 // Valida variáveis de ambiente obrigatórias no boot (fail-fast).
 // Se JWT_SECRET estiver ausente, a aplicação não sobe.
 require('./config/env');
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const pinoHttp = require('pino-http');
 const swaggerUi = require('swagger-ui-express');
 
 const prisma = require('./config/database');
+const logger = require('./config/logger');
 const swaggerDocs = require('./config/swagger.config');
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
+const { metricsMiddleware, metricsHandler } = require('./middlewares/metrics');
 
 const app = express();
 
-// Necessário para o express-rate-limit identificar o IP real atrás do proxy
-// da plataforma (Railway) via X-Forwarded-For. '1' confia apenas no primeiro hop.
+
 app.set('trust proxy', 1);
 
 const authRoutes = require('./routes/authRoutes');
@@ -42,10 +45,35 @@ app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000', 'https://petplus-frontend.vercel.app', 'https://petplus.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit', 'X-Total-Pages'],
   credentials: true
 }));
+
+// Logging estruturado por requisição com correlation id (req.id).
+// Ecoa o id no header X-Request-Id para correlação cliente↔servidor.
+app.use(pinoHttp({
+  logger,
+  genReqId: (req, res) => {
+    const id = req.headers['x-request-id'] || crypto.randomUUID();
+    res.setHeader('X-Request-Id', id);
+    return id;
+  },
+  customLogLevel: (req, res, err) => {
+    if (res.statusCode >= 500 || err) return 'error';
+    if (res.statusCode >= 400) return 'warn';
+    return 'info';
+  },
+  serializers: {
+    req: (req) => ({ id: req.id, method: req.method, url: req.url }),
+    res: (res) => ({ statusCode: res.statusCode }),
+  },
+}));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Coleta métricas RED (rate/errors/duration) por rota — alimenta GET /api/metrics.
+app.use(metricsMiddleware);
 
 // Documentação Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
@@ -68,10 +96,22 @@ app.get('/api/health', async (req, res) => {
       message: 'API rodando e conectada ao PostgreSQL!'
     });
   } catch (error) {
-    console.error('Erro no Banco de Dados:', error);
+    req.log.error({ err: error }, 'Health check: falha na conexão com o banco');
     res.status(500).json({ status: 'error', message: 'Falha no banco de dados.' });
   }
 });
+
+/**
+ * @swagger
+ * /api/metrics:
+ *   get:
+ *     summary: Métricas RED (rate, errors, duration) por rota
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Contagem, taxa de erro e latências (p50/p95/p99) por rota
+ */
+app.get('/api/metrics', metricsHandler);
 
 // Rotas do Sistema
 app.use('/api/v1/auth', authLimiter, authRoutes);

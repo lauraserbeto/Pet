@@ -3,6 +3,7 @@ const listProviderProductsUseCase = require('../useCases/products/ListProviderPr
 const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
 const listActiveProductsUseCase = require('../useCases/products/ListActiveProductsUseCase');
 const getProductDetailsUseCase = require('../useCases/products/GetProductDetailsUseCase');
+const { listProductsQuery } = require('../schemas/productSchemas');
 class ProductController {
   
   getOptions(req, res) {
@@ -21,9 +22,25 @@ class ProductController {
 
   async listActive(req, res) {
     try {
-      const products = await listActiveProductsUseCase.execute();
-      return res.status(200).json(products);
+      // Lê (sem reatribuir — Express 5 tem req.query só-leitura) e valida a página.
+      const { page, limit } = listProductsQuery.parse(req.query);
+      const { data, total, totalPages } = await listActiveProductsUseCase.execute({ page, limit });
+
+      // Corpo permanece um ARRAY (compatível com o frontend atual);
+      // os metadados de paginação vão nos headers X-*.
+      res.set({
+        'X-Total-Count': String(total),
+        'X-Page': String(page),
+        'X-Limit': String(limit),
+        'X-Total-Pages': String(totalPages),
+      });
+      return res.status(200).json(data);
     } catch (error) {
+      if (error?.name === 'ZodError') {
+        return res.status(422).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Parâmetros de paginação inválidos (page>=1, limit 1..100).' },
+        });
+      }
       console.error("[ProductController] Erro em listActive:", error);
       return res.status(500).json({ error: error.message });
     }
