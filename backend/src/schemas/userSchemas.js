@@ -52,9 +52,19 @@ const uploadAvatarSchema = z
   })
   .strict();
 
+// Query da listagem de usuários no painel admin.
+// `limit` tem teto para evitar consulta não-limitada (mesma convenção de produtos).
+const listUsersQuery = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(100),
+  role_id: z.coerce.number().int().min(1).max(5).optional(),
+  q: z.string().trim().max(150).optional(),
+});
+
 module.exports = {
   updateProfileSchema,
   changePasswordSchema,
   uploadAvatarSchema,
+  listUsersQuery,
   AVATAR_MAX_CHARS,
 };

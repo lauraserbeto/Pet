@@ -2,6 +2,7 @@ const prisma = require('../config/database');
 const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDetailsUseCase');
 const updateProviderProfileUseCase = require('../useCases/providers/UpdateProviderProfileUseCase');
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
+const { APPROVED_PROVIDER_STATUSES } = require('../constants/providerStatus');
 
 class ProviderController {
   // Validador de completitude em memória (JS) para estabilidade de tipagem
@@ -33,7 +34,7 @@ class ProviderController {
 
   // Lista os status que consideramos como "Aprovado/Visível"
   #getApprovedStatus() {
-    return { in: ['APROVADO', 'ATIVO', 'ACTIVE'] };
+    return { in: APPROVED_PROVIDER_STATUSES };
   }
 
   async listHotels(req, res) {

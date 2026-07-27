@@ -17,12 +17,14 @@ const HotelDetailsPage = lazy(() => import("../pages/HotelDetailsPage").then((m)
 const WalkersPage = lazy(() => import("../pages/WalkersPage").then((m) => ({ default: m.WalkersPage })));
 const WalkerDetailsPage = lazy(() => import("../pages/WalkerDetailsPage").then((m) => ({ default: m.WalkerDetailsPage })));
 const StorePage = lazy(() => import("../pages/StorePage").then((m) => ({ default: m.StorePage })));
-const Overview = lazy(() => import("../pages/dashboard/Overview").then((m) => ({ default: m.Overview })));
+// Índice do dashboard: despacha por perfil (admin vê o painel da plataforma).
+const DashboardHome = lazy(() => import("../pages/dashboard/DashboardHome").then((m) => ({ default: m.DashboardHome })));
 const Schedule = lazy(() => import("../pages/dashboard/Schedule").then((m) => ({ default: m.Schedule })));
 const Customers = lazy(() => import("../pages/dashboard/Customers").then((m) => ({ default: m.Customers })));
 const Products = lazy(() => import("../pages/dashboard/Products").then((m) => ({ default: m.Products })));
 const Settings = lazy(() => import("../pages/dashboard/Settings").then((m) => ({ default: m.Settings })));
 const Approvals = lazy(() => import("../pages/dashboard/admin/Approvals").then((m) => ({ default: m.Approvals })));
+const Users = lazy(() => import("../pages/dashboard/admin/Users").then((m) => ({ default: m.Users })));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage").then((m) => ({ default: m.RegisterPage })));
 const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage })));
@@ -235,7 +237,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: Overview,
+        Component: DashboardHome,
       },
       {
         path: "schedule",
@@ -272,6 +274,10 @@ export const router = createBrowserRouter([
       {
         path: "aprovacoes",
         Component: Approvals,
+      },
+      {
+        path: "usuarios",
+        Component: Users,
       },
       {
         path: "avaliacoes-sitters",

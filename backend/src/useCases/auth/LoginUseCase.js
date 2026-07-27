@@ -2,6 +2,12 @@ const UserRepository = require('../../repositories/UserRepository');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../../config/env');
+const { PROVIDER_STATUS, isApprovedProviderStatus } = require('../../constants/providerStatus');
+
+// Lojista (2) e Hotel (3) só acessam a plataforma depois da aprovação do admin.
+// O Pet Sitter (4) é exceção deliberada: precisa logar ainda PENDENTE para
+// preencher o onboarding/avaliação — só depois disso o admin pode aprová-lo.
+const ROLES_REQUIRING_APPROVAL = [2, 3];
 
 class LoginUseCase {
   async execute(email, password) {
@@ -18,17 +24,18 @@ class LoginUseCase {
     }
 
     // --- BLOQUEIO PARA PARCEIROS REJEITADOS ---
-    if (user.provider?.status === 'REJEITADO') {
+    if (user.provider?.status === PROVIDER_STATUS.REJECTED) {
         const reason = user.provider.rejection_reason || 'Sem motivo especificado pelo administrador.';
         const error = new Error(`Seu cadastro de parceiro foi recusado. Motivo: ${reason}`);
         error.statusCode = 403;
         throw error;
     }
 
-    // --- BLOQUEIO DE LOGIN PARA PET SITTER EM ANÁLISE ---
-    // Se for role 4 (PET_SITTER) e o status do provedor for PENDENTE, bloqueamos o login.
-    if (user.role_id === 4 && user.provider?.status === 'PENDENTE' && user.onboarding_step === 'INCOMPLETE') {
-        const error = new Error('Sua conta está em análise pelo administrador.');
+    // --- BLOQUEIO DE ACESSO ANTES DA APROVAÇÃO (Lojista e Hotel) ---
+    // Testa por conjunto de status aprovados (o campo é VarChar livre), então
+    // qualquer valor fora de APROVADO/ATIVO/ACTIVE barra o acesso.
+    if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider?.status)) {
+        const error = new Error('Seu cadastro está em análise. Você poderá acessar a plataforma assim que for aprovado pelo administrador.');
         error.statusCode = 403;
         throw error;
     }

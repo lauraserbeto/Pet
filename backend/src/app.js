@@ -116,6 +116,7 @@ app.get('/api/metrics', metricsHandler);
 // Rotas do Sistema
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/providers', providerRoutes);
+app.use('/api/v1/admin', require('./routes/adminRoutes'));
 app.use('/api/v1/users', require('./routes/userRoutes'));
 app.use('/api/v1/users/me/pets', require('./routes/petRoutes'));
 app.use('/api/v1/addresses', require('./routes/addressRoutes'));

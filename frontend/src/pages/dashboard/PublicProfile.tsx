@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { providerService } from "../../lib/services/providerService";
 import { useCepLookup } from "../../lib/hooks/useCepLookup";
+import { completenessQueryKey } from "../../lib/hooks/useCompleteness";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -134,6 +136,7 @@ const parseCurrency = (v: string) => {
 
 
 export function PublicProfile() {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState<PublicProfileFormState>({
     business_name: "",
     phone: "",
@@ -345,6 +348,9 @@ export function PublicProfile() {
         rules_policies: rules_policies,
       };
       await providerService.updatePublicProfile(payload);
+      // Revalida a completude para o banner do dashboard refletir o salvamento
+      // na hora (antes ficava congelado no estado capturado no login).
+      await queryClient.invalidateQueries({ queryKey: completenessQueryKey });
       toast.success("Perfil público atualizado com sucesso!");
     } catch {
       toast.error("Erro ao salvar perfil.");

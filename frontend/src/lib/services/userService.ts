@@ -35,6 +35,26 @@ export type SitterEvaluation = {
   user?: { full_name: string; email: string };
 };
 
+export type AdminUser = {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string | null;
+  role_id: number;
+  is_active?: boolean | null;
+  onboarding_step?: string | null;
+  created_at: string;
+  role?: { name: string } | null;
+  provider?: { business_name: string; status: string; document: string } | null;
+};
+
+export type ListUsersParams = {
+  role_id?: number;
+  q?: string;
+  page?: number;
+  limit?: number;
+};
+
 export const userService = {
   // Retorna os dados do próprio usuário
   getMe() {
@@ -80,5 +100,10 @@ export const userService = {
       status,
       feedback,
     });
+  },
+
+  // Lista todos os usuários da plataforma (tutores, parceiros e admins).
+  listUsers(params: ListUsersParams = {}) {
+    return httpClient.get<AdminUser[]>(`/users/admin/users`, { query: { ...params } });
   },
 };

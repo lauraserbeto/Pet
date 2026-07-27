@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  Store
+  Store,
+  Users
 } from "lucide-react";
 import { NavLink, Link, useNavigate } from "react-router";
 import { useState } from "react";
@@ -56,6 +57,7 @@ export function Sidebar({
     { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard, roles: [1, 2, 3, 4], end: true },
     { name: 'Aprovações de Parceiros', href: '/dashboard/aprovacoes', icon: ClipboardCheck, roles: [1], end: false },
     { name: 'Avaliações de Pet Sitters', href: '/dashboard/avaliacoes-sitters', icon: Heart, roles: [1], end: false },
+    { name: 'Usuários', href: '/dashboard/usuarios', icon: Users, roles: [1], end: false },
     { name: 'Meu Perfil Público', href: '/dashboard/perfil', icon: Store, roles: [2, 3, 4], end: false },
     { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
     { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },

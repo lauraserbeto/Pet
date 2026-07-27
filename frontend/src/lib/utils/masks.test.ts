@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { formatPhone, formatCep, PHONE_MASKED_REGEX, CEP_MASKED_REGEX } from "./masks";
+import {
+  formatPhone,
+  formatCep,
+  formatCpf,
+  formatCnpj,
+  formatDocument,
+  isValidDocument,
+  PHONE_MASKED_REGEX,
+  CEP_MASKED_REGEX,
+} from "./masks";
 
 describe("formatPhone", () => {
   it("formata celular de 11 dígitos", () => {
@@ -28,5 +37,40 @@ describe("formatCep", () => {
 
   it("não insere hífen antes de 5 dígitos", () => {
     expect(formatCep("013")).toBe("013");
+  });
+});
+
+describe("formatCpf / formatCnpj", () => {
+  it("formata CPF de 11 dígitos", () => {
+    expect(formatCpf("65288049580")).toBe("652.880.495-80");
+  });
+  it("formata CNPJ de 14 dígitos", () => {
+    expect(formatCnpj("09253439000109")).toBe("09.253.439/0001-09");
+  });
+});
+
+describe("formatDocument", () => {
+  it("14 dígitos → máscara de CNPJ", () => {
+    expect(formatDocument("09253439000109")).toBe("09.253.439/0001-09");
+  });
+  it("11 dígitos → máscara de CPF", () => {
+    expect(formatDocument("65288049580")).toBe("652.880.495-80");
+  });
+  it("ignora pontuação existente", () => {
+    expect(formatDocument("09.253.439/0001-09")).toBe("09.253.439/0001-09");
+  });
+});
+
+describe("isValidDocument", () => {
+  it("aceita 11 e 14 dígitos", () => {
+    expect(isValidDocument("65288049580")).toBe(true);
+    expect(isValidDocument("09253439000109")).toBe(true);
+  });
+  it("rejeita comprimento inválido", () => {
+    expect(isValidDocument("123")).toBe(false);
+    expect(isValidDocument("0925343900010")).toBe(false);
+  });
+  it("rejeita todos os dígitos iguais", () => {
+    expect(isValidDocument("11111111111")).toBe(false);
   });
 });

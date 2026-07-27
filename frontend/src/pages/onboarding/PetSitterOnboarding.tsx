@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router';
 import { authService } from "../../lib/services/authService";
 import { userService } from "../../lib/services/userService";
 import { toast } from 'sonner';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../../components/ui/select";
 import { 
     CheckCircle2, 
     ChevronRight, 
@@ -340,48 +347,57 @@ export const PetSitterOnboarding = () => {
                                     <label className="block text-sm font-bold text-gray-800 mb-3">
                                         1. O que você faria se o cachorro hospede engasgasse com um osso de brinquedo?
                                     </label>
-                                    <select 
-                                        value={quizData.q1}
-                                        onChange={(e) => setQuizData({...quizData, q1: e.target.value})}
-                                        className="w-full rounded-lg border-gray-300 p-2.5 text-sm shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                    <Select
+                                        value={quizData.q1 || undefined}
+                                        onValueChange={(value) => setQuizData({...quizData, q1: value})}
                                     >
-                                        <option value="">Selecione uma resposta</option>
-                                        <option value="A">Daria tapas muito fortes nas costas e gritaria</option>
-                                        <option value="B">Realizaria a Manobra de Heimlich canina imediatamente e buscaria um veterinário se não saísse</option>
-                                        <option value="C">Ofereceria água em copo para ele beber</option>
-                                    </select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione uma resposta" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="A">Daria tapas muito fortes nas costas e gritaria</SelectItem>
+                                            <SelectItem value="B">Realizaria a Manobra de Heimlich canina imediatamente e buscaria um veterinário se não saísse</SelectItem>
+                                            <SelectItem value="C">Ofereceria água em copo para ele beber</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50">
                                     <label className="block text-sm font-bold text-gray-800 mb-3">
                                         2. Como lidar com um cão sofrendo forte Ansiedade de Separação?
                                     </label>
-                                    <select 
-                                        value={quizData.q2}
-                                        onChange={(e) => setQuizData({...quizData, q2: e.target.value})}
-                                        className="w-full rounded-lg border-gray-300 p-2.5 text-sm shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                    <Select
+                                        value={quizData.q2 || undefined}
+                                        onValueChange={(value) => setQuizData({...quizData, q2: value})}
                                     >
-                                        <option value="">Selecione uma resposta</option>
-                                        <option value="A">Abraçá-lo e chorar junto para ele sentir empatia</option>
-                                        <option value="B">Prendê-lo em um quarto pequeno até ele cansar de latir</option>
-                                        <option value="C">Ignorar excesso de choro, propor atividades mentais e criar uma rotina segura e calma</option>
-                                    </select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione uma resposta" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="A">Abraçá-lo e chorar junto para ele sentir empatia</SelectItem>
+                                            <SelectItem value="B">Prendê-lo em um quarto pequeno até ele cansar de latir</SelectItem>
+                                            <SelectItem value="C">Ignorar excesso de choro, propor atividades mentais e criar uma rotina segura e calma</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
                                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50">
                                     <label className="block text-sm font-bold text-gray-800 mb-3">
                                         3. Em caso de briga feia entre dois cães na sua casa, qual a ação correta?
                                     </label>
-                                    <select 
-                                        value={quizData.q3}
-                                        onChange={(e) => setQuizData({...quizData, q3: e.target.value})}
-                                        className="w-full rounded-lg border-gray-300 p-2.5 text-sm shadow-sm focus:border-orange-500 focus:ring-orange-500"
+                                    <Select
+                                        value={quizData.q3 || undefined}
+                                        onValueChange={(value) => setQuizData({...quizData, q3: value})}
                                     >
-                                        <option value="">Selecione uma resposta</option>
-                                        <option value="A">Entrar no meio e separá-los usando as mãos nuas pelo colarinho</option>
-                                        <option value="B">Fazer um barulho muito alto, jogar água ou colocar uma barreira física entre eles</option>
-                                        <option value="C">Deixar eles resolverem a hierarquia naturalmente</option>
-                                    </select>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione uma resposta" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="A">Entrar no meio e separá-los usando as mãos nuas pelo colarinho</SelectItem>
+                                            <SelectItem value="B">Fazer um barulho muito alto, jogar água ou colocar uma barreira física entre eles</SelectItem>
+                                            <SelectItem value="C">Deixar eles resolverem a hierarquia naturalmente</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </div>

@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router"; // Se der erro aqui, mude para "react-router"
 import { useState, useRef, useEffect } from "react";
+import { isApprovedProviderStatus } from "../../lib/constants/providerStatus";
 import {
   Menu,
   X,
@@ -182,7 +183,11 @@ export function Navbar() {
     .toUpperCase();
 
   const isTutor = roleId === 5 || (sessionUser && roleId === null);
-  const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4;
+  // Parceiro (2/3) ainda não aprovado não deve receber o atalho para o dashboard
+  // — ele seria barrado pelo ProtectedRoute de qualquer forma.
+  const isPendingPartner =
+    (roleId === 2 || roleId === 3) && !isApprovedProviderStatus(sessionUser?.provider_status);
+  const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4 && !isPendingPartner;
 
   // Cart visível para anônimos e tutores. Escondido para dashboard users (admin/lojista/hotel/walker)
   const showCart = !isLoading && (!sessionUser || isTutor);

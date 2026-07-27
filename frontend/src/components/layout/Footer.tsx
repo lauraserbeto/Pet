@@ -40,7 +40,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4 font-[family-name:var(--font-display)]">Legal</h3>
             <ul className="space-y-3 text-sm">
               <li><Link to="/terms" className="hover:text-white transition-colors">Termos de Uso</Link></li>
-              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacidade</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Política de Privacidade</Link></li>
             </ul>
           </div>
         </div>

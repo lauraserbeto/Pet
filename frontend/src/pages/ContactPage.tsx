@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
   ChevronRight,
   ArrowUp,
   Mail,
@@ -420,17 +427,18 @@ export function ContactPage() {
                         <FileText className="h-3.5 w-3.5 text-slate-400" />
                         Assunto *
                       </label>
-                      <select
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-all appearance-none"
-                      >
-                        {subjects.map((s) => (
-                          <option key={s} value={s} disabled={s === subjects[0]}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={subject || undefined} onValueChange={setSubject}>
+                        <SelectTrigger className="w-full rounded-xl bg-slate-50 px-4 py-2.5 h-auto">
+                          <SelectValue placeholder={subjects[0]} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subjects.slice(1).map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {s}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     {/* Message */}

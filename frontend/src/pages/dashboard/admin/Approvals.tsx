@@ -5,6 +5,9 @@ import { CheckCircle, XCircle, Store, Bed, MapPin, User, AlertTriangle, Search, 
 import { HamsterLoader } from "../../../components/ui/HamsterLoader";
 import { toast } from "sonner";
 import { Card, CardContent } from "../../../components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import { formatDocument, isValidDocument } from "../../../lib/utils/masks";
+import { APPROVED_PROVIDER_STATUSES } from "../../../lib/constants/providerStatus";
 
 interface Partner {
   id: string; // provider id
@@ -19,6 +22,11 @@ interface Partner {
 }
 
 type TabType = 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+
+// A aprovação de Pet Sitter (via avaliação de sitter) grava Provider.status = 'ATIVO',
+// enquanto lojista/hotel gravam 'APROVADO' — por isso a aba "Aprovados" usa o
+// conjunto canônico compartilhado em vez de igualdade estrita.
+const APPROVED_STATUSES = APPROVED_PROVIDER_STATUSES;
 
 export function Approvals() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -165,8 +173,11 @@ export function Approvals() {
   };
 
   const filteredPartners = partners.filter(p => {
-    if (p.status !== activeTab) return false;
-    
+    const matchesTab = activeTab === 'APROVADO'
+      ? APPROVED_STATUSES.includes(p.status)
+      : p.status === activeTab;
+    if (!matchesTab) return false;
+
     // Role filter
     if (roleFilter !== 'all') {
       if (roleFilter === '2' && p.role_id !== 2) return false;
@@ -249,16 +260,17 @@ export function Approvals() {
           />
         </div>
         <div className="w-full sm:w-48">
-          <select 
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors"
-          >
-            <option value="all">Todos os tipos</option>
-            <option value="2">Lojista</option>
-            <option value="3">Hotel</option>
-            <option value="4">Pet Sitter</option>
-          </select>
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Todos os tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os tipos</SelectItem>
+              <SelectItem value="2">Lojista</SelectItem>
+              <SelectItem value="3">Hotel</SelectItem>
+              <SelectItem value="4">Pet Sitter</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -306,7 +318,17 @@ export function Approvals() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-slate-600 font-mono text-sm">{partner.document}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-slate-600 font-mono text-sm">{formatDocument(partner.document)}</span>
+                          {!isValidDocument(partner.document) && (
+                            <AlertTriangle
+                              className="h-3.5 w-3.5 text-amber-500 shrink-0"
+                              aria-label="Documento com formato inválido"
+                            >
+                              <title>Documento com formato inválido</title>
+                            </AlertTriangle>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center text-sm font-medium text-slate-700 bg-slate-100 w-fit px-2.5 py-1 rounded-full">

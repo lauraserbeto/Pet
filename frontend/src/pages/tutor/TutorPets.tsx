@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -47,6 +54,7 @@ export function TutorPets() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<PetForm>({
     resolver: zodResolver(petSchema),
@@ -247,14 +255,22 @@ export function TutorPets() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Espécie</label>
-                  <select
-                    {...register("species")}
-                    className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] py-2 px-3 border outline-none bg-white"
-                  >
-                    <option value="DOG">Cachorro</option>
-                    <option value="CAT">Gato</option>
-                    <option value="OTHER">Outro</option>
-                  </select>
+                  <Controller
+                    name="species"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value || undefined} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full rounded-xl">
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="DOG">Cachorro</SelectItem>
+                          <SelectItem value="CAT">Gato</SelectItem>
+                          <SelectItem value="OTHER">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Raça</label>

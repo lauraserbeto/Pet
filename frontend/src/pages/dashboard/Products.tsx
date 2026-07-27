@@ -155,6 +155,14 @@ export function Products() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Categoria e Tipo de Pet usam o Select do design system (não é <select> nativo),
+    // então a obrigatoriedade é validada aqui, no lugar do atributo `required`.
+    if (!formData.category || !formData.pet_type) {
+      toast.error("Selecione a categoria e o tipo de pet.");
+      return;
+    }
+
     try {
       setIsSubmitLoading(true);
       
@@ -327,35 +335,35 @@ export function Products() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2 flex flex-col">
                     <Label htmlFor="category">Categoria</Label>
-                    <select 
-                      id="category" 
-                      name="category" 
-                      required 
-                      value={formData.category} 
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Select
+                      value={formData.category || undefined}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                     >
-                      <option value="" disabled>Selecione...</option>
-                      {options.categories.map(cat => (
-                         <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
+                      <SelectTrigger id="category" className="w-full">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {options.categories.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2 flex flex-col">
                     <Label htmlFor="pet_type">Tipo de Pet</Label>
-                    <select 
-                      id="pet_type" 
-                      name="pet_type" 
-                      required 
-                      value={formData.pet_type} 
-                      onChange={handleInputChange}
-                      className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    <Select
+                      value={formData.pet_type || undefined}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, pet_type: value }))}
                     >
-                      <option value="" disabled>Selecione...</option>
-                      {options.petTypes.map(pt => (
-                         <option key={pt} value={pt}>{pt}</option>
-                      ))}
-                    </select>
+                      <SelectTrigger id="pet_type" className="w-full">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {options.petTypes.map(pt => (
+                          <SelectItem key={pt} value={pt}>{pt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

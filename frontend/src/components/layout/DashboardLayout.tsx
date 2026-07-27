@@ -6,8 +6,8 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
-import { providerService } from "../../lib/services/providerService";
 import { cn } from "../../lib/utils";
+import { useCompleteness } from "../../lib/hooks/useCompleteness";
 
 export function DashboardLayout() {
   const { pathname } = useLocation();
@@ -20,8 +20,11 @@ export function DashboardLayout() {
   const [displayName, setDisplayName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
-  // Completeness State
-  const [completeness, setCompleteness] = useState<{ isComplete: boolean; missingFields: string[] } | null>(null);
+  // Completude do perfil: fica no React Query para poder ser revalidada após
+  // salvar o perfil (ver invalidateQueries em PublicProfile). Só parceiros
+  // (3 = Hotel, 4 = Pet Sitter) têm perfil público a completar.
+  const isProvider = roleId === 3 || roleId === 4;
+  const { data: completeness } = useCompleteness(isProvider);
 
   // Header State
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -57,16 +60,8 @@ export function DashboardLayout() {
         }
         
         setDisplayName(finalName);
-
-        // Somente parceiros (3=HOTEL, 4=PET_SITTER) precisam verificar completitude
-        if (user.role_id === 3 || user.role_id === 4) {
-          try {
-            const comp = await providerService.fetchCompleteness();
-            setCompleteness(comp);
-          } catch (err) {
-            console.error("Erro ao carregar completitude:", err);
-          }
-        }
+        // A completude do perfil é buscada pelo hook useCompleteness (React Query),
+        // para poder ser revalidada após salvar o perfil.
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
       } finally {

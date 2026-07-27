@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -74,6 +81,7 @@ export function AddressesSection() {
     reset,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<AddressForm>({
     resolver: zodResolver(addressSchema),
@@ -266,17 +274,24 @@ export function AddressesSection() {
                   <label className="block text-sm font-medium text-slate-700 mb-1">
                     UF<RequiredMark />
                   </label>
-                  <select
-                    {...register("estado")}
-                    className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] bg-white"
-                  >
-                    <option value="">--</option>
-                    {UF_LIST.map((uf) => (
-                      <option key={uf} value={uf}>
-                        {uf}
-                      </option>
-                    ))}
-                  </select>
+                  <Controller
+                    name="estado"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value || undefined} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full rounded-lg">
+                          <SelectValue placeholder="--" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {UF_LIST.map((uf) => (
+                            <SelectItem key={uf} value={uf}>
+                              {uf}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   {errors.estado && (
                     <p className="text-xs text-red-500 mt-1">{errors.estado.message}</p>
                   )}

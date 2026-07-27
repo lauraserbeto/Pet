@@ -1,6 +1,7 @@
 const prisma = require('../config/database');
 const bcrypt = require('bcryptjs');
 const AppError = require('../utils/AppError');
+const { listUsersQuery } = require('../schemas/userSchemas');
 
 const PROFILE_SELECT = {
   id: true,
@@ -173,6 +174,62 @@ class UserController {
   }
 
   // --- MÉTODOS DO ADMINISTRADOR ---
+
+  // Lista TODOS os usuários da plataforma (tutores, parceiros e admins).
+  // `avatar_url` é omitido de propósito: guarda base64 inline, e trazê-lo para
+  // N usuários geraria payload de megabytes.
+  async listUsers(req, res, next) {
+    try {
+      const { page, limit, role_id, q } = listUsersQuery.parse(req.query);
+
+      const where = {
+        ...(role_id ? { role_id } : {}),
+        ...(q
+          ? {
+              OR: [
+                { full_name: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      };
+
+      const [total, users] = await Promise.all([
+        prisma.user.count({ where }),
+        prisma.user.findMany({
+          where,
+          select: {
+            id: true,
+            full_name: true,
+            email: true,
+            phone: true,
+            role_id: true,
+            is_active: true,
+            onboarding_step: true,
+            created_at: true,
+            role: { select: { name: true } },
+            provider: { select: { business_name: true, status: true, document: true } },
+          },
+          orderBy: { created_at: 'desc' },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+      ]);
+
+      res.set({
+        'X-Total-Count': String(total),
+        'X-Page': String(page),
+        'X-Limit': String(limit),
+        'X-Total-Pages': String(Math.ceil(total / limit)),
+      });
+      return res.status(200).json(users);
+    } catch (error) {
+      if (error?.name === 'ZodError') {
+        return next(AppError.validation('Parâmetros de listagem inválidos.'));
+      }
+      return next(error);
+    }
+  }
 
   // Retorna avaliações filtradas por status
   async getEvaluations(req, res) {

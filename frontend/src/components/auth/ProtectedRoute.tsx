@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
+import { isApprovedProviderStatus } from "../../lib/constants/providerStatus";
+
+// Lojista (2) e Hotel (3) só acessam áreas internas após aprovação do admin.
+// O Pet Sitter (4) é exceção: entra pendente para completar o onboarding.
+const ROLES_REQUIRING_APPROVAL = [2, 3];
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,6 +26,13 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
     }
 
     if (adminOnly && user.role_id !== 1) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // Parceiro ainda não aprovado não acessa o dashboard. O backend já barra o
+    // login desses perfis; isto é defesa em profundidade (sessão/token antigo).
+    if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider_status)) {
       navigate("/", { replace: true });
       return;
     }
@@ -52,6 +64,7 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
 
   if (!isAuthenticated || !user) return null;
   if (adminOnly && user.role_id !== 1) return null;
+  if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider_status)) return null;
 
   return <>{children}</>;
 };

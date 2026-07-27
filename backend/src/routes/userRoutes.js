@@ -141,6 +141,33 @@ router.get('/admin/evaluations', adminMiddleware, UserController.getEvaluations)
 
 /**
  * @swagger
+ * /api/v1/users/admin/users:
+ *   get:
+ *     summary: Lista todos os usuários da plataforma (Admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role_id
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de usuários (metadados de paginação nos headers X-Total-*)
+ */
+router.get('/admin/users', adminMiddleware, UserController.listUsers);
+
+/**
+ * @swagger
  * /api/v1/users/admin/evaluations/{id}:
  *   patch:
  *     summary: Aprova ou rejeita uma avaliação de parceiro (Admin)
