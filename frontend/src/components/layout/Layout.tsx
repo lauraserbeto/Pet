@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { ScrollToTop } from "../../app/components/ScrollToTop";
-import { CustomLoader } from "../ui/loader";
+import { HamsterLoader } from "../ui/HamsterLoader";
 
 export function Layout() {
   return (
@@ -18,13 +18,7 @@ export function Layout() {
       </a>
       <Navbar />
       <main id="main-content" tabIndex={-1} className="flex-grow">
-        <Suspense
-          fallback={
-            <div className="flex min-h-[50vh] items-center justify-center">
-              <CustomLoader />
-            </div>
-          }
-        >
+        <Suspense fallback={<HamsterLoader />}>
           <Outlet />
         </Suspense>
       </main>

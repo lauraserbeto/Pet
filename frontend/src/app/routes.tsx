@@ -6,7 +6,7 @@ import { Layout } from "../components/layout/Layout";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { NotFound } from "../pages/NotFound";
-import { CustomLoader } from "../components/ui/loader";
+import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 // Páginas em code splitting (React.lazy) — cada rota vira um chunk sob demanda,
 // tirando ~40 páginas do bundle inicial (antes um único chunk de ~2,1 MB).
@@ -52,11 +52,7 @@ const PartnersPage = lazy(() => import("../pages/PartnersPage").then((m) => ({ d
 
 // Fallback exibido enquanto o chunk da rota carrega.
 function RouteFallback() {
-  return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <CustomLoader />
-    </div>
-  );
+  return <HamsterLoader />;
 }
 
 // Envolve rotas SEM layout (que teria o Suspense no <Outlet/>) numa fronteira própria.
