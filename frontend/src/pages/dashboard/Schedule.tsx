@@ -27,6 +27,7 @@ import {
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { DemoBanner } from "../../components/DemoBanner";
 
 // Mock Data Types
 type Appointment = {
@@ -103,6 +104,8 @@ export function Schedule() {
 
   return (
     <div className="flex flex-col space-y-3 sm:space-y-4">
+      <DemoBanner />
+
       {/* ─── Header Toolbar ─── */}
       <div className="flex flex-col gap-3 bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200 shrink-0">
         {/* Top row: date nav + view toggle */}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Hotel, Footprints, Calendar, Clock, MapPin } from "lucide-react";
+import { DemoBanner } from "../../components/DemoBanner";
 
 const mockHotels = [
   { id: 1, partnerName: "Hotel Fazenda Pet", petName: "Rex", dateIn: "2026-03-10", dateOut: "2026-03-15", status: "Confirmado", price: "R$ 450,00" },
@@ -17,6 +18,8 @@ export function TutorAppointments() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
+        <DemoBanner />
+
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Meus Agendamentos</h1>
           <p className="text-slate-500 mt-2">Acompanhe suas reservas de hotéis e passeios agendados.</p>

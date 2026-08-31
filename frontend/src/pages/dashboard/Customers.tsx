@@ -11,6 +11,7 @@ import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 import { Avatar } from "../../components/ui/avatar";
 import { Search, Plus, Filter, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { DemoBanner } from "../../components/DemoBanner";
 
 export function Customers() {
   const customers = [
@@ -23,6 +24,8 @@ export function Customers() {
 
   return (
     <div className="space-y-6">
+      <DemoBanner />
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 font-[family-name:var(--font-display)]">Clientes</h2>
