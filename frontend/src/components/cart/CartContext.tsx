@@ -238,9 +238,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   /* -------- API pública -------- */
 
+console.log("USUÁRIO NO CARRINHO:", user);
+console.log("ROLE ID:", user?.role_id);
+
+
   const addItem = useCallback(
     async (input: CartAddInput, quantity: number = 1): Promise<boolean> => {
-      if (user && user.role_id !== 1) {
+      if (user && user.role_id !== 5) {
         toast.warning("Funcionalidade indisponível. Apenas clientes podem usar o carrinho.");
         return false;
       }

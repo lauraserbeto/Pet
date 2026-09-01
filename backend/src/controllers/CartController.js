@@ -105,7 +105,7 @@ class CartController {
   // POST /cart/items
   async addItem(req, res, next) {
     try {
-      if (req.userRole && req.userRole !== 1) {
+      if (req.userRole && req.userRole !== 5) {
         throw AppError.forbidden('Apenas clientes podem adicionar itens ao carrinho');
       }
 
@@ -231,7 +231,7 @@ class CartController {
   // POST /cart/merge — usado após login para fundir carrinho anônimo
   async merge(req, res, next) {
     try {
-      if (req.userRole && req.userRole !== 1) {
+      if (req.userRole && req.userRole !== 5) {
         throw AppError.forbidden('Apenas clientes podem ter um carrinho de compras');
       }
 

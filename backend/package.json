@@ -11,6 +11,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -36,7 +39,6 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.7.0",
     "prettier": "^3.9.6",
-    "prisma": "^5.22.0",
     "supertest": "^7.2.2"
   }
 }
