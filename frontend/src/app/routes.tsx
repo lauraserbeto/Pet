@@ -1,11 +1,12 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, type RouteObject } from "react-router";
 
 // Shell e guardas ficam EAGER (necessários já no primeiro paint).
 import { Layout } from "../components/layout/Layout";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { NotFound } from "../pages/NotFound";
+import { RouteErrorBoundary } from "../components/RouteErrorBoundary";
 import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 // Páginas em code splitting (React.lazy) — cada rota vira um chunk sob demanda,
@@ -60,7 +61,7 @@ const withSuspense = (node: ReactNode) => (
   <Suspense fallback={<RouteFallback />}>{node}</Suspense>
 );
 
-export const router = createBrowserRouter([
+const rootRoutes: RouteObject[] = [
   {
     path: "/login",
     element: withSuspense(<LoginPage />),
@@ -285,4 +286,10 @@ export const router = createBrowserRouter([
     path: "*",
     Component: NotFound,
   },
-]);
+];
+
+// Toda rota raiz ganha a mesma fronteira de erro: sem `errorElement` o React
+// Router mostra a tela padrão dele e o erro nunca chega ao Sentry.
+export const router = createBrowserRouter(
+  rootRoutes.map((route) => ({ errorElement: <RouteErrorBoundary />, ...route }))
+);

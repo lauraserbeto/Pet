@@ -48,4 +48,6 @@ module.exports = {
   FRONTEND_URL,
   PORT: process.env.PORT || 3000,
   NODE_ENV: process.env.NODE_ENV || 'development',
+  // Opcional: sem DSN o Sentry fica desabilitado e a API roda normalmente.
+  SENTRY_DSN: process.env.SENTRY_DSN || null,
 };

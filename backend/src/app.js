@@ -1,6 +1,9 @@
 require('dotenv').config();
 // Valida variáveis de ambiente obrigatórias no boot (fail-fast).
 const env = require('./config/env');
+// Sentry antes do express: o SDK instrumenta os módulos no momento do require.
+// No-op quando SENTRY_DSN não está definido.
+require('./config/sentry').initSentry();
 const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
