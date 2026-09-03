@@ -17,6 +17,7 @@ jobs:
       # Segredos fake apenas para o boot/config nos testes (não conectam a nada real).
       JWT_SECRET: ci-dummy-secret-com-mais-de-32-caracteres-0000
       DATABASE_URL: postgresql://user:pass@localhost:5432/petplus_test
+      FRONTEND_URL: http://localhost:5173
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

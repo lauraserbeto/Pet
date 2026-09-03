@@ -13,7 +13,6 @@ import {
   Star,
   Heart,
   SlidersHorizontal,
-  ChevronDown,
   Wifi,
   TreePine,
   Shield,
@@ -30,9 +29,9 @@ export function HotelsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"rating" | "price" | "distance">("rating");
   const [showFilters, setShowFilters] = useState(false);
-
   const [apiHotels, setApiHotels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isOpenNow = (operatingHours: any) => {
     if (!operatingHours || typeof operatingHours !== 'object') return false;
@@ -58,7 +57,10 @@ export function HotelsPage() {
     return false;
   };
 
-  useEffect(() => {
+  const fetchData = () => {
+    setLoading(true);
+    setError(null);
+
     providerService.fetchHotels()
       .then(data => {
         setApiHotels(
@@ -90,8 +92,13 @@ export function HotelsPage() {
       })
       .catch(err => {
         console.error("Erro ao buscar hotéis:", err);
+        setError("Ocorreu um erro ao carregar os hotéis. Por favor, tente novamente.");
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const toggleFavorite = (id: string) => {
@@ -215,6 +222,13 @@ export function HotelsPage() {
         <div className="space-y-4 pb-8">
           {loading ? (
             <HamsterLoader message="Buscando hotéis disponíveis..." size="sm" />
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl border border-slate-100">
+              <p className="text-red-500 mb-4">{error}</p>
+              <Button onClick={fetchData} className="px-6 rounded-full">
+                Tentar novamente
+              </Button>
+            </div>
           ) : (
             <>
               {filtered.map((hotel, index) => (

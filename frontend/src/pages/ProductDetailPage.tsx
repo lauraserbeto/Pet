@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
@@ -32,27 +32,6 @@ import {
 /* ═══════════════════════════════════════════════
    MOCK DATA (STAYS MOCKED)
    ═══════════════════════════════════════════════ */
-
-const allProductsMock = [
-  {
-    id: 1,
-    name: "Ração Premium Cães Adultos 15kg",
-    brand: "Pedigree",
-    price: 149.9,
-    rating: 4.5,
-    reviews: 328,
-    image: "https://images.unsplash.com/photo-1725533488658-437e3619f856?w=600&q=80",
-  },
-  {
-    id: 2,
-    name: "Brinquedo Interativo Resistente",
-    brand: "PetClean",
-    price: 39.9,
-    rating: 4.7,
-    reviews: 156,
-    image: "https://images.unsplash.com/photo-1714339691990-803e3dbf2056?w=600&q=80",
-  },
-];
 
 const ratingDistribution = [
   { stars: 5, percentage: 72 },
@@ -155,8 +134,6 @@ export function ProductDetailPage() {
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "delivery">("desc");
   const isFavorite = product ? isFav("PRODUCT", String(product.id)) : false;
 
-  const relatedScrollRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -212,10 +189,6 @@ export function ProductDetailPage() {
   const toggleFavorite = () => {
     if (!product) return;
     void toggleFav("PRODUCT", String(product.id));
-  };
-
-  const scrollRelated = (dir: "left" | "right") => {
-    relatedScrollRef.current?.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
   };
 
   return (
@@ -565,38 +538,6 @@ export function ProductDetailPage() {
               </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ═══════ Related Products (Mocked) ═══════ */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
-            Quem viu também gostou
-          </h2>
-          <div className="flex gap-2">
-            <button onClick={() => scrollRelated("left")} className="h-8 w-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm transition-all"><ChevronLeft className="h-4 w-4" /></button>
-            <button onClick={() => scrollRelated("right")} className="h-8 w-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm transition-all"><ChevronRight className="h-4 w-4" /></button>
-          </div>
-        </div>
-
-        <div ref={relatedScrollRef} className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-          {allProductsMock.map((rp) => (
-            <Link key={rp.id} to={`/shopping/${rp.id}`} className="shrink-0 w-[60%] sm:w-[35%] md:w-[25%] lg:w-[18%] snap-start group">
-              <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full hover:shadow-md transition-all">
-                <div className="aspect-square bg-slate-50">
-                  <ImageWithFallback src={rp.image} alt={rp.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="p-3 flex-1 flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">{rp.brand}</span>
-                  <h4 className="text-xs font-bold text-slate-800 mt-1 line-clamp-2">{rp.name}</h4>
-                  <div className="mt-auto pt-2">
-                    <p className="text-sm font-extrabold text-slate-900">{fmt(rp.price)}</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 

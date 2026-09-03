@@ -5,11 +5,17 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status",
     "test": "node --test",
     "test:watch": "node --test --watch",
     "lint": "eslint .",
+    "sentry:smoke": "node scripts/sentry-smoke.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +23,7 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@sentry/node": "^10.73.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",

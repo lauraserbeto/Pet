@@ -31,6 +31,7 @@ import {
   PieChart,
   Pie
 } from 'recharts';
+import { DemoBanner } from "../../components/DemoBanner";
 
 export function Overview() {
   // Mock Data
@@ -98,6 +99,8 @@ export function Overview() {
 
   return (
     <div className="space-y-6 pb-8">
+      <DemoBanner message="Os agendamentos, o gráfico de receita e a distribuição de serviços desta tela ainda utilizam dados fictícios e não foram integrados ao backend." />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>

@@ -1,4 +1,5 @@
 const AppError = require('../utils/AppError');
+const { captureError } = require('../config/sentry');
 
 function notFoundHandler(req, res, next) {
   next(AppError.notFound(`Rota não encontrada: ${req.method} ${req.originalUrl}`));
@@ -42,8 +43,10 @@ function errorHandler(err, req, res, _next) {
     });
   }
 
-  // AppError (erros operacionais explícitos)
+  // AppError (erros operacionais explícitos). Só reporta os 5xx — 4xx são
+  // fluxo esperado (validação, permissão, não encontrado) e virariam ruído.
   if (err instanceof AppError) {
+    if (err.statusCode >= 500) captureError(err, req);
     return res.status(err.statusCode).json({
       error: { code: err.code, message: err.message, details: err.details },
       message: err.message,
@@ -54,6 +57,7 @@ function errorHandler(err, req, res, _next) {
   // pino-http) e devolve o requestId ao cliente para rastreio no suporte.
   const log = req.log || require('../config/logger');
   log.error({ err }, 'Erro não tratado');
+  captureError(err, req);
   return res.status(500).json({
     error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor', requestId: req.id },
     message: 'Erro interno do servidor',

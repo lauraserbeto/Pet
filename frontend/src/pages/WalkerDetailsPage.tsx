@@ -74,79 +74,40 @@ export function WalkerDetailsPage() {
       });
   }, [id]);
 
-  const mockWalker = {
-    name: "Pedro Alves",
-    age: 30,
-    role: "Pet Sitter & Dog Walker",
-    price: 40,
-    rating: 5.0,
-    reviews: 24,
-    distance: "1 km",
-    experience: "3 anos",
-    petsCount: 35,
-    description:
-      "Olá, me chamo Pedro Alves e tenho 30 anos. Sou publicitário e dog walker certificado pelo Curso Profissional de Dog Walker Pet Anjo. Apaixonado por animais, levo os passeios a sério: com segurança, responsabilidade e muito carinho. Tenho experiência com cães de todos os portes e respeito sempre o ritmo e a personalidade de cada um.",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&auto=format&fit=crop&q=80",
-    verified: true,
-    available: true,
-    services: [
-      {
-        name: "Passeio (30 min)",
-        price: 30,
-        description: "Passeio individual com duração de 30 minutos",
-      },
-      {
-        name: "Passeio (1 hora)",
-        price: 40,
-        description: "Passeio individual com duração de 1 hora",
-      },
-      {
-        name: "Pet Sitting (diária)",
-        price: 120,
-        description: "Cuidados na sua casa ou na minha por um dia inteiro",
-      },
-      {
-        name: "Day Care",
-        price: 80,
-        description: "Creche diurna com atividades e socialização",
-      },
-    ],
-    reviewsList: [
-      {
-        name: "Fernanda L.",
-        rating: 5,
-        text: "Pedro é incrível! Meu dog ama os passeios com ele. Super responsável e carinhoso.",
-        date: "1 semana atrás",
-      },
-      {
-        name: "Ricardo M.",
-        rating: 5,
-        text: "Profissional de excelência. Meu cachorro sempre volta feliz e cansado.",
-        date: "3 semanas atrás",
-      },
-      {
-        name: "Juliana S.",
-        rating: 5,
-        text: "Confio 100% no Pedro. Ele envia fotos e vídeos durante o passeio.",
-        date: "1 mês atrás",
-      },
-    ],
-    highlights: [
-      "Certificado profissional",
-      "Envia fotos e vídeos",
-      "Aceita todos os portes",
-      "Disponível finais de semana",
-    ],
-  };
 
-  const walker = apiWalker || mockWalker;
+
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)] text-sky-600">Carregando perfil...</div>;
   }
+
+  if (!apiWalker) {
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-md w-full text-center">
+        <PawPrint className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+
+        <h1 className="text-xl font-bold text-slate-900 mb-2">
+          Profissional não encontrado
+        </h1>
+
+        <p className="text-sm text-slate-500 mb-6">
+          O profissional que você está procurando não existe ou não está mais disponível.
+        </p>
+
+        <Button
+          className="bg-sky-600 hover:bg-sky-700"
+          onClick={() => navigate("/walkers")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar para a lista
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+const walker = apiWalker;
 
   const stats = [
     {
@@ -166,6 +127,7 @@ export function WalkerDetailsPage() {
     },
   ];
 
+ 
   return (
     <div className="min-h-screen bg-slate-50 pb-28 font-[family-name:var(--font-body)]">
       {/* Cover Image */}

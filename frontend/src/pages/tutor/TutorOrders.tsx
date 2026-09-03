@@ -1,4 +1,5 @@
 import { ShoppingBag, Package, Truck, CheckCircle } from "lucide-react";
+import { DemoBanner } from "../../components/DemoBanner";
 
 const mockOrders = [
   { id: "PED-20260308-01", date: "2026-03-08", items: "Ração Royal Canin 15kg, Brinquedo Osso", total: "R$ 380,50", status: "Em Rota de Entrega" },
@@ -9,6 +10,8 @@ export function TutorOrders() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
+        <DemoBanner />
+
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Meus Pedidos</h1>
           <p className="text-slate-500 mt-2">Histórico de compras realizadas no Pet+ Shopping.</p>

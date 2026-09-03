@@ -5,8 +5,8 @@ O Pet+ utiliza o **PostgreSQL** hospedado no **Railway** com o **Prisma ORM**. O
 ## Infraestrutura
 - **Provedor:** Railway (PostgreSQL 16+)
 - **ORM:** Prisma v5+
-- **Sincronização do schema:** `prisma db push` (sem histórico de migrations versionado)
-- **SQL complementar:** scripts opcionais em `backend/prisma/migrations/manual/` para índices parciais, CHECKs e backfills
+- **Sincronização do schema:** `prisma migrate deploy` com histórico versionado em `backend/prisma/migrations/`
+- **SQL legado:** scripts antigos arquivados em `backend/prisma/legacy-migrations/manual/`; o baseline Prisma já cobre as mudanças aplicáveis ao schema atual
 
 ## Principais Entidades
 
@@ -47,7 +47,7 @@ Dados dos animais cadastrados pelos tutores.
 ### 🏠 `addresses`
 Endereços do usuário.
 - **`is_default Boolean`** (default `false`): marca o endereço principal.
-- Invariante: no máximo 1 default por usuário. Garantida pelo controller via transação; reforço opcional via índice parcial único (SQL em `prisma/migrations/manual/2026_05_11_add_address_default.sql`).
+- Invariante: no máximo 1 default por usuário. Garantida pelo controller via transação e reforçada no baseline por índice parcial único (`addresses_user_id_default_unique`).
 - Índice: `@@index([user_id, is_default])`.
 
 ### ❤️ `favorites` *(novo)*
@@ -69,7 +69,7 @@ Itens do carrinho.
 - **Colunas:** `id`, `cart_id`, `product_id`, `quantity`, **`unit_price_snapshot`** (Decimal), `added_at`, `updated_at`.
 - **Constraints:**
   - `@@unique([cart_id, product_id])` — um produto, uma linha por carrinho.
-  - `quantity > 0` (CHECK opcional via SQL manual; aplicação já valida).
+  - `quantity > 0` (CHECK aplicado no baseline; aplicação também valida).
 - **`unit_price_snapshot`** congela o preço no momento da adição. Permite detectar `price_changed` ao ler o carrinho, comparando com o preço atual do produto.
 
 ### 🧾 `orders` / `order_items`
