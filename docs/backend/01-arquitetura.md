@@ -41,4 +41,4 @@ O backend do Pet+ segue princípios de separação de responsabilidades (Separat
   }
   ```
 - **Códigos HTTP utilizados:** 200, 201, 204 (sucesso); 400 (BAD_REQUEST), 401 (UNAUTHORIZED), 403 (FORBIDDEN), 404 (NOT_FOUND), 409 (CONFLICT), 422 (VALIDATION_ERROR), 500 (INTERNAL_ERROR).
-- **Migrations:** schema gerenciado via `prisma db push` (sem histórico de migrations versionadas). SQLs complementares (índices parciais, CHECKs, backfills) ficam em `backend/prisma/migrations/manual/` e são aplicados sob demanda.
+- **Migrations:** schema gerenciado por Prisma Migrate em `backend/prisma/migrations/`. O deploy deve usar `npx prisma migrate deploy`; bancos legados já criados via `db push` devem marcar o baseline com `npx prisma migrate resolve --applied 20260901000000_init_baseline`. SQLs antigos ficam arquivados em `backend/prisma/legacy-migrations/manual/`.

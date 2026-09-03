@@ -101,12 +101,12 @@ npm install
 ```
 - Crie um arquivo `.env` baseado no `.env.example`.
 - Certifique-se de configurar a `DATABASE_URL` corretamente (local ou Railway).
-- Sincronize o schema do banco de dados:
+- Aplique as migrations versionadas e gere o Prisma Client:
 ```bash
-npx prisma db push
+npx prisma migrate deploy
 npx prisma generate
 ```
-> Esse comando cria/atualiza as tabelas (`addresses.is_default`, `favorites`, `carts`, `cart_items`) a partir do `schema.prisma`. SQLs complementares opcionais (índices parciais, CHECKs, backfills) ficam em `backend/prisma/migrations/manual/`.
+> Em bancos já existentes que foram provisionados via `prisma db push`, registre o baseline uma única vez com `npx prisma migrate resolve --applied 20260901000000_init_baseline` antes do primeiro `migrate deploy`.
 
 - Inicie o servidor:
 ```bash
@@ -156,8 +156,12 @@ npm run dev
 ```env
 DATABASE_URL="postgresql://user:password@host:port/database" # URL do PostgreSQL (Local ou Railway)
 JWT_SECRET="sua_chave_secreta_aqui"
+FRONTEND_URL="http://localhost:5173"
 PORT=3000
 ```
+
+Procedimento de rotação de `DATABASE_URL` e `JWT_SECRET` no Railway:
+[`docs/runbooks/rotacao-segredos-railway.md`](docs/runbooks/rotacao-segredos-railway.md).
 
 ### Frontend (`/frontend/.env.local`)
 ```env

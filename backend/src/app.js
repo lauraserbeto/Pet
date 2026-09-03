@@ -1,7 +1,6 @@
 require('dotenv').config();
 // Valida variáveis de ambiente obrigatórias no boot (fail-fast).
-// Se JWT_SECRET estiver ausente, a aplicação não sobe.
-require('./config/env');
+const env = require('./config/env');
 const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
@@ -17,6 +16,13 @@ const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 const { metricsMiddleware, metricsHandler } = require('./middlewares/metrics');
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://petplus-frontend.vercel.app',
+  'https://petplus.vercel.app',
+  env.FRONTEND_URL,
+];
 
 
 app.set('trust proxy', 1);
@@ -42,7 +48,7 @@ const authLimiter = rateLimit({
 // CSP desativado aqui — é responsabilidade do frontend (PET-10) e evita quebrar o Swagger UI.
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'https://petplus-frontend.vercel.app', 'https://petplus.vercel.app'],
+  origin: [...new Set(allowedOrigins)],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit', 'X-Total-Pages'],

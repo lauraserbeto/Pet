@@ -11,7 +11,7 @@ Com PED-1 entregando a criação transacional de pedidos, é hora de ter testes 
 Montar a infraestrutura de testes de integração com um banco PostgreSQL de teste e cobrir o happy-path de carrinho (adicionar item) e de criação de pedido (`POST /orders`), integrando tudo ao CI.
 
 ## Escopo / Passos
-1. **Banco de teste:** adicionar um serviço PostgreSQL ao job `backend` do CI (`services: postgres:...` no `ci.yml`) e apontar `DATABASE_URL` para ele. Rodar `npx prisma migrate deploy` (ou `db push`) antes dos testes para criar o schema.
+1. **Banco de teste:** adicionar um serviço PostgreSQL ao job `backend` do CI (`services: postgres:...` no `ci.yml`) e apontar `DATABASE_URL` para ele. Rodar `npx prisma migrate deploy` antes dos testes para criar o schema.
 2. **Setup/teardown:** criar helpers para semear dados mínimos (usuário tutor, provider/lojista aprovado, produto com estoque) e limpar as tabelas entre testes (truncate ou transação por teste). Isolar do banco de desenvolvimento.
 3. **Autenticação nos testes:** helper para registrar/logar um tutor e obter o JWT, reutilizável nos casos com DB.
 4. **Casos happy-path:**

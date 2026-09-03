@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status",
     "test": "node --test",
     "test:watch": "node --test --watch",
     "lint": "eslint .",
