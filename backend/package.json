@@ -10,6 +10,7 @@
     "test": "node --test",
     "test:watch": "node --test --watch",
     "lint": "eslint .",
+    "sentry:smoke": "node scripts/sentry-smoke.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
