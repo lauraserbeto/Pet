@@ -10,6 +10,7 @@
     "test": "node --test",
     "test:watch": "node --test --watch",
     "lint": "eslint .",
+    "sentry:smoke": "node scripts/sentry-smoke.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -22,6 +23,7 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@sentry/node": "^10.73.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
@@ -41,6 +43,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.7.0",
     "prettier": "^3.9.6",
+    "prisma": "^5.22.0",
     "supertest": "^7.2.2"
   }
 }
