@@ -112,7 +112,7 @@ Autenticação (login/registro com anti-escalonamento de privilégio; forgot/res
 | `JWT_SECRET` | ✅ (fail-fast no boot) | ≥32 chars |
 | `DATABASE_URL` | ✅ | Postgres (Railway) |
 | `RESEND_API_KEY` | a partir de `EML-1` | envio de e-mail |
-| `FRONTEND_URL` | a partir de `EML-1` | montar links de e-mail |
+| `FRONTEND_URL` | ✅ | origem canônica do frontend para CORS e links gerados pelo backend |
 | `PORT` / `NODE_ENV` / `LOG_LEVEL` | opcionais | têm default |
 
 > `INF-0` cria o `.env.example` oficial. **Nunca** commitar `.env` real. Os segredos de produção atuais devem ser **rotacionados** (ver `INF-0`).
@@ -120,7 +120,7 @@ Autenticação (login/registro com anti-escalonamento de privilégio; forgot/res
 ### Rodar
 ```bash
 # backend
-cd backend && npm install && npx prisma generate && npm run dev
+cd backend && npm install && npx prisma migrate deploy && npx prisma generate && npm start
 # frontend
 cd frontend && npm install && npm run dev
 # testes

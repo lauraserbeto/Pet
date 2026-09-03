@@ -48,6 +48,7 @@ validação de env no boot e documentar/rotacionar segredos, sem jamais commitar
 - `backend/.env.example` — **criar** com placeholders (versionado).
 - `backend/.env` — gitignorado; **não** commitar, **não** copiar valores.
 - Documentação de deploy/README — atualizar para `prisma migrate deploy` e citar o `.env.example`.
+- `docs/runbooks/rotacao-segredos-railway.md` — procedimento de rotação de `DATABASE_URL`/`JWT_SECRET`.
 
 ## Dependências
 - Depende de: nenhuma.
@@ -73,3 +74,8 @@ validação de env no boot e documentar/rotacionar segredos, sem jamais commitar
 - Segredos: nunca em URL/query string, nunca em log, nunca no `.env.example`. O `.env` real permanece gitignorado.
 - `FRONTEND_URL` é usada por CORS; em dev local o front usa `VITE_API_URL=http://localhost:3000/api/v1` (o `.env.local` do front aponta para o Railway por padrão).
 - Após rotacionar o `JWT_SECRET`, todos os tokens JWT emitidos anteriormente são invalidados (usuários precisarão logar de novo) — comunicar ao time.
+
+## Runbook
+
+Procedimento operacional documentado em
+[`docs/runbooks/rotacao-segredos-railway.md`](../../runbooks/rotacao-segredos-railway.md).

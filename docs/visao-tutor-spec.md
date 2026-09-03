@@ -162,8 +162,8 @@ is_default Boolean @default(false)
 @@index([user_id, is_default])
 ```
 
-> A **unicidade do default por usuário** (`UNIQUE WHERE is_default = true`) não pode ser expressa em DSL Prisma. O backend garante a invariante via transação no `setDefault`. Há um SQL opcional em
-[`prisma/migrations/manual/2026_05_11_add_address_default.sql`](../backend/prisma/migrations/manual/2026_05_11_add_address_default.sql) que cria o índice parcial — recomendado em produção como safety-net.
+> A **unicidade do default por usuário** (`UNIQUE WHERE is_default = true`) não pode ser expressa em DSL Prisma. O backend garante a invariante via transação no `setDefault`, e o baseline Prisma aplica o índice parcial `addresses_user_id_default_unique`. O SQL manual antigo ficou arquivado em
+[`prisma/legacy-migrations/manual/2026_05_11_add_address_default.sql`](../backend/prisma/legacy-migrations/manual/2026_05_11_add_address_default.sql) apenas como histórico.
 
 ### 4.3 Regras críticas implementadas
 - **Primeiro endereço** criado vira default automaticamente.
@@ -213,8 +213,8 @@ type CreatePetDTO = {
 - **Ownership** em todos os métodos: `where: { id, tutor_id: req.userId }`.
 - **Bloqueio de delete (409)** se houver `Appointment` com `status IN (PENDING, CONFIRMED)` e `start_time > now()`. Concluídos/cancelados não bloqueiam.
 - **Limite de 10 pets** por tutor.
-- **Enum `species`** padronizado. Há um SQL opcional em
-[`prisma/migrations/manual/2026_05_12_normalize_pet_species.sql`](../backend/prisma/migrations/manual/2026_05_12_normalize_pet_species.sql) que normaliza valores legados PT-BR → enum, **só rode se houver dados antigos**.
+- **Enum `species`** padronizado. O SQL antigo de normalização de dados legados PT-BR → enum fica arquivado em
+[`prisma/legacy-migrations/manual/2026_05_12_normalize_pet_species.sql`](../backend/prisma/legacy-migrations/manual/2026_05_12_normalize_pet_species.sql); use apenas em migração pontual de bases antigas.
 
 ### 5.4 Frontend
 - [`usePets`](../frontend/src/lib/hooks/usePets.ts) com optimistic remove.
@@ -379,18 +379,19 @@ type CartItemDTO = {
 2. **Variáveis de ambiente** (backend/.env):
    - `DATABASE_URL` — PostgreSQL
    - `JWT_SECRET`
+   - `FRONTEND_URL` — origem do frontend para CORS e links gerados
    - `PORT` (default 3000)
-3. **Aplicar schema:**
+3. **Aplicar migrations e gerar client:**
    ```bash
    cd backend
-   npx prisma db push     # cria favorites, carts, cart_items, coluna is_default
+   npx prisma migrate deploy
    npx prisma generate
    ```
-4. **(Opcional)** Rodar os SQLs em `backend/prisma/migrations/manual/` para:
-   - Backfill do `is_default` para usuários com endereços existentes
-   - Índice parcial único `is_default` (safety-net contra race conditions)
-   - `CHECK (quantity > 0)` em `cart_items`
-   - Normalização de `pets.species` PT-BR → enum
+4. **Banco legado:** se o ambiente já foi criado antes via `prisma db push`,
+   registre o baseline uma única vez com
+   `npx prisma migrate resolve --applied 20260901000000_init_baseline`.
+   Os SQLs antigos ficam apenas como histórico em
+   `backend/prisma/legacy-migrations/manual/`.
 5. **Subir:**
    ```bash
    # terminal 1

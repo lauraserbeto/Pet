@@ -316,7 +316,7 @@ lib/services/            # consomem httpClient, não fetch cru
 
 ### Fase 2 — Endereços ✅
 - [x] Back: schema Prisma atualizado com `is_default Boolean` + index `@@index([user_id, is_default])`
-- [x] Back: migration SQL manual em `prisma/migrations/manual/2026_05_11_add_address_default.sql` (coluna + backfill + índice parcial único). **Requer execução manual no banco**
+- [x] Back: `addresses.is_default` e índice parcial único incorporados ao baseline Prisma; SQL manual antigo arquivado em `prisma/legacy-migrations/manual/2026_05_11_add_address_default.sql`.
 - [x] Back: endpoint `PATCH /addresses/:id/default` em transação (zera os outros, marca o alvo)
 - [x] Back: primeiro endereço criado vira default automaticamente
 - [x] Back: regra de exclusão do default — promove o mais recente quando há outros; bloqueia (409) se for o único e houver pedido `PENDING/PREPARING/SHIPPED`

@@ -2,6 +2,7 @@ const UserRepository = require('../../repositories/UserRepository');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/database');
+const { FRONTEND_URL } = require('../../config/env');
 
 // ── Helpers ──────────────────────────────────────────────────────────
 function hashToken(rawToken) {
@@ -47,7 +48,7 @@ const ForgotPasswordUseCase = {
     //   from: 'no-reply@petplus.com.br',
     //   to: user.email,
     //   subject: 'Redefinição de senha — Pet+',
-    //   html: `<p>Clique <a href="${process.env.FRONTEND_URL}/redefinir-senha?token=${rawToken}">aqui</a> para redefinir sua senha. O link expira em 1 hora.</p>`,
+    //   html: `<p>Clique <a href="${FRONTEND_URL}/redefinir-senha?token=${rawToken}">aqui</a> para redefinir sua senha. O link expira em 1 hora.</p>`,
     // });
     //
     // Exemplo com Nodemailer:
@@ -56,7 +57,7 @@ const ForgotPasswordUseCase = {
     // ────────────────────────────────────────────────────────────────
 
     // Por enquanto, loga o token no console para testes locais
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/redefinir-senha?token=${rawToken}`;
+    const resetUrl = `${FRONTEND_URL}/redefinir-senha?token=${rawToken}`;
     console.log(`\n🔑 [DEV] Link de recuperação para ${user.email}:\n${resetUrl}\n`);
 
     return { message: 'Se esse e-mail estiver cadastrado, você receberá as instruções.' };
