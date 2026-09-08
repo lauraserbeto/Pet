@@ -10,7 +10,7 @@ const LoginUseCase = require('../../src/useCases/auth/LoginUseCase');
 
 // Monta um usuário fake e intercepta o repositório + a checagem de senha,
 // isolando a REGRA DE ACESSO (role × status) do banco.
-function stubUser({ role_id, status, onboarding_step = 'INCOMPLETE', rejection_reason = null }) {
+function stubUser({ role_id, status, onboarding_step = 'INCOMPLETE', rejection_reason = null, is_active }) {
   const user = {
     id: 'user-1',
     full_name: 'Fulano',
@@ -18,6 +18,7 @@ function stubUser({ role_id, status, onboarding_step = 'INCOMPLETE', rejection_r
     password_hash: 'hash',
     role_id,
     onboarding_step,
+    is_active,
     provider: status ? { status, business_name: 'Negócio', rejection_reason } : null,
   };
   mock.method(UserRepository, 'findByEmail', async () => user);
@@ -93,4 +94,41 @@ test('Admin (1) entra normalmente', async () => {
 test('status desconhecido em Lojista bloqueia (teste por conjunto, não por igualdade)', async () => {
   stubUser({ role_id: 2, status: 'QUALQUER_COISA' });
   await assert.rejects(login, (err) => err.statusCode === 403);
+});
+
+// --- SEC-1: conta desativada ---
+
+test('Usuário com is_active = false é bloqueado com 403', async () => {
+  stubUser({ role_id: 1, is_active: false });
+  await assert.rejects(login, (err) => {
+    assert.equal(err.statusCode, 403);
+    assert.match(err.message, /desativada/i);
+    return true;
+  });
+});
+
+test('is_active = false bloqueia mesmo um parceiro aprovado', async () => {
+  stubUser({ role_id: 2, status: 'APROVADO', is_active: false });
+  await assert.rejects(login, (err) => {
+    assert.equal(err.statusCode, 403);
+    assert.match(err.message, /desativada/i);
+    return true;
+  });
+});
+
+test('is_active null/undefined vale como ativo (default do schema)', async () => {
+  stubUser({ role_id: 1, is_active: null });
+  const semFlag = await login();
+  assert.ok(semFlag.token);
+
+  stubUser({ role_id: 1 });
+  const indefinido = await login();
+  assert.ok(indefinido.token);
+});
+
+test('is_active = true continua logando normalmente', async () => {
+  stubUser({ role_id: 1, is_active: true });
+  const result = await login();
+  assert.ok(result.token);
+  assert.equal(result.user.email, 'fulano@teste.com');
 });

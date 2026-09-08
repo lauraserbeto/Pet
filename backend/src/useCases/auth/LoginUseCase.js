@@ -23,6 +23,15 @@ class LoginUseCase {
       throw new Error('E-mail ou senha inválidos.');
     }
 
+    // --- BLOQUEIO DE CONTA DESATIVADA ---
+    // `is_active` é Boolean? com default true: null/undefined valem como ativo,
+    // então só barra quando o admin desativou explicitamente.
+    if (user.is_active === false) {
+      const error = new Error('Conta desativada. Entre em contato com o suporte.');
+      error.statusCode = 403;
+      throw error;
+    }
+
     // --- BLOQUEIO PARA PARCEIROS REJEITADOS ---
     if (user.provider?.status === PROVIDER_STATUS.REJECTED) {
         const reason = user.provider.rejection_reason || 'Sem motivo especificado pelo administrador.';

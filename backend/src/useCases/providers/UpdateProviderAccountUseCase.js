@@ -23,7 +23,18 @@ class UpdateProviderAccountUseCase {
     const updatedProvider = await prisma.provider.update({
       where: { user_id: userId },
       data: providerData,
-      include: { user: true }
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            email: true,
+            avatar_url: true,
+            role_id: true,
+            phone: true,
+          },
+        },
+      }
     });
 
     return updatedProvider;
