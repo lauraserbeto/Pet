@@ -1,24 +1,48 @@
-// `Provider.status` é um VarChar livre (não é enum no schema), e o fluxo grava
-// valores diferentes conforme o caminho de aprovação:
-//   - Lojista/Hotel  → 'APROVADO' (ProviderController.updateStatus)
-//   - Pet Sitter     → 'ATIVO'    (UserController.reviewEvaluation)
-// Por isso "aprovado" é testado por CONJUNTO, nunca por igualdade simples.
-
-const PROVIDER_STATUS = {
+const PROVIDER_STATUS = Object.freeze({
   PENDING: 'PENDENTE',
   APPROVED: 'APROVADO',
   REJECTED: 'REJEITADO',
-};
+  IN_REVIEW: 'EM_REVISAO',
+});
 
-/** Valores que significam "parceiro liberado na plataforma". */
-const APPROVED_PROVIDER_STATUSES = ['APROVADO', 'ATIVO', 'ACTIVE'];
+const PROVIDER_STATUS_VALUES = Object.freeze(Object.values(PROVIDER_STATUS));
+const APPROVED_PROVIDER_STATUSES = Object.freeze([PROVIDER_STATUS.APPROVED]);
+const SITTER_EVALUATION_APPROVED_STATUS = 'APPROVED';
+
+function isProviderStatus(status) {
+  return PROVIDER_STATUS_VALUES.includes(status);
+}
 
 function isApprovedProviderStatus(status) {
-  return APPROVED_PROVIDER_STATUSES.includes(status);
+  return status === PROVIDER_STATUS.APPROVED;
+}
+
+function hasApprovedSitterEvaluation(evaluations = []) {
+  return Array.isArray(evaluations)
+    && evaluations.some((evaluation) => evaluation?.status === SITTER_EVALUATION_APPROVED_STATUS);
+}
+
+function isOperationalSitter(provider) {
+  if (!provider) return false;
+
+  const providerStatus = provider.status ?? provider.provider_status ?? provider.providerStatus;
+  const evaluationStatus = provider.sitter_evaluation_status ?? provider.sitterEvaluationStatus;
+  const evaluations = provider.sitter_evaluations
+    ?? provider.sitterEvaluations
+    ?? provider.user?.sitter_evaluations
+    ?? [];
+
+  return isApprovedProviderStatus(providerStatus)
+    && (evaluationStatus === SITTER_EVALUATION_APPROVED_STATUS || hasApprovedSitterEvaluation(evaluations));
 }
 
 module.exports = {
   PROVIDER_STATUS,
+  PROVIDER_STATUS_VALUES,
   APPROVED_PROVIDER_STATUSES,
+  SITTER_EVALUATION_APPROVED_STATUS,
+  isProviderStatus,
   isApprovedProviderStatus,
+  hasApprovedSitterEvaluation,
+  isOperationalSitter,
 };

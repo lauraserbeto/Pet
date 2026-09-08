@@ -1,9 +1,9 @@
 const { isApprovedProviderStatus, PROVIDER_STATUS } = require('../constants/providerStatus');
 
 /**
- * Reduz os valores livres de `Provider.status` a três baldes estáveis.
- * Sem isso, o groupBy devolveria 'APROVADO', 'ATIVO' e 'ACTIVE' separados
- * (lojista/hotel gravam um, pet sitter grava outro).
+ * Reduz os valores de `Provider.status` a três baldes estáveis.
+ * Depois da STA-1, o banco grava um enum canônico e APROVADO é o único valor
+ * liberado na plataforma.
  */
 function bucketProviderStatus(status) {
   if (isApprovedProviderStatus(status)) return 'aprovados';

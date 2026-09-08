@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const ProductController = require('../controllers/ProductController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const validate = require('../middlewares/validate');
+const { productIdParamsSchema } = require('../schemas/productSchemas');
 
 /**
  * @swagger
@@ -106,5 +108,36 @@ router.post('/', ProductController.create);
  *         description: Produto atualizado
  */
 router.put('/:id', ProductController.update);
+
+/**
+ * @swagger
+ * /api/v1/products/{id}:
+ *   delete:
+ *     summary: Exclui um produto do lojista autenticado
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Produto excluído
+ *       403:
+ *         description: Produto pertence a outro lojista ou usuário não é lojista
+ *       404:
+ *         description: Produto não encontrado
+ *       409:
+ *         description: Produto vinculado a pedidos
+ */
+router.delete(
+  '/:id',
+  validate({ params: productIdParamsSchema }),
+  ProductController.delete
+);
 
 module.exports = router;

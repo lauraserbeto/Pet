@@ -49,9 +49,14 @@ test('Lojista (2) APROVADO entra normalmente', async () => {
   assert.equal(result.user.role_id, 2);
 });
 
-test('Hotel (3) ATIVO entra (status sinônimo de aprovado)', async () => {
+test('Hotel (3) ATIVO é bloqueado após normalização do enum STA-1', async () => {
   stubUser({ role_id: 3, status: 'ATIVO' });
-  assert.ok((await login()).token);
+  await assert.rejects(login, (err) => err.statusCode === 403);
+});
+
+test('Hotel (3) ACTIVE é bloqueado após normalização do enum STA-1', async () => {
+  stubUser({ role_id: 3, status: 'ACTIVE' });
+  await assert.rejects(login, (err) => err.statusCode === 403);
 });
 
 test('Pet Sitter (4) PENDENTE/INCOMPLETE CONSEGUE logar (precisa completar o onboarding)', async () => {

@@ -6,6 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { MapPin, Phone, Star, ShieldCheck, ShoppingBag, ArrowLeft } from "lucide-react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
+import { isApprovedProviderStatus } from "../lib/constants/providerStatus";
 
 export function StorePage() {
   const { id } = useParams();
@@ -29,7 +30,7 @@ export function StorePage() {
           city: data.city || "Cidade não informada",
           state: data.state || "UF",
           phone: data.phone || "Não informado",
-          verified: data.status === 'APROVADO',
+          verified: isApprovedProviderStatus(data.status),
           products: data.products || []
         });
         setLoading(false);

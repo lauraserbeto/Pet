@@ -22,6 +22,7 @@ import {
 import { useParams, useNavigate } from "react-router";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
+import { isApprovedProviderStatus } from "../lib/constants/providerStatus";
 
 export function WalkerDetailsPage() {
   const { id } = useParams();
@@ -51,7 +52,7 @@ export function WalkerDetailsPage() {
           description: data.description || "Apaixonado por animais. Levo os passeios a sério.",
           image: data.user.avatar_url || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80",
           coverImage: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1200&auto=format&fit=crop&q=80",
-          verified: data.status === 'ACTIVE',
+          verified: isApprovedProviderStatus(data.status),
           available: true,
           services: data.services && data.services.length > 0 ? data.services.map((s: any) => ({
             name: s.name,

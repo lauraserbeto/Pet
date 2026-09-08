@@ -1,12 +1,16 @@
 /**
  * Espelha `backend/src/constants/providerStatus.js`.
- *
- * `Provider.status` é texto livre no schema e recebe valores diferentes conforme
- * o caminho de aprovação: 'APROVADO' (lojista/hotel) ou 'ATIVO' (pet sitter).
- * Por isso "aprovado" é sempre testado por conjunto, nunca por igualdade.
  */
-export const APPROVED_PROVIDER_STATUSES = ["APROVADO", "ATIVO", "ACTIVE"];
+export const PROVIDER_STATUS = {
+  PENDING: "PENDENTE",
+  APPROVED: "APROVADO",
+  REJECTED: "REJEITADO",
+  IN_REVIEW: "EM_REVISAO",
+} as const;
+
+export const PROVIDER_STATUS_VALUES: string[] = Object.values(PROVIDER_STATUS);
+export const APPROVED_PROVIDER_STATUSES: string[] = [PROVIDER_STATUS.APPROVED];
 
 export function isApprovedProviderStatus(status?: string | null): boolean {
-  return !!status && APPROVED_PROVIDER_STATUSES.includes(status);
+  return status === PROVIDER_STATUS.APPROVED;
 }

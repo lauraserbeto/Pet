@@ -1,6 +1,7 @@
 const CreateProductUseCase = require('../useCases/products/CreateProductUseCase');
 const listProviderProductsUseCase = require('../useCases/products/ListProviderProductsUseCase');
 const updateProductUseCase = require('../useCases/products/UpdateProductUseCase');
+const deleteProductUseCase = require('../useCases/products/DeleteProductUseCase');
 const listActiveProductsUseCase = require('../useCases/products/ListActiveProductsUseCase');
 const getProductDetailsUseCase = require('../useCases/products/GetProductDetailsUseCase');
 const { listProductsQuery } = require('../schemas/productSchemas');
@@ -134,6 +135,20 @@ class ProductController {
     } catch (error) {
       console.error("[ProductController] Erro em update:", error);
       return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async delete(req, res, next) {
+    try {
+      const { id } = req.params;
+      const product = await deleteProductUseCase.execute(id, req.userId, req.userRole);
+
+      return res.status(200).json({
+        message: 'Produto excluído com sucesso!',
+        product
+      });
+    } catch (error) {
+      return next(error);
     }
   }
 }
