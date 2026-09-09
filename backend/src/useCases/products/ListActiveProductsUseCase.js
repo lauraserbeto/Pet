@@ -5,7 +5,6 @@ const PROVIDER_INCLUDE = {
     select: {
       id: true,
       business_name: true,
-      document: true,
       status: true,
       user: {
         select: {
@@ -47,3 +46,5 @@ class ListActiveProductsUseCase {
 }
 
 module.exports = new ListActiveProductsUseCase();
+// Exportado para teste: garante que o document do parceiro não volte ao select.
+module.exports.PROVIDER_INCLUDE = PROVIDER_INCLUDE;

@@ -7,6 +7,7 @@ const {
   PROVIDER_STATUS,
   isOperationalSitter,
 } = require('../constants/providerStatus');
+const { toPublicProvider, toPublicProviders } = require('../utils/publicProvider');
 
 class ProviderController {
   // Validador de completitude em memória (JS) para estabilidade de tipagem
@@ -69,7 +70,7 @@ class ProviderController {
       });
 
       const completeHotels = providers.filter(p => this.#isProfileComplete(p));
-      return res.status(200).json(completeHotels);
+      return res.status(200).json(toPublicProviders(completeHotels));
     } catch (error) {
       console.error("[ProviderController] listHotels:", error);
       return res.status(500).json({ error: 'Erro ao listar hotéis' });
@@ -109,7 +110,7 @@ class ProviderController {
       const completeSitters = providers
         .filter(p => isOperationalSitter(p) && this.#isProfileComplete(p))
         .map(p => this.#withoutSitterEvaluationProbe(p));
-      return res.status(200).json(completeSitters);
+      return res.status(200).json(toPublicProviders(completeSitters));
     } catch (error) {
       console.error("[ProviderController] listSitters:", error);
       return res.status(500).json({ error: 'Erro ao listar pet sitters' });
@@ -138,7 +139,7 @@ class ProviderController {
       });
 
       const completeStores = providers.filter(p => this.#isProfileComplete(p));
-      return res.status(200).json(completeStores);
+      return res.status(200).json(toPublicProviders(completeStores));
     } catch (error) {
       console.error("[ProviderController] listStores:", error);
       return res.status(500).json({ error: 'Erro ao listar lojas' });
@@ -162,7 +163,7 @@ class ProviderController {
 
       // Transforma para o formato esperado pelo frontend
       const mapped = providers.map(p => ({
-        ...p,
+        ...toPublicProvider(p),
         full_name: p.user ? p.user.full_name : 'Desconhecido',
         email: p.user ? p.user.email : 'Sem email',
         role_id: p.user ? p.user.role_id : undefined
@@ -179,7 +180,8 @@ class ProviderController {
     try {
       const { id } = req.params;
       const provider = await getProviderDetailsUseCase.execute(id);
-      return res.status(200).json(provider);
+      // Rota pública: o detalhe do parceiro também não pode carregar CPF/CNPJ.
+      return res.status(200).json(toPublicProvider(provider));
     } catch (error) {
       console.error("[ProviderController] Erro em getDetails:", error);
       return res.status(500).json({ error: error.message });
@@ -191,7 +193,18 @@ class ProviderController {
       const userId = req.userId;
       const provider = await prisma.provider.findUnique({
         where: { user_id: userId },
-        include: { user: true }
+        include: {
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              email: true,
+              avatar_url: true,
+              role_id: true,
+              phone: true,
+            },
+          },
+        }
       });
       return res.status(200).json(provider);
     } catch (error) {
@@ -233,7 +246,18 @@ class ProviderController {
       const userId = req.userId;
       const provider = await prisma.provider.findUnique({
         where: { user_id: userId },
-        include: { user: true }
+        include: {
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              email: true,
+              avatar_url: true,
+              role_id: true,
+              phone: true,
+            },
+          },
+        }
       });
 
       if (!provider) {
