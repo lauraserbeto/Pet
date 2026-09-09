@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Camera, Lock, Loader2 } from "lucide-react";
+import { Camera, Lock, Loader2, ArrowLeft } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { useNavigate, Link, useSearchParams } from "react-router";
 
 import { ApiError } from "../../lib/httpClient";
 import { useAuth } from "../../contexts/AuthContext";
@@ -44,6 +45,14 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 export function TutorProfile() {
   const { user, isLoading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [cameFromCheckout] = useState(() => {
+    const fromCheckout = sessionStorage.getItem("come_from_checkout") === "true";
+    if (fromCheckout) {
+      sessionStorage.removeItem("come_from_checkout"); // Limpa para evitar falso positivo 
+    }
+    return fromCheckout;
+  });
   const {
     profile,
     isLoading: profileLoading,
@@ -54,6 +63,15 @@ export function TutorProfile() {
     uploadAvatar,
     isUploadingAvatar,
   } = useProfile();
+
+  const [isPulseActive, setIsPulseActive] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPulseActive(false);
+    }, 4000); // Para de pulsar após 4 segundos
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentUser = profile ?? user;
   const loadingInitial = authLoading || profileLoading;
@@ -165,6 +183,8 @@ export function TutorProfile() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-[family-name:var(--font-body)]">
       <div className="max-w-4xl mx-auto space-y-8">
+        
+        {/* Cabeçalho */}
         <div>
           <h1 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
             Meu Perfil
@@ -276,7 +296,9 @@ export function TutorProfile() {
         </section>
 
         {/* --- Endereços --- */}
-        <AddressesSection />
+        <section id="meus-enderecos" className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden p-6 sm:p-8 scroll-mt-28">
+          <AddressesSection />
+        </section>
 
         {/* --- Segurança --- */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -346,6 +368,22 @@ export function TutorProfile() {
             </div>
           </form>
         </section>
+
+{/* Botão flutuante condicional (só aparece se veio do checkout) */}
+        {cameFromCheckout && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <Link
+              to="/checkout"
+              className={`flex items-center gap-2 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-5 py-3 rounded-full text-sm font-semibold shadow-2xl shadow-primary-500/40 transition-all transform hover:scale-105 ${
+                isPulseActive ? "animate-bounce scale-105" : "scale-100"
+              }`}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar para o Checkout
+            </Link>
+          </div>
+        )}
+
       </div>
     </div>
   );

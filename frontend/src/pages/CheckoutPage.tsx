@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { useCart } from "../components/cart/CartContext";
+import { HamsterLoader } from "../components/ui/HamsterLoader";
+import { useAddresses } from "../lib/hooks/useAddresses";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -16,6 +18,8 @@ import {
   ChevronRight,
   Check,
   Package,
+  Plus,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -35,16 +39,20 @@ export function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState<Step>("address");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Address form
-  const [address, setAddress] = useState({
-    cep: "01310-100",
-    street: "Av. Paulista",
-    number: "1000",
-    complement: "Apto 42",
-    neighborhood: "Bela Vista",
-    city: "São Paulo",
-    state: "SP",
-  });
+  // Hook de endereços (Substitui o estado estático anterior)
+  const { addresses, isLoading: isLoadingAddresses, error: addressError } = useAddresses();
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+
+  // Seleciona automaticamente o endereço padrão (is_default) ou o primeiro da lista
+  useEffect(() => {
+    if (addresses && addresses.length > 0 && !selectedAddressId) {
+      const defaultAddress = addresses.find((addr) => addr.is_default) || addresses[0];
+      setSelectedAddressId(defaultAddress.id);
+    }
+  }, [addresses, selectedAddressId]);
+
+  // Recupera o objeto do endereço selecionado para exibir no resumo da revisão
+  const selectedAddress = addresses?.find((addr) => addr.id === selectedAddressId);
 
   // Payment
   const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix" | "boleto">("credit");
@@ -54,6 +62,25 @@ export function CheckoutPage() {
     expiry: "",
     cvv: "",
   });
+
+  // Funções de máscara para os campos de cartão
+  const maskCardNumber = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .slice(0, 16)
+      .replace(/(\d{4})(?=\d)/g, "$1 ");
+  };
+
+  const maskExpiry = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .slice(0, 4)
+      .replace(/(\d{2})(\d{1,2})/, "$1/$2");
+  };
+
+  const maskCVV = (value: string) => {
+    return value.replace(/\D/g, "").slice(0, 4);
+  };
 
   const shipping = totalPrice >= 199 ? 0 : 14.9;
   const finalTotal = totalPrice + shipping;
@@ -65,9 +92,41 @@ export function CheckoutPage() {
     return null;
   }
 
+  // Validação e avanço do passo de endereço
+  const handleNextFromAddress = () => {
+    if (!selectedAddressId) {
+      toast.error("Por favor, selecione um endereço de entrega.");
+      return;
+    }
+    setCurrentStep("payment");
+  };
+
+  // Validação e avanço do passo de pagamento
+  const handleNextFromPayment = () => {
+    if (paymentMethod === "credit") {
+      const cleanNumber = cardData.number.replace(/\D/g, "");
+      if (cleanNumber.length < 16 || !cardData.name || cardData.expiry.length < 5 || cardData.cvv.length < 3) {
+        toast.error("Preencha todos os dados do cartão corretamente.");
+        return;
+      }
+
+      // Validação de validade vencida (MM/AA)
+      const [month, year] = cardData.expiry.split("/").map(Number);
+      const now = new Date();
+      const currentYear = now.getFullYear() % 100;
+      const currentMonth = now.getMonth() + 1;
+
+      if (!month || month > 12 || year < currentYear || (year === currentYear && month < currentMonth)) {
+        toast.error("A validade do cartão está vencida ou inválida.");
+        return;
+      }
+    }
+    setCurrentStep("review");
+  };
+
   const handleFinalize = async () => {
     setIsProcessing(true);
-    // Simulate API
+    // TODO CHK-2: Ligar POST /orders quando PED-1/PED-2 estiverem prontos (Pagamento SIMULADO)
     await new Promise((r) => setTimeout(r, 2000));
     clearCart();
     navigate("/checkout/success");
@@ -147,65 +206,90 @@ export function CheckoutPage() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="cep">CEP</Label>
-                    <Input
-                      id="cep"
-                      value={address.cep}
-                      onChange={(e) => setAddress({ ...address, cep: e.target.value })}
-                      placeholder="00000-000"
-                    />
+                {/* ESTADO 1: Loading */}
+                {isLoadingAddresses && (
+                  <div className="flex flex-col items-center justify-center p-8 space-y-3">
+                    <div className="h-8 w-8 border-4 border-[var(--color-primary-500)] border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-slate-500">Carregando seus endereços...</p>
                   </div>
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="street">Rua</Label>
-                    <Input
-                      id="street"
-                      value={address.street}
-                      onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                    />
+                )}
+
+                {/* ESTADO 2: Erro */}
+                {addressError && (
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700">
+                    <AlertCircle className="h-5 w-5 shrink-0" />
+                    <p className="text-sm">Não foi possível carregar os endereços. Tente novamente mais tarde.</p>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="number">Número</Label>
-                    <Input
-                      id="number"
-                      value={address.number}
-                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
-                    />
+                )}
+
+                {/* ESTADO 3: Vazio */}
+                {!isLoadingAddresses && !addressError && addresses?.length === 0 && (
+                  <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl space-y-3">
+                    <MapPin className="h-10 w-10 text-slate-300 mx-auto" />
+                    <p className="text-sm text-slate-600">Você ainda não possui endereços cadastrados.</p>
+                    <Button asChild variant="outline" className="gap-2">
+                      <Link to="/tutor/perfil#meus-enderecos" onClick={() => sessionStorage.setItem("come_from_checkout", "true")}>
+                        <Plus className="h-4 w-4" />
+                          Cadastrar Novo Endereço
+                      </Link>
+                    </Button>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="complement">Complemento</Label>
-                    <Input
-                      id="complement"
-                      value={address.complement}
-                      onChange={(e) => setAddress({ ...address, complement: e.target.value })}
-                    />
+                )}
+
+                {/* ESTADO 4: Sucesso (Lista de Endereços com propriedades corrigidas para rua) */}
+                {!isLoadingAddresses && !addressError && addresses && addresses.length > 0 && (
+                  <div className="space-y-3">
+                    {addresses.map((addr) => {
+                      const isSelected = selectedAddressId === addr.id;
+                      return (
+                        <div
+                          key={addr.id}
+                          onClick={() => setSelectedAddressId(addr.id)}
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start justify-between ${
+                            isSelected
+                              ? "border-[var(--color-primary-500)] bg-[var(--color-primary-50)]/30"
+                              : "border-slate-100 hover:border-slate-200 bg-white"
+                          }`}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-slate-900 text-sm">
+                                {addr.rua}, {addr.numero} {addr.complemento && `- ${addr.complemento}`}
+                              </p>
+                              {addr.is_default && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
+                                  Padrão
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-500">
+                              {addr.bairro}, {addr.cidade} - {addr.estado} • CEP: {addr.cep}
+                            </p>
+                          </div>
+                          <div
+                            className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? "border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white"
+                                : "border-slate-300"
+                            }`}
+                          >
+                            {isSelected && <Check className="h-3 w-3" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="pt-1">
+                      <div className="pt-1">
+                      <Button asChild variant="outline" className="w-full gap-2 border-dashed h-11 rounded-xl">
+                        <Link to="/tutor/perfil#meus-enderecos" onClick={() => sessionStorage.setItem("come_from_checkout", "true")}>
+                          <Plus className="h-4 w-4" />
+                            Cadastrar Novo Endereço
+                        </Link>    
+                      </Button>
+                     </div>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="neighborhood">Bairro</Label>
-                    <Input
-                      id="neighborhood"
-                      value={address.neighborhood}
-                      onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="city">Cidade</Label>
-                    <Input
-                      id="city"
-                      value={address.city}
-                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="state">Estado</Label>
-                    <Input
-                      id="state"
-                      value={address.state}
-                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                    />
-                  </div>
-                </div>
+                )}
 
                 {/* Shipping option */}
                 <div className="border border-slate-100 rounded-xl p-4">
@@ -226,7 +310,8 @@ export function CheckoutPage() {
                 <Button
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
-                  onClick={() => setCurrentStep("payment")}
+                  onClick={handleNextFromAddress}
+                  disabled={!selectedAddressId || isLoadingAddresses}
                 >
                   Continuar para Pagamento
                   <ChevronRight className="h-4 w-4" />
@@ -289,7 +374,7 @@ export function CheckoutPage() {
                       <Input
                         placeholder="0000 0000 0000 0000"
                         value={cardData.number}
-                        onChange={(e) => setCardData({ ...cardData, number: e.target.value })}
+                        onChange={(e) => setCardData({ ...cardData, number: maskCardNumber(e.target.value) })}
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -306,7 +391,7 @@ export function CheckoutPage() {
                         <Input
                           placeholder="MM/AA"
                           value={cardData.expiry}
-                          onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
+                          onChange={(e) => setCardData({ ...cardData, expiry: maskExpiry(e.target.value) })}
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -314,7 +399,7 @@ export function CheckoutPage() {
                         <Input
                           placeholder="000"
                           value={cardData.cvv}
-                          onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
+                          onChange={(e) => setCardData({ ...cardData, cvv: maskCVV(e.target.value) })}
                         />
                       </div>
                     </div>
@@ -355,7 +440,7 @@ export function CheckoutPage() {
                 <Button
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
-                  onClick={() => setCurrentStep("review")}
+                  onClick={handleNextFromPayment}
                 >
                   Revisar Pedido
                   <ChevronRight className="h-4 w-4" />
@@ -385,12 +470,18 @@ export function CheckoutPage() {
                       Alterar
                     </button>
                   </div>
-                  <p className="text-sm text-slate-600">
-                    {address.street}, {address.number} {address.complement && `- ${address.complement}`}
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    {address.neighborhood}, {address.city} - {address.state}, {address.cep}
-                  </p>
+                  {selectedAddress ? (
+                    <>
+                      <p className="text-sm text-slate-600">
+                        {selectedAddress.rua}, {selectedAddress.numero} {selectedAddress.complemento && `- ${selectedAddress.complemento}`}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {selectedAddress.bairro}, {selectedAddress.cidade} - {selectedAddress.estado}, {selectedAddress.cep}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-slate-500">Nenhum endereço selecionado.</p>
+                  )}
                 </div>
 
                 {/* Payment summary */}
