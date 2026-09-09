@@ -3,6 +3,11 @@ const router = express.Router();
 const ProviderController = require('../controllers/ProviderController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/adminMiddleware');
+const validate = require('../middlewares/validate');
+const {
+  providerIdParamsSchema,
+  updateProviderStatusSchema,
+} = require('../schemas/providerSchemas');
 
 /**
  * @swagger
@@ -172,6 +177,12 @@ router.get('/:id', ProviderController.getDetails);
  */
 // Aprovar/recusar parceiro é ação exclusiva do admin. Sem estes middlewares a
 // rota ficava aberta, permitindo auto-aprovação por qualquer um sem token.
-router.patch('/:id/status', authMiddleware, adminMiddleware, ProviderController.updateStatus);
+router.patch(
+  '/:id/status',
+  authMiddleware,
+  adminMiddleware,
+  validate({ params: providerIdParamsSchema, body: updateProviderStatusSchema }),
+  ProviderController.updateStatus
+);
 
 module.exports = router;

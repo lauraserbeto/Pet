@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { formatDocument, isValidDocument } from "../../../lib/utils/masks";
-import { APPROVED_PROVIDER_STATUSES } from "../../../lib/constants/providerStatus";
+import { APPROVED_PROVIDER_STATUSES, PROVIDER_STATUS } from "../../../lib/constants/providerStatus";
 
 interface Partner {
   id: string; // provider id
@@ -23,10 +23,8 @@ interface Partner {
 
 type TabType = 'PENDENTE' | 'APROVADO' | 'REJEITADO';
 
-// A aprovação de Pet Sitter (via avaliação de sitter) grava Provider.status = 'ATIVO',
-// enquanto lojista/hotel gravam 'APROVADO' — por isso a aba "Aprovados" usa o
-// conjunto canônico compartilhado em vez de igualdade estrita.
 const APPROVED_STATUSES = APPROVED_PROVIDER_STATUSES;
+const REVIEW_STATUSES: string[] = [PROVIDER_STATUS.PENDING, PROVIDER_STATUS.IN_REVIEW];
 
 export function Approvals() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -175,6 +173,8 @@ export function Approvals() {
   const filteredPartners = partners.filter(p => {
     const matchesTab = activeTab === 'APROVADO'
       ? APPROVED_STATUSES.includes(p.status)
+      : activeTab === 'PENDENTE'
+      ? REVIEW_STATUSES.includes(p.status)
       : p.status === activeTab;
     if (!matchesTab) return false;
 

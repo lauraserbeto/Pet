@@ -2,10 +2,10 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { bucketProviderStatus, toDayKey, groupByDay, toCountMap } = require('../../src/utils/adminMetrics');
 
-test('bucketProviderStatus une APROVADO/ATIVO/ACTIVE num único balde', () => {
+test('bucketProviderStatus considera apenas APROVADO como aprovado', () => {
   assert.equal(bucketProviderStatus('APROVADO'), 'aprovados');
-  assert.equal(bucketProviderStatus('ATIVO'), 'aprovados');
-  assert.equal(bucketProviderStatus('ACTIVE'), 'aprovados');
+  assert.equal(bucketProviderStatus('ATIVO'), 'pendentes');
+  assert.equal(bucketProviderStatus('ACTIVE'), 'pendentes');
 });
 
 test('bucketProviderStatus separa recusados e trata o resto como pendente', () => {

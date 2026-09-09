@@ -2,6 +2,7 @@ const prisma = require('../config/database');
 const bcrypt = require('bcryptjs');
 const AppError = require('../utils/AppError');
 const { listUsersQuery } = require('../schemas/userSchemas');
+const { PROVIDER_STATUS } = require('../constants/providerStatus');
 
 const PROFILE_SELECT = {
   id: true,
@@ -305,7 +306,7 @@ class UserController {
           if (provider) {
              await tx.provider.update({
                where: { user_id: evaluation.user_id },
-               data: { status: 'ATIVO' }
+               data: { status: PROVIDER_STATUS.APPROVED }
              });
           }
         }

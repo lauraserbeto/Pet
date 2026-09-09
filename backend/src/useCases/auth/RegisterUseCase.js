@@ -2,6 +2,7 @@ const UserRepository = require('../../repositories/UserRepository');
 const bcrypt = require('bcryptjs');
 const prisma = require('../../config/database');
 const DocumentVerificationService = require('../../services/DocumentVerificationService');
+const { PROVIDER_STATUS } = require('../../constants/providerStatus');
 
 const CNPJ_ONLY_ROLES = [2, 3];
 const COMMERCIAL_ROLES = [2, 3, 4];
@@ -71,7 +72,7 @@ class RegisterUseCase {
               business_name: business_name,
               document: document,
               document_type: document_type,
-              status: 'PENDENTE'
+              status: PROVIDER_STATUS.PENDING
             }
           }
         } : {})

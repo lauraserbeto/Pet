@@ -52,7 +52,7 @@ model Provider {
   business_name    String   @db.VarChar(150)
   document         String   @unique @db.VarChar(20)
   document_type    String   @default("CNPJ") @db.VarChar(4)
-  status           String?  @default("PENDENTE") @db.VarChar(50)
+  status           ProviderStatus @default(PENDENTE)
   description      String?  @db.Text
   phone            String?  @db.VarChar(20)
   zip_code         String?  @db.VarChar(20)
@@ -80,6 +80,13 @@ model Provider {
   appointments  Appointment[]
 
   @@map("providers")
+}
+
+enum ProviderStatus {
+  PENDENTE
+  APROVADO
+  REJEITADO
+  EM_REVISAO
 }
 
 enum EvaluationStatus {

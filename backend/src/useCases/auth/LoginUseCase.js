@@ -32,8 +32,7 @@ class LoginUseCase {
     }
 
     // --- BLOQUEIO DE ACESSO ANTES DA APROVAÇÃO (Lojista e Hotel) ---
-    // Testa por conjunto de status aprovados (o campo é VarChar livre), então
-    // qualquer valor fora de APROVADO/ATIVO/ACTIVE barra o acesso.
+    // Depois da migração STA-1, APROVADO é o único status que libera acesso.
     if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider?.status)) {
         const error = new Error('Seu cadastro está em análise. Você poderá acessar a plataforma assim que for aprovado pelo administrador.');
         error.statusCode = 403;

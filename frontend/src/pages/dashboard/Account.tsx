@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { isApprovedProviderStatus, PROVIDER_STATUS } from "../../lib/constants/providerStatus";
 
 interface AccountInfo {
   full_name: string;
@@ -30,6 +31,13 @@ const ROLE_LABELS: Record<number, string> = {
   3: "Hotel para Pets",
   4: "Pet Sitter",
 };
+
+function getProviderStatusLabel(status?: string) {
+  if (status === PROVIDER_STATUS.APPROVED) return "Ativo";
+  if (status === PROVIDER_STATUS.REJECTED) return "Recusado";
+  if (status === PROVIDER_STATUS.IN_REVIEW) return "Em revisão";
+  return "Pendente";
+}
 
 export function Account() {
   const navigate = useNavigate();
@@ -48,7 +56,7 @@ export function Account() {
           email: data.user?.email || "—",
           document: data.document || "Não informado",
           role_label: ROLE_LABELS[roleId] || "Usuário",
-          status: data.status || "ACTIVE",
+          status: data.status || PROVIDER_STATUS.PENDING,
         });
       } catch {
         // fallback to localStorage
@@ -61,7 +69,7 @@ export function Account() {
               email: user.email || "—",
               document: "Não disponível",
               role_label: ROLE_LABELS[user.role_id] || "Usuário",
-              status: "ACTIVE",
+              status: user.provider_status || PROVIDER_STATUS.PENDING,
             });
           }
         } catch {
@@ -182,12 +190,12 @@ export function Account() {
             </div>
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                account?.status === "ACTIVE"
+                isApprovedProviderStatus(account?.status)
                   ? "bg-emerald-100 text-emerald-700"
                   : "bg-amber-100 text-amber-700"
               }`}
             >
-              {account?.status === "ACTIVE" ? "Ativo" : "Pendente"}
+              {getProviderStatusLabel(account?.status)}
             </span>
           </div>
 

@@ -2,7 +2,11 @@ const prisma = require('../config/database');
 const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDetailsUseCase');
 const updateProviderProfileUseCase = require('../useCases/providers/UpdateProviderProfileUseCase');
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
-const { APPROVED_PROVIDER_STATUSES } = require('../constants/providerStatus');
+const {
+  APPROVED_PROVIDER_STATUSES,
+  PROVIDER_STATUS,
+  isOperationalSitter,
+} = require('../constants/providerStatus');
 
 class ProviderController {
   // Validador de completitude em memória (JS) para estabilidade de tipagem
@@ -35,6 +39,11 @@ class ProviderController {
   // Lista os status que consideramos como "Aprovado/Visível"
   #getApprovedStatus() {
     return { in: APPROVED_PROVIDER_STATUSES };
+  }
+
+  #withoutSitterEvaluationProbe(provider) {
+    const { sitter_evaluations: _omit, ...user } = provider.user || {};
+    return { ...provider, user };
   }
 
   async listHotels(req, res) {
@@ -79,7 +88,15 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
-              role_id: true
+              role_id: true,
+              sitter_evaluations: {
+                where: { status: 'APPROVED' },
+                select: {
+                  id: true,
+                  status: true
+                },
+                take: 1
+              }
             }
           },
           services: {
@@ -89,10 +106,10 @@ class ProviderController {
         }
       });
 
-      // --- BYPASS DE DEBUG ---
-      // Retornando diretamente o que vem do Prisma para validar se o registro existe no banco.
-      // const completeSitters = providers.filter(p => this.#isProfileComplete(p));
-      return res.status(200).json(providers);
+      const completeSitters = providers
+        .filter(p => isOperationalSitter(p) && this.#isProfileComplete(p))
+        .map(p => this.#withoutSitterEvaluationProbe(p));
+      return res.status(200).json(completeSitters);
     } catch (error) {
       console.error("[ProviderController] listSitters:", error);
       return res.status(500).json({ error: 'Erro ao listar pet sitters' });
@@ -269,7 +286,7 @@ class ProviderController {
   }
 
   // Atualiza status do provedor
-  async updateStatus(req, res) {
+  async updateStatus(req, res, next) {
     try {
       const { id } = req.params;
       const { status, rejection_reason } = req.body;
@@ -278,14 +295,15 @@ class ProviderController {
         where: { id },
         data: {
           status,
-          rejection_reason: rejection_reason || null
+          rejection_reason: status === PROVIDER_STATUS.REJECTED
+            ? rejection_reason || null
+            : null
         }
       });
 
       return res.status(200).json(updated);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao atualizar provedor' });
+      return next(error);
     }
   }
 }
