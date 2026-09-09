@@ -25,7 +25,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import { productService, Product, CreateProductDTO } from "../../lib/services/productService";
+import { describeDeleteProductError, isProductGoneError, productService, Product, CreateProductDTO } from "../../lib/services/productService";
 import {
   Select,
   SelectContent,
@@ -45,6 +45,9 @@ export function Products() {
   const [selectedPetType, setSelectedPetType] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  // Exclusão: o produto alvo abre o diálogo; null = diálogo fechado.
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initialFormState: CreateProductDTO = {
@@ -195,15 +198,27 @@ export function Products() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Tem certeza que deseja excluir o produto "${name}"?`)) {
-      try {
-        await productService.deleteProduct(id);
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    const { id, name } = productToDelete;
+
+    setIsDeleting(true);
+    try {
+      await productService.deleteProduct(id);
+      // A remoção acontece só depois do sucesso: exclusão otimista exigiria
+      // rollback e deixaria a lista mentindo enquanto a requisição falha.
+      setProducts(prev => prev.filter(p => p.id !== id));
+      toast.success(`"${name}" foi excluído.`);
+      setProductToDelete(null);
+    } catch (error) {
+      toast.error(describeDeleteProductError(error));
+      // 404 = o produto já não existe no servidor; a lista estava desatualizada.
+      if (isProductGoneError(error)) {
         setProducts(prev => prev.filter(p => p.id !== id));
-        toast.success("Produto excluído com sucesso!");
-      } catch (error: any) {
-        toast.error(error.message || "Erro ao excluir produto");
+        setProductToDelete(null);
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -605,7 +620,7 @@ export function Products() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => handleDelete(product.id, product.name)}
+                          onClick={() => setProductToDelete(product)}
                           className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Excluir Produto"
                         >
@@ -620,6 +635,41 @@ export function Products() {
           )}
         </div>
       </div>
+
+      {/* Confirmação de exclusão — substitui o window.confirm, que não é
+          estilizável, trava a aba e destoa do resto do dashboard. */}
+      <Dialog
+        open={productToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setProductToDelete(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir produto</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir <strong>{productToDelete?.name}</strong>?
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setProductToDelete(null)}
+              disabled={isDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Excluindo..." : "Excluir produto"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
