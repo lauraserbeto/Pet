@@ -1,5 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+const prisma = require('../config/database');
 
 class ProductRepository {
   // Criar um novo produto
@@ -29,6 +28,18 @@ class ProductRepository {
     return await prisma.product.update({
       where: { id },
       data
+    });
+  }
+
+  // Decrementar estoque de um produto com suporte a transação
+  async decrementStock(productId, quantity, tx = prisma) {
+    return await tx.product.update({
+      where: { id: productId },
+      data: {
+        stock_quantity: {
+          decrement: quantity,
+        },
+      },
     });
   }
 

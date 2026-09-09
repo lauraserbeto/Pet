@@ -69,12 +69,12 @@ class CartRepository {
     return prisma.cartItem.delete({ where: { id } });
   }
 
-  deleteAllItems(cartId) {
-    return prisma.cartItem.deleteMany({ where: { cart_id: cartId } });
+  deleteAllItems(cartId, tx = prisma) {
+    return tx.cartItem.deleteMany({ where: { cart_id: cartId } });
   }
 
-  touch(cartId) {
-    return prisma.cart.update({ where: { id: cartId }, data: { updated_at: new Date() } });
+  touch(cartId, tx = prisma) {
+    return tx.cart.update({ where: { id: cartId }, data: { updated_at: new Date() } });
   }
 }
 

@@ -234,7 +234,7 @@ model Order {
   provider_id String      @db.Uuid // O lojista que recebe o pedido
   customer_id String      @db.Uuid // O Tutor/Cliente
   total_price Decimal     @db.Decimal(10, 2)
-  status      String      @default("PENDING") // PENDING, PREPARING, SHIPPED, DELIVERED, CANCELLED
+  status      String      @default("AGUARDANDO_PAGAMENTO") // AGUARDANDO_PAGAMENTO, PAGO, PREPARING, SHIPPED, DELIVERED, CANCELLED
   created_at  DateTime    @default(now()) @db.Timestamptz
   updated_at  DateTime    @default(now()) @db.Timestamptz
 

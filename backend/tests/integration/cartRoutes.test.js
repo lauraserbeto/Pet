@@ -1,4 +1,7 @@
 process.env.LOG_LEVEL = 'silent';
+process.env.JWT_SECRET ||= 'test-secret-com-mais-de-32-caracteres-0000';
+process.env.DATABASE_URL ||= 'postgresql://user:pass@localhost:5432/petplus_test';
+process.env.FRONTEND_URL ||= 'http://localhost:5173';
 
 const { test, before } = require('node:test');
 const assert = require('node:assert/strict');

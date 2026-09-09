@@ -25,6 +25,8 @@ Implementar o endpoint `POST /orders` que, a partir do carrinho do usuário aute
 
 > **Nota de escopo:** decisão de negócio: um carrinho pode conter produtos de mais de um lojista. Definir com o time se o MVP cria **um Order por provider** (agrupando itens) ou assume **carrinho de um único lojista**. Registrar a escolha aqui antes de codar.
 
+> **Nota de escopo:** decisão de negócio registrada: Adotada a **Opção A (um Order por provider)**. No checkout, os itens do carrinho são agrupados por `provider_id` e é criado 1 `Order` para cada lojista dentro de uma única transação Prisma atômica, retornando `{ order: orders[0], orders: [...] }`.
+
 ## Arquivos envolvidos
 - `backend/src/routes/orderRoutes.js` (novo)
 - `backend/src/controllers/OrderController.js` (novo)
