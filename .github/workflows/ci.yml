@@ -10,14 +10,30 @@ jobs:
   backend:
     name: Backend — testes (unit + integração)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: petplus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d petplus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: backend
     env:
-      # Segredos fake apenas para o boot/config nos testes (não conectam a nada real).
+      # Segredos fake apenas para o boot/config nos testes.
       JWT_SECRET: ci-dummy-secret-com-mais-de-32-caracteres-0000
       DATABASE_URL: postgresql://user:pass@localhost:5432/petplus_test
       FRONTEND_URL: http://localhost:5173
+      LOG_LEVEL: silent
+      RUN_DB_INTEGRATION_TESTS: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,6 +49,8 @@ jobs:
         continue-on-error: true
       - name: Prisma generate
         run: npx prisma generate
+      - name: Migrations do banco de teste
+        run: npx prisma migrate deploy
       - name: Testes (node:test + supertest)
         run: npm test
 
