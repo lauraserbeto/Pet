@@ -1,18 +1,22 @@
-const { Resend } = require('resend');
-const { RESEND_API_KEY, EMAIL_FROM } = require('../config/env');
+const { Resend } = require("resend");
+const { RESEND_API_KEY, EMAIL_FROM, EMAIL_REPLY_TO } = require("../config/env");
 
-const PASSWORD_RESET_TEMPLATE_ID = 'password-reset';
+const PASSWORD_RESET_TEMPLATE_ID = "password-reset";
 
 function assertEmailConfig() {
   if (!RESEND_API_KEY || !EMAIL_FROM) {
-    throw new Error('[EMAIL] RESEND_API_KEY e EMAIL_FROM precisam estar configurados.');
+    throw new Error(
+      "[EMAIL] RESEND_API_KEY e EMAIL_FROM precisam estar configurados.",
+    );
   }
 }
 
 function unwrapResendResponse(response) {
   if (response.error) {
-    const error = new Error(response.error.message || 'Falha ao enviar e-mail.');
-    error.provider = 'resend';
+    const error = new Error(
+      response.error.message || "Falha ao enviar e-mail.",
+    );
+    error.provider = "resend";
     error.details = response.error;
     throw error;
   }
@@ -35,7 +39,7 @@ class EmailService {
 
   async send({ to, subject, html, text }) {
     if (!to || !subject || !html) {
-      throw new Error('[EMAIL] to, subject e html são obrigatórios.');
+      throw new Error("[EMAIL] to, subject e html são obrigatórios.");
     }
 
     const response = await this.getClient().emails.send({
@@ -43,6 +47,7 @@ class EmailService {
       to,
       subject,
       html,
+      ...(EMAIL_REPLY_TO ? { replyTo: EMAIL_REPLY_TO } : {}),
       ...(text ? { text } : {}),
     });
 
@@ -51,12 +56,13 @@ class EmailService {
 
   async sendTemplate({ to, templateId, variables }) {
     if (!to || !templateId) {
-      throw new Error('[EMAIL] to e templateId são obrigatórios.');
+      throw new Error("[EMAIL] to e templateId são obrigatórios.");
     }
 
     const response = await this.getClient().emails.send({
       from: EMAIL_FROM,
       to,
+      ...(EMAIL_REPLY_TO ? { replyTo: EMAIL_REPLY_TO } : {}),
       template: {
         id: templateId,
         variables: variables || {},

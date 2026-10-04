@@ -1,8 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const AuthController = require('../controllers/AuthController');
-const validate = require('../middlewares/validate');
-const { registerSchema } = require('../schemas/authSchemas');
+const AuthController = require("../controllers/AuthController");
+const validate = require("../middlewares/validate");
+const {
+  registerSchema,
+  resetPasswordSchema,
+} = require("../schemas/authSchemas");
 
 /**
  * @swagger
@@ -31,7 +34,11 @@ const { registerSchema } = require('../schemas/authSchemas');
  *       400:
  *         description: Erro de validação ou e-mail já existente
  */
-router.post('/register', validate({ body: registerSchema }), AuthController.register);
+router.post(
+  "/register",
+  validate({ body: registerSchema }),
+  AuthController.register,
+);
 
 /**
  * @swagger
@@ -56,7 +63,7 @@ router.post('/register', validate({ body: registerSchema }), AuthController.regi
  *       401:
  *         description: Credenciais inválidas
  */
-router.post('/login', AuthController.login);
+router.post("/login", AuthController.login);
 
 /**
  * @swagger
@@ -77,7 +84,7 @@ router.post('/login', AuthController.login);
  *       200:
  *         description: Instruções enviadas (resposta genérica por segurança)
  */
-router.post('/forgot-password', AuthController.forgotPassword);
+router.post("/forgot-password", AuthController.forgotPassword);
 
 /**
  * @swagger
@@ -102,6 +109,10 @@ router.post('/forgot-password', AuthController.forgotPassword);
  *       400:
  *         description: Token inválido, expirado ou já utilizado
  */
-router.post('/reset-password', AuthController.resetPassword);
+router.post(
+  "/reset-password",
+  validate({ body: resetPasswordSchema }),
+  AuthController.resetPassword,
+);
 
 module.exports = router;
