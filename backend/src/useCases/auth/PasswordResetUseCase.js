@@ -1,16 +1,17 @@
-const UserRepository = require('../../repositories/UserRepository');
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
-const prisma = require('../../config/database');
-const { FRONTEND_URL } = require('../../config/env');
-const EmailService = require('../../services/EmailService');
-const logger = require('../../config/logger');
+const UserRepository = require("../../repositories/UserRepository");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const prisma = require("../../config/database");
+const { FRONTEND_URL } = require("../../config/env");
+const EmailService = require("../../services/EmailService");
+const logger = require("../../config/logger");
 
-const GENERIC_RESET_MESSAGE = 'Se esse e-mail estiver cadastrado, você receberá as instruções.';
+const GENERIC_RESET_MESSAGE =
+  "Se esse e-mail estiver cadastrado, você receberá as instruções.";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 function hashToken(rawToken) {
-  return crypto.createHash('sha256').update(rawToken).digest('hex');
+  return crypto.createHash("sha256").update(rawToken).digest("hex");
 }
 
 // ── ForgotPasswordUseCase ─────────────────────────────────────────────
@@ -30,7 +31,7 @@ const ForgotPasswordUseCase = {
     });
 
     // 3. Gerar token aleatório seguro de 32 bytes
-    const rawToken = crypto.randomBytes(32).toString('hex');
+    const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = hashToken(rawToken);
 
     // 4. Salvar no banco com expiração de 1 hora
@@ -48,14 +49,22 @@ const ForgotPasswordUseCase = {
     try {
       await EmailService.sendPasswordReset(user.email, resetUrl);
     } catch (err) {
-      await prisma.passwordResetToken.update({
-        where: { id: resetToken.id },
-        data: { used: true },
-      }).catch((updateErr) => {
-        logger.error({ err: updateErr, user_id: user.id }, 'Falha ao invalidar token de reset não enviado');
-      });
+      await prisma.passwordResetToken
+        .update({
+          where: { id: resetToken.id },
+          data: { used: true },
+        })
+        .catch((updateErr) => {
+          logger.error(
+            { err: updateErr, user_id: user.id },
+            "Falha ao invalidar token de reset não enviado",
+          );
+        });
 
-      logger.error({ err, user_id: user.id }, 'Falha ao enviar e-mail de recuperação de senha');
+      logger.error(
+        { err, user_id: user.id },
+        "Falha ao enviar e-mail de recuperação de senha",
+      );
     }
 
     return { message: GENERIC_RESET_MESSAGE };
@@ -66,26 +75,31 @@ const ForgotPasswordUseCase = {
 const ResetPasswordUseCase = {
   async execute(rawToken, newPassword) {
     if (!rawToken || !newPassword) {
-      throw new Error('Token e nova senha são obrigatórios.');
+      throw new Error("Token e nova senha são obrigatórios.");
     }
 
     if (newPassword.length < 8) {
-      throw new Error('A senha deve ter no mínimo 8 caracteres.');
+      throw new Error("A senha deve ter no mínimo 8 caracteres.");
     }
 
     const tokenHash = hashToken(rawToken);
 
-    // 1. Buscar o token no banco
+    // 1. Buscar o token e a senha atual do usuário no banco
     const record = await prisma.passwordResetToken.findUnique({
       where: { token_hash: tokenHash },
+      include: {
+        user: {
+          select: { password_hash: true },
+        },
+      },
     });
 
     if (!record) {
-      throw new Error('Token inválido ou já utilizado.');
+      throw new Error("Token inválido ou já utilizado.");
     }
 
     if (record.used) {
-      throw new Error('Este link de recuperação já foi utilizado.');
+      throw new Error("Este link de recuperação já foi utilizado.");
     }
 
     if (new Date() > record.expires_at) {
@@ -94,23 +108,32 @@ const ResetPasswordUseCase = {
         where: { id: record.id },
         data: { used: true },
       });
-      throw new Error('Este link de recuperação expirou. Solicite um novo.');
+      throw new Error("Este link de recuperação expirou. Solicite um novo.");
     }
 
-    // 2. Atualizar senha do usuário com bcrypt
+    const reusesCurrentPassword = await bcrypt.compare(
+      newPassword,
+      record.user.password_hash,
+    );
+    if (reusesCurrentPassword) {
+      throw new Error("A nova senha deve ser diferente da senha atual.");
+    }
+
+    // 2. Atualizar a senha e invalidar todos os links pendentes atomicamente
     const passwordHash = await bcrypt.hash(newPassword, 12);
-    await prisma.user.update({
-      where: { id: record.user_id },
-      data: { password_hash: passwordHash, updated_at: new Date() },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: record.user_id },
+        data: { password_hash: passwordHash, updated_at: new Date() },
+      });
+
+      await tx.passwordResetToken.updateMany({
+        where: { user_id: record.user_id, used: false },
+        data: { used: true },
+      });
     });
 
-    // 3. Invalidar o token
-    await prisma.passwordResetToken.update({
-      where: { id: record.id },
-      data: { used: true },
-    });
-
-    return { message: 'Senha atualizada com sucesso.' };
+    return { message: "Senha atualizada com sucesso." };
   },
 };
 

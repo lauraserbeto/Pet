@@ -10,12 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { PawPrint, ArrowLeft, Eye, EyeOff, Lock, CheckCircle2, AlertCircle, X, Check } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Lock, CheckCircle2, AlertCircle, X, Check } from "lucide-react";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { authService } from "@/lib/services/authService";
-import logo from "../../assets/pet+/logo-horizontal.png";
+import { AuthBrandLogo } from "../../components/auth/AuthBrandLogo";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 
 interface PasswordCheck {
@@ -25,8 +25,8 @@ interface PasswordCheck {
 
 const passwordChecks: PasswordCheck[] = [
   { label: "Mínimo 8 caracteres", test: (pw) => pw.length >= 8 },
-  { label: "Uma letra maiúscula",  test: (pw) => /[A-Z]/.test(pw) },
-  { label: "Um número",            test: (pw) => /\d/.test(pw) },
+  { label: "Uma letra maiúscula", test: (pw) => /[A-Z]/.test(pw) },
+  { label: "Um número", test: (pw) => /\d/.test(pw) },
 ];
 
 type Status = "idle" | "loading" | "success" | "error";
@@ -36,40 +36,44 @@ export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
 
-  const [password, setPassword]               = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword]       = useState(false);
-  const [showConfirm, setShowConfirm]         = useState(false);
-  const [status, setStatus]                   = useState<Status>("idle");
-  const [errorMsg, setErrorMsg]               = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const strength = useMemo(
-    () => passwordChecks.filter((c) => c.test(password)).length,
-    [password]
-  );
+  const strength = useMemo(() => passwordChecks.filter((c) => c.test(password)).length, [password]);
 
   const strengthColor =
-    strength === 0 ? "bg-slate-200"
-    : strength === 1 ? "bg-red-400"
-    : strength === 2 ? "bg-yellow-400"
-    : "bg-emerald-400";
+    strength === 0
+      ? "bg-slate-200"
+      : strength === 1
+        ? "bg-red-400"
+        : strength === 2
+          ? "bg-yellow-400"
+          : "bg-emerald-400";
 
   const strengthLabel =
     strength === 0 ? "" : strength === 1 ? "Fraca" : strength === 2 ? "Média" : "Forte";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatus("idle");
     setErrorMsg("");
 
     if (!token) {
+      setStatus("error");
       setErrorMsg("Link inválido. Solicite um novo link de recuperação.");
       return;
     }
     if (password !== confirmPassword) {
+      setStatus("error");
       setErrorMsg("As senhas não coincidem.");
       return;
     }
     if (strength < 3) {
+      setStatus("error");
       setErrorMsg("Sua senha não atende aos requisitos mínimos.");
       return;
     }
@@ -80,16 +84,16 @@ export function ResetPasswordPage() {
       setStatus("success");
       toast.success("Senha redefinida com sucesso!");
       setTimeout(() => navigate("/login"), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Erro ao redefinir a senha.";
       setStatus("error");
-      setErrorMsg(err.message || "Erro ao redefinir a senha.");
-      toast.error("Falha ao redefinir", { description: err.message });
+      setErrorMsg(errorMessage);
+      toast.error("Falha ao redefinir", { description: errorMessage });
     }
   };
 
   return (
     <div className="h-screen overflow-hidden flex font-[family-name:var(--font-body)]">
-
       {/* ── Painel esquerdo — Branding ── */}
       <div className="hidden lg:flex lg:w-[45%] relative flex-shrink-0">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary-700)]/90 via-[var(--color-primary-600)]/80 to-[var(--color-primary-800)]/95 z-10" />
@@ -100,7 +104,7 @@ export function ResetPasswordPage() {
         />
         <div className="relative z-20 flex flex-col justify-between p-12 text-white h-full">
           <Link to="/" className="flex flex-shrink-0 items-center gap-2">
-            <ImageWithFallback src={logo} alt="Pet+ Logo" className="h-32 w-auto" />
+            <AuthBrandLogo className="h-24 w-auto" />
           </Link>
           <div className="space-y-4">
             <h2 className="text-4xl font-extrabold font-[family-name:var(--font-display)] leading-tight drop-shadow-md">
@@ -128,13 +132,12 @@ export function ResetPasswordPage() {
         >
           {/* Logo mobile */}
           <div className="flex flex-col items-center lg:hidden">
-            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <div className="bg-[var(--color-primary-500)] p-2 rounded-xl shadow-lg shadow-orange-200">
-                <PawPrint className="h-7 w-7 text-white" />
-              </div>
-              <span className="text-2xl font-extrabold text-slate-900 tracking-tight font-[family-name:var(--font-display)]">
-                Pet<span className="text-[var(--color-primary-500)]">+</span>
-              </span>
+            <Link
+              to="/"
+              className="hover:opacity-80 transition-opacity"
+              aria-label="Ir para a página inicial"
+            >
+              <AuthBrandLogo className="h-14 w-auto" />
             </Link>
           </div>
 
@@ -191,7 +194,10 @@ export function ResetPasswordPage() {
 
                     {/* Nova senha */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="password" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                      <Label
+                        htmlFor="password"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                      >
                         Nova Senha
                       </Label>
                       <div className="relative overflow-visible">
@@ -210,14 +216,22 @@ export function ResetPasswordPage() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
 
                     {/* Força da senha */}
                     {password.length > 0 && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-2"
+                      >
                         <div className="flex items-center gap-2">
                           <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
                             <motion.div
@@ -227,7 +241,9 @@ export function ResetPasswordPage() {
                               transition={{ duration: 0.3 }}
                             />
                           </div>
-                          <span className={`text-xs font-medium ${strength === 3 ? "text-emerald-600" : strength === 2 ? "text-yellow-600" : "text-red-500"}`}>
+                          <span
+                            className={`text-xs font-medium ${strength === 3 ? "text-emerald-600" : strength === 2 ? "text-yellow-600" : "text-red-500"}`}
+                          >
                             {strengthLabel}
                           </span>
                         </div>
@@ -236,11 +252,14 @@ export function ResetPasswordPage() {
                             const ok = check.test(password);
                             return (
                               <div key={check.label} className="flex items-center gap-2">
-                                {ok
-                                  ? <Check className="h-3 w-3 text-emerald-500 shrink-0" />
-                                  : <X className="h-3 w-3 text-slate-300 shrink-0" />
-                                }
-                                <span className={`text-xs ${ok ? "text-emerald-600" : "text-slate-400"}`}>
+                                {ok ? (
+                                  <Check className="h-3 w-3 text-emerald-500 shrink-0" />
+                                ) : (
+                                  <X className="h-3 w-3 text-slate-300 shrink-0" />
+                                )}
+                                <span
+                                  className={`text-xs ${ok ? "text-emerald-600" : "text-slate-400"}`}
+                                >
                                   {check.label}
                                 </span>
                               </div>
@@ -252,7 +271,10 @@ export function ResetPasswordPage() {
 
                     {/* Confirmar senha */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="confirmPassword" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                      <Label
+                        htmlFor="confirmPassword"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                      >
                         Confirmar Senha
                       </Label>
                       <div className="relative overflow-visible">
@@ -268,8 +290,8 @@ export function ResetPasswordPage() {
                             confirmPassword.length > 0 && password !== confirmPassword
                               ? "border-red-300"
                               : confirmPassword.length > 0 && password === confirmPassword
-                              ? "border-emerald-300"
-                              : ""
+                                ? "border-emerald-300"
+                                : ""
                           }`}
                         />
                         <button
@@ -277,11 +299,19 @@ export function ResetPasswordPage() {
                           onClick={() => setShowConfirm(!showConfirm)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                         >
-                          {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showConfirm ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                       {confirmPassword.length > 0 && password !== confirmPassword && (
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-red-500">
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-xs text-red-500"
+                        >
                           As senhas não coincidem
                         </motion.p>
                       )}
@@ -309,7 +339,9 @@ export function ResetPasswordPage() {
                           <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           Salvando...
                         </div>
-                      ) : "Salvar nova senha"}
+                      ) : (
+                        "Salvar nova senha"
+                      )}
                     </Button>
                   </motion.form>
                 )}
