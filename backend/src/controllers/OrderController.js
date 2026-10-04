@@ -34,6 +34,11 @@ class OrderController {
       });
 
       return res.status(200).json(result);
+    } catch (err) {
+      return next(err);
+    }
+  }
+
   /** GET /api/v1/orders — Pedidos do tutor autenticado */
   async listMine(req, res, next) {
     try {
@@ -84,12 +89,13 @@ class OrderController {
     return res.status(501).json({
       message: 'Webhook de pagamento reservado para integração de gateway em PGT-1.',
     });
+  }
+
   /** PATCH /api/v1/orders/:id/status — Atualiza status com máquina de estados e ownership */
   async updateStatus(req, res, next) {
     try {
       const parsed = updateOrderStatusSchema.safeParse(req.body);
       if (!parsed.success) {
-        const { ZodError } = require('zod');
         const AppError = require('../utils/AppError');
         const messages = parsed.error.errors.map((e) => e.message).join(', ');
         return next(AppError.validation(messages));

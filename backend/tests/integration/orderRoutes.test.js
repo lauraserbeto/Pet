@@ -496,40 +496,6 @@ test('POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO', async () =>
       assert.deepEqual(where, { id: orderId });
       assert.equal(data.status, ORDER_STATUS.PAID);
       return { ...order, status: data.status, updated_at: data.updated_at };
-// ============================================================
-// GET /api/v1/orders — Listagem de pedidos do tutor (PED-2)
-// ============================================================
-
-test('GET /api/v1/orders: 401 sem token de autenticação', async () => {
-  const res = await request(app).get('/api/v1/orders');
-  assert.equal(res.status, 401);
-});
-
-test('GET /api/v1/orders: 200 retorna pedidos do tutor logado com headers de paginação', async () => {
-  const userId = 'tutor-list-001';
-  const token = generateToken(5, userId);
-
-  const mockOrder = {
-    id: 'order-list-001',
-    provider_id: mockProvider1.id,
-    customer_id: userId,
-    total_price: 150.0,
-    status: 'AGUARDANDO_PAGAMENTO',
-    created_at: new Date('2026-09-08T10:00:00Z'),
-    updated_at: new Date('2026-09-08T10:00:00Z'),
-    provider: { id: mockProvider1.id, business_name: mockProvider1.business_name },
-    customer: null,
-    items: [],
-  };
-
-  prisma.order = {
-    count: async ({ where }) => {
-      assert.equal(where.customer_id, userId);
-      return 1;
-    },
-    findMany: async ({ where }) => {
-      assert.equal(where.customer_id, userId);
-      return [mockOrder];
     },
   };
 
@@ -575,6 +541,92 @@ test('POST /api/v1/orders/:id/pay: pedido de outro tutor retorna 404 sem vazar e
   prisma.order = {
     findFirst: async ({ where }) => {
       assert.deepEqual(where, { id: orderId, customer_id: 'user-tutor-123' });
+      return null;
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 404);
+});
+
+test('POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor', async () => {
+  const orderId = '44444444-4444-4444-8444-444444444444';
+  const token = generateToken(2, 'user-store-123');
+  let findCalled = false;
+
+  prisma.order = {
+    findFirst: async () => {
+      findCalled = true;
+      return null;
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 403);
+  assert.equal(findCalled, false);
+});
+
+test('POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável', async () => {
+  const orderId = '55555555-5555-4555-8555-555555555555';
+  const token = generateToken(5, 'user-tutor-123');
+  const order = mockPayableOrder({ id: orderId, status: ORDER_STATUS.CANCELLED });
+
+  prisma.order = {
+    findFirst: async () => order,
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 409);
+  assert.match(res.body.error.message, /não pode ser pago/i);
+});
+
+// ============================================================
+// GET /api/v1/orders — Listagem de pedidos do tutor (PED-2)
+// ============================================================
+
+test('GET /api/v1/orders: 401 sem token de autenticação', async () => {
+  const res = await request(app).get('/api/v1/orders');
+  assert.equal(res.status, 401);
+});
+
+test('GET /api/v1/orders: 200 retorna pedidos do tutor logado com headers de paginação', async () => {
+  const userId = 'tutor-list-001';
+  const token = generateToken(5, userId);
+
+  const mockOrder = {
+    id: 'order-list-001',
+    provider_id: mockProvider1.id,
+    customer_id: userId,
+    total_price: 150.0,
+    status: 'AGUARDANDO_PAGAMENTO',
+    created_at: new Date('2026-09-08T10:00:00Z'),
+    updated_at: new Date('2026-09-08T10:00:00Z'),
+    provider: { id: mockProvider1.id, business_name: mockProvider1.business_name },
+    customer: null,
+    items: [],
+  };
+
+  prisma.order = {
+    count: async ({ where }) => {
+      assert.equal(where.customer_id, userId);
+      return 1;
+    },
+    findMany: async ({ where }) => {
+      assert.equal(where.customer_id, userId);
+      return [mockOrder];
+    },
+  };
+
+  const res = await request(app)
     .get('/api/v1/orders')
     .set('Authorization', `Bearer ${token}`);
 
@@ -691,20 +743,6 @@ test('GET /api/v1/orders/received: 403 para usuário sem perfil de parceiro', as
   };
 
   const res = await request(app)
-    .post(`/api/v1/orders/${orderId}/pay`)
-    .set('Authorization', `Bearer ${token}`);
-
-  assert.equal(res.status, 404);
-});
-
-test('POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor', async () => {
-  const orderId = '44444444-4444-4444-8444-444444444444';
-  const token = generateToken(2, 'user-store-123');
-  let findCalled = false;
-
-  prisma.order = {
-    findFirst: async () => {
-      findCalled = true;
     .get('/api/v1/orders/received')
     .set('Authorization', `Bearer ${token}`);
 
@@ -781,31 +819,6 @@ test('GET /api/v1/providers/orders: 200 retorna pedidos do parceiro (alias da ro
       return null;
     },
   };
-
-  const res = await request(app)
-    .post(`/api/v1/orders/${orderId}/pay`)
-    .set('Authorization', `Bearer ${token}`);
-
-  assert.equal(res.status, 403);
-  assert.equal(findCalled, false);
-});
-
-test('POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável', async () => {
-  const orderId = '55555555-5555-4555-8555-555555555555';
-  const token = generateToken(5, 'user-tutor-123');
-  const order = mockPayableOrder({ id: orderId, status: ORDER_STATUS.CANCELLED });
-
-  prisma.order = {
-    findFirst: async () => order,
-  };
-
-  const res = await request(app)
-    .post(`/api/v1/orders/${orderId}/pay`)
-    .set('Authorization', `Bearer ${token}`);
-
-  assert.equal(res.status, 409);
-  assert.match(res.body.error.message, /não pode ser pago/i);
-});
 
   prisma.order = {
     count: async () => 0,

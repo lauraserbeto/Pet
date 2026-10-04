@@ -44,6 +44,34 @@ router.post('/', OrderController.create);
  * /api/v1/orders/{orderId}/pay:
  *   post:
  *     summary: Confirma pagamento simulado de um pedido
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Pedido pago ou pagamento idempotente
+ *       403:
+ *         description: Acesso restrito a clientes
+ *       404:
+ *         description: Pedido não encontrado para o usuário autenticado
+ *       409:
+ *         description: Pedido não está em estado pagável
+ */
+router.post(
+  '/:orderId/pay',
+  validate({ params: orderIdParamsSchema }),
+  OrderController.pay
+);
+
+/**
+ * @swagger
  * /api/v1/orders:
  *   get:
  *     summary: Lista os pedidos do tutor autenticado
@@ -142,26 +170,6 @@ router.get('/received', OrderController.listReceived);
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: orderId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Pedido pago ou pagamento idempotente
- *       403:
- *         description: Acesso restrito a clientes
- *       404:
- *         description: Pedido não encontrado para o usuário autenticado
- *       409:
- *         description: Pedido não está em estado pagável
- */
-router.post(
-  '/:orderId/pay',
-  validate({ params: orderIdParamsSchema }),
-  OrderController.pay
-);
  *         name: id
  *         required: true
  *         schema:
