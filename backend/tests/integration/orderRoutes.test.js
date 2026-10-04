@@ -496,6 +496,40 @@ test('POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO', async () =>
       assert.deepEqual(where, { id: orderId });
       assert.equal(data.status, ORDER_STATUS.PAID);
       return { ...order, status: data.status, updated_at: data.updated_at };
+// ============================================================
+// GET /api/v1/orders — Listagem de pedidos do tutor (PED-2)
+// ============================================================
+
+test('GET /api/v1/orders: 401 sem token de autenticação', async () => {
+  const res = await request(app).get('/api/v1/orders');
+  assert.equal(res.status, 401);
+});
+
+test('GET /api/v1/orders: 200 retorna pedidos do tutor logado com headers de paginação', async () => {
+  const userId = 'tutor-list-001';
+  const token = generateToken(5, userId);
+
+  const mockOrder = {
+    id: 'order-list-001',
+    provider_id: mockProvider1.id,
+    customer_id: userId,
+    total_price: 150.0,
+    status: 'AGUARDANDO_PAGAMENTO',
+    created_at: new Date('2026-09-08T10:00:00Z'),
+    updated_at: new Date('2026-09-08T10:00:00Z'),
+    provider: { id: mockProvider1.id, business_name: mockProvider1.business_name },
+    customer: null,
+    items: [],
+  };
+
+  prisma.order = {
+    count: async ({ where }) => {
+      assert.equal(where.customer_id, userId);
+      return 1;
+    },
+    findMany: async ({ where }) => {
+      assert.equal(where.customer_id, userId);
+      return [mockOrder];
     },
   };
 
@@ -541,6 +575,117 @@ test('POST /api/v1/orders/:id/pay: pedido de outro tutor retorna 404 sem vazar e
   prisma.order = {
     findFirst: async ({ where }) => {
       assert.deepEqual(where, { id: orderId, customer_id: 'user-tutor-123' });
+    .get('/api/v1/orders')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body));
+  assert.equal(res.body.length, 1);
+  assert.equal(res.body[0].id, 'order-list-001');
+  assert.equal(res.body[0].status, 'AGUARDANDO_PAGAMENTO');
+  assert.equal(typeof res.body[0].total_price, 'number');
+
+  // Headers de paginação
+  assert.equal(res.headers['x-total-count'], '1');
+  assert.equal(res.headers['x-page'], '1');
+  assert.equal(res.headers['x-limit'], '20');
+  assert.equal(res.headers['x-total-pages'], '1');
+});
+
+test('GET /api/v1/orders: isolamento de tutor — tutor A não vê pedidos de tutor B', async () => {
+  const userIdA = 'tutor-A-001';
+  const userIdB = 'tutor-B-001';
+  const tokenA = generateToken(5, userIdA);
+
+  const orderB = {
+    id: 'order-b-001',
+    provider_id: mockProvider1.id,
+    customer_id: userIdB,
+    total_price: 50.0,
+    status: 'PAGO',
+    created_at: new Date(),
+    updated_at: new Date(),
+    provider: { id: mockProvider1.id, business_name: 'Pet Shop Alfa' },
+    customer: null,
+    items: [],
+  };
+
+  prisma.order = {
+    count: async ({ where }) => (where.customer_id === userIdA ? 0 : 1),
+    findMany: async ({ where }) => (where.customer_id === userIdA ? [] : [orderB]),
+  };
+
+  const res = await request(app)
+    .get('/api/v1/orders')
+    .set('Authorization', `Bearer ${tokenA}`);
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.length, 0, 'Tutor A não deve ver os pedidos de Tutor B');
+  assert.equal(res.headers['x-total-count'], '0');
+});
+
+test('GET /api/v1/orders: resposta não vaza password_hash do cliente', async () => {
+  const userId = 'tutor-safe-001';
+  const token = generateToken(5, userId);
+
+  prisma.order = {
+    count: async () => 1,
+    findMany: async () => [
+      {
+        id: 'order-safe-001',
+        provider_id: mockProvider1.id,
+        customer_id: userId,
+        total_price: 99.0,
+        status: 'PAGO',
+        created_at: new Date(),
+        updated_at: new Date(),
+        provider: { id: mockProvider1.id, business_name: 'Shop' },
+        customer: {
+          id: userId,
+          full_name: 'João Tutor',
+          email: 'joao@test.com',
+          phone: null,
+          password_hash: 'SEGREDO_HASH_SECRETO',
+        },
+        items: [],
+      },
+    ],
+  };
+
+  const res = await request(app)
+    .get('/api/v1/orders')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.length, 1);
+  const order = res.body[0];
+  // Confirma que password_hash nunca é exposto
+  assert.equal(order.customer?.password_hash, undefined, 'password_hash jamais deve ser exposto');
+  assert.equal(order.customer?.full_name, 'João Tutor');
+  assert.equal(order.customer?.email, 'joao@test.com');
+});
+
+// ============================================================
+// GET /api/v1/orders/received e GET /api/v1/providers/orders
+// ============================================================
+
+test('GET /api/v1/orders/received: 401 sem token', async () => {
+  const res = await request(app).get('/api/v1/orders/received');
+  assert.equal(res.status, 401);
+});
+
+test('GET /api/v1/providers/orders: 401 sem token', async () => {
+  const res = await request(app).get('/api/v1/providers/orders');
+  assert.equal(res.status, 401);
+});
+
+test('GET /api/v1/orders/received: 403 para usuário sem perfil de parceiro', async () => {
+  const userId = 'user-sem-provider';
+  const token = generateToken(5, userId);
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return null;
       return null;
     },
   };
@@ -560,6 +705,79 @@ test('POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor', async (
   prisma.order = {
     findFirst: async () => {
       findCalled = true;
+    .get('/api/v1/orders/received')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 403);
+});
+
+test('GET /api/v1/orders/received: 200 retorna apenas pedidos do parceiro logado com paginação', async () => {
+  const userId = 'user-provider-001';
+  const token = generateToken(2, userId);
+
+  const mockProviderFull = { id: 'prov-001', user_id: userId, business_name: 'Minha Loja' };
+
+  const mockReceivedOrder = {
+    id: 'recv-order-001',
+    provider_id: mockProviderFull.id,
+    customer_id: 'customer-xyz',
+    total_price: 200.0,
+    status: 'PAGO',
+    created_at: new Date('2026-09-01T00:00:00Z'),
+    updated_at: new Date('2026-09-01T00:00:00Z'),
+    customer: {
+      id: 'customer-xyz',
+      full_name: 'Maria Cliente',
+      email: 'maria@test.com',
+      phone: null,
+    },
+    items: [],
+  };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return mockProviderFull;
+      return null;
+    },
+  };
+
+  prisma.order = {
+    count: async ({ where }) => {
+      assert.equal(where.provider_id, mockProviderFull.id);
+      return 1;
+    },
+    findMany: async ({ where }) => {
+      assert.equal(where.provider_id, mockProviderFull.id);
+      return [mockReceivedOrder];
+    },
+  };
+
+  const res = await request(app)
+    .get('/api/v1/orders/received')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body));
+  assert.equal(res.body.length, 1);
+  assert.equal(res.body[0].id, 'recv-order-001');
+  assert.equal(res.body[0].status, 'PAGO');
+
+  // Headers de paginação
+  assert.equal(res.headers['x-total-count'], '1');
+  assert.equal(res.headers['x-page'], '1');
+  assert.equal(res.headers['x-limit'], '20');
+  assert.equal(res.headers['x-total-pages'], '1');
+});
+
+test('GET /api/v1/providers/orders: 200 retorna pedidos do parceiro (alias da rota /received)', async () => {
+  const userId = 'user-provider-002';
+  const token = generateToken(2, userId);
+
+  const mockProviderFull = { id: 'prov-002', user_id: userId, business_name: 'Loja Dois' };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return mockProviderFull;
       return null;
     },
   };
@@ -589,3 +807,382 @@ test('POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável', asyn
   assert.match(res.body.error.message, /não pode ser pago/i);
 });
 
+  prisma.order = {
+    count: async () => 0,
+    findMany: async () => [],
+  };
+
+  const res = await request(app)
+    .get('/api/v1/providers/orders')
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.ok(Array.isArray(res.body));
+  assert.equal(res.headers['x-total-count'], '0');
+});
+
+// ============================================================
+// PATCH /api/v1/orders/:id/status — Máquina de estados (PED-2)
+// ============================================================
+
+test('PATCH /api/v1/orders/:id/status: 401 sem token', async () => {
+  const res = await request(app)
+    .patch('/api/v1/orders/some-order-id/status')
+    .send({ status: 'PAGO' });
+  assert.equal(res.status, 401);
+});
+
+test('PATCH /api/v1/orders/:id/status: 404 para pedido inexistente', async () => {
+  const userId = 'user-provider-patch-1';
+  const token = generateToken(2, userId);
+
+  const mockProviderFull = { id: 'prov-patch-1', user_id: userId };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return mockProviderFull;
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => null,
+    update: async () => { throw new Error('Não deve ser chamado'); },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-inexistente/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'PAGO' });
+
+  assert.equal(res.status, 404);
+});
+
+test('PATCH /api/v1/orders/:id/status: 403 quando parceiro não é o dono do pedido', async () => {
+  const userId = 'user-provider-patch-2';
+  const token = generateToken(2, userId);
+
+  // O provider do usuário é prov-X mas o pedido pertence a prov-Y
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-X', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-002',
+      provider_id: 'prov-Y', // diferente de prov-X
+      customer_id: 'customer-abc',
+      status: 'AGUARDANDO_PAGAMENTO',
+    }),
+    update: async () => { throw new Error('Não deve ser chamado'); },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-002/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'PAGO' });
+
+  assert.equal(res.status, 403);
+});
+
+test('PATCH /api/v1/orders/:id/status: 403 para usuário sem perfil de parceiro', async () => {
+  const userId = 'user-tutor-no-provider';
+  const token = generateToken(5, userId);
+
+  prisma.provider = {
+    findUnique: async () => null,
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-003',
+      provider_id: 'prov-Z',
+      customer_id: 'customer-def',
+      status: 'AGUARDANDO_PAGAMENTO',
+    }),
+    update: async () => { throw new Error('Não deve ser chamado'); },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-003/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'PAGO' });
+
+  assert.equal(res.status, 403);
+});
+
+test('PATCH /api/v1/orders/:id/status: 422 para status desconhecido', async () => {
+  const userId = 'user-provider-patch-3';
+  const token = generateToken(2, userId);
+
+  // Não precisamos configurar o prisma porque a validação do status deve ser a primeira verificação
+  prisma.provider = {
+    findUnique: async () => ({ id: 'prov-P', user_id: userId }),
+  };
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-004',
+      provider_id: 'prov-P',
+      status: 'AGUARDANDO_PAGAMENTO',
+    }),
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-004/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'STATUS_INVENTADO_XYZ' });
+
+  assert.equal(res.status, 422);
+});
+
+test('PATCH /api/v1/orders/:id/status: 422 para transição inválida (CONCLUIDO → AGUARDANDO_PAGAMENTO)', async () => {
+  const userId = 'user-provider-patch-4';
+  const token = generateToken(2, userId);
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-Q', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-005',
+      provider_id: 'prov-Q',
+      customer_id: 'customer-ghi',
+      status: 'CONCLUIDO', // status terminal
+    }),
+    update: async () => { throw new Error('Não deve ser chamado'); },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-005/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'AGUARDANDO_PAGAMENTO' });
+
+  assert.equal(res.status, 422);
+  assert.match(res.body.error.message, /transição inválida/i);
+});
+
+test('PATCH /api/v1/orders/:id/status: 422 para transição inválida (ENVIADO → AGUARDANDO_PAGAMENTO)', async () => {
+  const userId = 'user-provider-patch-5';
+  const token = generateToken(2, userId);
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-R', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-006',
+      provider_id: 'prov-R',
+      customer_id: 'customer-jkl',
+      status: 'ENVIADO',
+    }),
+    update: async () => { throw new Error('Não deve ser chamado'); },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-006/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'AGUARDANDO_PAGAMENTO' });
+
+  assert.equal(res.status, 422);
+});
+
+test('PATCH /api/v1/orders/:id/status: 200 para transição válida (AGUARDANDO_PAGAMENTO → PAGO)', async () => {
+  const userId = 'user-provider-patch-6';
+  const token = generateToken(2, userId);
+
+  const updatedOrder = {
+    id: 'order-patch-007',
+    provider_id: 'prov-S',
+    customer_id: 'customer-mno',
+    total_price: 100.0,
+    status: 'PAGO',
+    created_at: new Date('2026-09-01T00:00:00Z'),
+    updated_at: new Date('2026-09-09T12:00:00Z'),
+    provider: { id: 'prov-S', business_name: 'Loja S' },
+    customer: { id: 'customer-mno', full_name: 'Ana Cliente', email: 'ana@test.com', phone: null },
+    items: [],
+  };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-S', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-007',
+      provider_id: 'prov-S',
+      customer_id: 'customer-mno',
+      status: 'AGUARDANDO_PAGAMENTO',
+    }),
+    update: async ({ data }) => {
+      assert.equal(data.status, 'PAGO');
+      return updatedOrder;
+    },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-007/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'PAGO' });
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'PAGO');
+  assert.equal(res.body.id, 'order-patch-007');
+  // Verificar que não há vazamento de senha
+  assert.equal(res.body.customer?.password_hash, undefined);
+});
+
+test('PATCH /api/v1/orders/:id/status: 200 para transição válida (PAGO → ENVIADO)', async () => {
+  const userId = 'user-provider-patch-7';
+  const token = generateToken(2, userId);
+
+  const updatedOrder = {
+    id: 'order-patch-008',
+    provider_id: 'prov-T',
+    customer_id: 'customer-pqr',
+    total_price: 75.0,
+    status: 'ENVIADO',
+    created_at: new Date(),
+    updated_at: new Date(),
+    provider: { id: 'prov-T', business_name: 'Loja T' },
+    customer: { id: 'customer-pqr', full_name: 'Carlos Cliente', email: 'carlos@test.com', phone: null },
+    items: [],
+  };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-T', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-008',
+      provider_id: 'prov-T',
+      customer_id: 'customer-pqr',
+      status: 'PAGO',
+    }),
+    update: async ({ data }) => {
+      assert.equal(data.status, 'ENVIADO');
+      return updatedOrder;
+    },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-008/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'ENVIADO' });
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'ENVIADO');
+});
+
+test('PATCH /api/v1/orders/:id/status: 200 para transição válida (ENVIADO → CONCLUIDO)', async () => {
+  const userId = 'user-provider-patch-8';
+  const token = generateToken(2, userId);
+
+  const updatedOrder = {
+    id: 'order-patch-009',
+    provider_id: 'prov-U',
+    customer_id: 'customer-stu',
+    total_price: 250.0,
+    status: 'CONCLUIDO',
+    created_at: new Date(),
+    updated_at: new Date(),
+    provider: { id: 'prov-U', business_name: 'Loja U' },
+    customer: { id: 'customer-stu', full_name: 'Diego Cliente', email: 'diego@test.com', phone: null },
+    items: [],
+  };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-U', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-009',
+      provider_id: 'prov-U',
+      customer_id: 'customer-stu',
+      status: 'ENVIADO',
+    }),
+    update: async ({ data }) => {
+      assert.equal(data.status, 'CONCLUIDO');
+      return updatedOrder;
+    },
+  };
+
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-009/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'CONCLUIDO' });
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'CONCLUIDO');
+  assert.equal(res.body.customer?.password_hash, undefined, 'Jamais deve expor password_hash');
+});
+
+test('PATCH /api/v1/orders/:id/status: aceita alias em inglês (SHIPPED → CONCLUIDO via DELIVERED)', async () => {
+  const userId = 'user-provider-patch-9';
+  const token = generateToken(2, userId);
+
+  const updatedOrder = {
+    id: 'order-patch-010',
+    provider_id: 'prov-V',
+    customer_id: 'customer-vwx',
+    total_price: 180.0,
+    status: 'CONCLUIDO',
+    created_at: new Date(),
+    updated_at: new Date(),
+    provider: { id: 'prov-V', business_name: 'Loja V' },
+    customer: { id: 'customer-vwx', full_name: 'Eva Cliente', email: 'eva@test.com', phone: null },
+    items: [],
+  };
+
+  prisma.provider = {
+    findUnique: async ({ where }) => {
+      if (where.user_id === userId) return { id: 'prov-V', user_id: userId };
+      return null;
+    },
+  };
+
+  prisma.order = {
+    findUnique: async () => ({
+      id: 'order-patch-010',
+      provider_id: 'prov-V',
+      customer_id: 'customer-vwx',
+      status: 'ENVIADO',
+    }),
+    update: async ({ data }) => {
+      // O alias DELIVERED deve ser normalizado para CONCLUIDO
+      assert.equal(data.status, 'CONCLUIDO');
+      return updatedOrder;
+    },
+  };
+
+  // Envia o alias em inglês "DELIVERED"
+  const res = await request(app)
+    .patch('/api/v1/orders/order-patch-010/status')
+    .set('Authorization', `Bearer ${token}`)
+    .send({ status: 'DELIVERED' });
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.status, 'CONCLUIDO');
+});

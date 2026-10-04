@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ProviderController = require('../controllers/ProviderController');
+const OrderController = require('../controllers/OrderController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/adminMiddleware');
 const validate = require('../middlewares/validate');
@@ -8,6 +9,49 @@ const {
   providerIdParamsSchema,
   updateProviderStatusSchema,
 } = require('../schemas/providerSchemas');
+
+/**
+ * @swagger
+ * /api/v1/providers/orders:
+ *   get:
+ *     summary: Lista os pedidos recebidos pelo parceiro autenticado
+ *     tags: [Providers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *           maximum: 100
+ *     responses:
+ *       200:
+ *         description: Lista de pedidos recebidos
+ *         headers:
+ *           X-Total-Count:
+ *             schema:
+ *               type: integer
+ *           X-Page:
+ *             schema:
+ *               type: integer
+ *           X-Limit:
+ *             schema:
+ *               type: integer
+ *           X-Total-Pages:
+ *             schema:
+ *               type: integer
+ *       401:
+ *         description: Não autenticado
+ *       403:
+ *         description: Acesso restrito a parceiros cadastrados
+ */
+router.get('/orders', authMiddleware, OrderController.listReceived);
 
 /**
  * @swagger
