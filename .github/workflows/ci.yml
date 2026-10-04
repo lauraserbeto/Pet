@@ -32,6 +32,8 @@ jobs:
       JWT_SECRET: ci-dummy-secret-com-mais-de-32-caracteres-0000
       DATABASE_URL: postgresql://user:pass@localhost:5432/petplus_test
       FRONTEND_URL: http://localhost:5173
+      RESEND_API_KEY: ci-resend-api-key
+      EMAIL_FROM: no-reply@petplus.test
       LOG_LEVEL: silent
       RUN_DB_INTEGRATION_TESTS: 'true'
     steps:

@@ -1,5 +1,9 @@
 const { z } = require('zod');
 
+const orderIdParamsSchema = z.object({
+  orderId: z.string().uuid('orderId inválido'),
+});
+
 /**
  * Schema de query para listagem de pedidos.
  * Suporta paginação com coerção de string → número (query strings chegam como string).
@@ -17,6 +21,7 @@ const updateOrderStatusSchema = z.object({
 });
 
 module.exports = {
+  orderIdParamsSchema,
   listOrdersQuerySchema,
   updateOrderStatusSchema,
 };

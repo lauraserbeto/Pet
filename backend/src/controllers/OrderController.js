@@ -1,4 +1,6 @@
 const createOrderUseCase = require('../useCases/orders/CreateOrderUseCase');
+const confirmOrderPaymentUseCase = require('../useCases/orders/ConfirmOrderPaymentUseCase');
+const { PAYMENT_PROVIDER, PAYMENT_STATUS } = require('../constants/orderStatus');
 const listCustomerOrdersUseCase = require('../useCases/orders/ListCustomerOrdersUseCase');
 const listProviderOrdersUseCase = require('../useCases/orders/ListProviderOrdersUseCase');
 const updateOrderStatusUseCase = require('../useCases/orders/UpdateOrderStatusUseCase');
@@ -13,6 +15,25 @@ class OrderController {
       });
 
       return res.status(201).json(result);
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  async pay(req, res, next) {
+    try {
+      const result = await confirmOrderPaymentUseCase.execute({
+        userId: req.userId,
+        userRole: req.userRole,
+        orderId: req.params.orderId,
+        paymentResult: {
+          provider: PAYMENT_PROVIDER.SIMULATED,
+          status: PAYMENT_STATUS.APPROVED,
+          external_id: null,
+        },
+      });
+
+      return res.status(200).json(result);
     } catch (err) {
       return next(err);
     }
@@ -64,12 +85,17 @@ class OrderController {
     }
   }
 
+  async webhook(_req, res) {
+    return res.status(501).json({
+      message: 'Webhook de pagamento reservado para integração de gateway em PGT-1.',
+    });
+  }
+
   /** PATCH /api/v1/orders/:id/status — Atualiza status com máquina de estados e ownership */
   async updateStatus(req, res, next) {
     try {
       const parsed = updateOrderStatusSchema.safeParse(req.body);
       if (!parsed.success) {
-        const { ZodError } = require('zod');
         const AppError = require('../utils/AppError');
         const messages = parsed.error.errors.map((e) => e.message).join(', ');
         return next(AppError.validation(messages));

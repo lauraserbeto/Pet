@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../../src/config/database');
 const CartRepository = require('../../src/repositories/CartRepository');
 const app = require('../../src/app');
+const { ORDER_STATUS } = require('../../src/constants/orderStatus');
 
 function generateToken(roleId = 5, userId = 'user-tutor-123') {
   const payload = { id: userId };
@@ -62,6 +63,37 @@ const mockProductOtherProvider = {
   provider_id: mockProvider2.id,
   provider: mockProvider2,
 };
+
+function mockPayableOrder(overrides = {}) {
+  return {
+    id: overrides.id || '11111111-1111-4111-8111-111111111111',
+    customer_id: overrides.customer_id || 'user-tutor-123',
+    provider_id: overrides.provider_id || mockProvider1.id,
+    total_price: overrides.total_price ?? 150.0,
+    status: overrides.status || ORDER_STATUS.AWAITING_PAYMENT,
+    created_at: new Date('2026-09-30T12:00:00Z'),
+    updated_at: new Date('2026-09-30T12:00:00Z'),
+    provider: {
+      id: mockProvider1.id,
+      business_name: mockProvider1.business_name,
+    },
+    items: [
+      {
+        id: 'order-item-pay-1',
+        order_id: overrides.id || '11111111-1111-4111-8111-111111111111',
+        product_id: mockProduct1.id,
+        quantity: 1,
+        unit_price: 150.0,
+        product: {
+          id: mockProduct1.id,
+          name: mockProduct1.name,
+          image_url: mockProduct1.image_url,
+          sku: 'SKU-PAY-1',
+        },
+      },
+    ],
+  };
+}
 
 test('POST /api/v1/orders: 401 sem token de autenticação', async () => {
   const res = await request(app).post('/api/v1/orders');
@@ -446,6 +478,115 @@ test('POST /api/v1/orders: 409 e rollback se estoque mudar concorrentemente dura
   assert.match(res.body.error.message, /estoque insuficiente/i);
   assert.equal(ordersCreatedCount, 0, 'Nenhum pedido deve ser criado em caso de erro');
   assert.equal(cartCleared, false, 'Carrinho não deve ser limpo');
+});
+
+test('POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO', async () => {
+  const orderId = '11111111-1111-4111-8111-111111111111';
+  const token = generateToken(5, 'user-tutor-123');
+  const order = mockPayableOrder({ id: orderId });
+  let updateCalled = false;
+
+  prisma.order = {
+    findFirst: async ({ where }) => {
+      assert.deepEqual(where, { id: orderId, customer_id: 'user-tutor-123' });
+      return order;
+    },
+    update: async ({ where, data }) => {
+      updateCalled = true;
+      assert.deepEqual(where, { id: orderId });
+      assert.equal(data.status, ORDER_STATUS.PAID);
+      return { ...order, status: data.status, updated_at: data.updated_at };
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.order.id, orderId);
+  assert.equal(res.body.order.status, ORDER_STATUS.PAID);
+  assert.equal(res.body.payment.provider, 'SIMULATED');
+  assert.equal(res.body.payment.status, 'APPROVED');
+  assert.equal(updateCalled, true);
+});
+
+test('POST /api/v1/orders/:id/pay: pagamento já PAGO é idempotente', async () => {
+  const orderId = '22222222-2222-4222-8222-222222222222';
+  const token = generateToken(5, 'user-tutor-123');
+  const order = mockPayableOrder({ id: orderId, status: ORDER_STATUS.PAID });
+  let updateCalled = false;
+
+  prisma.order = {
+    findFirst: async () => order,
+    update: async () => {
+      updateCalled = true;
+      return order;
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 200);
+  assert.equal(res.body.order.status, ORDER_STATUS.PAID);
+  assert.equal(updateCalled, false);
+});
+
+test('POST /api/v1/orders/:id/pay: pedido de outro tutor retorna 404 sem vazar existência', async () => {
+  const orderId = '33333333-3333-4333-8333-333333333333';
+  const token = generateToken(5, 'user-tutor-123');
+
+  prisma.order = {
+    findFirst: async ({ where }) => {
+      assert.deepEqual(where, { id: orderId, customer_id: 'user-tutor-123' });
+      return null;
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 404);
+});
+
+test('POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor', async () => {
+  const orderId = '44444444-4444-4444-8444-444444444444';
+  const token = generateToken(2, 'user-store-123');
+  let findCalled = false;
+
+  prisma.order = {
+    findFirst: async () => {
+      findCalled = true;
+      return null;
+    },
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 403);
+  assert.equal(findCalled, false);
+});
+
+test('POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável', async () => {
+  const orderId = '55555555-5555-4555-8555-555555555555';
+  const token = generateToken(5, 'user-tutor-123');
+  const order = mockPayableOrder({ id: orderId, status: ORDER_STATUS.CANCELLED });
+
+  prisma.order = {
+    findFirst: async () => order,
+  };
+
+  const res = await request(app)
+    .post(`/api/v1/orders/${orderId}/pay`)
+    .set('Authorization', `Bearer ${token}`);
+
+  assert.equal(res.status, 409);
+  assert.match(res.body.error.message, /não pode ser pago/i);
 });
 
 // ============================================================
