@@ -13,30 +13,44 @@ const UserRepository = require('../../src/repositories/UserRepository');
 const EmailService = require('../../src/services/EmailService');
 const { ForgotPasswordUseCase } = require('../../src/useCases/auth/PasswordResetUseCase');
 
-afterEach(() => mock.restoreAll());
+const prismaRestores = [];
+
+afterEach(() => {
+  while (prismaRestores.length > 0) {
+    prismaRestores.pop()();
+  }
+  mock.restoreAll();
+});
+
+function stubPasswordResetTokenMethod(methodName, implementation) {
+  const delegate = prisma.passwordResetToken;
+  const original = delegate[methodName];
+  delegate[methodName] = implementation;
+  prismaRestores.push(() => {
+    delegate[methodName] = original;
+  });
+}
 
 function mockTokenPersistence({ onCreate } = {}) {
   let updateManyCalled = false;
   let invalidatedTokenId = null;
 
-  mock.property(prisma, 'passwordResetToken', {
-    updateMany: async () => {
-      updateManyCalled = true;
-      return { count: 1 };
-    },
-    create: async ({ data }) => {
-      onCreate?.(data);
-      return {
-        id: 'reset-token-1',
-        ...data,
-      };
-    },
-    update: async ({ where, data }) => {
-      if (data.used === true) {
-        invalidatedTokenId = where.id;
-      }
-      return { id: where.id, ...data };
-    },
+  stubPasswordResetTokenMethod('updateMany', async () => {
+    updateManyCalled = true;
+    return { count: 1 };
+  });
+  stubPasswordResetTokenMethod('create', async ({ data }) => {
+    onCreate?.(data);
+    return {
+      id: 'reset-token-1',
+      ...data,
+    };
+  });
+  stubPasswordResetTokenMethod('update', async ({ where, data }) => {
+    if (data.used === true) {
+      invalidatedTokenId = where.id;
+    }
+    return { id: where.id, ...data };
   });
 
   return {
@@ -85,10 +99,8 @@ test('forgot password para e-mail inexistente mantém resposta genérica e não 
   mock.method(EmailService, 'sendPasswordReset', async () => {
     sendCalled = true;
   });
-  mock.property(prisma, 'passwordResetToken', {
-    create: async () => {
-      createCalled = true;
-    },
+  stubPasswordResetTokenMethod('create', async () => {
+    createCalled = true;
   });
 
   const result = await ForgotPasswordUseCase.execute('ausente@petplus.test');
