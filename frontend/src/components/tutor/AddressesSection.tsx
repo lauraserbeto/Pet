@@ -35,7 +35,7 @@ const addressSchema = z.object({
     .trim()
     .regex(CEP_MASKED_REGEX, "CEP inválido (use 00000-000)"),
   rua: z.string().trim().min(2, "Rua é obrigatória").max(255),
-  numero: z.string().trim().min(1, "Número é obrigatório").max(20),
+  numero: z.string().trim().max(20).optional().or(z.literal("")),
   complemento: z.string().trim().max(255).optional().or(z.literal("")),
   bairro: z.string().trim().min(2, "Bairro é obrigatório").max(100),
   cidade: z.string().trim().min(2, "Cidade é obrigatória").max(100),
@@ -228,7 +228,7 @@ export function AddressesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Número<RequiredMark />
+                  Número
                 </label>
                 <input
                   type="text"
@@ -368,7 +368,7 @@ export function AddressesSection() {
                 </div>
 
                 <p className="font-semibold text-slate-800">
-                  {addr.rua}, {addr.numero}
+                  {addr.rua}{addr.numero ? `, ${addr.numero}` : ''}
                 </p>
                 {addr.complemento && (
                   <p className="text-sm text-slate-500">{addr.complemento}</p>

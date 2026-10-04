@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -16,6 +16,7 @@ import {
   Bone,
   Heart,
   Sparkles,
+  ShoppingCart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
@@ -26,16 +27,23 @@ import iconTransparente from "../../assets/pet+/logo-horizontal.png";
 import heroCarePets from "../../assets/imgs/hero_care_pets.png";
 
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  clearPostLoginRedirect,
+  getPostLoginRedirect,
+  rememberPostLoginRedirect,
+} from "@/lib/postLoginRedirect";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const postLoginRedirect = getPostLoginRedirect(location.state);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [email, setEmail]               = useState("");
-  const [password, setPassword]         = useState("");
-  const [rememberMe, setRememberMe]     = useState(false);
-  const [error, setError]               = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Pré-preenche o e-mail se o usuário marcou "Lembrar de mim" antes
   useEffect(() => {
@@ -73,30 +81,37 @@ export function LoginPage() {
       const providerStatus = user.provider_status;
 
       if (userRoleId === 4 && onboardingStep !== "COMPLETED") {
+        clearPostLoginRedirect();
         navigate("/onboarding/sitter");
       } else if ([2, 3].includes(userRoleId) && providerStatus === "PENDENTE") {
+        clearPostLoginRedirect();
         toast.info("Conta em análise", {
-          description: "Aguarde a aprovação do administrador para acessar o painel."
+          description: "Aguarde a aprovação do administrador para acessar o painel.",
         });
         navigate("/");
+      } else if (postLoginRedirect && userRoleId === 5) {
+        clearPostLoginRedirect();
+        navigate(postLoginRedirect.returnTo, { replace: true });
       } else if ([1, 2, 3, 4].includes(userRoleId)) {
+        clearPostLoginRedirect();
         navigate("/dashboard");
       } else {
+        clearPostLoginRedirect();
         navigate("/");
       }
-
     } catch (err: any) {
       console.error("Login error:", err);
-      
-      if (err.status === 403 || err.message?.includes('análise')) {
+
+      if (err.status === 403 || err.message?.includes("análise")) {
         toast.info("Conta em análise", {
-            description: "Sua conta está sendo avaliada pelo nosso time. Você receberá um e-mail em breve!",
-            duration: 6000
+          description:
+            "Sua conta está sendo avaliada pelo nosso time. Você receberá um e-mail em breve!",
+          duration: 6000,
         });
       } else {
         setError(err.message);
         toast.error("Erro ao entrar", {
-            description: err.message,
+          description: err.message,
         });
       }
     } finally {
@@ -106,18 +121,18 @@ export function LoginPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center font-[family-name:var(--font-body)]">
-
       {/* ── Animated Background ── */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#FFF8EB] via-[#FFF1D6] to-[#FFE8C2]" />
-      
+
       {/* Mesh gradient overlay */}
-      <div className="absolute inset-0 opacity-60"
+      <div
+        className="absolute inset-0 opacity-60"
         style={{
           background: `
             radial-gradient(ellipse 80% 50% at 20% 80%, rgba(245,139,5,0.12) 0%, transparent 60%),
             radial-gradient(ellipse 60% 60% at 80% 20%, rgba(54,153,210,0.08) 0%, transparent 50%),
             radial-gradient(ellipse 50% 40% at 50% 50%, rgba(245,139,5,0.06) 0%, transparent 60%)
-          `
+          `,
         }}
       />
 
@@ -214,7 +229,6 @@ export function LoginPage() {
 
       {/* ── Main Content ── */}
       <div className="relative z-10 flex flex-col items-center w-full max-w-md px-4 sm:px-6 py-8">
-
         {/* Logo + Brand */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -239,7 +253,6 @@ export function LoginPage() {
           className="w-full"
         >
           <div className="relative bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl shadow-[0_8px_40px_rgba(245,139,5,0.08),0_2px_12px_rgba(0,0,0,0.04)] p-6 sm:p-8">
-            
             {/* Subtle glow accent */}
             <div className="absolute -top-px left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-[var(--color-primary-400)] to-transparent rounded-full" />
 
@@ -252,10 +265,29 @@ export function LoginPage() {
               </p>
             </div>
 
+            {postLoginRedirect?.intent === "checkout" && (
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 p-3 text-left">
+                <ShoppingCart className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">
+                    Entre para finalizar sua compra
+                  </p>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-600">
+                    Seu carrinho será mantido e você poderá continuar de onde parou.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSignIn} className="space-y-4">
               {/* E-mail */}
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">E-mail</Label>
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                >
+                  E-mail
+                </Label>
                 <div className="relative overflow-visible">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
                   <Input
@@ -273,7 +305,12 @@ export function LoginPage() {
               {/* Senha */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Senha</Label>
+                  <Label
+                    htmlFor="password"
+                    className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                  >
+                    Senha
+                  </Label>
                   <Link
                     to="/recuperar-senha"
                     className="text-xs font-medium text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
@@ -309,7 +346,10 @@ export function LoginPage() {
                   checked={rememberMe}
                   onCheckedChange={(c) => setRememberMe(c === true)}
                 />
-                <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer select-none">
+                <label
+                  htmlFor="remember"
+                  className="text-sm text-slate-600 cursor-pointer select-none"
+                >
                   Lembrar de mim
                 </label>
               </div>
@@ -335,7 +375,9 @@ export function LoginPage() {
                     <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Entrando...
                   </div>
-                ) : "Entrar"}
+                ) : (
+                  "Entrar"
+                )}
               </Button>
             </form>
 
@@ -350,7 +392,14 @@ export function LoginPage() {
             <div className="space-y-3">
               <div className="text-center text-sm text-slate-600">
                 Novo por aqui?{" "}
-                <Link to="/register" className="font-bold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors">
+                <Link
+                  to="/register"
+                  state={postLoginRedirect ?? undefined}
+                  onClick={() => {
+                    if (postLoginRedirect) rememberPostLoginRedirect(postLoginRedirect);
+                  }}
+                  className="font-bold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
+                >
                   Crie sua conta grátis
                 </Link>
               </div>

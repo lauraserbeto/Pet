@@ -24,6 +24,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { CreditCardVisual } from "../components/checkout/CreditCardVisual";
 
 type Step = "address" | "payment" | "review";
 
@@ -55,7 +56,8 @@ export function CheckoutPage() {
   const selectedAddress = addresses?.find((addr) => addr.id === selectedAddressId);
 
   // Payment
-  const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix" | "boleto">("credit");
+  const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix">("credit");
+  const [isCvvFocused, setIsCvvFocused] = useState(false);
   const [cardData, setCardData] = useState({
     number: "",
     name: "",
@@ -254,7 +256,7 @@ export function CheckoutPage() {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-slate-900 text-sm">
-                                {addr.rua}, {addr.numero} {addr.complemento && `- ${addr.complemento}`}
+                                {addr.rua}{addr.numero ? `, ${addr.numero}` : ''} {addr.complemento && `- ${addr.complemento}`}
                               </p>
                               {addr.is_default && (
                                 <span className="text-[10px] bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
@@ -335,11 +337,10 @@ export function CheckoutPage() {
                 </div>
 
                 {/* Payment methods */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     { key: "credit" as const, icon: CreditCard, label: "Cartão" },
                     { key: "pix" as const, icon: QrCode, label: "PIX" },
-                    { key: "boleto" as const, icon: Barcode, label: "Boleto" },
                   ].map((m) => (
                     <button
                       key={m.key}
@@ -368,39 +369,57 @@ export function CheckoutPage() {
 
                 {/* Credit card form */}
                 {paymentMethod === "credit" && (
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label>Número do Cartão</Label>
-                      <Input
-                        placeholder="0000 0000 0000 0000"
-                        value={cardData.number}
-                        onChange={(e) => setCardData({ ...cardData, number: maskCardNumber(e.target.value) })}
+                  <div className="space-y-6">
+                    {/* Visual Card */}
+                    <div className="px-4 py-2">
+                      <CreditCardVisual
+                        number={cardData.number}
+                        name={cardData.name}
+                        expiry={cardData.expiry}
+                        cvv={cardData.cvv}
+                        isFlipped={isCvvFocused}
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label>Nome no Cartão</Label>
-                      <Input
-                        placeholder="Como impresso no cartão"
-                        value={cardData.name}
-                        onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+
+                    <div className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label>Validade</Label>
+                        <Label>Número do Cartão</Label>
                         <Input
-                          placeholder="MM/AA"
-                          value={cardData.expiry}
-                          onChange={(e) => setCardData({ ...cardData, expiry: maskExpiry(e.target.value) })}
+                          placeholder="0000 0000 0000 0000"
+                          value={cardData.number}
+                          onChange={(e) => setCardData({ ...cardData, number: maskCardNumber(e.target.value) })}
+                          onFocus={() => setIsCvvFocused(false)}
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label>CVV</Label>
+                        <Label>Nome no Cartão</Label>
                         <Input
-                          placeholder="000"
-                          value={cardData.cvv}
-                          onChange={(e) => setCardData({ ...cardData, cvv: maskCVV(e.target.value) })}
+                          placeholder="Como impresso no cartão"
+                          value={cardData.name}
+                          onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                          onFocus={() => setIsCvvFocused(false)}
                         />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label>Validade</Label>
+                          <Input
+                            placeholder="MM/AA"
+                            value={cardData.expiry}
+                            onChange={(e) => setCardData({ ...cardData, expiry: maskExpiry(e.target.value) })}
+                            onFocus={() => setIsCvvFocused(false)}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>CVV</Label>
+                          <Input
+                            placeholder="000"
+                            value={cardData.cvv}
+                            onChange={(e) => setCardData({ ...cardData, cvv: maskCVV(e.target.value) })}
+                            onFocus={() => setIsCvvFocused(true)}
+                            onBlur={() => setIsCvvFocused(false)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -419,18 +438,7 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Boleto info */}
-                {paymentMethod === "boleto" && (
-                  <div className="bg-slate-50 rounded-xl p-5 text-center space-y-3">
-                    <Barcode className="h-16 w-16 text-slate-300 mx-auto" />
-                    <p className="text-sm text-slate-600">
-                      O boleto será gerado com vencimento em 3 dias úteis.
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Pedido confirmado após compensação (1 a 3 dias úteis).
-                    </p>
-                  </div>
-                )}
+
 
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Lock className="h-3.5 w-3.5" />
@@ -473,7 +481,7 @@ export function CheckoutPage() {
                   {selectedAddress ? (
                     <>
                       <p className="text-sm text-slate-600">
-                        {selectedAddress.rua}, {selectedAddress.numero} {selectedAddress.complemento && `- ${selectedAddress.complemento}`}
+                        {selectedAddress.rua}{selectedAddress.numero ? `, ${selectedAddress.numero}` : ''} {selectedAddress.complemento && `- ${selectedAddress.complemento}`}
                       </p>
                       <p className="text-sm text-slate-500">
                         {selectedAddress.bairro}, {selectedAddress.cidade} - {selectedAddress.estado}, {selectedAddress.cep}
@@ -503,7 +511,7 @@ export function CheckoutPage() {
                       ? "Cartão de Crédito"
                       : paymentMethod === "pix"
                       ? "PIX (5% de desconto)"
-                      : "Boleto Bancário"}
+                      : ""}
                   </p>
                 </div>
 

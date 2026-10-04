@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { useCart } from "../components/cart/CartContext";
+import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
 import {
   ShoppingCart,
@@ -15,16 +16,44 @@ import {
   RotateCcw,
   Tag,
   PackageOpen,
+  LogIn,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { rememberPostLoginRedirect } from "../lib/postLoginRedirect";
 import { useState } from "react";
 
 export function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [coupon, setCoupon] = useState("");
   const [discount, setDiscount] = useState(0);
   const [itemToRemove, setItemToRemove] = useState<any | null>(null);
+  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
+
+  const handleCheckout = () => {
+    if (isAuthenticated) {
+      navigate("/checkout");
+      return;
+    }
+
+    setIsAuthPromptOpen(true);
+  };
+
+  const continueWithAuthentication = (destination: "/login" | "/register") => {
+    const redirect = { returnTo: "/cart", intent: "checkout" as const };
+    rememberPostLoginRedirect(redirect);
+    setIsAuthPromptOpen(false);
+    navigate(destination, { state: redirect });
+  };
 
   const applyCoupon = () => {
     if (coupon.toUpperCase() === "PETMAIS15") {
@@ -70,7 +99,10 @@ export function CartPage() {
       <div className="bg-white border-b border-slate-100">
         <div className="container mx-auto max-w-6xl px-4 py-5">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-slate-100 transition-colors">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+            >
               <ArrowLeft className="h-5 w-5 text-slate-600" />
             </button>
             <div>
@@ -238,9 +270,7 @@ export function CartPage() {
                   </span>
                 </div>
                 {shipping > 0 && (
-                  <p className="text-xs text-slate-400">
-                    Frete grátis acima de R$ 199,00
-                  </p>
+                  <p className="text-xs text-slate-400">Frete grátis acima de R$ 199,00</p>
                 )}
                 <div className="border-t border-slate-100 pt-3 flex justify-between">
                   <span className="font-bold text-slate-900">Total</span>
@@ -251,11 +281,7 @@ export function CartPage() {
               </div>
 
               {/* CTA */}
-              <Button
-                size="lg"
-                className="w-full gap-2 rounded-xl h-12"
-                onClick={() => navigate("/checkout")}
-              >
+              <Button size="lg" className="w-full gap-2 rounded-xl h-12" onClick={handleCheckout}>
                 Finalizar Compra
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -314,9 +340,11 @@ export function CartPage() {
               <h3 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
                 Remover este item?
               </h3>
-              
+
               <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed font-semibold">
-                Você quer retirar <span className="text-slate-800 font-bold">"{itemToRemove.name}"</span> do seu carrinho?
+                Você quer retirar{" "}
+                <span className="text-slate-800 font-bold">"{itemToRemove.name}"</span> do seu
+                carrinho?
               </p>
 
               <div className="flex gap-3 mt-6">
@@ -343,6 +371,47 @@ export function CartPage() {
         )}
       </AnimatePresence>
 
+      <Dialog open={isAuthPromptOpen} onOpenChange={setIsAuthPromptOpen}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-2xl sm:max-w-md">
+          <DialogHeader className="items-center text-center">
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-orange-50">
+              <ShoppingCart className="h-5 w-5 text-orange-600" />
+            </div>
+            <DialogTitle>Entre para finalizar sua compra</DialogTitle>
+            <DialogDescription className="max-w-sm leading-6">
+              Seu carrinho será mantido. Depois de entrar, você volta para ele e pode continuar a
+              compra com segurança.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-2 grid gap-3">
+            <Button
+              size="lg"
+              className="w-full gap-2 rounded-xl"
+              onClick={() => continueWithAuthentication("/login")}
+            >
+              <LogIn className="h-4 w-4" />
+              Entrar e continuar
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full gap-2 rounded-xl"
+              onClick={() => continueWithAuthentication("/register")}
+            >
+              <UserPlus className="h-4 w-4" />
+              Criar uma conta
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full rounded-xl text-slate-500"
+              onClick={() => setIsAuthPromptOpen(false)}
+            >
+              Continuar comprando
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
