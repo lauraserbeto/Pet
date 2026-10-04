@@ -8,8 +8,30 @@ const ORDER_STATUS = {
 };
 
 const INITIAL_ORDER_STATUS = ORDER_STATUS.AWAITING_PAYMENT;
+const PAYABLE_ORDER_STATUSES = Object.freeze([ORDER_STATUS.AWAITING_PAYMENT]);
+
+const PAYMENT_PROVIDER = {
+  SIMULATED: 'SIMULATED',
+};
+
+const PAYMENT_STATUS = {
+  APPROVED: 'APPROVED',
+};
+
+function isPayableOrderStatus(status) {
+  return PAYABLE_ORDER_STATUSES.includes(status);
+}
+
+function isPaidOrderStatus(status) {
+  return status === ORDER_STATUS.PAID;
+}
 
 module.exports = {
   ORDER_STATUS,
   INITIAL_ORDER_STATUS,
+  PAYABLE_ORDER_STATUSES,
+  PAYMENT_PROVIDER,
+  PAYMENT_STATUS,
+  isPayableOrderStatus,
+  isPaidOrderStatus,
 };
