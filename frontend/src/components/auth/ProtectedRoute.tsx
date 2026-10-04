@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
 import { isApprovedProviderStatus } from "../../lib/constants/providerStatus";
+import { rememberPostLoginRedirect, type PostLoginIntent } from "../../lib/postLoginRedirect";
 
 // Lojista (2) e Hotel (3) só acessam áreas internas após aprovação do admin.
 // O Pet Sitter (4) é exceção: entra pendente para completar o onboarding.
@@ -10,9 +11,18 @@ const ROLES_REQUIRING_APPROVAL = [2, 3];
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  allowedRoles?: number[];
+  unauthenticatedReturnTo?: string;
+  unauthenticatedIntent?: PostLoginIntent;
 }
 
-export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  adminOnly = false,
+  allowedRoles,
+  unauthenticatedReturnTo,
+  unauthenticatedIntent,
+}: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -21,7 +31,12 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
     if (isLoading) return;
 
     if (!isAuthenticated || !user) {
-      navigate("/login", { replace: true });
+      const returnTo =
+        unauthenticatedReturnTo ?? `${location.pathname}${location.search}${location.hash}`;
+      const redirect = { returnTo, intent: unauthenticatedIntent };
+
+      rememberPostLoginRedirect(redirect);
+      navigate("/login", { replace: true, state: redirect });
       return;
     }
 
@@ -30,9 +45,17 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
       return;
     }
 
+    if (allowedRoles && !allowedRoles.includes(user.role_id)) {
+      navigate("/", { replace: true });
+      return;
+    }
+
     // Parceiro ainda não aprovado não acessa o dashboard. O backend já barra o
     // login desses perfis; isto é defesa em profundidade (sessão/token antigo).
-    if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider_status)) {
+    if (
+      ROLES_REQUIRING_APPROVAL.includes(user.role_id) &&
+      !isApprovedProviderStatus(user.provider_status)
+    ) {
       navigate("/", { replace: true });
       return;
     }
@@ -52,7 +75,19 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
         return;
       }
     }
-  }, [isLoading, isAuthenticated, user, adminOnly, navigate, location.pathname]);
+  }, [
+    isLoading,
+    isAuthenticated,
+    user,
+    adminOnly,
+    allowedRoles,
+    navigate,
+    location.pathname,
+    location.search,
+    location.hash,
+    unauthenticatedReturnTo,
+    unauthenticatedIntent,
+  ]);
 
   if (isLoading) {
     return (
@@ -64,7 +99,12 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
 
   if (!isAuthenticated || !user) return null;
   if (adminOnly && user.role_id !== 1) return null;
-  if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider_status)) return null;
+  if (allowedRoles && !allowedRoles.includes(user.role_id)) return null;
+  if (
+    ROLES_REQUIRING_APPROVAL.includes(user.role_id) &&
+    !isApprovedProviderStatus(user.provider_status)
+  )
+    return null;
 
   return <>{children}</>;
 };

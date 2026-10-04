@@ -1,13 +1,6 @@
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import {
-  CheckCircle2,
-  Package,
-  ArrowRight,
-  ShoppingBag,
-  Home,
-  Mail,
-} from "lucide-react";
+import { CheckCircle2, Package, ShoppingBag, Home, Mail } from "lucide-react";
 import { Button } from "../components/ui/button";
 
 export function CheckoutSuccessPage() {
@@ -85,7 +78,9 @@ export function CheckoutSuccessPage() {
                       step.done ? "bg-emerald-500" : "bg-slate-200"
                     }`}
                   />
-                  <span className={`text-[10px] ${step.done ? "text-emerald-600 font-medium" : "text-slate-400"}`}>
+                  <span
+                    className={`text-[10px] ${step.done ? "text-emerald-600 font-medium" : "text-slate-400"}`}
+                  >
                     {step.label}
                   </span>
                   {i < 3 && <div className="flex-1 h-px bg-slate-200" />}
@@ -103,8 +98,14 @@ export function CheckoutSuccessPage() {
               Continuar Comprando
             </Button>
           </Link>
-          <Link to="/" className="block">
+          <Link to="/tutor/pedidos" className="block">
             <Button variant="outline" size="lg" className="w-full gap-2 rounded-xl">
+              <Package className="h-4 w-4" />
+              Ver Meus Pedidos
+            </Button>
+          </Link>
+          <Link to="/" className="block">
+            <Button variant="ghost" size="lg" className="w-full gap-2 rounded-xl">
               <Home className="h-4 w-4" />
               Voltar ao Início
             </Button>

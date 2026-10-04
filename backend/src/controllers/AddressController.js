@@ -44,7 +44,7 @@ class AddressController {
           user_id: req.userId,
           cep: payload.cep,
           rua: payload.rua,
-          numero: payload.numero,
+          numero: payload.numero || '',
           complemento: payload.complemento || null,
           bairro: payload.bairro,
           cidade: payload.cidade,

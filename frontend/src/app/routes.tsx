@@ -11,45 +11,111 @@ import { HamsterLoader } from "../components/ui/HamsterLoader";
 
 // Páginas em code splitting (React.lazy) — cada rota vira um chunk sob demanda,
 // tirando ~40 páginas do bundle inicial (antes um único chunk de ~2,1 MB).
-const LandingPage = lazy(() => import("../pages/LandingPage").then((m) => ({ default: m.LandingPage })));
-const StyleGuide = lazy(() => import("../pages/StyleGuide").then((m) => ({ default: m.StyleGuide })));
-const HotelsPage = lazy(() => import("../pages/HotelsPage").then((m) => ({ default: m.HotelsPage })));
-const HotelDetailsPage = lazy(() => import("../pages/HotelDetailsPage").then((m) => ({ default: m.HotelDetailsPage })));
-const WalkersPage = lazy(() => import("../pages/WalkersPage").then((m) => ({ default: m.WalkersPage })));
-const WalkerDetailsPage = lazy(() => import("../pages/WalkerDetailsPage").then((m) => ({ default: m.WalkerDetailsPage })));
+const LandingPage = lazy(() =>
+  import("../pages/LandingPage").then((m) => ({ default: m.LandingPage }))
+);
+const StyleGuide = lazy(() =>
+  import("../pages/StyleGuide").then((m) => ({ default: m.StyleGuide }))
+);
+const HotelsPage = lazy(() =>
+  import("../pages/HotelsPage").then((m) => ({ default: m.HotelsPage }))
+);
+const HotelDetailsPage = lazy(() =>
+  import("../pages/HotelDetailsPage").then((m) => ({ default: m.HotelDetailsPage }))
+);
+const WalkersPage = lazy(() =>
+  import("../pages/WalkersPage").then((m) => ({ default: m.WalkersPage }))
+);
+const WalkerDetailsPage = lazy(() =>
+  import("../pages/WalkerDetailsPage").then((m) => ({ default: m.WalkerDetailsPage }))
+);
 const StorePage = lazy(() => import("../pages/StorePage").then((m) => ({ default: m.StorePage })));
 // Índice do dashboard: despacha por perfil (admin vê o painel da plataforma).
-const DashboardHome = lazy(() => import("../pages/dashboard/DashboardHome").then((m) => ({ default: m.DashboardHome })));
-const Schedule = lazy(() => import("../pages/dashboard/Schedule").then((m) => ({ default: m.Schedule })));
-const Customers = lazy(() => import("../pages/dashboard/Customers").then((m) => ({ default: m.Customers })));
-const Products = lazy(() => import("../pages/dashboard/Products").then((m) => ({ default: m.Products })));
-const Settings = lazy(() => import("../pages/dashboard/Settings").then((m) => ({ default: m.Settings })));
-const Approvals = lazy(() => import("../pages/dashboard/admin/Approvals").then((m) => ({ default: m.Approvals })));
-const Users = lazy(() => import("../pages/dashboard/admin/Users").then((m) => ({ default: m.Users })));
-const LoginPage = lazy(() => import("../pages/auth/LoginPage").then((m) => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import("../pages/auth/RegisterPage").then((m) => ({ default: m.RegisterPage })));
-const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })));
+const DashboardHome = lazy(() =>
+  import("../pages/dashboard/DashboardHome").then((m) => ({ default: m.DashboardHome }))
+);
+const Schedule = lazy(() =>
+  import("../pages/dashboard/Schedule").then((m) => ({ default: m.Schedule }))
+);
+const Customers = lazy(() =>
+  import("../pages/dashboard/Customers").then((m) => ({ default: m.Customers }))
+);
+const Products = lazy(() =>
+  import("../pages/dashboard/Products").then((m) => ({ default: m.Products }))
+);
+const Settings = lazy(() =>
+  import("../pages/dashboard/Settings").then((m) => ({ default: m.Settings }))
+);
+const Approvals = lazy(() =>
+  import("../pages/dashboard/admin/Approvals").then((m) => ({ default: m.Approvals }))
+);
+const Users = lazy(() =>
+  import("../pages/dashboard/admin/Users").then((m) => ({ default: m.Users }))
+);
+const LoginPage = lazy(() =>
+  import("../pages/auth/LoginPage").then((m) => ({ default: m.LoginPage }))
+);
+const RegisterPage = lazy(() =>
+  import("../pages/auth/RegisterPage").then((m) => ({ default: m.RegisterPage }))
+);
+const ForgotPasswordPage = lazy(() =>
+  import("../pages/auth/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage }))
+);
+const ResetPasswordPage = lazy(() =>
+  import("../pages/auth/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage }))
+);
 const AboutPage = lazy(() => import("../pages/AboutPage").then((m) => ({ default: m.AboutPage })));
-const ShoppingPage = lazy(() => import("../pages/ShoppingPage").then((m) => ({ default: m.ShoppingPage })));
-const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage").then((m) => ({ default: m.ProductDetailPage })));
+const ShoppingPage = lazy(() =>
+  import("../pages/ShoppingPage").then((m) => ({ default: m.ShoppingPage }))
+);
+const ProductDetailPage = lazy(() =>
+  import("../pages/ProductDetailPage").then((m) => ({ default: m.ProductDetailPage }))
+);
 const TermsPage = lazy(() => import("../pages/TermsPage").then((m) => ({ default: m.TermsPage })));
-const PrivacyPage = lazy(() => import("../pages/PrivacyPage").then((m) => ({ default: m.PrivacyPage })));
-const ContactPage = lazy(() => import("../pages/ContactPage").then((m) => ({ default: m.ContactPage })));
+const PrivacyPage = lazy(() =>
+  import("../pages/PrivacyPage").then((m) => ({ default: m.PrivacyPage }))
+);
+const ContactPage = lazy(() =>
+  import("../pages/ContactPage").then((m) => ({ default: m.ContactPage }))
+);
 const CartPage = lazy(() => import("../pages/CartPage").then((m) => ({ default: m.CartPage })));
-const CheckoutPage = lazy(() => import("../pages/CheckoutPage").then((m) => ({ default: m.CheckoutPage })));
-const CheckoutSuccessPage = lazy(() => import("../pages/CheckoutSuccessPage").then((m) => ({ default: m.CheckoutSuccessPage })));
-const Account = lazy(() => import("../pages/dashboard/Account").then((m) => ({ default: m.Account })));
-const PublicProfile = lazy(() => import("../pages/dashboard/PublicProfile").then((m) => ({ default: m.PublicProfile })));
+const CheckoutPage = lazy(() =>
+  import("../pages/CheckoutPage").then((m) => ({ default: m.CheckoutPage }))
+);
+const CheckoutSuccessPage = lazy(() =>
+  import("../pages/CheckoutSuccessPage").then((m) => ({ default: m.CheckoutSuccessPage }))
+);
+const Account = lazy(() =>
+  import("../pages/dashboard/Account").then((m) => ({ default: m.Account }))
+);
+const PublicProfile = lazy(() =>
+  import("../pages/dashboard/PublicProfile").then((m) => ({ default: m.PublicProfile }))
+);
 const Finance = lazy(() => import("@/pages/dashboard/Finance"));
 const Orders = lazy(() => import("@/pages/dashboard/Orders"));
-const PetSitterOnboarding = lazy(() => import("../pages/onboarding/PetSitterOnboarding").then((m) => ({ default: m.PetSitterOnboarding })));
-const SitterEvaluations = lazy(() => import("@/pages/dashboard/SitterEvaluations").then((m) => ({ default: m.SitterEvaluations })));
-const TutorProfile = lazy(() => import("../pages/tutor/TutorProfile").then((m) => ({ default: m.TutorProfile })));
-const TutorPets = lazy(() => import("../pages/tutor/TutorPets").then((m) => ({ default: m.TutorPets })));
-const TutorAppointments = lazy(() => import("../pages/tutor/TutorAppointments").then((m) => ({ default: m.TutorAppointments })));
-const TutorOrders = lazy(() => import("../pages/tutor/TutorOrders").then((m) => ({ default: m.TutorOrders })));
-const PartnersPage = lazy(() => import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage })));
+const PetSitterOnboarding = lazy(() =>
+  import("../pages/onboarding/PetSitterOnboarding").then((m) => ({
+    default: m.PetSitterOnboarding,
+  }))
+);
+const SitterEvaluations = lazy(() =>
+  import("@/pages/dashboard/SitterEvaluations").then((m) => ({ default: m.SitterEvaluations }))
+);
+const TutorProfile = lazy(() =>
+  import("../pages/tutor/TutorProfile").then((m) => ({ default: m.TutorProfile }))
+);
+const TutorPets = lazy(() =>
+  import("../pages/tutor/TutorPets").then((m) => ({ default: m.TutorPets }))
+);
+const TutorAppointments = lazy(() =>
+  import("../pages/tutor/TutorAppointments").then((m) => ({ default: m.TutorAppointments }))
+);
+const TutorOrders = lazy(() =>
+  import("../pages/tutor/TutorOrders").then((m) => ({ default: m.TutorOrders }))
+);
+const PartnersPage = lazy(() =>
+  import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage }))
+);
 
 // Fallback exibido enquanto o chunk da rota carrega.
 function RouteFallback() {
@@ -57,9 +123,7 @@ function RouteFallback() {
 }
 
 // Envolve rotas SEM layout (que teria o Suspense no <Outlet/>) numa fronteira própria.
-const withSuspense = (node: ReactNode) => (
-  <Suspense fallback={<RouteFallback />}>{node}</Suspense>
-);
+const withSuspense = (node: ReactNode) => <Suspense fallback={<RouteFallback />}>{node}</Suspense>;
 
 const rootRoutes: RouteObject[] = [
   {
@@ -150,11 +214,23 @@ const rootRoutes: RouteObject[] = [
         children: [
           {
             index: true,
-            Component: CheckoutPage,
+            element: (
+              <ProtectedRoute
+                allowedRoles={[5]}
+                unauthenticatedReturnTo="/cart"
+                unauthenticatedIntent="checkout"
+              >
+                <CheckoutPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: "success",
-            Component: CheckoutSuccessPage,
+            element: (
+              <ProtectedRoute allowedRoles={[5]}>
+                <CheckoutSuccessPage />
+              </ProtectedRoute>
+            ),
           },
         ],
       },
