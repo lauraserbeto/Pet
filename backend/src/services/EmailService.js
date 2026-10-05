@@ -2,6 +2,7 @@ const { Resend } = require("resend");
 const { RESEND_API_KEY, EMAIL_FROM, EMAIL_REPLY_TO } = require("../config/env");
 
 const PASSWORD_RESET_TEMPLATE_ID = "password-reset";
+const PROVIDER_REJECTION_TEMPLATE_ID = "provider-correction-needed";
 
 function assertEmailConfig() {
   if (!RESEND_API_KEY || !EMAIL_FROM) {
@@ -81,8 +82,20 @@ class EmailService {
       },
     });
   }
+
+  sendRejection(to, { reason, correctionUrl }) {
+    return this.sendTemplate({
+      to,
+      templateId: PROVIDER_REJECTION_TEMPLATE_ID,
+      variables: {
+        REASON: reason,
+        CORRECTION_URL: correctionUrl,
+      },
+    });
+  }
 }
 
 module.exports = new EmailService();
 module.exports.EmailService = EmailService;
 module.exports.PASSWORD_RESET_TEMPLATE_ID = PASSWORD_RESET_TEMPLATE_ID;
+module.exports.PROVIDER_REJECTION_TEMPLATE_ID = PROVIDER_REJECTION_TEMPLATE_ID;

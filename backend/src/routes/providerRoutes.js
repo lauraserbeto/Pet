@@ -133,6 +133,26 @@ router.get('/completeness', authMiddleware, ProviderController.getCompleteness);
 
 /**
  * @swagger
+ * /api/v1/providers/me/resubmit:
+ *   post:
+ *     summary: Reenvio do cadastro após recusa — move o status de REJEITADO para EM_REVISAO
+ *     tags: [Providers]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cadastro reenviado para revisão
+ *       400:
+ *         description: Status atual não permite reenvio
+ *       401:
+ *         description: Não autenticado
+ *       404:
+ *         description: Perfil de parceiro não encontrado
+ */
+router.post('/me/resubmit', authMiddleware, ProviderController.resubmit);
+
+/**
+ * @swagger
  * /api/v1/providers/me:
  *   put:
  *     summary: Atualiza dados de conta do parceiro

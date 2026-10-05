@@ -8,6 +8,10 @@ const {
   isOperationalSitter,
 } = require('../constants/providerStatus');
 const { toPublicProvider, toPublicProviders } = require('../utils/publicProvider');
+const emailService = require('../services/EmailService');
+const logger = require('../config/logger');
+const { FRONTEND_URL } = require('../config/env');
+const AppError = require('../utils/AppError');
 
 class ProviderController {
   // Validador de completitude em memória (JS) para estabilidade de tipagem
@@ -309,20 +313,82 @@ class ProviderController {
     }
   }
 
-  // Atualiza status do provedor
+  // Atualiza status do provedor (admin)
   async updateStatus(req, res, next) {
     try {
       const { id } = req.params;
       const { status, rejection_reason } = req.body;
+
+      // Busca o provider com o e-mail do user para envio de e-mail
+      const existing = await prisma.provider.findUnique({
+        where: { id },
+        include: {
+          user: {
+            select: { email: true },
+          },
+        },
+      });
+
+      if (!existing) {
+        return next(AppError.notFound('Parceiro não encontrado'));
+      }
 
       const updated = await prisma.provider.update({
         where: { id },
         data: {
           status,
           rejection_reason: status === PROVIDER_STATUS.REJECTED
-            ? rejection_reason || null
-            : null
-        }
+            ? rejection_reason
+            : null,
+        },
+      });
+
+      // Dispara e-mail de recusa — falha não reverte a persistência
+      if (status === PROVIDER_STATUS.REJECTED && existing.user?.email) {
+        const correctionUrl = `${FRONTEND_URL}/parceiro/cadastro`;
+        emailService
+          .sendRejection(existing.user.email, {
+            reason: rejection_reason,
+            correctionUrl,
+          })
+          .catch((err) =>
+            logger.error(
+              { err, providerId: id },
+              '[ProviderController] Falha ao enviar e-mail de recusa',
+            ),
+          );
+      }
+
+      return res.status(200).json(updated);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  // Endpoint de reenvio: parceiro REJEITADO move o próprio cadastro para EM_REVISAO
+  async resubmit(req, res, next) {
+    try {
+      const userId = req.userId;
+
+      const provider = await prisma.provider.findUnique({
+        where: { user_id: userId },
+      });
+
+      if (!provider) {
+        return next(AppError.notFound('Perfil de parceiro não encontrado'));
+      }
+
+      if (provider.status !== PROVIDER_STATUS.REJECTED) {
+        return next(
+          AppError.badRequest(
+            `Reenvio só é permitido a partir do status REJEITADO. Status atual: ${provider.status}`,
+          ),
+        );
+      }
+
+      const updated = await prisma.provider.update({
+        where: { id: provider.id },
+        data: { status: PROVIDER_STATUS.IN_REVIEW },
       });
 
       return res.status(200).json(updated);
