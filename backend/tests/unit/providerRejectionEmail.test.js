@@ -30,7 +30,7 @@ test("sendRejection envia o template provider-correction-needed com REASON e COR
     },
   }));
 
-  const correctionUrl = "http://localhost:5173/parceiro/cadastro";
+  const correctionUrl = "http://localhost:5173/parceiro/corrigir-cadastro";
   const reason = "Documentação incompleta: faltam CNPJ e comprovante de endereço.";
 
   const result = await service.sendRejection("parceiro@petplus.test", {
@@ -73,12 +73,36 @@ test("sendRejection propaga erro retornado pelo Resend", async () => {
     () =>
       service.sendRejection("parceiro@petplus.test", {
         reason: "Motivo qualquer",
-        correctionUrl: "http://localhost:5173/parceiro/cadastro",
+        correctionUrl: "http://localhost:5173/parceiro/corrigir-cadastro",
       }),
     (error) => {
       assert.equal(error.message, "Template não publicado");
       assert.equal(error.provider, "resend");
       return true;
     },
+  );
+});
+
+test("sendRejection escapa HTML informado no motivo da recusa", async () => {
+  const service = new EmailService();
+  let sentPayload;
+
+  mock.method(service, "getClient", () => ({
+    emails: {
+      send: async (payload) => {
+        sentPayload = payload;
+        return { data: { id: "email-rejection-safe" } };
+      },
+    },
+  }));
+
+  await service.sendRejection("parceiro@petplus.test", {
+    reason: '<img src=x onerror="alert(1)"> & revisão',
+    correctionUrl: "https://petplus.vercel.app/parceiro/corrigir-cadastro",
+  });
+
+  assert.equal(
+    sentPayload.template.variables.REASON,
+    "&lt;img src=x onerror=&quot;alert(1)&quot;&gt; &amp; revisão",
   );
 });

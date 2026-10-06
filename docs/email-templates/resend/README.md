@@ -103,10 +103,17 @@ Preview text: Revise os pontos indicados para reenviar seu cadastro.
 Variáveis:
 
 ```txt
-PARTNER_NAME
-REVIEW_NOTES
+REASON
 CORRECTION_URL
 ```
+
+O alias e os nomes acima precisam ser idênticos aos enviados pelo backend em
+`EmailService.sendRejection`. Após importar ou alterar o HTML, publique a versão do
+template; rascunhos não são usados pelos envios da API.
+
+O botão aponta para `/parceiro/corrigir-cadastro`, rota protegida prevista na REC-2.
+Enquanto a REC-2 não estiver publicada no frontend, o e-mail será enviado normalmente,
+mas o destino de correção ainda não estará disponível para o parceiro.
 
 ## Observação importante
 

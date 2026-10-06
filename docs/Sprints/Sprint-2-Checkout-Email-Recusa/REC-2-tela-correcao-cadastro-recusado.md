@@ -17,7 +17,7 @@ ação de reenviar que chama o endpoint de reenvio (status → `EM_REVISAO`).
 
 ## Escopo / Passos
 1. Criar a rota de correção (ex.: `/parceiro/corrigir-cadastro`) e registrá-la no roteamento centralizado (lazy loading, como as demais rotas).
-2. Proteger a rota: se não autenticado, redirecionar para login preservando o retorno (voltar à correção após autenticar). Reusar o guard/`AuthContext` existente.
+2. Proteger a rota: se não autenticado, redirecionar para login preservando o retorno (voltar à correção após autenticar). Reusar o guard/`AuthContext` existente. Ajustar também o `LoginUseCase`, que atualmente devolve 403 para qualquer parceiro `REJEITADO`, para permitir uma sessão restrita ao fluxo de correção sem liberar as demais áreas internas.
 3. Carregar os dados do parceiro logado (`GET /providers/me`) e o `rejection_reason` para exibir em destaque no topo (alerta/banner).
 4. Formulário de edição dos campos cadastrais reutilizando os componentes/serviços já usados na vitrine (`providerService`), com validação e estados de loading/erro.
 5. Ação "Reenviar para análise": chama o endpoint de reenvio (REC-1), que aplica as correções e move o status para `EM_REVISAO`; feedback de sucesso e redirecionamento adequado.
@@ -36,6 +36,7 @@ ação de reenviar que chama o endpoint de reenvio (status → `EM_REVISAO`).
 ## Critério de aceite (Definition of Done)
 - [ ] O link do e-mail leva à tela de correção.
 - [ ] A tela **exige login**: usuário não autenticado é enviado ao login e retorna à correção após autenticar.
+- [ ] Um parceiro `REJEITADO` consegue autenticar para corrigir o cadastro, mas continua impedido de acessar as demais áreas internas até nova aprovação.
 - [ ] O `rejection_reason` aparece em destaque no topo da tela.
 - [ ] O parceiro corrige os dados e reenvia; o status passa a `EM_REVISAO`.
 - [ ] Reenvio fora do estado `REJEITADO` é bloqueado com aviso claro.
@@ -48,6 +49,7 @@ ação de reenviar que chama o endpoint de reenvio (status → `EM_REVISAO`).
 
 ## Notas técnicas / armadilhas
 - O link do e-mail **não** autentica por si só; a proteção é por login — nunca embutir token de acesso na URL.
+- O bloqueio atual de parceiros `REJEITADO` em `backend/src/useCases/auth/LoginUseCase.js` precisa ser refinado; sem isso, o usuário recebe o e-mail, mas não consegue acessar a correção depois de sair da sessão.
 - Preservar o destino de retorno ao redirecionar para login (evitar perder o link após autenticar).
 - Reaproveitar os componentes de formulário da vitrine/`PublicProfile` para não duplicar validação de campos cadastrais.
 - Tratar os quatro estados (loading/erro/vazio/sucesso); usar `HamsterLoader` no carregamento.
