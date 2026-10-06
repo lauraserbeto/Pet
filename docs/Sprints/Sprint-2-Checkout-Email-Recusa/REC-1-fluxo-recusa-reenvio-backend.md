@@ -54,6 +54,6 @@ painel do admin diferencie `EM_REVISAO` de `PENDENTE`.
 - `Provider.status` é VarChar livre; usar as constantes de `providerStatus.js` para não espalhar strings mágicas, e lembrar que "aprovado" é testado por CONJUNTO (`APPROVED_PROVIDER_STATUSES`).
 - Não vazar `document`/`password_hash` nas respostas de provider/user; usar `select` explícito.
 - Falha no envio de e-mail não deve reverter a recusa já persistida; logar via pino e seguir (o admin pode reenviar o e-mail depois).
-- O template publicado no Resend deve usar o alias `provider-correction-needed` e as variáveis `REASON` e `CORRECTION_URL` exatamente como enviadas pelo backend.
+- O template publicado no Resend deve usar o alias `cadastro-rejeitado` e as variáveis `REASON` e `CORRECTION_URL` exatamente como enviadas pelo backend.
 - Reaproveitar o campo `rejection_reason` do `Provider` (`schema.prisma:71`) — há também um em `User`, não confundir.
 - Erros via `next(AppError)` + errorHandler central; validação com Zod.

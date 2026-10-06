@@ -2,7 +2,7 @@ const { Resend } = require("resend");
 const { RESEND_API_KEY, EMAIL_FROM, EMAIL_REPLY_TO } = require("../config/env");
 
 const PASSWORD_RESET_TEMPLATE_ID = "password-reset";
-const PROVIDER_REJECTION_TEMPLATE_ID = "provider-correction-needed";
+const PROVIDER_REJECTION_TEMPLATE_ID = "cadastro-rejeitado";
 
 function assertEmailConfig() {
   if (!RESEND_API_KEY || !EMAIL_FROM) {

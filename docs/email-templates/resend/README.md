@@ -89,7 +89,7 @@ Uso: cadastro de parceiro recusado com pedido de correção.
 Alias recomendado:
 
 ```txt
-provider-correction-needed
+cadastro-rejeitado
 ```
 
 Campos recomendados:
@@ -107,7 +107,7 @@ REASON
 CORRECTION_URL
 ```
 
-O alias e os nomes acima precisam ser idênticos aos enviados pelo backend em
+O alias `cadastro-rejeitado` e os nomes acima precisam ser idênticos aos enviados pelo backend em
 `EmailService.sendRejection`. Após importar ou alterar o HTML, publique a versão do
 template; rascunhos não são usados pelos envios da API.
 

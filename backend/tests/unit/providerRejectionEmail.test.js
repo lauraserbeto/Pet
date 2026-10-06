@@ -17,7 +17,7 @@ const {
 
 afterEach(() => mock.restoreAll());
 
-test("sendRejection envia o template provider-correction-needed com REASON e CORRECTION_URL", async () => {
+test("sendRejection envia o template cadastro-rejeitado com REASON e CORRECTION_URL", async () => {
   const service = new EmailService();
   const sentPayloads = [];
 
