@@ -125,15 +125,12 @@ test("PATCH /:id/status — recusar com rejection_reason → 200, e-mail enviado
   assert.equal(res.body.status, PROVIDER_STATUS.REJECTED);
   assert.equal(res.body.rejection_reason, rejectionReason);
 
-  // O e-mail é disparado de forma assíncrona (fire-and-forget),
-  // aguardamos um tick para que a Promise interna seja resolvida
-  await new Promise((resolve) => setImmediate(resolve));
   assert.equal(emailCalls.length, 1, "sendRejection deve ser chamado uma vez");
   assert.equal(emailCalls[0].to, "parceiro@petplus.test");
   assert.equal(emailCalls[0].reason, rejectionReason);
   assert.ok(
-    emailCalls[0].correctionUrl.includes("/parceiro/cadastro"),
-    "Link de correção deve apontar para a rota de cadastro",
+    emailCalls[0].correctionUrl.includes("/parceiro/corrigir-cadastro"),
+    "Link de correção deve apontar para a rota definida na REC-2",
   );
 });
 

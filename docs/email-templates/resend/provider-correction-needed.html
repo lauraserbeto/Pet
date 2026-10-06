@@ -22,7 +22,7 @@
                     <td>
                       <img src="https://petplus.vercel.app/email-assets/petplus-logo.png" width="170" alt="Pet+" style="display:block;width:170px;max-width:170px;height:auto;border:0;outline:none;text-decoration:none;">
                       <div style="margin-top:8px;font-size:14px;line-height:20px;color:#64748b;">
-                        Revisão de cadastro de parceiro.
+                        Cuidado, serviços e produtos para pets em um só lugar.
                       </div>
                     </td>
                   </tr>
@@ -33,10 +33,10 @@
             <tr>
               <td style="padding:34px 32px 12px 32px;">
                 <h1 style="margin:0;font-family:Nunito,Arial,sans-serif;font-size:28px;line-height:34px;font-weight:800;color:#0f172a;">
-                  Ajustes no cadastro
+                  Precisamos de alguns ajustes
                 </h1>
                 <p style="margin:16px 0 0 0;font-size:16px;line-height:25px;color:#475569;">
-                  Olá, {{{PARTNER_NAME}}}. Nossa equipe revisou seu cadastro e encontrou alguns pontos que precisam ser ajustados antes da publicação.
+                  Olá! Nossa equipe revisou seu cadastro de parceiro e encontrou pontos que precisam ser corrigidos antes da aprovação.
                 </p>
               </td>
             </tr>
@@ -48,7 +48,7 @@
                     <td style="padding:18px;">
                       <span style="display:block;font-size:13px;font-weight:800;text-transform:uppercase;color:#92400e;">Observações da revisão</span>
                       <p style="margin:8px 0 0 0;font-size:15px;line-height:24px;color:#78350f;">
-                        {{{REVIEW_NOTES}}}
+                        {{{REASON}}}
                       </p>
                     </td>
                   </tr>
@@ -61,6 +61,9 @@
                 <p style="margin:0;font-size:15px;line-height:24px;color:#475569;">
                   Depois de ajustar as informações, reenvie o cadastro para que a equipe Pet+ possa fazer uma nova avaliação.
                 </p>
+                <p style="margin:12px 0 0 0;font-size:14px;line-height:22px;color:#64748b;">
+                  Por segurança, será necessário entrar na sua conta Pet+ para acessar a correção.
+                </p>
               </td>
             </tr>
 
@@ -69,6 +72,17 @@
                 <a href="{{{CORRECTION_URL}}}" style="display:inline-block;background:#f58b05;color:#ffffff;text-decoration:none;font-family:Nunito,Arial,sans-serif;font-size:16px;font-weight:800;line-height:20px;border-radius:10px;padding:15px 26px;box-shadow:0 10px 18px rgba(245,139,5,0.24);">
                   Corrigir cadastro
                 </a>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:0 32px 32px 32px;">
+                <p style="margin:0;font-size:13px;line-height:21px;color:#64748b;">
+                  Se o botão não funcionar, copie e cole este link no navegador:
+                </p>
+                <p style="margin:8px 0 0 0;font-size:12px;line-height:19px;color:#64748b;word-break:break-all;">
+                  {{{CORRECTION_URL}}}
+                </p>
               </td>
             </tr>
 

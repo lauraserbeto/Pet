@@ -25,6 +25,15 @@ function unwrapResendResponse(response) {
   return response.data;
 }
 
+function escapeTemplateText(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 class EmailService {
   constructor() {
     this.client = null;
@@ -88,7 +97,7 @@ class EmailService {
       to,
       templateId: PROVIDER_REJECTION_TEMPLATE_ID,
       variables: {
-        REASON: reason,
+        REASON: escapeTemplateText(reason),
         CORRECTION_URL: correctionUrl,
       },
     });
@@ -99,3 +108,4 @@ module.exports = new EmailService();
 module.exports.EmailService = EmailService;
 module.exports.PASSWORD_RESET_TEMPLATE_ID = PASSWORD_RESET_TEMPLATE_ID;
 module.exports.PROVIDER_REJECTION_TEMPLATE_ID = PROVIDER_REJECTION_TEMPLATE_ID;
+module.exports.escapeTemplateText = escapeTemplateText;

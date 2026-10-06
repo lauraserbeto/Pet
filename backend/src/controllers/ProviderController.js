@@ -345,18 +345,19 @@ class ProviderController {
 
       // Dispara e-mail de recusa — falha não reverte a persistência
       if (status === PROVIDER_STATUS.REJECTED && existing.user?.email) {
-        const correctionUrl = `${FRONTEND_URL}/parceiro/cadastro`;
-        emailService
-          .sendRejection(existing.user.email, {
+        const correctionUrl = `${FRONTEND_URL}/parceiro/corrigir-cadastro`;
+
+        try {
+          await emailService.sendRejection(existing.user.email, {
             reason: rejection_reason,
             correctionUrl,
-          })
-          .catch((err) =>
-            logger.error(
-              { err, providerId: id },
-              '[ProviderController] Falha ao enviar e-mail de recusa',
-            ),
+          });
+        } catch (err) {
+          logger.error(
+            { err, providerId: id },
+            '[ProviderController] Falha ao enviar e-mail de recusa',
           );
+        }
       }
 
       return res.status(200).json(updated);

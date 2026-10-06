@@ -19,7 +19,7 @@ painel do admin diferencie `EM_REVISAO` de `PENDENTE`.
 
 ## Escopo / Passos
 1. Em `ProviderController.updateStatus:272-290`, ao definir `status = REJEITADO`: exigir/validar `rejection_reason`, persistir e disparar `EmailService.sendRejection(user.email, { reason, correctionUrl })`.
-2. Montar o link de correção como `${FRONTEND_URL}/<rota-de-correcao>` (rota definida em REC-2), levando ao cadastro do parceiro logado.
+2. Montar o link de correção como `${FRONTEND_URL}/parceiro/corrigir-cadastro` (rota definida em REC-2), levando ao cadastro do parceiro logado.
 3. Criar endpoint de reenvio (ex.: `POST /providers/me/resubmit`) que valida que o parceiro está `REJEITADO`, aplica as correções e move o status para `EM_REVISAO`.
 4. Padronizar os valores de status em `constants/providerStatus.js` incluindo `EM_REVISAO` (hoje há `PENDENTE/APROVADO/REJEITADO`).
 5. Garantir que a listagem do admin (`listPartners`) exponha `status` de forma que o painel distinga `EM_REVISAO` de `PENDENTE` (o painel já consome esse endpoint).
@@ -54,5 +54,6 @@ painel do admin diferencie `EM_REVISAO` de `PENDENTE`.
 - `Provider.status` é VarChar livre; usar as constantes de `providerStatus.js` para não espalhar strings mágicas, e lembrar que "aprovado" é testado por CONJUNTO (`APPROVED_PROVIDER_STATUSES`).
 - Não vazar `document`/`password_hash` nas respostas de provider/user; usar `select` explícito.
 - Falha no envio de e-mail não deve reverter a recusa já persistida; logar via pino e seguir (o admin pode reenviar o e-mail depois).
+- O template publicado no Resend deve usar o alias `provider-correction-needed` e as variáveis `REASON` e `CORRECTION_URL` exatamente como enviadas pelo backend.
 - Reaproveitar o campo `rejection_reason` do `Provider` (`schema.prisma:71`) — há também um em `User`, não confundir.
 - Erros via `next(AppError)` + errorHandler central; validação com Zod.
