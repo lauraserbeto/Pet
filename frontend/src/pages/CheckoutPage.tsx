@@ -6,6 +6,7 @@ import { useCart } from "../components/cart/CartContext";
 import { HamsterLoader } from "../components/ui/HamsterLoader";
 import { useAddresses } from "../lib/hooks/useAddresses";
 import { toast } from "sonner";
+import { orderService } from "../lib/services/orderService";
 import {
   ArrowLeft,
   CreditCard,
@@ -128,10 +129,40 @@ export function CheckoutPage() {
 
   const handleFinalize = async () => {
     setIsProcessing(true);
-    // TODO CHK-2: Ligar POST /orders quando PED-1/PED-2 estiverem prontos (Pagamento SIMULADO)
-    await new Promise((r) => setTimeout(r, 2000));
-    clearCart();
-    navigate("/checkout/success");
+    try {
+      // 1. Prepara os dados (payload) para criar o pedido
+      const orderPayload = {
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price
+        })),
+        address_id: selectedAddressId,
+        payment_method: paymentMethod.toUpperCase(),
+      }
+      // 2. Chama a API para criar o pedido real
+      const orderResponse: any = await orderService.createOrder(orderPayload);
+      
+      console.log("RESPOSTA DO BACKEND:", orderResponse); 
+      
+      const newOrderId = orderResponse.order?.id || orderResponse.data?.order?.id || orderResponse.id;
+
+      if (!newOrderId) throw new Error("ID do pedido não retornado pelo servidor.");
+
+      // 3. Simula o pagamento usando o ID real
+      await orderService.payOrder(newOrderId);
+
+      // 4. Se deu tudo certo: limpa o carrinho e envia o ID real para a tela de sucesso!
+      clearCart();
+      
+      navigate("/checkout/success", { state: { orderId: newOrderId } });
+
+    } catch (error: any) {
+      console.error("Erro ao finalizar pedido:", error);
+      toast.error(error?.response?.data?.message || "Ocorreu um erro ao processar o seu pedido. Tente novamente.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (

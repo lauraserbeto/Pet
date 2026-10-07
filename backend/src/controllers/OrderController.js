@@ -12,6 +12,7 @@ class OrderController {
       const result = await createOrderUseCase.execute({
         userId: req.userId,
         userRole: req.userRole,
+        ...req.body // <-- Adicionamos esta linha para receber os dados do Frontend
       });
 
       return res.status(201).json(result);

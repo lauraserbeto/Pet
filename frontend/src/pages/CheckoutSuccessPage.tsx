@@ -1,10 +1,14 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { motion } from "motion/react";
-import { CheckCircle2, Package, ShoppingBag, Home, Mail } from "lucide-react";
+import { CheckCircle2, Package, ShoppingBag, Home, FileText } from "lucide-react";
 import { Button } from "../components/ui/button";
 
 export function CheckoutSuccessPage() {
-  const orderNumber = `PET-${Math.floor(100000 + Math.random() * 900000)}`;
+  // Lê o state enviado pelo navigate do CheckoutPage
+  const location = useLocation();
+  
+  // Se não vier nenhum ID do state, tentamos mostrar uma mensagem padrão ou de erro (Tratamento para a Sprint)
+  const orderNumber = location.state?.orderId || "Não identificado";
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -31,7 +35,7 @@ export function CheckoutSuccessPage() {
             Pedido Confirmado!
           </h1>
           <p className="text-slate-500 mt-2">
-            Seu pedido foi recebido com sucesso e está sendo preparado.
+            O seu pedido foi recebido com sucesso e já estamos a tratar dele.
           </p>
         </div>
 
@@ -50,9 +54,10 @@ export function CheckoutSuccessPage() {
           </div>
 
           <div className="border-t border-slate-100 pt-3 space-y-2">
+            {/* Mensagem corrigida para ser mais honesta (Conforme exigido na task) */}
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Mail className="h-4 w-4 text-slate-400" />
-              <span>Confirmação enviada para seu e-mail</span>
+              <FileText className="h-4 w-4 text-slate-400" />
+              <span>Acompanhe o estado na aba "Meus Pedidos"</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Package className="h-4 w-4 text-slate-400" />
@@ -67,7 +72,7 @@ export function CheckoutSuccessPage() {
             </p>
             <div className="flex items-center gap-2">
               {[
-                { label: "Confirmado", done: true },
+                { label: "Aguardando Pagamento", done: true }, // Marcamos a primeira bolinha como verde (pago)
                 { label: "Preparando", done: false },
                 { label: "Enviado", done: false },
                 { label: "Entregue", done: false },
@@ -95,7 +100,7 @@ export function CheckoutSuccessPage() {
           <Link to="/shopping" className="block">
             <Button size="lg" className="w-full gap-2 rounded-xl">
               <ShoppingBag className="h-4 w-4" />
-              Continuar Comprando
+              Continuar a Comprar
             </Button>
           </Link>
           <Link to="/tutor/pedidos" className="block">
