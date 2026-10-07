@@ -27,6 +27,7 @@ import {
 import { useParams, useNavigate } from "react-router";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 const AUTOPLAY_INTERVAL = 4500;
 
@@ -34,7 +35,8 @@ export function HotelDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
-  const [isFav, setIsFav] = useState(false);
+  const { isFavorite, toggle } = useFavorites();
+  const isFav = id ? isFavorite("HOTEL", id) : false;
   const [activeTab, setActiveTab] = useState<"info" | "reviews">("info");
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -219,7 +221,7 @@ export function HotelDetailsPage() {
               className={`rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm h-10 w-10 ${
                 isFav ? "text-red-500" : "text-slate-900"
               }`}
-              onClick={() => setIsFav(!isFav)}
+              onClick={() => id && toggle("HOTEL", id)}
               aria-label={isFav ? "Remover dos favoritos" : "Favoritar"}
             >
               <Heart size={18} className={isFav ? "fill-current" : ""} />

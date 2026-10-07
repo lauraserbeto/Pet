@@ -157,6 +157,8 @@ export function PublicProfile() {
     operating_hours: INITIAL_HOURS,
   });
 
+  const [initialData, setInitialData] = useState<PublicProfileFormState | null>(null);
+
   const [newRule, setNewRule] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -175,7 +177,7 @@ export function PublicProfile() {
       try {
         const d = await providerService.fetchMe();
         if (d) {
-          setFormData({
+          const loadedData = {
             role_id: d.user?.role_id,
             business_name: d.business_name || "",
             phone: d.phone || "",
@@ -194,7 +196,11 @@ export function PublicProfile() {
             highlights: d.highlights || [],
             hourly_rate: maskCurrency(d.hourly_rate || 0),
             sitter_roles: d.sitter_roles || [],
-          });
+          };
+
+          setFormData(loadedData);
+          setInitialData(loadedData); 
+        
         }
       } catch {
         toast.error("Erro ao carregar perfil público.");
@@ -799,7 +805,7 @@ export function PublicProfile() {
                 type="button"
                 variant="ghost"
                 className="hidden sm:flex rounded-xl font-semibold text-slate-400 hover:text-slate-600 h-11 px-5"
-                onClick={() => window.location.reload()}
+                onClick={() => initialData && setFormData(initialData)}
               >
                 <X size={16} className="mr-1.5" /> Descartar
               </Button>

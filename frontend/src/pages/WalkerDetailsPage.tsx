@@ -23,11 +23,13 @@ import { useParams, useNavigate } from "react-router";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
 import { isApprovedProviderStatus } from "../lib/constants/providerStatus";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 export function WalkerDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [isFav, setIsFav] = useState(false);
+  const { isFavorite, toggle } = useFavorites();
+  const isFav = id ? isFavorite("SITTER", id) : false;
   const [activeTab, setActiveTab] = useState<"about" | "services" | "reviews">(
     "about"
   );
@@ -166,7 +168,7 @@ const walker = apiWalker;
               className={`rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm h-10 w-10 ${
                 isFav ? "text-red-500" : "text-slate-900"
               }`}
-              onClick={() => setIsFav(!isFav)}
+              onClick={() => id && toggle("SITTER", id)}
               aria-label={isFav ? "Remover dos favoritos" : "Favoritar"}
             >
               <Heart size={18} className={isFav ? "fill-current" : ""} />
