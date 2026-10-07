@@ -52,6 +52,10 @@ model Provider {
   document         String         @unique @db.VarChar(20)
   document_type    String         @default("CNPJ") @db.VarChar(4)
   status           ProviderStatus @default(PENDENTE)
+  // AGD-1: PRESENCIAL (paga no local, padrão) | PRE_PAGO (exige pagamento
+  // antecipado — só nesse caso o agendamento passa por AGUARDANDO_CONFIRMACAO).
+  // Helpers em src/constants/paymentPolicy.js.
+  payment_policy   PaymentPolicy  @default(PRESENCIAL)
   description      String?        @db.Text
   phone            String?        @db.VarChar(20)
   zip_code         String?        @db.VarChar(20)
@@ -86,6 +90,11 @@ enum ProviderStatus {
   APROVADO
   REJEITADO
   EM_REVISAO
+}
+
+enum PaymentPolicy {
+  PRESENCIAL
+  PRE_PAGO
 }
 
 enum EvaluationStatus {
@@ -286,7 +295,12 @@ model Appointment {
   pet_id      String   @db.Uuid
   start_time  DateTime @db.Timestamptz
   end_time    DateTime @db.Timestamptz
-  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  // AGD-1 — máquina de estados em src/constants/appointmentStatus.js.
+  // PRESENCIAL: PENDENTE -> CONFIRMADO -> CONCLUIDO
+  // PRE_PAGO:   PENDENTE -> AGUARDANDO_CONFIRMACAO -> CONFIRMADO -> CONCLUIDO
+  // Terminais de saída: RECUSADO (parceiro nega) e CANCELADO.
+  // Independente da máquina de Order/pagamento.
+  status      String   @default("PENDENTE") @db.VarChar(30)
   total_price Decimal  @db.Decimal(10, 2)
   notes       String?  @db.Text
   created_at  DateTime @default(now()) @db.Timestamptz
