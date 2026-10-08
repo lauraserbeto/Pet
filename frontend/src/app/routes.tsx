@@ -116,6 +116,7 @@ const TutorOrders = lazy(() =>
 const PartnersPage = lazy(() =>
   import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage }))
 );
+const CorrecaoCadastro = lazy(() => import("../pages/parceiro/CorrecaoCadastro"));
 
 // Fallback exibido enquanto o chunk da rota carrega.
 function RouteFallback() {
@@ -287,6 +288,18 @@ const rootRoutes: RouteObject[] = [
         element: (
           <ProtectedRoute>
             <TutorOrders />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        // URL fixada no backend: o e-mail de recusa aponta para
+        // `${FRONTEND_URL}/parceiro/corrigir-cadastro` (ProviderController).
+        // Mudar aqui exige mudar lá. O link não autentica — a proteção é o login,
+        // e `allowRejectedProvider` deixa passar justamente quem foi recusado.
+        path: "parceiro/corrigir-cadastro",
+        element: (
+          <ProtectedRoute allowRejectedProvider>
+            <CorrecaoCadastro />
           </ProtectedRoute>
         ),
       },
