@@ -72,15 +72,23 @@ test('Pet Sitter (4) em IN_REVIEW também loga', async () => {
   assert.ok((await login()).token);
 });
 
-test('Parceiro REJEITADO é bloqueado com o motivo', async () => {
+test('Parceiro REJEITADO agora LOGA — precisa entrar para corrigir o cadastro (REC-2)', async () => {
   stubUser({ role_id: 2, status: 'REJEITADO', rejection_reason: 'Documento inválido' });
-  await assert.rejects(login, (err) => {
-    assert.equal(err.statusCode, 403);
-    assert.match(err.message, /recusado.*Documento inválido/i);
-    return true;
-  });
+
+  const result = await login();
+
+  assert.ok(result.token, 'o recusado precisa de token para abrir a tela de correção');
+  assert.equal(result.user.provider_status, 'REJEITADO');
 });
 
+test('Sitter (4) REJEITADO também loga para corrigir', async () => {
+  stubUser({ role_id: 4, status: 'REJEITADO', rejection_reason: 'Fotos ilegíveis' });
+
+  const result = await login();
+
+  assert.ok(result.token);
+  assert.equal(result.user.provider_status, 'REJEITADO');
+});
 test('Tutor (5) sem provider entra normalmente', async () => {
   stubUser({ role_id: 5, status: null });
   assert.ok((await login()).token);

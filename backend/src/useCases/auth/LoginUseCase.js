@@ -32,17 +32,24 @@ class LoginUseCase {
       throw error;
     }
 
-    // --- BLOQUEIO PARA PARCEIROS REJEITADOS ---
-    if (user.provider?.status === PROVIDER_STATUS.REJECTED) {
-        const reason = user.provider.rejection_reason || 'Sem motivo especificado pelo administrador.';
-        const error = new Error(`Seu cadastro de parceiro foi recusado. Motivo: ${reason}`);
-        error.statusCode = 403;
-        throw error;
-    }
+    // --- PARCEIRO REJEITADO: ENTRA, MAS SÓ PARA CORRIGIR O CADASTRO ---
+    // Antes o login era barrado com 403 e o motivo ia na mensagem de erro. Isso
+    // tornava a REC-2 impossível: o e-mail de recusa manda o parceiro corrigir o
+    // cadastro numa tela que exige login, e ele não conseguia autenticar.
+    //
+    // Agora ele autentica e o motivo aparece na própria tela de correção. O
+    // acesso às áreas internas segue barrado — o bloqueio por aprovação abaixo
+    // continua valendo para lojista e hotel, e o front só libera a rota de
+    // correção para este estado.
+    const isRejected = user.provider?.status === PROVIDER_STATUS.REJECTED;
 
     // --- BLOQUEIO DE ACESSO ANTES DA APROVAÇÃO (Lojista e Hotel) ---
     // Depois da migração STA-1, APROVADO é o único status que libera acesso.
-    if (ROLES_REQUIRING_APPROVAL.includes(user.role_id) && !isApprovedProviderStatus(user.provider?.status)) {
+    if (
+      !isRejected &&
+      ROLES_REQUIRING_APPROVAL.includes(user.role_id) &&
+      !isApprovedProviderStatus(user.provider?.status)
+    ) {
         const error = new Error('Seu cadastro está em análise. Você poderá acessar a plataforma assim que for aprovado pelo administrador.');
         error.statusCode = 403;
         throw error;

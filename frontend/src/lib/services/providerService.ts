@@ -1,4 +1,5 @@
 import { API_URL, getHeaders } from '../api';
+import { httpClient } from '../httpClient';
 
 export interface ProviderDetails {
   id: string;
@@ -91,6 +92,18 @@ export const providerService = {
 
     const data = await response.json();
     return data;
+  },
+
+  /**
+   * Reenvia o cadastro corrigido para análise (REC-2).
+   *
+   * O endpoint só troca o status REJEITADO → EM_REVISAO; não grava dados. As
+   * correções precisam ter sido salvas antes, via `updateMe`.
+   *
+   * Erros: 400 se o parceiro não estiver REJEITADO, 404 se não houver perfil.
+   */
+  async resubmit(): Promise<unknown> {
+    return httpClient.post('/providers/me/resubmit');
   },
 
   async updatePublicProfile(updateData: any): Promise<any> {
