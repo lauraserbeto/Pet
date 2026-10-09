@@ -57,3 +57,74 @@ deixando as regras documentadas para AGD-2 implementar os endpoints.
 - Definir explicitamente a política de arredondamento de diárias (ex.: dia iniciado conta como diária) e registrá-la no doc.
 - Esta task NÃO expõe endpoints — só modelo, migration e cálculo reutilizável (endpoints são AGD-2).
 - Não misturar estados de `Appointment` com estados de `Order`/pagamento; são máquinas distintas.
+
+---
+
+## Contrato definido (saída desta task — entrada da AGD-2)
+
+> Preenchido na implementação. As decisões de arredondamento e fuso que o card
+> pedia para explicitar estão registradas aqui.
+
+### Política de cobrança — `Provider.payment_policy`
+Enum `PaymentPolicy` no Postgres (mesma convenção que a STA-1 adotou para
+`ProviderStatus`), default `PRESENCIAL`. Helpers em `src/constants/paymentPolicy.js`.
+
+| Valor | Significado |
+|---|---|
+| `PRESENCIAL` (padrão) | Tutor paga no local, no momento do serviço |
+| `PRE_PAGO` | Parceiro exige pagamento antecipado |
+
+Valor nulo ou desconhecido é normalizado para `PRESENCIAL` — nunca para pré-pago.
+
+### Máquina de estados — `Appointment.status`
+VarChar(30), default `PENDENTE`. Constantes e validadores em
+`src/constants/appointmentStatus.js`.
+
+```
+PRESENCIAL:  PENDENTE ──────────────────────────────▶ CONFIRMADO ─▶ CONCLUIDO
+PRE_PAGO:    PENDENTE ─▶ AGUARDANDO_CONFIRMACAO ────▶ CONFIRMADO ─▶ CONCLUIDO
+```
+
+`AGUARDANDO_CONFIRMACAO` **só ocorre em parceiro `PRE_PAGO`** — é a janela entre
+o aceite do parceiro e a confirmação do pagamento. Em `PRESENCIAL` a transição é
+bloqueada por `isValidAppointmentTransition`.
+
+| De | Para |
+|---|---|
+| `PENDENTE` | `AGUARDANDO_CONFIRMACAO`¹, `CONFIRMADO`, `RECUSADO`, `CANCELADO` |
+| `AGUARDANDO_CONFIRMACAO` | `CONFIRMADO`, `CANCELADO` |
+| `CONFIRMADO` | `CONCLUIDO`, `CANCELADO` |
+| `CONCLUIDO` / `RECUSADO` / `CANCELADO` | — (terminais) |
+
+¹ apenas quando `payment_policy = PRE_PAGO`.
+
+A AGD-2 deve usar `nextStatusAfterPartnerAccepts(payment_policy)` no aceite, em
+vez de decidir o próximo estado na mão.
+
+> Esta máquina é **independente** da de `Order`/pagamento. Um agendamento
+> `CONFIRMADO` não diz nada sobre o pedido.
+
+### Cálculo do total — `CalculateAppointmentTotalUseCase`
+Não expõe endpoint. Recebe `{ provider, startTime, endTime }` e devolve
+`{ total, unit, quantity, unitPrice }`.
+
+| Papel | Fórmula |
+|---|---|
+| Hotel (role 3) | `daily_rate` × diárias |
+| Sitter (role 4) | `hourly_rate` × horas |
+
+**Arredondamento — decisões tomadas aqui:**
+
+- **Diária = noite.** Conta-se a diferença entre as *datas de calendário* de
+  entrada e saída. Entrar dia 10 e sair dia 12 são 2 diárias, qualquer que seja
+  o horário. Entrada e saída no mesmo dia contam **1 diária** (regra de daycare).
+- **Hora iniciada conta inteira.** 90 minutos custam 2 horas; o mínimo é 1 hora.
+
+**Fuso:** as diárias são contadas por data de calendário em `America/Sao_Paulo`,
+não por diferença bruta de horas — senão uma estadia das 23h às 01h viraria
+"0 diária". O `Provider` ainda não tem campo de fuso; quando tiver, trocar a
+constante `BUSINESS_TIMEZONE` pelo fuso do parceiro.
+
+**Erros** (todos `AppError` 400): fim anterior ou igual ao início; datas
+inválidas; parceiro sem `daily_rate`/`hourly_rate`; papel que não é hotel nem
+sitter.

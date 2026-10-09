@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Role {
   id          Int     @id @default(autoincrement())
   name        String  @unique @db.VarChar(50)
@@ -32,52 +31,56 @@ model User {
   created_at       DateTime @default(now()) @db.Timestamptz
   updated_at       DateTime @default(now()) @db.Timestamptz
 
-  role               Role                @relation(fields: [role_id], references: [id])
-  provider           Provider?
-  sitter_evaluations SitterEvaluation[]
-  pets               Pet[]
-  addresses          Address[]
+  role                Role                 @relation(fields: [role_id], references: [id])
+  provider            Provider?
+  sitter_evaluations  SitterEvaluation[]
+  pets                Pet[]
+  addresses           Address[]
   passwordResetTokens PasswordResetToken[]
-  favorites          Favorite[]
-  cart               Cart?
+  favorites           Favorite[]
+  cart                Cart?
 
-  orders      Order[]
+  orders Order[]
 
   @@map("users")
 }
 
 model Provider {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id          String   @unique @db.Uuid
-  business_name    String   @db.VarChar(150)
-  document         String   @unique @db.VarChar(20)
-  document_type    String   @default("CNPJ") @db.VarChar(4)
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String         @unique @db.Uuid
+  business_name    String         @db.VarChar(150)
+  document         String         @unique @db.VarChar(20)
+  document_type    String         @default("CNPJ") @db.VarChar(4)
   status           ProviderStatus @default(PENDENTE)
-  description      String?  @db.Text
-  phone            String?  @db.VarChar(20)
-  zip_code         String?  @db.VarChar(20)
-  address_line     String?  @db.VarChar(255)
-  city             String?  @db.VarChar(100)
-  state            String?  @db.VarChar(2)
+  // AGD-1: PRESENCIAL (paga no local, padrão) | PRE_PAGO (exige pagamento
+  // antecipado — só nesse caso o agendamento passa por AGUARDANDO_CONFIRMACAO).
+  // Helpers em src/constants/paymentPolicy.js.
+  payment_policy   PaymentPolicy  @default(PRESENCIAL)
+  description      String?        @db.Text
+  phone            String?        @db.VarChar(20)
+  zip_code         String?        @db.VarChar(20)
+  address_line     String?        @db.VarChar(255)
+  city             String?        @db.VarChar(100)
+  state            String?        @db.VarChar(2)
   operating_hours  Json?
   allowed_animals  Json?
   amenities        Json?
   gallery_images   Json?
-  daily_rate       Decimal? @db.Decimal(10, 2)
-  rules_policies   String?  @db.Text
+  daily_rate       Decimal?       @db.Decimal(10, 2)
+  rules_policies   String?        @db.Text
   highlights       Json?
-  hourly_rate      Decimal? @db.Decimal(10, 2)
+  hourly_rate      Decimal?       @db.Decimal(10, 2)
   sitter_roles     Json?
-  rejection_reason String?  @db.Text
-  created_at       DateTime @default(now()) @db.Timestamptz
-  updated_at       DateTime @default(now()) @db.Timestamptz
+  rejection_reason String?        @db.Text
+  created_at       DateTime       @default(now()) @db.Timestamptz
+  updated_at       DateTime       @default(now()) @db.Timestamptz
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  products      Product[]
-  orders        Order[]
-  services      Service[]
-  appointments  Appointment[]
+  products     Product[]
+  orders       Order[]
+  services     Service[]
+  appointments Appointment[]
 
   @@map("providers")
 }
@@ -89,6 +92,11 @@ enum ProviderStatus {
   EM_REVISAO
 }
 
+enum PaymentPolicy {
+  PRESENCIAL
+  PRE_PAGO
+}
+
 enum EvaluationStatus {
   PENDING
   APPROVED
@@ -96,20 +104,19 @@ enum EvaluationStatus {
 }
 
 model SitterEvaluation {
-  id                 String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id            String           @db.Uuid
-  experience_details String           @db.Text
-  environment_photos Json?            @default("[]")
-  quiz_answers       Json?            @default("{}")
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String            @db.Uuid
+  experience_details String            @db.Text
+  environment_photos Json?             @default("[]")
+  quiz_answers       Json?             @default("{}")
   status             EvaluationStatus? @default(PENDING)
-  feedback           String?          @db.Text
-  created_at         DateTime         @default(now()) @db.Timestamptz
+  feedback           String?           @db.Text
+  created_at         DateTime          @default(now()) @db.Timestamptz
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("sitter_evaluations")
 }
-
 
 model Pet {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -126,7 +133,6 @@ model Pet {
   tutor User @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
   appointments Appointment[]
-
 
   @@map("pets")
 }
@@ -151,10 +157,10 @@ model Address {
 }
 
 model Cart {
-  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id    String     @unique @db.Uuid
-  created_at DateTime   @default(now()) @db.Timestamptz
-  updated_at DateTime   @default(now()) @updatedAt @db.Timestamptz
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @unique @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
 
   user  User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   items CartItem[]
@@ -212,42 +218,41 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-
 // Entidades para Lojistas
 model Product {
-  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  provider_id    String      @db.Uuid // Relaciona ao Lojista
-  name           String      @db.VarChar(150)
-  category       String      @db.VarChar(50)
-  pet_type       String      @default("TODOS") @db.VarChar(50)
-  description    String?     @db.Text
-  sku            String?     @db.VarChar(50)
-  stock_quantity Int         @default(0)
-  price          Decimal     @db.Decimal(10, 2)
-  image_url      String?     @db.Text
-  status         String      @default("ACTIVE") // ACTIVE, INACTIVE, OUT_OF_STOCK
-  created_at     DateTime    @default(now()) @db.Timestamptz
-  updated_at     DateTime    @default(now()) @db.Timestamptz
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id    String   @db.Uuid // Relaciona ao Lojista
+  name           String   @db.VarChar(150)
+  category       String   @db.VarChar(50)
+  pet_type       String   @default("TODOS") @db.VarChar(50)
+  description    String?  @db.Text
+  sku            String?  @db.VarChar(50)
+  stock_quantity Int      @default(0)
+  price          Decimal  @db.Decimal(10, 2)
+  image_url      String?  @db.Text
+  status         String   @default("ACTIVE") // ACTIVE, INACTIVE, OUT_OF_STOCK
+  created_at     DateTime @default(now()) @db.Timestamptz
+  updated_at     DateTime @default(now()) @db.Timestamptz
 
-  provider       Provider    @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  order_items    OrderItem[]
-  cart_items     CartItem[]
+  provider    Provider    @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  order_items OrderItem[]
+  cart_items  CartItem[]
 
   @@map("products")
 }
 
 model Order {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  provider_id String      @db.Uuid // O lojista que recebe o pedido
-  customer_id String      @db.Uuid // O Tutor/Cliente
-  total_price Decimal     @db.Decimal(10, 2)
-  status      String      @default("AGUARDANDO_PAGAMENTO") // AGUARDANDO_PAGAMENTO, PAGO, PREPARING, SHIPPED, DELIVERED, CANCELLED
-  created_at  DateTime    @default(now()) @db.Timestamptz
-  updated_at  DateTime    @default(now()) @db.Timestamptz
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id String   @db.Uuid // O lojista que recebe o pedido
+  customer_id String   @db.Uuid // O Tutor/Cliente
+  total_price Decimal  @db.Decimal(10, 2)
+  status      String   @default("AGUARDANDO_PAGAMENTO") // AGUARDANDO_PAGAMENTO, PAGO, PREPARING, SHIPPED, DELIVERED, CANCELLED
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @default(now()) @db.Timestamptz
 
-  provider    Provider    @relation(fields: [provider_id], references: [id])
-  customer    User        @relation(fields: [customer_id], references: [id])
-  items       OrderItem[]
+  provider Provider    @relation(fields: [provider_id], references: [id])
+  customer User        @relation(fields: [customer_id], references: [id])
+  items    OrderItem[]
 
   @@map("orders")
 }
@@ -259,26 +264,26 @@ model OrderItem {
   quantity   Int
   unit_price Decimal @db.Decimal(10, 2)
 
-  order      Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  product    Product @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  order   Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Restrict)
 
   @@map("order_items")
 }
 
 // Entidades para Hotel e Pet Sitter
 model Service {
-  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  provider_id      String        @db.Uuid // Relaciona ao Hotel ou Pet Sitter
-  name             String        @db.VarChar(150)
-  category         String        @db.VarChar(50) // BOARDING, DAYCARE, SITTING, WALKING
-  description      String?       @db.Text
-  price            Decimal       @db.Decimal(10, 2)
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id      String   @db.Uuid // Relaciona ao Hotel ou Pet Sitter
+  name             String   @db.VarChar(150)
+  category         String   @db.VarChar(50) // BOARDING, DAYCARE, SITTING, WALKING
+  description      String?  @db.Text
+  price            Decimal  @db.Decimal(10, 2)
   duration_minutes Int?
-  is_active        Boolean       @default(true)
-  created_at       DateTime      @default(now()) @db.Timestamptz
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now()) @db.Timestamptz
 
-  provider         Provider      @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  appointments     Appointment[]
+  provider     Provider      @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  appointments Appointment[]
 
   @@map("services")
 }
@@ -290,15 +295,20 @@ model Appointment {
   pet_id      String   @db.Uuid
   start_time  DateTime @db.Timestamptz
   end_time    DateTime @db.Timestamptz
-  status      String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  // AGD-1 — máquina de estados em src/constants/appointmentStatus.js.
+  // PRESENCIAL: PENDENTE -> CONFIRMADO -> CONCLUIDO
+  // PRE_PAGO:   PENDENTE -> AGUARDANDO_CONFIRMACAO -> CONFIRMADO -> CONCLUIDO
+  // Terminais de saída: RECUSADO (parceiro nega) e CANCELADO.
+  // Independente da máquina de Order/pagamento.
+  status      String   @default("PENDENTE") @db.VarChar(30)
   total_price Decimal  @db.Decimal(10, 2)
   notes       String?  @db.Text
   created_at  DateTime @default(now()) @db.Timestamptz
   updated_at  DateTime @default(now()) @db.Timestamptz
 
-  provider    Provider  @relation(fields: [provider_id], references: [id])
-  service     Service   @relation(fields: [service_id], references: [id])
-  pet         Pet       @relation(fields: [pet_id], references: [id])
+  provider Provider @relation(fields: [provider_id], references: [id])
+  service  Service  @relation(fields: [service_id], references: [id])
+  pet      Pet      @relation(fields: [pet_id], references: [id])
 
   @@map("appointments")
 }
