@@ -85,7 +85,7 @@ export function TutorOrders() {
         {/* Estado 1: Loading */}
         {isLoading && (
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 flex justify-center items-center">
-            <HamsterLoader message="Carregando seus pedidos..." size="md" />
+            <HamsterLoader message="Carregando seus pedidos..." size="sm" />
           </div>
         )}
 
