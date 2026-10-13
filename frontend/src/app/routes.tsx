@@ -119,6 +119,9 @@ const CheckoutPaymentPage = lazy(() =>
 const PartnersPage = lazy(() =>
   import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage }))
 );
+const Services = lazy(() =>
+  import("../pages/dashboard/Services").then((m) => ({ default: m.Services }))
+);
 const CorrecaoCadastro = lazy(() => import("../pages/parceiro/CorrecaoCadastro"));
 
 // Fallback exibido enquanto o chunk da rota carrega.
@@ -359,6 +362,12 @@ const rootRoutes: RouteObject[] = [
       {
         path: "products",
         Component: Products,
+      },
+      {
+        // Gestão de serviços do parceiro (SRV-F1). Hotel e sitter; o backend
+        // ainda barra quem não for aprovado.
+        path: "servicos",
+        Component: Services,
       },
       {
         path: "settings",

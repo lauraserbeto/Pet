@@ -1,6 +1,12 @@
 const prisma = require('../../config/database');
+const { isValidPaymentPolicy } = require('../../constants/paymentPolicy');
+const AppError = require('../../utils/AppError');
 
 class UpdateProviderAccountUseCase {
+  constructor({ providerRepository = prisma.provider } = {}) {
+    this.providerRepository = providerRepository;
+  }
+
   async execute(userId, data) {
     const {
       business_name,
@@ -8,7 +14,8 @@ class UpdateProviderAccountUseCase {
       zip_code,
       address_line,
       city,
-      state
+      state,
+      payment_policy
     } = data;
 
     const providerData = {};
@@ -20,7 +27,16 @@ class UpdateProviderAccountUseCase {
     if (city !== undefined)          providerData.city = city;
     if (state !== undefined)         providerData.state = state;
 
-    const updatedProvider = await prisma.provider.update({
+    // AGD-1 criou a coluna `payment_policy`, mas nenhum endpoint a gravava —
+    // a SRV-F1 precisa do seletor e a AGD-2 vai ler o valor.
+    if (payment_policy !== undefined) {
+      if (!isValidPaymentPolicy(payment_policy)) {
+        throw AppError.validation('Política de cobrança inválida. Use PRESENCIAL ou PRE_PAGO.');
+      }
+      providerData.payment_policy = payment_policy;
+    }
+
+    const updatedProvider = await this.providerRepository.update({
       where: { user_id: userId },
       data: providerData,
       include: {
@@ -42,3 +58,4 @@ class UpdateProviderAccountUseCase {
 }
 
 module.exports = new UpdateProviderAccountUseCase();
+module.exports.UpdateProviderAccountUseCase = UpdateProviderAccountUseCase;
