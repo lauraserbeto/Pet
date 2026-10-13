@@ -7,9 +7,12 @@ class ServiceRepository {
     });
   }
 
-  async findByProviderId(providerId) {
+  async findByProviderId(providerId, { activeOnly = true } = {}) {
     return await prisma.service.findMany({
-      where: { provider_id: providerId },
+      where: {
+        provider_id: providerId,
+        ...(activeOnly ? { is_active: true } : {}),
+      },
       orderBy: { created_at: 'desc' }
     });
   }
@@ -27,9 +30,10 @@ class ServiceRepository {
     });
   }
 
-  async delete(id) {
-    return await prisma.service.delete({
-      where: { id }
+  async deactivate(id) {
+    return await prisma.service.update({
+      where: { id },
+      data: { is_active: false },
     });
   }
 }

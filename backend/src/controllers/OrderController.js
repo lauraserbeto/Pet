@@ -5,6 +5,8 @@ const listCustomerOrdersUseCase = require('../useCases/orders/ListCustomerOrders
 const listProviderOrdersUseCase = require('../useCases/orders/ListProviderOrdersUseCase');
 const updateOrderStatusUseCase = require('../useCases/orders/UpdateOrderStatusUseCase');
 const { listOrdersQuerySchema, updateOrderStatusSchema } = require('../schemas/orderSchemas');
+const { MERCADO_PAGO } = require('../config/env');
+const AppError = require('../utils/AppError');
 
 class OrderController {
   async create(req, res, next) {
@@ -12,7 +14,6 @@ class OrderController {
       const result = await createOrderUseCase.execute({
         userId: req.userId,
         userRole: req.userRole,
-        ...req.body // <-- Adicionamos esta linha para receber os dados do Frontend
       });
 
       return res.status(201).json(result);
@@ -23,6 +24,9 @@ class OrderController {
 
   async pay(req, res, next) {
     try {
+      if (MERCADO_PAGO.enabled) {
+        throw AppError.conflict('Pagamento simulado indisponível. Finalize pelo Mercado Pago.');
+      }
       const result = await confirmOrderPaymentUseCase.execute({
         userId: req.userId,
         userRole: req.userRole,
@@ -84,12 +88,6 @@ class OrderController {
     } catch (err) {
       return next(err);
     }
-  }
-
-  async webhook(_req, res) {
-    return res.status(501).json({
-      message: 'Webhook de pagamento reservado para integração de gateway em PGT-1.',
-    });
   }
 
   /** PATCH /api/v1/orders/:id/status — Atualiza status com máquina de estados e ownership */

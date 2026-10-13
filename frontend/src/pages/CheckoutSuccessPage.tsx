@@ -8,7 +8,7 @@ export function CheckoutSuccessPage() {
   const location = useLocation();
   
   // Se não vier nenhum ID do state, tentamos mostrar uma mensagem padrão ou de erro (Tratamento para a Sprint)
-  const orderNumber = location.state?.orderId || "Não identificado";
+  const orderNumber = location.state?.orderIds?.join(', ') || location.state?.orderId || "Não identificado";
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -72,7 +72,7 @@ export function CheckoutSuccessPage() {
             </p>
             <div className="flex items-center gap-2">
               {[
-                { label: "Aguardando Pagamento", done: true }, // Marcamos a primeira bolinha como verde (pago)
+                { label: "Pago", done: true },
                 { label: "Preparando", done: false },
                 { label: "Enviado", done: false },
                 { label: "Entregue", done: false },

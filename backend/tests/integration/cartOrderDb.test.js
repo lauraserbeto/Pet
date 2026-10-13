@@ -24,6 +24,38 @@ const {
 const skipDbIntegration = getDbIntegrationSkipReason();
 let databasePrepared = false;
 
+test('PGT-1: webhooks concorrentes confirmam pagamento uma única vez no Postgres', { skip: skipDbIntegration }, async () => {
+  const { CreatePaymentPreferenceUseCase } = require('../../src/useCases/payments/CreatePaymentPreferenceUseCase');
+  const { ProcessPaymentWebhookUseCase } = require('../../src/useCases/payments/ProcessPaymentWebhookUseCase');
+  const { tutor } = await createAuthenticatedTutor();
+  const { provider, product } = await createStoreWithProduct({ price: '45.00' });
+  const order = await prisma.order.create({
+    data: {
+      customer_id: tutor.id, provider_id: provider.id, total_price: '90.00',
+      items: { create: { product_id: product.id, quantity: 2, unit_price: '45.00' } },
+    },
+  });
+  const gateway = {
+    config: { enabled: true, testUserId: '999', frontendUrl: 'https://petplus.test', backendUrl: 'https://api.petplus.test' },
+    assertEnabled() {}, verifySignature() {}, assertTestAccount: async () => {},
+    createPreference: async () => ({ id: 'pref-db', init_point: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=pref-db' }),
+  };
+  await new CreatePaymentPreferenceUseCase({ gateway }).execute({ userId: tutor.id, userRole: 5, orderId: order.id });
+  const attempt = await prisma.paymentAttempt.findUnique({ where: { order_id: order.id } });
+  gateway.getPayment = async () => ({
+    id: 123456, collector_id: 999, live_mode: false, external_reference: order.id,
+    transaction_amount: 90, currency_id: 'BRL', status: 'approved', date_last_updated: new Date().toISOString(),
+    metadata: { payment_attempt_id: attempt.id },
+  });
+  const webhook = new ProcessPaymentWebhookUseCase({ gateway });
+  const results = await Promise.all(Array.from({ length: 3 }, () => webhook.execute({
+    signature: 'signed', requestId: 'request', query: { 'data.id': '123456', type: 'payment' }, body: {},
+  })));
+  assert.equal(results.filter((result) => result.duplicate).length, 2);
+  assert.equal((await prisma.order.findUnique({ where: { id: order.id } })).status, 'PAGO');
+  assert.equal((await prisma.paymentAttempt.findUnique({ where: { id: attempt.id } })).status, 'APPROVED');
+});
+
 before(async () => {
   if (skipDbIntegration) return;
 

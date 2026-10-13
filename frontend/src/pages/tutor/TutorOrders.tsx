@@ -14,6 +14,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { paymentUrl } from '../../lib/services/paymentService';
 import {
   orderService,
   formatBRL,
@@ -215,6 +216,7 @@ export function TutorOrders() {
                       >
                         Ver Detalhes
                       </button>
+                      {order.status === 'AGUARDANDO_PAGAMENTO' && <Link to={paymentUrl([order.id])} className="text-sm font-semibold text-sky-700 hover:underline whitespace-nowrap">Pagar pedido</Link>}
                     </div>
                   </div>
                 </div>

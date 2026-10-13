@@ -8,10 +8,8 @@ class GetProviderDetailsUseCase {
         user: {
           select: {
             full_name: true,
-            email: true,
             avatar_url: true,
             role_id: true,
-            phone: true
           }
         },
         products: {
@@ -29,7 +27,18 @@ class GetProviderDetailsUseCase {
         },
         services: {
           where: { is_active: true },
-          orderBy: { created_at: 'desc' }
+          orderBy: { created_at: 'desc' },
+          select: {
+            id: true,
+            provider_id: true,
+            name: true,
+            category: true,
+            description: true,
+            price: true,
+            duration_minutes: true,
+            is_active: true,
+            created_at: true,
+          },
         }
       }
     });
@@ -50,7 +59,12 @@ class GetProviderDetailsUseCase {
     if (provider.services) {
        provider.services = provider.services.map(s => ({
          ...s,
-         price: Number(s.price)
+         price: Number(s.price),
+         billing_unit: provider.user?.role_id === 3
+           ? 'DIARIA'
+           : provider.user?.role_id === 4
+             ? 'HORA'
+             : null,
        }));
     }
 

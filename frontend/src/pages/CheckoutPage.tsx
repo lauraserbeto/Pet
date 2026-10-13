@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
@@ -6,7 +7,8 @@ import { useCart } from "../components/cart/CartContext";
 import { HamsterLoader } from "../components/ui/HamsterLoader";
 import { useAddresses } from "../lib/hooks/useAddresses";
 import { toast } from "sonner";
-import { orderService } from "../lib/services/orderService";
+import { orderService, type Order } from "../lib/services/orderService";
+import { paymentService, paymentUrl } from '../lib/services/paymentService';
 import {
   ArrowLeft,
   CreditCard,
@@ -36,10 +38,14 @@ const STEPS: { key: Step; label: string }[] = [
 ];
 
 export function CheckoutPage() {
-  const { items, totalPrice, totalItems, clearCart } = useCart();
+  const { items, totalPrice, totalItems, clearCart, isLoading: isLoadingCart } = useCart();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("address");
   const [isProcessing, setIsProcessing] = useState(false);
+  const processing = useRef(false);
+  const orderCreated = useRef(false);
+  const paymentConfig = useQuery({ queryKey: ['payment-config'], queryFn: paymentService.configuration, staleTime: 30000 });
+  const mercadoPagoEnabled = paymentConfig.data?.provider === 'MERCADO_PAGO';
 
   // Hook de endereços (Substitui o estado estático anterior)
   const { addresses, isLoading: isLoadingAddresses, error: addressError } = useAddresses();
@@ -85,15 +91,16 @@ export function CheckoutPage() {
     return value.replace(/\D/g, "").slice(0, 4);
   };
 
-  const shipping = totalPrice >= 199 ? 0 : 14.9;
+  const shipping = mercadoPagoEnabled || totalPrice >= 199 ? 0 : 14.9;
   const finalTotal = totalPrice + shipping;
 
   const stepIndex = STEPS.findIndex((s) => s.key === currentStep);
 
-  if (items.length === 0) {
-    navigate("/cart");
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoadingCart && items.length === 0 && !isProcessing && !orderCreated.current) {
+      navigate('/cart', { replace: true });
+    }
+  }, [isLoadingCart, items.length, isProcessing, navigate]);
 
   // Validação e avanço do passo de endereço
   const handleNextFromAddress = () => {
@@ -106,7 +113,7 @@ export function CheckoutPage() {
 
   // Validação e avanço do passo de pagamento
   const handleNextFromPayment = () => {
-    if (paymentMethod === "credit") {
+    if (!mercadoPagoEnabled && paymentMethod === "credit") {
       const cleanNumber = cardData.number.replace(/\D/g, "");
       if (cleanNumber.length < 16 || !cardData.name || cardData.expiry.length < 5 || cardData.cvv.length < 3) {
         toast.error("Preencha todos os dados do cartão corretamente.");
@@ -128,40 +135,34 @@ export function CheckoutPage() {
   };
 
   const handleFinalize = async () => {
+    if (processing.current) return;
+    processing.current = true;
     setIsProcessing(true);
+    let createdOrders: Order[] = [];
     try {
-      // 1. Prepara os dados (payload) para criar o pedido
-      const orderPayload = {
-        items: items.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          unit_price: item.price
-        })),
-        address_id: selectedAddressId,
-        payment_method: paymentMethod.toUpperCase(),
+      const config = await paymentService.configuration();
+      const response = await orderService.createOrder({ address_id: selectedAddressId });
+      const orders = response.orders?.length ? response.orders : [response.order];
+      if (!orders.every((order) => order?.id)) throw new Error('Pedido não retornado pelo servidor.');
+      createdOrders = orders;
+      orderCreated.current = true;
+      if (config.provider === 'MERCADO_PAGO') {
+        navigate(paymentUrl(createdOrders.map((order) => order.id)));
+        clearCart();
+        return;
       }
-      // 2. Chama a API para criar o pedido real
-      const orderResponse: any = await orderService.createOrder(orderPayload);
-      
-      console.log("RESPOSTA DO BACKEND:", orderResponse); 
-      
-      const newOrderId = orderResponse.order?.id || orderResponse.data?.order?.id || orderResponse.id;
-
-      if (!newOrderId) throw new Error("ID do pedido não retornado pelo servidor.");
-
-      // 3. Simula o pagamento usando o ID real
-      await orderService.payOrder(newOrderId);
-
-      // 4. Se deu tudo certo: limpa o carrinho e envia o ID real para a tela de sucesso!
+      for (const order of createdOrders) await orderService.payOrder(order.id);
+      navigate('/checkout/success', { state: { orderId: createdOrders[0].id, orderIds: createdOrders.map((order) => order.id) } });
       clearCart();
-      
-      navigate("/checkout/success", { state: { orderId: newOrderId } });
-
-    } catch (error: any) {
-      console.error("Erro ao finalizar pedido:", error);
-      toast.error(error?.response?.data?.message || "Ocorreu um erro ao processar o seu pedido. Tente novamente.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível finalizar o pedido.');
+      if (createdOrders.length) {
+        navigate(paymentUrl(createdOrders.map((order) => order.id)));
+        clearCart();
+      }
     } finally {
       setIsProcessing(false);
+      processing.current = false;
     }
   };
 
@@ -367,6 +368,9 @@ export function CheckoutPage() {
                   </h2>
                 </div>
 
+                {paymentConfig.isError && <p role="alert" className="text-sm text-rose-700">Não foi possível carregar os meios de pagamento. <button onClick={() => void paymentConfig.refetch()} className="underline">Tentar novamente</button></p>}
+                {mercadoPagoEnabled && <p className="text-sm text-slate-600">Pagamento de teste no Mercado Pago. Você escolherá o meio de pagamento na próxima etapa. Use apenas cartões e conta de teste.</p>}
+                {!mercadoPagoEnabled && <>
                 {/* Payment methods */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -471,6 +475,7 @@ export function CheckoutPage() {
 
 
 
+                </>}
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Lock className="h-3.5 w-3.5" />
                   <span>Seus dados estão protegidos com criptografia SSL</span>
@@ -480,6 +485,7 @@ export function CheckoutPage() {
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
                   onClick={handleNextFromPayment}
+                  disabled={paymentConfig.isPending || paymentConfig.isError}
                 >
                   Revisar Pedido
                   <ChevronRight className="h-4 w-4" />
@@ -538,7 +544,7 @@ export function CheckoutPage() {
                     </button>
                   </div>
                   <p className="text-sm text-slate-600">
-                    {paymentMethod === "credit"
+                    {mercadoPagoEnabled ? 'Mercado Pago (teste)' : paymentMethod === "credit"
                       ? "Cartão de Crédito"
                       : paymentMethod === "pix"
                       ? "PIX (5% de desconto)"
@@ -581,7 +587,7 @@ export function CheckoutPage() {
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
                   onClick={handleFinalize}
-                  disabled={isProcessing}
+                  disabled={isProcessing || paymentConfig.isPending || paymentConfig.isError}
                 >
                   {isProcessing ? (
                     <div className="flex items-center gap-2">

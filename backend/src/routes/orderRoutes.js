@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const OrderController = require('../controllers/OrderController');
+const PaymentController = require('../controllers/PaymentController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
 const { orderIdParamsSchema } = require('../schemas/orderSchemas');
@@ -9,15 +10,23 @@ const { orderIdParamsSchema } = require('../schemas/orderSchemas');
  * @swagger
  * /api/v1/orders/webhook:
  *   post:
- *     summary: Rota reservada para webhook de gateway de pagamento
+ *     summary: Recebe notificações de pagamento Mercado Pago com assinatura
  *     tags: [Orders]
  *     responses:
- *       501:
- *         description: Gateway real ainda não implementado
+ *       200:
+ *         description: Notificação processada ou duplicada
+ *       401:
+ *         description: Assinatura inválida
+ *       503:
+ *         description: Gateway desativado
  */
-router.post('/webhook', OrderController.webhook);
+router.post('/webhook', PaymentController.webhook);
 
 router.use(authMiddleware);
+
+router.get('/payment-config', PaymentController.configuration);
+router.post('/:orderId/payment-preference', validate({ params: orderIdParamsSchema }), PaymentController.preference);
+router.get('/:orderId/payment-status', validate({ params: orderIdParamsSchema }), PaymentController.status);
 
 /**
  * @swagger
