@@ -6,6 +6,8 @@
 A decisão de negócio 7 define pagamento **SIMULADO primeiro** e **Mercado Pago sandbox como OPCIONAL**. Esta task integra o gateway em ambiente de testes, mantendo o pagamento simulado como fallback. **É explicitamente opcional e pode migrar para o próximo semestre** — não bloqueia o marco M3 nem o fluxo essencial de compra/agendamento.
 
 ## Objetivo
+Configuração operacional e limites da implementação: [PGT-1-CONFIGURACAO.md](./PGT-1-CONFIGURACAO.md).
+
 Integrar o Mercado Pago **sandbox** ao checkout: criar preferência de pagamento, pagar com cartão de teste e receber a confirmação por **webhook**, marcando o pedido como pago. Preservar o pagamento simulado como caminho padrão/fallback.
 
 ## Escopo / Passos

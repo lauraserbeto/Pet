@@ -1,6 +1,7 @@
 const prisma = require('../../config/database');
 const AppError = require('../../utils/AppError');
 const { formatOrder } = require('../../utils/orderFormatter');
+const { MERCADO_PAGO } = require('../../config/env');
 const {
   normalizeOrderStatus,
   isValidOrderTransition,
@@ -39,6 +40,10 @@ class UpdateOrderStatusUseCase {
 
     if (!provider || provider.id !== order.provider_id) {
       throw AppError.forbidden('Você não tem permissão para atualizar este pedido');
+    }
+
+    if (MERCADO_PAGO.enabled && normalizedTargetStatus === 'PAGO') {
+      throw AppError.forbidden('O pagamento deve ser confirmado pelo Mercado Pago.');
     }
 
     // 4. Valida a transição de status pela máquina de estados

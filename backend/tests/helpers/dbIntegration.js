@@ -1,6 +1,7 @@
 const prisma = require('../../src/config/database');
 
 const TRUNCATE_TABLES = [
+  'payment_attempts',
   'appointments',
   'services',
   'order_items',

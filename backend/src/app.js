@@ -32,6 +32,7 @@ app.set('trust proxy', 1);
 
 const authRoutes = require('./routes/authRoutes');
 const providerRoutes = require('./routes/providerRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
 
 // Limitador para as rotas de autenticação — mitiga força bruta e enumeração
 // em login, recuperação de senha, registro e reset.
@@ -124,6 +125,8 @@ app.get('/api/metrics', metricsHandler);
 
 // Rotas do Sistema
 app.use('/api/v1/auth', authLimiter, authRoutes);
+// Registrar antes de providerRoutes: GET /providers/:id não deve capturar "services".
+app.use('/api/v1/providers/services', serviceRoutes);
 app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/admin', require('./routes/adminRoutes'));
 app.use('/api/v1/users', require('./routes/userRoutes'));

@@ -253,8 +253,27 @@ model Order {
   provider Provider    @relation(fields: [provider_id], references: [id])
   customer User        @relation(fields: [customer_id], references: [id])
   items    OrderItem[]
+  payment_attempt PaymentAttempt?
 
   @@map("orders")
+}
+
+model PaymentAttempt {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id           String   @unique @db.Uuid
+  preference_id      String?  @unique @db.VarChar(150)
+  external_id        String?  @unique @db.VarChar(100)
+  checkout_url       String?  @db.Text
+  status             String   @default("CREATED") @db.VarChar(40)
+  amount             Decimal  @db.Decimal(10, 2)
+  currency           String   @default("BRL") @db.VarChar(3)
+  gateway_updated_at DateTime? @db.Timestamptz
+  created_at         DateTime @default(now()) @db.Timestamptz
+  updated_at         DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  order Order @relation(fields: [order_id], references: [id], onDelete: Restrict)
+
+  @@map("payment_attempts")
 }
 
 model OrderItem {

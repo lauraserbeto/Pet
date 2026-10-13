@@ -113,6 +113,9 @@ const TutorAppointments = lazy(() =>
 const TutorOrders = lazy(() =>
   import("../pages/tutor/TutorOrders").then((m) => ({ default: m.TutorOrders }))
 );
+const CheckoutPaymentPage = lazy(() =>
+  import('../pages/CheckoutPaymentPage').then((m) => ({ default: m.CheckoutPaymentPage }))
+);
 const PartnersPage = lazy(() =>
   import("../pages/PartnersPage").then((m) => ({ default: m.PartnersPage }))
 );
@@ -232,6 +235,10 @@ const rootRoutes: RouteObject[] = [
                 <CheckoutSuccessPage />
               </ProtectedRoute>
             ),
+          },
+          {
+            path: "payment",
+            element: <ProtectedRoute allowedRoles={[5]}><CheckoutPaymentPage /></ProtectedRoute>,
           },
         ],
       },

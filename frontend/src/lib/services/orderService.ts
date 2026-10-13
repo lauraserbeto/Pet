@@ -198,8 +198,8 @@ export function getOrderStatusBadge(status: string): OrderStatusBadgeInfo {
 
 export const orderService = {
   // 1. Cria o pedido real baseado no carrinho e endereço
-  createOrder: async (payload: any) => {
-    const response = await httpClient.post('/orders', payload);
+  createOrder: async (payload: { address_id?: string | null }) => {
+    const response = await httpClient.post<{ order: Order; orders?: Order[] }>('/orders', payload);
     return response;
   },
 

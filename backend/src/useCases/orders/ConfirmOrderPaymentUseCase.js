@@ -71,13 +71,16 @@ function normalizePaymentResult(paymentResult = {}) {
 }
 
 class ConfirmOrderPaymentUseCase {
-  async execute({ userId, userRole, orderId, paymentResult }) {
+  async execute({ userId, userRole, orderId, paymentResult, database = prisma }) {
     if (userRole && userRole !== 5) {
       throw AppError.forbidden('Apenas clientes podem pagar pedidos');
     }
 
     const payment = normalizePaymentResult(paymentResult);
-    const order = await prisma.order.findFirst({
+    if (payment.status !== PAYMENT_STATUS.APPROVED) {
+      throw AppError.validation('Apenas pagamentos aprovados podem confirmar pedidos.');
+    }
+    const order = await database.order.findFirst({
       where: {
         id: orderId,
         customer_id: userId,
@@ -103,7 +106,18 @@ class ConfirmOrderPaymentUseCase {
       );
     }
 
-    const updatedOrder = await prisma.order.update({
+    if (payment.provider === PAYMENT_PROVIDER.MERCADO_PAGO) {
+      const changed = await database.order.updateMany({
+        where: { id: order.id, status: ORDER_STATUS.AWAITING_PAYMENT },
+        data: { status: ORDER_STATUS.PAID, updated_at: new Date() },
+      });
+      if (changed.count !== 1) throw AppError.conflict('O estado do pedido mudou durante o pagamento.');
+      return {
+        order: formatOrder(await database.order.findFirst({ where: { id: order.id }, include: ORDER_INCLUDE })),
+        payment,
+      };
+    }
+    const updatedOrder = await database.order.update({
       where: { id: order.id },
       data: {
         status: ORDER_STATUS.PAID,

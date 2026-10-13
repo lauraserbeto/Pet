@@ -60,6 +60,35 @@ const RESEND_API_KEY = requireEnvInProduction("RESEND_API_KEY");
 const EMAIL_FROM = requireEnvInProduction("EMAIL_FROM");
 const EMAIL_REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || null;
 
+function loadMercadoPagoConfig() {
+  const flag = process.env.MERCADO_PAGO_ENABLED?.trim() || 'false';
+  if (!['true', 'false'].includes(flag)) {
+    throw new Error('[CONFIG] MERCADO_PAGO_ENABLED deve ser true ou false.');
+  }
+  if (flag === 'false') return Object.freeze({ enabled: false });
+
+  const backendUrl = requireEnv('BACKEND_PUBLIC_URL');
+  const frontendUrl = new URL(FRONTEND_URL);
+  const publicUrl = new URL(backendUrl);
+  if (publicUrl.protocol !== 'https:' || frontendUrl.protocol !== 'https:') {
+    throw new Error('[CONFIG] Mercado Pago exige BACKEND_PUBLIC_URL e FRONTEND_URL com HTTPS.');
+  }
+  const testUserId = requireEnv('MERCADO_PAGO_TEST_USER_ID');
+  if (!/^\d+$/.test(testUserId)) {
+    throw new Error('[CONFIG] MERCADO_PAGO_TEST_USER_ID deve ser o ID numérico do vendedor de teste.');
+  }
+  return Object.freeze({
+    enabled: true,
+    accessToken: requireEnv('MERCADO_PAGO_ACCESS_TOKEN'),
+    webhookSecret: requireEnv('MERCADO_PAGO_WEBHOOK_SECRET'),
+    testUserId,
+    backendUrl: publicUrl.origin,
+    frontendUrl: frontendUrl.origin,
+  });
+}
+
+const MERCADO_PAGO = loadMercadoPagoConfig();
+
 if (JWT_SECRET.length < 32) {
   console.warn(
     "[CONFIG] Aviso: JWT_SECRET tem menos de 32 caracteres. " +
@@ -98,6 +127,8 @@ module.exports = {
   RESEND_API_KEY,
   EMAIL_FROM,
   EMAIL_REPLY_TO,
+  MERCADO_PAGO,
+  loadMercadoPagoConfig,
   PORT: process.env.PORT || 3000,
   NODE_ENV,
   // Opcional: sem DSN o Sentry fica desabilitado e a API roda normalmente.
