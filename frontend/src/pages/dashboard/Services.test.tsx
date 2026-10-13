@@ -108,3 +108,88 @@ it("desfaz a troca de política quando o backend recusa", async () => {
   // O valor em tela continua sendo o carregado do backend.
   await waitFor(() => expect(screen.getByText(/paga no local/i)).toBeTruthy());
 });
+
+// --- SRV-F2: editar e excluir ---
+
+it("entra em modo edição com os campos preenchidos e salva via PUT", async () => {
+  vi.spyOn(serviceService, "list").mockResolvedValue([servicoHotel]);
+  const update = vi.spyOn(serviceService, "update").mockResolvedValue(servicoHotel);
+
+  renderTela();
+  await screen.findByText("Hospedagem completa");
+
+  fireEvent.click(screen.getByLabelText("Editar Hospedagem completa"));
+
+  // O mesmo formulário vira edição, já preenchido.
+  expect(await screen.findByText("Editar serviço")).toBeTruthy();
+  expect((screen.getByLabelText("Nome do serviço") as HTMLInputElement).value).toBe(
+    "Hospedagem completa"
+  );
+
+  fireEvent.change(screen.getByLabelText("Nome do serviço"), {
+    target: { value: "Hospedagem premium" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /salvar alterações/i }));
+
+  await waitFor(() => expect(update).toHaveBeenCalledTimes(1));
+  expect(update.mock.calls[0][0]).toBe("s1");
+  expect(update.mock.calls[0][1]).toMatchObject({ name: "Hospedagem premium" });
+});
+
+it("cancelar edição limpa o formulário e volta ao modo de criação", async () => {
+  vi.spyOn(serviceService, "list").mockResolvedValue([servicoHotel]);
+
+  renderTela();
+  await screen.findByText("Hospedagem completa");
+
+  fireEvent.click(screen.getByLabelText("Editar Hospedagem completa"));
+  await screen.findByText("Editar serviço");
+
+  fireEvent.click(screen.getByRole("button", { name: /cancelar edição/i }));
+
+  await waitFor(() => expect(screen.getByText("Novo serviço")).toBeTruthy());
+  expect((screen.getByLabelText("Nome do serviço") as HTMLInputElement).value).toBe("");
+});
+
+it("exclui só após confirmação no diálogo", async () => {
+  vi.spyOn(serviceService, "list").mockResolvedValue([servicoHotel]);
+  const remove = vi.spyOn(serviceService, "remove").mockResolvedValue(undefined);
+
+  renderTela();
+  await screen.findByText("Hospedagem completa");
+
+  fireEvent.click(screen.getByLabelText("Excluir Hospedagem completa"));
+  await screen.findByRole("heading", { name: "Excluir serviço" });
+
+  // Cancelar não exclui nada.
+  fireEvent.click(screen.getByRole("button", { name: /^cancelar$/i }));
+  await waitFor(() =>
+    expect(screen.queryByRole("heading", { name: "Excluir serviço" })).toBeNull()
+  );
+  expect(remove).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByLabelText("Excluir Hospedagem completa"));
+  await screen.findByRole("heading", { name: "Excluir serviço" });
+  fireEvent.click(screen.getByRole("button", { name: /excluir serviço/i }));
+
+  await waitFor(() => expect(remove).toHaveBeenCalledWith("s1"));
+});
+
+it("avisa quando o backend recusa a exclusão", async () => {
+  vi.spyOn(serviceService, "list").mockResolvedValue([servicoHotel]);
+  vi.spyOn(serviceService, "remove").mockRejectedValue(
+    new ApiError(403, "FORBIDDEN", "Apenas parceiros aprovados podem gerenciar serviços.")
+  );
+
+  renderTela();
+  await screen.findByText("Hospedagem completa");
+
+  fireEvent.click(screen.getByLabelText("Excluir Hospedagem completa"));
+  await screen.findByRole("heading", { name: "Excluir serviço" });
+  fireEvent.click(screen.getByRole("button", { name: /excluir serviço/i }));
+
+  // Num erro o diálogo NÃO fecha — fechar sugeriria que a exclusão aconteceu.
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: "Excluir serviço" })).toBeTruthy()
+  );
+});

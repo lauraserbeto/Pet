@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CalendarClock, PackagePlus, RefreshCw, Wallet } from "lucide-react";
+import { CalendarClock, PackagePlus, Pencil, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../../components/ui/button";
@@ -17,11 +17,20 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { useServices } from "../../lib/hooks/useServices";
 import {
   BILLING_UNIT_LABELS,
   SERVICE_CATEGORIES,
   SERVICE_CATEGORY_LABELS,
+  type Service,
   type ServiceCategory,
 } from "../../lib/services/serviceService";
 import { providerService } from "../../lib/services/providerService";
@@ -35,9 +44,10 @@ import {
 import { ApiError } from "../../lib/httpClient";
 
 /**
- * Gestão de serviços do parceiro (SRV-F1 — parte 1: criar e listar).
+ * Gestão de serviços do parceiro (SRV-F1 + SRV-F2).
  *
- * Editar e excluir ficam para a SRV-F2; o `useServices` já expõe as mutations.
+ * O mesmo formulário serve para criar e editar: `editingId` decide o modo, e
+ * duplicar o formulário só para a edição deixaria duas validações para manter.
  *
  * A unidade de cobrança (diária/hora) NÃO é decidida aqui: vem no
  * `billing_unit` que o backend deriva do papel do parceiro.
@@ -65,10 +75,23 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
 export function Services() {
-  const { services, isLoading, error, refetch, createService, isCreating } = useServices();
+  const {
+    services,
+    isLoading,
+    error,
+    refetch,
+    createService,
+    isCreating,
+    updateService,
+    isUpdating,
+    removeService,
+    isRemoving,
+  } = useServices();
 
   const [paymentPolicy, setPaymentPolicy] = useState<PaymentPolicy | null>(null);
   const [isSavingPolicy, setIsSavingPolicy] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   const {
     register,
@@ -89,19 +112,63 @@ export function Services() {
       .catch(() => setPaymentPolicy(null));
   }, []);
 
+  const isSubmitting = isCreating || isUpdating;
+
+  const sairDaEdicao = () => {
+    setEditingId(null);
+    reset({ name: "", price: "", description: "", category: undefined });
+  };
+
   const onSubmit = async (values: FormValues) => {
+    const payload = {
+      name: values.name,
+      category: values.category,
+      price: values.price,
+      description: values.description || null,
+    };
+
     try {
-      await createService({
-        name: values.name,
-        category: values.category,
-        price: values.price,
-        description: values.description || null,
-      });
-      toast.success(`"${values.name}" foi criado.`);
-      reset({ name: "", price: "", description: "" });
+      if (editingId) {
+        await updateService({ id: editingId, payload });
+        toast.success(`"${values.name}" foi atualizado.`);
+      } else {
+        await createService(payload);
+        toast.success(`"${values.name}" foi criado.`);
+      }
+      sairDaEdicao();
     } catch (err) {
       toast.error(
-        err instanceof ApiError ? err.message : "Não foi possível criar o serviço."
+        err instanceof ApiError
+          ? err.message
+          : `Não foi possível ${editingId ? "atualizar" : "criar"} o serviço.`
+      );
+    }
+  };
+
+  const iniciarEdicao = (service: Service) => {
+    setEditingId(service.id);
+    reset({
+      name: service.name,
+      category: service.category,
+      price: formatCurrency(service.price),
+      description: service.description ?? "",
+    });
+  };
+
+  const confirmarExclusao = async () => {
+    if (!serviceToDelete) return;
+    const { id, name } = serviceToDelete;
+
+    try {
+      await removeService(id);
+      toast.success(`"${name}" foi excluído.`);
+      setServiceToDelete(null);
+      // Se o item excluído estava em edição, o formulário não pode continuar
+      // apontando para um id que não existe mais.
+      if (editingId === id) sairDaEdicao();
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError ? err.message : "Não foi possível excluir o serviço."
       );
     }
   };
@@ -183,8 +250,12 @@ export function Services() {
       {/* Criação */}
       <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
         <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <PackagePlus className="w-5 h-5 text-[var(--color-primary-500)]" />
-          Novo serviço
+          {editingId ? (
+            <Pencil className="w-5 h-5 text-[var(--color-primary-500)]" />
+          ) : (
+            <PackagePlus className="w-5 h-5 text-[var(--color-primary-500)]" />
+          )}
+          {editingId ? "Editar serviço" : "Novo serviço"}
         </h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -227,9 +298,26 @@ export function Services() {
             <Textarea id="description" rows={3} {...register("description")} />
           </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isCreating}>
-              {isCreating ? "Criando..." : "Criar serviço"}
+          <div className="flex justify-end gap-3">
+            {editingId && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={sairDaEdicao}
+                disabled={isSubmitting}
+              >
+                Cancelar edição
+              </Button>
+            )}
+            {/* disabled durante a mutation: evita duplo submit */}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? editingId
+                  ? "Salvando..."
+                  : "Criando..."
+                : editingId
+                  ? "Salvar alterações"
+                  : "Criar serviço"}
             </Button>
           </div>
         </form>
@@ -274,17 +362,71 @@ export function Services() {
                     <p className="text-sm text-slate-400 mt-1">{service.description}</p>
                   )}
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="font-semibold text-slate-800">{formatCurrency(service.price)}</p>
-                  <p className="text-xs text-slate-500">
-                    {BILLING_UNIT_LABELS[service.billing_unit] ?? service.billing_unit}
-                  </p>
+                <div className="flex items-start gap-4 shrink-0">
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-800">{formatCurrency(service.price)}</p>
+                    <p className="text-xs text-slate-500">
+                      {BILLING_UNIT_LABELS[service.billing_unit] ?? service.billing_unit}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title={`Editar ${service.name}`}
+                      aria-label={`Editar ${service.name}`}
+                      onClick={() => iniciarEdicao(service)}
+                      className="text-slate-400 hover:text-[#3699D2] hover:bg-blue-50"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title={`Excluir ${service.name}`}
+                      aria-label={`Excluir ${service.name}`}
+                      onClick={() => setServiceToDelete(service)}
+                      className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {/* Confirmação de exclusão — mesmo padrão adotado na PRD-1 para produtos. */}
+      <Dialog
+        open={serviceToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !isRemoving) setServiceToDelete(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir serviço</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir <strong>{serviceToDelete?.name}</strong>?
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setServiceToDelete(null)}
+              disabled={isRemoving}
+            >
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmarExclusao} disabled={isRemoving}>
+              {isRemoving ? "Excluindo..." : "Excluir serviço"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
