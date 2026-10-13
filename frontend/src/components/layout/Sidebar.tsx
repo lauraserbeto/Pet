@@ -5,6 +5,7 @@ import {
   Settings, 
   LogOut,
   ClipboardCheck,
+  ClipboardList,
   ShoppingCart,
   DollarSign,
   Globe,
@@ -62,6 +63,7 @@ export function Sidebar({
     { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
     { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },
     { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, roles: [3, 4], end: false },
+    { name: 'Meus Serviços', href: '/dashboard/servicos', icon: ClipboardList, roles: [3, 4], end: false },
     { name: 'Financeiro', href: '/dashboard/financeiro', icon: DollarSign, roles: [2, 3, 4], end: false },
     { name: 'Configurações', href: '/dashboard/settings', icon: Settings, roles: [1], end: false },
   ];
