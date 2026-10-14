@@ -37,6 +37,57 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "review", label: "Revisão" },
 ];
 
+// Utilitário de mapeamento de erros da API
+type ApiErrorCode = 
+  | 'INSUFFICIENT_STOCK' 
+  | 'PAYMENT_FAILED' 
+  | 'PAYMENT_DECLINED'
+  | 'CART_EMPTY'
+  | 'ADDRESS_REQUIRED'
+  | 'SERVER_ERROR';
+
+function getCheckoutErrorMessage(error: any): { 
+  title: string; 
+  description: string; 
+  code?: string;
+  metadata?: any; 
+} {
+  const apiError = error?.response?.data?.error || error?.data?.error || error;
+  const errorCode = apiError?.code;
+
+  switch (errorCode) {
+    case 'INSUFFICIENT_STOCK':
+      return {
+        title: 'Estoque insuficiente',
+        description: apiError.message || 'Um ou mais itens do seu carrinho esgotaram ou não têm a quantidade solicitada.',
+        code: errorCode,
+        metadata: apiError.metadata || apiError.details
+      };
+    
+    case 'PAYMENT_DECLINED':
+    case 'PAYMENT_FAILED':
+      return {
+        title: 'Falha no pagamento',
+        description: 'Não foi possível processar o pagamento. Verifique seus dados ou tente outro método.',
+        code: errorCode
+      };
+
+    case 'CART_EMPTY':
+      return {
+        title: 'Carrinho vazio',
+        description: 'Seu carrinho está vazio. Adicione produtos antes de finalizar.',
+        code: errorCode
+      };
+
+    default:
+      return {
+        title: 'Ops, algo deu errado',
+        description: 'Não foi possível finalizar o pedido no momento. Tente novamente.',
+        code: 'UNKNOWN'
+      };
+  }
+}
+
 export function CheckoutPage() {
   const { items, totalPrice, totalItems, clearCart, isLoading: isLoadingCart } = useCart();
   const navigate = useNavigate();
@@ -47,11 +98,11 @@ export function CheckoutPage() {
   const paymentConfig = useQuery({ queryKey: ['payment-config'], queryFn: paymentService.configuration, staleTime: 30000 });
   const mercadoPagoEnabled = paymentConfig.data?.provider === 'MERCADO_PAGO';
 
-  // Hook de endereços (Substitui o estado estático anterior)
+  // Hook de endereços
   const { addresses, isLoading: isLoadingAddresses, error: addressError } = useAddresses();
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-  // Seleciona automaticamente o endereço padrão (is_default) ou o primeiro da lista
+  // Seleciona automaticamente o endereço padrão
   useEffect(() => {
     if (addresses && addresses.length > 0 && !selectedAddressId) {
       const defaultAddress = addresses.find((addr) => addr.is_default) || addresses[0];
@@ -59,7 +110,6 @@ export function CheckoutPage() {
     }
   }, [addresses, selectedAddressId]);
 
-  // Recupera o objeto do endereço selecionado para exibir no resumo da revisão
   const selectedAddress = addresses?.find((addr) => addr.id === selectedAddressId);
 
   // Payment
@@ -72,7 +122,6 @@ export function CheckoutPage() {
     cvv: "",
   });
 
-  // Funções de máscara para os campos de cartão
   const maskCardNumber = (value: string) => {
     return value
       .replace(/\D/g, "")
@@ -96,13 +145,13 @@ export function CheckoutPage() {
 
   const stepIndex = STEPS.findIndex((s) => s.key === currentStep);
 
+  // Verifica carrinho vazio
   useEffect(() => {
     if (!isLoadingCart && items.length === 0 && !isProcessing && !orderCreated.current) {
       navigate('/cart', { replace: true });
     }
   }, [isLoadingCart, items.length, isProcessing, navigate]);
 
-  // Validação e avanço do passo de endereço
   const handleNextFromAddress = () => {
     if (!selectedAddressId) {
       toast.error("Por favor, selecione um endereço de entrega.");
@@ -111,7 +160,6 @@ export function CheckoutPage() {
     setCurrentStep("payment");
   };
 
-  // Validação e avanço do passo de pagamento
   const handleNextFromPayment = () => {
     if (!mercadoPagoEnabled && paymentMethod === "credit") {
       const cleanNumber = cardData.number.replace(/\D/g, "");
@@ -120,7 +168,6 @@ export function CheckoutPage() {
         return;
       }
 
-      // Validação de validade vencida (MM/AA)
       const [month, year] = cardData.expiry.split("/").map(Number);
       const now = new Date();
       const currentYear = now.getFullYear() % 100;
@@ -154,8 +201,26 @@ export function CheckoutPage() {
       for (const order of createdOrders) await orderService.payOrder(order.id);
       navigate('/checkout/success', { state: { orderId: createdOrders[0].id, orderIds: createdOrders.map((order) => order.id) } });
       clearCart();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Não foi possível finalizar o pedido.');
+    } catch (error: any) {
+      const parsedError = getCheckoutErrorMessage(error);
+      
+      // Tratamento completo de erros
+      if (parsedError.code === 'INSUFFICIENT_STOCK') {
+        toast.error(parsedError.title, {
+          description: parsedError.description,
+          duration: 8000,
+          action: {
+            label: 'Ir para o Carrinho',
+            onClick: () => navigate('/cart'),
+          },
+        });
+      } else if (parsedError.code === 'PAYMENT_FAILED' || parsedError.code === 'PAYMENT_DECLINED') {
+        toast.error(parsedError.title, { description: parsedError.description });
+        setCurrentStep('payment'); // Volta para o usuário tentar outro cartão
+      } else {
+        toast.error(parsedError.title, { description: parsedError.description });
+      }
+
       if (createdOrders.length) {
         navigate(paymentUrl(createdOrders.map((order) => order.id)));
         clearCart();
@@ -167,7 +232,7 @@ export function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 relative">
       {/* Header */}
       <div className="bg-white border-b border-slate-100">
         <div className="container mx-auto max-w-4xl px-4 py-4">
@@ -240,7 +305,6 @@ export function CheckoutPage() {
                   </h2>
                 </div>
 
-                {/* ESTADO 1: Loading */}
                 {isLoadingAddresses && (
                   <div className="flex flex-col items-center justify-center p-8 space-y-3">
                     <div className="h-8 w-8 border-4 border-[var(--color-primary-500)] border-t-transparent rounded-full animate-spin" />
@@ -248,7 +312,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* ESTADO 2: Erro */}
                 {addressError && (
                   <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700">
                     <AlertCircle className="h-5 w-5 shrink-0" />
@@ -256,7 +319,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* ESTADO 3: Vazio */}
                 {!isLoadingAddresses && !addressError && addresses?.length === 0 && (
                   <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl space-y-3">
                     <MapPin className="h-10 w-10 text-slate-300 mx-auto" />
@@ -270,7 +332,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* ESTADO 4: Sucesso (Lista de Endereços com propriedades corrigidas para rua) */}
                 {!isLoadingAddresses && !addressError && addresses && addresses.length > 0 && (
                   <div className="space-y-3">
                     {addresses.map((addr) => {
@@ -288,7 +349,7 @@ export function CheckoutPage() {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-slate-900 text-sm">
-                                {addr.rua}{addr.numero ? `, ${addr.numero}` : ''} {addr.complemento && `- ${addr.complemento}`}
+                                {addr.rua}{addr.numero ? `, ${addr.numero}` : ''} {addr.complemento && `\n${addr.complemento}`}
                               </p>
                               {addr.is_default && (
                                 <span className="text-[10px] bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
@@ -297,7 +358,7 @@ export function CheckoutPage() {
                               )}
                             </div>
                             <p className="text-xs text-slate-500">
-                              {addr.bairro}, {addr.cidade} - {addr.estado} • CEP: {addr.cep}
+                              {addr.bairro}, {addr.cidade} {addr.estado} CEP: {addr.cep}
                             </p>
                           </div>
                           <div
@@ -325,7 +386,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Shipping option */}
                 <div className="border border-slate-100 rounded-xl p-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-emerald-50">
@@ -371,7 +431,6 @@ export function CheckoutPage() {
                 {paymentConfig.isError && <p role="alert" className="text-sm text-rose-700">Não foi possível carregar os meios de pagamento. <button onClick={() => void paymentConfig.refetch()} className="underline">Tentar novamente</button></p>}
                 {mercadoPagoEnabled && <p className="text-sm text-slate-600">Pagamento de teste no Mercado Pago. Você escolherá o meio de pagamento na próxima etapa. Use apenas cartões e conta de teste.</p>}
                 {!mercadoPagoEnabled && <>
-                {/* Payment methods */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { key: "credit" as const, icon: CreditCard, label: "Cartão" },
@@ -402,10 +461,8 @@ export function CheckoutPage() {
                   ))}
                 </div>
 
-                {/* Credit card form */}
                 {paymentMethod === "credit" && (
                   <div className="space-y-6">
-                    {/* Visual Card */}
                     <div className="px-4 py-2">
                       <CreditCardVisual
                         number={cardData.number}
@@ -460,7 +517,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                {/* PIX info */}
                 {paymentMethod === "pix" && (
                   <div className="bg-slate-50 rounded-xl p-5 text-center space-y-3">
                     <QrCode className="h-16 w-16 text-slate-300 mx-auto" />
@@ -472,9 +528,6 @@ export function CheckoutPage() {
                     </p>
                   </div>
                 )}
-
-
-
                 </>}
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Lock className="h-3.5 w-3.5" />
@@ -501,7 +554,6 @@ export function CheckoutPage() {
                 transition={{ duration: 0.3 }}
                 className="space-y-4"
               >
-                {/* Address summary */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -518,10 +570,10 @@ export function CheckoutPage() {
                   {selectedAddress ? (
                     <>
                       <p className="text-sm text-slate-600">
-                        {selectedAddress.rua}{selectedAddress.numero ? `, ${selectedAddress.numero}` : ''} {selectedAddress.complemento && `- ${selectedAddress.complemento}`}
+                        {selectedAddress.rua}{selectedAddress.numero ? `, ${selectedAddress.numero}` : ''} {selectedAddress.complemento && `\n${selectedAddress.complemento}`}
                       </p>
                       <p className="text-sm text-slate-500">
-                        {selectedAddress.bairro}, {selectedAddress.cidade} - {selectedAddress.estado}, {selectedAddress.cep}
+                        {selectedAddress.bairro}, {selectedAddress.cidade} {selectedAddress.estado}, {selectedAddress.cep}
                       </p>
                     </>
                   ) : (
@@ -529,7 +581,6 @@ export function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Payment summary */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -552,7 +603,6 @@ export function CheckoutPage() {
                   </p>
                 </div>
 
-                {/* Items */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Package className="h-4 w-4 text-[var(--color-primary-500)]" />
@@ -582,24 +632,14 @@ export function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Finalize */}
                 <Button
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
                   onClick={handleFinalize}
                   disabled={isProcessing || paymentConfig.isPending || paymentConfig.isError}
                 >
-                  {isProcessing ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processando...
-                    </div>
-                  ) : (
-                    <>
-                      <ShieldCheck className="h-4 w-4" />
-                      Confirmar Pedido — R$ {finalTotal.toFixed(2).replace(".", ",")}
-                    </>
-                  )}
+                  <ShieldCheck className="h-4 w-4" />
+                  Confirmar Pedido — R$ {finalTotal.toFixed(2).replace(".", ",")}
                 </Button>
               </motion.div>
             )}
@@ -653,6 +693,18 @@ export function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Overlay de Loading do Checkout */}
+      {isProcessing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <HamsterLoader />
+            <p className="text-lg font-bold text-slate-800 animate-pulse font-[family-name:var(--font-display)]">
+              Processando seu pedido...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
