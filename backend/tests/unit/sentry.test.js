@@ -65,6 +65,11 @@ test('scrubData descarta corpo não-JSON inteiro, por não haver como redigi-lo'
 });
 
 test('initSentry é no-op sem SENTRY_DSN (a API sobe normalmente)', () => {
-  assert.equal(process.env.SENTRY_DSN, undefined);
-  assert.equal(initSentry(), false);
+  const orig = process.env.SENTRY_DSN;
+  delete process.env.SENTRY_DSN;
+  try {
+    assert.equal(initSentry(), false);
+  } finally {
+    if (orig !== undefined) process.env.SENTRY_DSN = orig;
+  }
 });

@@ -71,8 +71,9 @@ test('CONCLUIDO, RECUSADO e CANCELADO são terminais', () => {
   }
 });
 
-test('recusa só acontece enquanto PENDENTE', () => {
+test('recusa só acontece enquanto PENDENTE ou AGUARDANDO_CONFIRMACAO', () => {
   assert.ok(isValidAppointmentTransition(S.PENDING, S.REJECTED));
+  assert.ok(isValidAppointmentTransition(S.AWAITING_CONFIRMATION, S.REJECTED));
   assert.ok(!isValidAppointmentTransition(S.CONFIRMED, S.REJECTED));
 });
 
