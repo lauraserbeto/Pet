@@ -8,6 +8,7 @@ const {
   isOperationalSitter,
 } = require('../constants/providerStatus');
 const { toPublicProvider, toPublicProviders } = require('../utils/publicProvider');
+const { ADMIN_PROVIDER_SELECT, toAdminProviders } = require('../utils/adminProvider');
 const emailService = require('../services/EmailService');
 const logger = require('../config/logger');
 const { FRONTEND_URL } = require('../config/env');
@@ -150,33 +151,17 @@ class ProviderController {
     }
   }
 
-  // Lista todos os provedores anexando dados do user (Padrão/Admin)
-  async listPartners(req, res) {
+  // Listagem administrativa de parceiros (E-02): rota exclusiva do admin, com
+  // os dados de moderação (CPF/CNPJ, motivo da recusa e estado da conta).
+  async listPartners(req, res, next) {
     try {
       const providers = await prisma.provider.findMany({
-        include: {
-          user: {
-            select: {
-              full_name: true,
-              email: true,
-              role_id: true,
-            }
-          }
-        }
+        select: ADMIN_PROVIDER_SELECT,
       });
 
-      // Transforma para o formato esperado pelo frontend
-      const mapped = providers.map(p => ({
-        ...toPublicProvider(p),
-        full_name: p.user ? p.user.full_name : 'Desconhecido',
-        email: p.user ? p.user.email : 'Sem email',
-        role_id: p.user ? p.user.role_id : undefined
-      }));
-
-      return res.status(200).json(mapped);
+      return res.status(200).json(toAdminProviders(providers));
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao buscar provedores' });
+      return next(error);
     }
   }
 

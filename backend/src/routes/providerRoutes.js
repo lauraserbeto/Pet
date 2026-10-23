@@ -93,13 +93,22 @@ router.get('/stores', (req, res) => ProviderController.listStores(req, res));
  * @swagger
  * /api/v1/providers:
  *   get:
- *     summary: Lista todos os parceiros
+ *     summary: Lista todos os parceiros para moderação (somente admin)
+ *     description: Inclui CPF/CNPJ, motivo da recusa e estado da conta. Usada pelo painel de aprovações.
  *     tags: [Providers]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de parceiros
+ *         description: Lista de parceiros com dados de moderação
+ *       401:
+ *         description: Não autenticado
+ *       403:
+ *         description: Acesso restrito a administradores
  */
-router.get('/', ProviderController.listPartners);
+// A listagem expõe dados de moderação (e-mail, CPF/CNPJ, motivo da recusa) e
+// por isso é exclusiva do admin; as vitrines públicas usam /hotels, /sitters e /stores.
+router.get('/', authMiddleware, adminMiddleware, ProviderController.listPartners);
 
 /**
  * @swagger
