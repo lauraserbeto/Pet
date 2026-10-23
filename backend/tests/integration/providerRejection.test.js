@@ -282,28 +282,64 @@ test("POST /me/resubmit — sem perfil cadastrado → 404", async () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GET / — listPartners expõe status EM_REVISAO distinto de PENDENTE
+// GET / — listagem administrativa de parceiros (E-02)
 // ─────────────────────────────────────────────────────────────────────────────
 
-test("GET /providers — listPartners inclui EM_REVISAO e PENDENTE como valores distintos", async () => {
-  const mockProviders = [
-    {
-      id: "p-pend-1",
-      status: PROVIDER_STATUS.PENDING,
-      rejection_reason: null,
-      user: { full_name: "Parceiro Pendente", email: "p@test.com", role_id: 2 },
-    },
-    {
-      id: "p-rev-1",
-      status: PROVIDER_STATUS.IN_REVIEW,
-      rejection_reason: "Motivo anterior.",
-      user: { full_name: "Parceiro Revisão", email: "r@test.com", role_id: 2 },
-    },
-  ];
+const mockPartners = [
+  {
+    id: "p-pend-1",
+    user_id: "u-pend-1",
+    business_name: "Loja Pendente",
+    document: "12345678000190",
+    document_type: "CNPJ",
+    status: PROVIDER_STATUS.PENDING,
+    rejection_reason: null,
+    user: { full_name: "Parceiro Pendente", email: "p@test.com", role_id: 2, is_active: null },
+  },
+  {
+    id: "p-rev-1",
+    user_id: "u-rev-1",
+    business_name: "Hotel em Revisão",
+    document: "98765432000110",
+    document_type: "CNPJ",
+    status: PROVIDER_STATUS.IN_REVIEW,
+    rejection_reason: "Motivo anterior.",
+    user: { full_name: "Parceiro Revisão", email: "r@test.com", role_id: 3, is_active: false },
+  },
+];
 
-  stubPrismaMethod(prisma.provider, "findMany", async () => mockProviders);
+test("GET /providers — sem token → 401 (listagem não é mais pública)", async () => {
+  stubPrismaMethod(prisma.provider, "findMany", async () => {
+    throw new Error("findMany não deveria ser chamado sem autenticação");
+  });
 
   const res = await request(app).get("/api/v1/providers");
+  assert.equal(res.status, 401);
+});
+
+test("GET /providers — parceiros e tutor → 403", async () => {
+  stubPrismaMethod(prisma.provider, "findMany", async () => {
+    throw new Error("findMany não deveria ser chamado sem papel de admin");
+  });
+
+  for (const roleId of [2, 3, 4, 5]) {
+    const res = await request(app)
+      .get("/api/v1/providers")
+      .set("Authorization", `Bearer ${generateToken({ roleId })}`);
+    assert.equal(res.status, 403, `role_id ${roleId} não pode listar parceiros`);
+  }
+});
+
+test("GET /providers — admin recebe documento, motivo da recusa e EM_REVISAO distinto de PENDENTE", async () => {
+  let receivedArgs;
+  stubPrismaMethod(prisma.provider, "findMany", async (args) => {
+    receivedArgs = args;
+    return mockPartners;
+  });
+
+  const res = await request(app)
+    .get("/api/v1/providers")
+    .set("Authorization", `Bearer ${generateAdminToken()}`);
   assert.equal(res.status, 200);
   assert.ok(Array.isArray(res.body));
 
@@ -311,12 +347,20 @@ test("GET /providers — listPartners inclui EM_REVISAO e PENDENTE como valores 
   assert.ok(statuses.includes(PROVIDER_STATUS.PENDING), "PENDENTE deve estar presente");
   assert.ok(statuses.includes(PROVIDER_STATUS.IN_REVIEW), "EM_REVISAO deve estar presente");
 
-  // rejection_reason nunca deve vazar na listagem (publicProvider.js)
+  // O painel de aprovações depende do documento e do motivo para moderar.
+  const revisao = res.body.find((p) => p.id === "p-rev-1");
+  assert.equal(revisao.document, "98765432000110");
+  assert.equal(revisao.rejection_reason, "Motivo anterior.");
+  assert.equal(revisao.full_name, "Parceiro Revisão");
+  assert.equal(revisao.email, "r@test.com");
+  assert.equal(revisao.role_id, 3);
+  assert.equal(revisao.is_active, false);
+  assert.equal(res.body.find((p) => p.id === "p-pend-1").is_active, true);
+
+  // Nada de password_hash: nem pedido ao banco, nem devolvido.
+  assert.equal(receivedArgs.select.user.select.password_hash, undefined);
   for (const p of res.body) {
-    assert.equal(
-      p.rejection_reason,
-      undefined,
-      "rejection_reason é campo privado e não deve aparecer na listagem",
-    );
+    assert.equal(p.password_hash, undefined);
+    assert.equal(p.user, undefined);
   }
 });

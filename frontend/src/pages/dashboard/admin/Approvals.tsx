@@ -81,15 +81,20 @@ export function Approvals() {
         const res = await fetch(`${API_URL}/providers`, {
           headers: getHeaders()
         });
-        
-        if (!res.ok) throw new Error("Erro ao carregar parceiros");
+
+        if (!res.ok) {
+          // A listagem é exclusiva do admin (E-02): sessão expirada ou sem
+          // permissão chegam aqui como 401/403 com mensagem da API.
+          const body = await res.json().catch(() => null);
+          throw new Error(body?.error?.message ?? body?.error ?? "Erro ao carregar parceiros.");
+        }
         const data = await res.json();
-        
+
         setPartners(data);
 
       } catch (err) {
         console.error('Error fetching partners:', err);
-        toast.error("Erro ao carregar parceiros.");
+        toast.error(err instanceof Error ? err.message : "Erro ao carregar parceiros.");
       } finally {
         setLoadingData(false);
       }

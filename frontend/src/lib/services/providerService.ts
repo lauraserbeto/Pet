@@ -122,20 +122,6 @@ export const providerService = {
     return data;
   },
 
-  async fetchAllProviders(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/providers`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar parceiros');
-    }
-
-    const data = await response.json();
-    return data;
-  },
-
   async fetchHotels(): Promise<any[]> {
     const response = await fetch(`${API_URL}/providers/hotels`, {
       method: 'GET',
