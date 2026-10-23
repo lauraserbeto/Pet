@@ -2,6 +2,8 @@
 
 > Sprint 4 · Semana 9 (20–26/out) · Frontend · Prioridade Alta · Esforço M · Responsável R4
 
+> **Atualizada em 23/10/2026** conforme a decisão DEC-A da Fase 0 de estabilização (`PLANO-DESENVOLVIMENTO.md` §3). Mudanças: concluir só depois do horário de início; o parceiro pode cancelar um `CONFIRMADO` antes do início, com estorno se houve pagamento.
+
 ## Contexto
 O **SCH-1** já trocou o mock de `frontend/src/pages/dashboard/Schedule.tsx` pela agenda real e habilitou **confirmar/recusar**. Falta completar o ciclo de vida do agendamento pela agenda: **concluir** um atendimento, refinar todos os **estados** (loading/vazio/erro) e tornar a **visão por dia/semana** coerente com os dados reais (o `Schedule.tsx` já tem estrutura de calendário e slots de horário, antes alimentada por mock).
 
@@ -9,14 +11,18 @@ O **SCH-1** já trocou o mock de `frontend/src/pages/dashboard/Schedule.tsx` pel
 Completar a gestão do agendamento pela agenda do parceiro: além de confirmar/recusar (SCH-1), permitir **concluir** (`CONCLUIDO`), tratar todos os estados de carregamento/vazio/erro e apresentar uma visão por dia/semana consistente com os Appointments reais.
 
 ## Escopo / Passos
-1. Adicionar a ação **Concluir** (`CONFIRMADO → CONCLUIDO`) à agenda, via `useUpdateAppointmentStatus` (SCH-1), com invalidação de cache.
+1. Adicionar a ação **Concluir** (`CONFIRMADO → CONCLUIDO`) à agenda, via `useUpdateAppointmentStatus` (SCH-1), com invalidação de cache. Ela só fica disponível **depois do horário de início** do agendamento (DEC-A).
+   - Adicionar a ação **Cancelar** para `CONFIRMADO` **antes do horário de início**, com confirmação explícita. Se houve pagamento (PRE_PAGO), o backend faz o estorno integral (PAG-2).
 2. Refinar estados:
    - **loading** com `HamsterLoader` nas transições e na carga;
    - **vazio** por período (dia/semana sem agendamentos);
    - **erro** com mensagem e possibilidade de retry, sem perder o contexto da tela.
 3. Tornar a **visão por dia/semana** coerente: mapear `start_time`/`end_time` reais para os slots do calendário existente; navegação entre dias/semana (os controles `ChevronLeft/Right` já existem) filtrando os agendamentos do período.
 4. Badges/cores por status alinhados ao fluxo (`PENDENTE`, `AGUARDANDO_CONFIRMACAO`, `CONFIRMADO`, `CONCLUIDO`, `RECUSADO`, `CANCELADO`).
-5. Garantir que ações inválidas para o status atual fiquem desabilitadas (ex.: não "concluir" um `PENDENTE`).
+5. Garantir que ações inválidas para o status atual fiquem desabilitadas. Exemplos:
+   - não "concluir" um `PENDENTE` nem um `CONFIRMADO` cujo horário ainda não começou;
+   - não "cancelar" depois do início;
+   - não agir sobre PRE_PAGO ainda não pago.
 
 ## Arquivos envolvidos
 - `frontend/src/pages/dashboard/Schedule.tsx` (concluir + estados + visão dia/semana)
@@ -28,13 +34,14 @@ Completar a gestão do agendamento pela agenda do parceiro: além de confirmar/r
 - **Bloqueia:** fecha a Definition of Done do marco M4 no lado do parceiro.
 
 ## Critério de aceite (Definition of Done)
-- Parceiro **gerencia o ciclo completo** pela agenda: confirmar, recusar e **concluir**.
+- Parceiro **gerencia o ciclo completo** pela agenda: confirmar, recusar, **concluir** (após o início) e cancelar `CONFIRMADO` (antes do início).
 - Estados **loading/vazio/erro** tratados em todas as ações e na carga.
 - Visão por **dia/semana** coerente com os horários reais dos Appointments; navegação funciona.
-- Ações inválidas para o status atual ficam indisponíveis.
+- Ações inválidas para o status e o horário atuais ficam indisponíveis.
 
 ## Testes
-- Confirmar → Concluir um agendamento: transições refletidas na UI e persistidas.
+- Confirmar → Concluir um agendamento já iniciado: transições refletidas na UI e persistidas.
+- Agendamento `CONFIRMADO` ainda não iniciado → "Concluir" desabilitado; "Cancelar" disponível; cancelar um PRE_PAGO pago → `CANCELADO` com estorno.
 - Semana sem agendamentos → estado vazio claro; navegar entre dias/semana filtra corretamente.
 - Erro na transição → mensagem + retry, sem quebrar a agenda.
 - Botão "Concluir" desabilitado para status não elegíveis.

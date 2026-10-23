@@ -2,6 +2,8 @@
 
 > Sprint 3 · Semana 6 (29/set–05/out) · Backend · Prioridade Crítico · Esforço G · Responsável R1
 
+> ⚠️ **Atualizado em 23/10/2026.** O estado inicial por política, a fonte do preço e o tratamento do estorno descritos abaixo foram substituídos pelas decisões DEC-A, DEC-B e DEC-D da Fase 0 de estabilização. O texto original foi mantido como registro do que foi pedido e entregue. A regra vigente está na seção [Atualização pós-auditoria](#atualização-pós-auditoria-23102026), ao final.
+
 ## Contexto
 O modelo `Appointment` e o `AppointmentRepository` (`backend/src/repositories/AppointmentRepository.js`) já existem, mas são **código morto**: nenhuma rota os importa. O repositório já expõe `create`, `findByProviderId`, `findByCustomerId`, `findById` e `update` com os `include` corretos (pet→tutor, service, provider). A modelagem e migração do fluxo — incluindo o campo `payment_policy` no `Provider` e o alinhamento dos estados de `Appointment.status` — são de **AGD-1** (pré-requisito). Esta task expõe o fluxo ponta a ponta.
 
@@ -49,3 +51,28 @@ Criar `appointmentRoutes` + `AppointmentController` + useCases que dão vida ao 
 - Prisma `Decimal` (`total_price`, `price`, `daily_rate`, `hourly_rate`) → converter com `Number()` na saída.
 - `req.userId`/`req.userRole` vêm do `authMiddleware` (role: 3=HOTEL, 4=PET_SITTER, 5=TUTOR).
 - Erros via `next(AppError)` + errorHandler central; validar body com Zod.
+
+---
+
+## Atualização pós-auditoria (23/10/2026)
+
+A auditoria das Sprints 0–3 (`docs/Sprints/AUDITORIA-QUALIDADE-ESTABILIZACAO-PRE-SPRINT-4.md`, achados AUD-06, AUD-07 e AUD-16) mostrou que esta spec divergia do §3 do plano. As decisões da Fase 0 (`docs/Sprints/PAUTA-FASE-0-DECISOES-ESTABILIZACAO.md`) definem o comportamento vigente:
+
+| Tema | Como foi pedido/entregue | Regra vigente |
+|---|---|---|
+| Estado inicial (DEC-A) | PRESENCIAL nasce `CONFIRMADO`; PRE_PAGO nasce `AGUARDANDO_CONFIRMACAO` | **Todo agendamento nasce `PENDENTE`** |
+| PRESENCIAL (DEC-A) | Sem aceite do parceiro | Parceiro **confirma ou recusa** a partir de `PENDENTE` |
+| PRE_PAGO (DEC-A) | Parceiro confirma a partir de `AGUARDANDO_CONFIRMACAO`, sem pagamento | `PENDENTE → AGUARDANDO_CONFIRMACAO` **só pelo pagamento aprovado** (PAG-2); parceiro confirma ou recusa depois disso |
+| Estorno (DEC-A) | "Marca estorno" na resposta, conforme a política atual do parceiro | Estorno **integral e persistido** (PAG-2), decidido pela política **gravada no agendamento** na reserva |
+| Cancelamento (DEC-A) | "Qualquer lado cancela" | Antes do início: tutor em `PENDENTE`/`AGUARDANDO_CONFIRMACAO`/`CONFIRMADO`; parceiro em `CONFIRMADO` |
+| Conclusão (DEC-A) | Parceiro conclui a partir de `CONFIRMADO` | Igual, mas **só depois do horário de início** |
+| Preço (DEC-B) | `daily_rate`/`hourly_rate` do parceiro | **`Service.price` do serviço reservado** × diárias ou horas |
+| Parceiro (DEC-D, auditoria) | Sem checagem de status do parceiro | Só **parceiro operacional** recebe agendamento (sitter: aprovado e com avaliação aprovada) |
+
+Validações acrescentadas pela auditoria:
+- início no futuro;
+- duração máxima definida;
+- recusa de sobreposição de horário para o mesmo parceiro;
+- resposta do tutor ao parceiro limitada a id, nome, telefone e e-mail.
+
+**Execução:** item **E-04** do plano de estabilização (R1), antes da PAG-2, da BKG e da SCH. Até lá, o código em `main` reflete a versão original desta spec.

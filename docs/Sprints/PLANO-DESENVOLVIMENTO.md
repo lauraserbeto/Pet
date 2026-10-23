@@ -53,30 +53,58 @@ Autenticação (login/registro com anti-escalonamento de privilégio; forgot/res
 
 ## 3. Decisões de negócio (JÁ ALINHADAS — não reabrir sem combinar)
 
+> **Atualizado em 23/10/2026** com as decisões da Fase 0 de estabilização (DEC-A a DEC-G), registradas em [`PAUTA-FASE-0-DECISOES-ESTABILIZACAO.md`](PAUTA-FASE-0-DECISOES-ESTABILIZACAO.md) a partir da [auditoria das Sprints 0–3](AUDITORIA-QUALIDADE-ESTABILIZACAO-PRE-SPRINT-4.md). Os trechos novos ou alterados estão marcados com **(23/10)**.
+
 1. **Status do parceiro** vira **enum**: `PENDENTE`, `APROVADO`, `REJEITADO`, `EM_REVISAO`.
    - Os valores legados `ATIVO`/`ACTIVE` são migrados para `APROVADO`.
    - **"Sitter operacional"** = `status === APROVADO` **e** `SitterEvaluation` do sitter em `APPROVED` (o sitter tem uma etapa extra: o questionário).
+   - **(23/10, DEC-D)** A aprovação do Pet Sitter acontece **somente pela avaliação aprovada**: o admin não consegue marcar `APROVADO` um sitter sem `SitterEvaluation` em `APPROVED`. Um **único verificador de "parceiro operacional"** é usado em serviços, agendamento, vitrine e produtos. Nova avaliação só é aceita quando a anterior estiver `REJECTED`, uma por vez, e só pelo papel Pet Sitter.
    - `EM_REVISAO` = cadastro **reenviado após uma recusa**, aguardando reanálise.
 
-2. **Recusa e reenvio de cadastro**: ao recusar, o admin grava um **motivo** (`rejection_reason`) e o sistema **envia e-mail** (via Resend) com um **link para a tela de correção**. A correção **exige login**. Ao reenviar, o status vai para `EM_REVISAO`.
+2. **Recusa e reenvio de cadastro**: ao recusar, o admin grava um **motivo** (`rejection_reason`) e o sistema **envia e-mail** (via Resend) com um **link para a tela de correção**. A correção **exige login**. Ao reenviar, o status vai para `EM_REVISAO`. **(23/10)** Recusa de cadastro não é desativação de conta (ver item 9).
 
-3. **Política de pagamento por parceiro** (`payment_policy`, configurável em Configurações):
-   - `PRESENCIAL` (**padrão**): paga na data, presencialmente. O agendamento é confirmado pelo parceiro sem pagamento online.
-   - `PRE_PAGO`: exige pagamento antes da confirmação. O agendamento nasce `AGUARDANDO_CONFIRMACAO`; recusa/cancelamento gera **estorno**.
+3. **Política de pagamento por parceiro** (`payment_policy`, configurável pelo parceiro em "Meus Serviços") — **(23/10, DEC-A)**:
+   - `PRESENCIAL` (**padrão**): paga na data, presencialmente. O agendamento nasce `PENDENTE`; o **parceiro confirma** (`CONFIRMADO`) ou **recusa** (`RECUSADO`), sem pagamento online.
+   - `PRE_PAGO`: exige pagamento antes da confirmação. O agendamento nasce `PENDENTE`; o **tutor paga na reserva** e o agendamento passa a `AGUARDANDO_CONFIRMACAO` **somente pelo pagamento aprovado**; depois, o parceiro confirma ou recusa. Recusa ou cancelamento de agendamento pago gera **estorno integral**.
+   - A política vigente na reserva fica **gravada no próprio agendamento**; mudanças posteriores do parceiro não afetam reservas existentes nem o estorno.
 
-4. **Unidades de cobrança**: **hotel = diária**; **sitter = visita/hora**.
+4. **Unidades de cobrança**: **hotel = diária**; **sitter = hora** (**(23/10, DEC-B)** a unidade "visita" fica no backlog).
+   - **(23/10, DEC-B)** O valor cobrado é o **preço do serviço reservado** (`Service.price`) × quantidade de unidades (diárias ou horas). A tarifa geral do parceiro (`daily_rate`/`hourly_rate`) passa a ser só **preço de referência** até a `SRV-Fpub`. A partir dela, a listagem mostra "a partir de" (menor preço entre os serviços ativos) e a completude do perfil exige ao menos um serviço ativo.
 
 5. **Quem vende produto**: **somente LOJISTA aprovado**. Hotel/sitter/tutor não criam produtos, e produto de lojista **não-aprovado não aparece na loja**.
 
 6. **Aceite de termos** passa a ser **capturado de verdade** (bloqueia cadastro sem aceite; grava o valor real + data/versão dos termos).
+   - **(23/10, DEC-F)** O registro fica no próprio usuário: `terms_accepted_at` e `terms_version`. Cadastro sem aceite recebe 422, e o campo deixa de ter `default(true)`.
+   - A versão é a **data de publicação do texto vigente**, definida em um único ponto de configuração e exibida em `/terms` e `/privacy`.
+   - Usuários anteriores ficam com versão vazia ("aceite anterior ao registro de versão"), sem novo aceite neste semestre. Não se guarda IP.
 
 7. **Pagamento em duas camadas**: primeiro **SIMULADO** (marca o pedido/agendamento como pago) — destrava todas as jornadas. **Mercado Pago sandbox** entra por cima como **OPCIONAL** (`PGT-1`), sem refazer a modelagem.
 
 8. **`Favorite.target_id` sem FK**: mantido como está (relação polimórfica; integridade garantida na aplicação).
 
+9. **(23/10, DEC-G) Desativação de conta** = `User.is_active=false`, separada da recusa de cadastro (`REJEITADO`).
+   - Vale para qualquer tipo de conta.
+   - Bloqueia o login e os tokens já emitidos a partir da requisição seguinte, tira produtos e serviços da vitrine e **não** envia e-mail de correção.
+   - Pedidos e agendamentos em aberto não são cancelados automaticamente; o admin trata caso a caso.
+
+10. **(23/10, DEC-C) Valores da compra**: neste semestre não há frete, desconto por forma de pagamento nem cupom.
+    - O total exibido no carrinho e no checkout é a soma dos itens e **igual ao valor cobrado** pelo backend.
+    - No modo simulado, a tela avisa "Pagamento simulado — nenhum valor real é cobrado".
+    - Frete e cupom ficam no backlog.
+
+11. **(23/10, DEC-E) Senhas**:
+    - **8 caracteres, 1 letra maiúscula e 1 número** em cadastro, troca e recuperação, com a mesma regra no backend e no frontend.
+    - bcrypt com **custo 12** em constante única.
+    - Usuários atuais não precisam trocar a senha.
+
 ### Máquinas de estado
 - **Pedido** (`Order.status`): `AGUARDANDO_PAGAMENTO → PAGO → (ENVIADO/CONCLUIDO)`, com `CANCELADO`. *(ajustar nomes na modelagem de `PED-1`/`PAG-1`.)*
-- **Agendamento** (`Appointment.status`): `PENDENTE → AGUARDANDO_CONFIRMACAO` *(só PRE_PAGO)* `→ CONFIRMADO → CONCLUIDO`, com `RECUSADO`/`CANCELADO`. A **avaliação** só é liberada após `CONCLUIDO`.
+- **Agendamento** (`Appointment.status`): `PENDENTE → AGUARDANDO_CONFIRMACAO` *(só PRE_PAGO)* `→ CONFIRMADO → CONCLUIDO`, com `RECUSADO`/`CANCELADO`. A **avaliação** só é liberada após `CONCLUIDO`. **(23/10, DEC-A)** Transições e responsáveis:
+  - **PRESENCIAL:** `PENDENTE → CONFIRMADO` ou `PENDENTE → RECUSADO`, pelo parceiro.
+  - **PRE_PAGO:** `PENDENTE → AGUARDANDO_CONFIRMACAO` acontece só pelo pagamento aprovado (nunca por alteração manual de status). Em seguida, `AGUARDANDO_CONFIRMACAO → CONFIRMADO` ou `→ RECUSADO` (com estorno), pelo parceiro.
+  - **Cancelamento** (antes do horário de início): o tutor cancela em `PENDENTE`, `AGUARDANDO_CONFIRMACAO` ou `CONFIRMADO`; o parceiro cancela em `CONFIRMADO`. O estorno é integral quando houve pagamento.
+  - **Conclusão:** `CONFIRMADO → CONCLUIDO` só pelo parceiro e só depois do horário de início.
+  - Expiração automática de `PENDENTE` não pago fica como pendência (backlog).
 
 ---
 
@@ -196,6 +224,13 @@ Avaliações no front; dashboards com dado real; segurança/infra; QA de release
 
 ## 9. Backlog opcional (candidato ao próximo semestre)
 Sem quebrar o essencial: **Mercado Pago real** (`PGT-1`, mantém o simulado), opção `SINAL` de pagamento, **storage de mídia** (`STO-1`) se estourar prazo, mapas/geolocalização, SMS/push/notificações, soft-delete, tela **Customers** (hoje órfã — decidir remover), limpeza de dependências (`depcheck`), unificação total do design system.
+
+**(23/10)** Itens adiados pelas decisões da Fase 0:
+- **Frete calculado e cupons** (DEC-C).
+- Unidade de cobrança **"visita"** para Pet Sitter (DEC-B).
+- **Histórico de aceites** com novo aceite a cada versão dos termos (DEC-F).
+- **Expiração automática** de agendamento PRE_PAGO não pago (DEC-A).
+- Multas e prazos de cancelamento de agendamento (DEC-A).
 
 ---
 

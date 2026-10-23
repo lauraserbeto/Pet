@@ -2,6 +2,8 @@
 
 > Sprint 4 · Semana 8 (13–19/out) · Frontend · Prioridade Alta · Esforço M · Responsável R4
 
+> **Atualizada em 23/10/2026** conforme a decisão DEC-A da Fase 0 de estabilização (`PLANO-DESENVOLVIMENTO.md` §3). Mudança: as ações de confirmar e recusar dependem da política gravada no agendamento. Um PRE_PAGO ainda `PENDENTE` (não pago) não tem ação do parceiro.
+
 ## Contexto
 A agenda do parceiro é **100% mock**: `frontend/src/pages/dashboard/Schedule.tsx:44` declara `appointmentsData` fixo (Rex/Luna/Thor com horários e status hardcoded) e o componente renderiza a partir desse array. Os Appointments reais já existem no backend (schema `Appointment` ~279-297) e são expostos pelo AGD-2, mas o parceiro não os vê nem age sobre eles. Esta é a **parte 1**: exibir a agenda real e permitir confirmar/recusar (o ciclo completo — concluir, visões dia/semana, estados — fica no SCH-2).
 
@@ -14,9 +16,12 @@ Trocar o mock de `Schedule.tsx` pela **agenda real** de Appointments do parceiro
 3. Em `Schedule.tsx`:
    - Remover `appointmentsData` mock e o tipo local acoplado ao mock; mapear os campos reais (pet, serviço, `start_time`/`end_time`, `status`, `total_price`).
    - Renderizar a lista/grade a partir dos dados reais.
-   - Ações **Confirmar** e **Recusar** por agendamento, chamando a mutation e refletindo o novo status.
+   - Ações **Confirmar** e **Recusar** por agendamento, chamando a mutation e refletindo o novo status. Elas ficam disponíveis apenas (DEC-A):
+     - em `PENDENTE`, quando a política gravada no agendamento é **PRESENCIAL**;
+     - em `AGUARDANDO_CONFIRMACAO` (PRE_PAGO já pago).
+   - Agendamento **PRE_PAGO em `PENDENTE`** (ainda não pago) aparece como "aguardando pagamento do tutor", **sem** ações do parceiro.
 4. Tratar estados básicos: loading (`HamsterLoader`), lista vazia e erro (os refinamentos avançados de estado e visão por dia/semana ficam no SCH-2).
-5. Mapear os status do backend (`PENDENTE`, `AGUARDANDO_CONFIRMACAO`, `CONFIRMADO`, `CONCLUIDO`, `RECUSADO`, `CANCELADO`) para os badges/cores da UI.
+5. Mapear os status do backend (`PENDENTE`, `AGUARDANDO_CONFIRMACAO`, `CONFIRMADO`, `CONCLUIDO`, `RECUSADO`, `CANCELADO`) para os badges/cores da UI. Distinguir "PENDENTE — aguardando sua confirmação" (PRESENCIAL) de "PENDENTE — aguardando pagamento" (PRE_PAGO).
 
 ## Arquivos envolvidos
 - `frontend/src/pages/dashboard/Schedule.tsx` (remover mock ~44; ligar a dados reais)
@@ -24,18 +29,20 @@ Trocar o mock de `Schedule.tsx` pela **agenda real** de Appointments do parceiro
 - `frontend/src/lib/hooks/usePartnerAppointments.ts` e `useUpdateAppointmentStatus.ts` (novos)
 
 ## Dependências
-- **Depende de:** AGD-2 (listagem e transição de status de Appointment).
+- **Depende de:** AGD-2 (listagem e transição de status de Appointment) ajustado pelo item **E-04** da estabilização (estado inicial `PENDENTE`, política gravada no agendamento, permissões por política).
 - **Bloqueia:** SCH-2 (parte 2: concluir, estados completos, visão dia/semana).
 
 ## Critério de aceite (Definition of Done)
 - O parceiro vê seus **agendamentos reais** na agenda (sem dados hardcoded).
-- É possível **confirmar** e **recusar** um agendamento pela tela, com o status atualizando.
+- É possível **confirmar** e **recusar** um agendamento pela tela, com o status atualizando, apenas nos casos permitidos (PRESENCIAL em `PENDENTE`; PRE_PAGO em `AGUARDANDO_CONFIRMACAO`).
+- PRE_PAGO não pago aparece identificado e sem ações.
 - `appointmentsData` mock **removido** de `Schedule.tsx`.
 - Estados de loading, vazio e erro presentes (versão básica).
 
 ## Testes
 - Manual: parceiro com agendamentos vê a lista real; sem agendamentos → estado vazio.
-- Confirmar um `PENDENTE`/`AGUARDANDO_CONFIRMACAO` → vira `CONFIRMADO` na UI.
+- Confirmar um `PENDENTE` (PRESENCIAL) ou um `AGUARDANDO_CONFIRMACAO` (PRE_PAGO) → vira `CONFIRMADO` na UI.
+- PRE_PAGO em `PENDENTE` (não pago) → sem botões de confirmar/recusar.
 - Recusar → vira `RECUSADO` (e, se PRE_PAGO pago, o backend PAG-2 estorna).
 - Erro na mutation → mensagem de erro, sem perder o estado da tela.
 
