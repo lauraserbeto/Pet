@@ -1,0 +1,39 @@
+# CT-PI-03 — Pedido AGUARDANDO_PAGAMENTO não vai direto para ENVIADO (RNE-014) — tutor B + lojista
+Início: 2026-10-23 13:55:58.287 -03:00
+API: http://localhost:3100/api/v1
+Obs.: senhas, tokens e password_hash aparecem como <omitido>.
+
+[2026-10-23 13:55:58.288 -03:00] POST http://localhost:3100/api/v1/cart/items
+Autenticação: Bearer <token omitido> (tutorB)
+Corpo enviado: {"product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1}
+Status HTTP: 201
+Corpo recebido: {"id":"49cdbaf0-73cf-4ab6-bc86-eb54436ae77f","updated_at":"2026-10-23T16:55:58.306Z","items":[{"id":"3fa6b2b7-a287-4598-bebb-8a260e55f0a8","product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1,"unit_price":45.9,"current_unit_price":45.9,"price_changed":false,"line_total":45.9,"added_at":"2026-10-23T16:55:58.307Z","product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","name":"Ração Bônus 1kg","image_url":null,"stock_quantity":10,"status":"ACTIVE","provider":{"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","business_name":"Loja Bônus Pet"}}}],"totals":{"subtotal":45.9,"discount":0,"total":45.9,"total_items":1},"warnings":[]}
+---
+[2026-10-23 13:55:58.318 -03:00] POST http://localhost:3100/api/v1/orders
+Autenticação: Bearer <token omitido> (tutorB)
+Corpo enviado: {"address_id":"dc12dfaf-8bcc-4bcd-9944-d5396042f9e0"}
+Status HTTP: 201
+Corpo recebido: {"order":{"id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","provider_id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","customer_id":"668b223b-575a-41da-86b4-5abdd236ed71","total_price":45.9,"status":"AGUARDANDO_PAGAMENTO","created_at":"2026-10-23T16:55:58.336Z","updated_at":"2026-10-23T16:55:58.336Z","provider":{"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","business_name":"Loja Bônus Pet"},"items":[{"id":"857ec95f-f197-4f37-afb6-d77a68bbf9ac","order_id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1,"unit_price":45.9,"line_total":45.9,"product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","name":"Ração Bônus 1kg","image_url":null,"sku":"PET-557592"}}]},"orders":[{"id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","provider_id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","customer_id":"668b223b-575a-41da-86b4-5abdd236ed71","total_price":45.9,"status":"AGUARDANDO_PAGAMENTO","created_at":"2026-10-23T16:55:58.336Z","updated_at":"2026-10-23T16:55:58.336Z","provider":{"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","business_name":"Loja Bônus Pet"},"items":[{"id":"857ec95f-f197-4f37-afb6-d77a68bbf9ac","order_id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1,"unit_price":45.9,"line_total":45.9,"product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","name":"Ração Bônus 1kg","image_url":null,"sku":"PET-557592"}}]}]}
+---
+VERIFICAÇÃO [OK] pedido criado em AGUARDANDO_PAGAMENTO — obtido HTTP 201, status AGUARDANDO_PAGAMENTO
+[2026-10-23 13:55:58.349 -03:00] PATCH http://localhost:3100/api/v1/orders/4d725abc-9842-4dcb-b2b1-22a39a1ce2b1/status
+Autenticação: Bearer <token omitido> (lojista)
+Corpo enviado: {"status":"ENVIADO"}
+Status HTTP: 422
+Corpo recebido: {"error":{"code":"VALIDATION_ERROR","message":"Transição inválida: \"AGUARDANDO_PAGAMENTO\" → \"ENVIADO\". Consulte as transições permitidas para este status."},"message":"Transição inválida: \"AGUARDANDO_PAGAMENTO\" → \"ENVIADO\". Consulte as transições permitidas para este status."}
+---
+[2026-10-23 13:55:58.362 -03:00] GET http://localhost:3100/api/v1/orders
+Autenticação: Bearer <token omitido> (tutorB)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","provider_id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","customer_id":"668b223b-575a-41da-86b4-5abdd236ed71","total_price":45.9,"status":"AGUARDANDO_PAGAMENTO","created_at":"2026-10-23T16:55:58.336Z","updated_at":"2026-10-23T16:55:58.336Z","provider":{"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","business_name":"Loja Bônus Pet"},"customer":null,"items":[{"id":"857ec95f-f197-4f37-afb6-d77a68bbf9ac","order_id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1,"unit_price":45.9,"line_total":45.9,"product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","name":"Ração Bônus 1kg","image_url":null,"sku":"PET-557592","price":45.9}}]}]
+---
+[2026-10-23 13:55:58.417 -03:00] GET http://localhost:3100/api/v1/orders/received
+Autenticação: Bearer <token omitido> (lojista)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","provider_id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","customer_id":"668b223b-575a-41da-86b4-5abdd236ed71","total_price":45.9,"status":"AGUARDANDO_PAGAMENTO","created_at":"2026-10-23T16:55:58.336Z","updated_at":"2026-10-23T16:55:58.336Z","provider":null,"customer":{"id":"668b223b-575a-41da-86b4-5abdd236ed71","full_name":"Tutor B Bônus","email":"bonus.tutor.b@petplus.local","phone":null},"items":[{"id":"857ec95f-f197-4f37-afb6-d77a68bbf9ac","order_id":"4d725abc-9842-4dcb-b2b1-22a39a1ce2b1","product_id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","quantity":1,"unit_price":45.9,"line_total":45.9,"product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","name":"Ração Bônus 1kg","image_url":null,"sku":"PET-557592","price":45.9}}]}]
+---
+VERIFICAÇÃO [OK] PATCH para ENVIADO recusado com 4xx e mensagem tratada — obtido 422
+VERIFICAÇÃO [OK] pedido continua AGUARDANDO_PAGAMENTO (visão do tutor) — obtido AGUARDANDO_PAGAMENTO
+VERIFICAÇÃO [OK] pedido continua AGUARDANDO_PAGAMENTO (visão do lojista) — obtido AGUARDANDO_PAGAMENTO

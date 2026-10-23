@@ -1,0 +1,26 @@
+# CT-PI-07 — Borda de data e fuso no cálculo do agendamento (RNE-018)
+Commit: c1d53f0 (cópia limpa via git archive) · Node v24.18.0 · 23/10/2026 13:57:20 -0300
+
+$ node --test --test-reporter=spec tests/unit/calculateAppointmentTotal.test.js
+(início: 23/10/2026 13:57:20 -0300)
+✔ hotel: 1 diária quando entra e sai no mesmo dia (daycare) (27.675ms)
+✔ hotel: 2 diárias entre os dias 10 e 12 (0.5377ms)
+✔ hotel: N diárias atravessando a virada de mês (0.3788ms)
+✔ hotel: estadia que vira o dia à noite conta como diária, não como zero (0.2743ms)
+✔ hotel: aceita o Decimal do Prisma como string (0.5857ms)
+✔ sitter: 2 horas exatas (0.5144ms)
+✔ sitter: 90 minutos custam 2 horas (hora iniciada conta inteira) (0.2682ms)
+✔ sitter: visita de 20 minutos cobra o mínimo de 1 hora (0.2359ms)
+✔ rejeita fim anterior ou igual ao início (1.3639ms)
+✔ rejeita parceiro sem tarifa definida (0.7783ms)
+✔ rejeita papel que não é hotel nem sitter (0.1765ms)
+✔ rejeita datas inválidas (0.1122ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 227.9326
+(código de saída: 0)

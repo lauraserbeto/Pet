@@ -1,0 +1,33 @@
+# CT-PI-01 — Valor limite do peso do pet (RNE-007) — tutor A
+Início: 2026-10-23 13:55:58.506 -03:00
+API: http://localhost:3100/api/v1
+Obs.: senhas, tokens e password_hash aparecem como <omitido>.
+
+[2026-10-23 13:55:58.507 -03:00] POST http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorA)
+Corpo enviado: {"name":"Teste Borda 200","species":"DOG","weight_kg":200}
+Status HTTP: 201
+Corpo recebido: {"id":"8d4f7553-9cc9-43ae-8882-d524724d4506","tutor_id":"1f10e220-8a9e-4171-804c-2b9932ab9fe4","name":"Teste Borda 200","species":"DOG","breed":null,"weight_kg":200,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.516Z","updated_at":"2026-10-23T16:55:58.516Z"}
+---
+[2026-10-23 13:55:58.520 -03:00] POST http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorA)
+Corpo enviado: {"name":"Teste Borda 200","species":"DOG","weight_kg":200.01}
+Status HTTP: 422
+Corpo recebido: {"error":{"code":"VALIDATION_ERROR","message":"Dados inválidos","details":[{"path":"weight_kg","message":"Peso máximo 200 kg","code":"too_big"}]},"message":"Dados inválidos"}
+---
+[2026-10-23 13:55:58.525 -03:00] POST http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorA)
+Corpo enviado: {"name":"Teste Borda 200","species":"DOG","weight_kg":0}
+Status HTTP: 422
+Corpo recebido: {"error":{"code":"VALIDATION_ERROR","message":"Dados inválidos","details":[{"path":"weight_kg","message":"Peso deve ser maior que zero","code":"too_small"}]},"message":"Dados inválidos"}
+---
+[2026-10-23 13:55:58.533 -03:00] GET http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorA)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"8d4f7553-9cc9-43ae-8882-d524724d4506","tutor_id":"1f10e220-8a9e-4171-804c-2b9932ab9fe4","name":"Teste Borda 200","species":"DOG","breed":null,"weight_kg":200,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.516Z","updated_at":"2026-10-23T16:55:58.516Z"}]
+---
+VERIFICAÇÃO [OK] 200 kg aceito com 201 — obtido 201
+VERIFICAÇÃO [OK] 200,01 kg recusado com 422 "Peso máximo 200 kg" — obtido 422
+VERIFICAÇÃO [OK] 0 kg recusado com 422 "Peso deve ser maior que zero" — obtido 422
+VERIFICAÇÃO [OK] lista contém só o pet de 200 kg — itens na lista: 1
