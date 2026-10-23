@@ -1,0 +1,80 @@
+# CT-PI-06 — Notificação de pagamento repetida não duplica efeito (RNE-023)
+Commit: c1d53f0 (cópia limpa via git archive) · Node v24.18.0 · 23/10/2026 13:57:10 -0300
+Ambiente: NODE_ENV=test, LOG_LEVEL=silent, MERCADO_PAGO_ENABLED=false, credenciais fictícias.
+Observação: o arquivo citado no roteiro (paymentRoutes.test.js) não contém teste de notificação repetida; ele foi executado como pedido, junto com os arquivos que testam o cenário: unit/mercadoPagoPayment.test.js e integration/cartOrderDb.test.js (este com PostgreSQL local real, banco isolado petplus_test).
+
+$ node --test --test-reporter=spec tests/integration/paymentRoutes.test.js
+(início: 23/10/2026 13:57:10 -0300)
+◇ injecting env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injecting env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+✔ configuração expõe somente modo, sem credenciais (33.1528ms)
+✔ criar preferência exige autenticação e UUID válido (12.5155ms)
+✔ preferência retorna link hospedado para pedido próprio (4.5216ms)
+✔ preferência oculta pedido de outro tutor (3.9501ms)
+✔ status permite retomar somente pedidos do tutor (10.0993ms)
+✔ Mercado Pago habilitado bloqueia confirmação simulada (4.4655ms)
+✔ webhook público rejeita notificação sem assinatura, sem precisar de JWT (16.054ms)
+✔ erros do SDK são sanitizados para o cliente (4.5335ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5217.9013
+(código de saída: 0)
+
+$ node --test --test-reporter=spec tests/unit/mercadoPagoPayment.test.js
+(início: 23/10/2026 13:57:16 -0300)
+◇ injecting env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+✔ preferência usa preços congelados do banco, referência do pedido e URLs HTTPS (15.807ms)
+✔ preferência é reutilizada, sem criar nova cobrança a cada tentativa (0.8197ms)
+✔ preferência bloqueia pedido de outro tutor e conta sem role de tutor (2.6259ms)
+✔ preferência rejeita pedido já pago e total divergente dos itens (0.8247ms)
+✔ SDK valida HMAC real e rejeita assinatura adulterada e cabeçalhos ausentes (3.3575ms)
+✔ gateway desativado não permite iniciar cobrança (0.2139ms)
+✔ gateway exige vendedor de teste mesmo se token começa por APP_USR (0.4046ms)
+✔ webhook consulta pagamento e marca pedido PAGO atomicamente; duplicação não reaplica (1.1282ms)
+✔ pagamento pending não confirma pedido mesmo com body forjado aprovado (0.2962ms)
+✔ pagamento in_process não confirma pedido mesmo com body forjado aprovado (0.2679ms)
+✔ pagamento rejected não confirma pedido mesmo com body forjado aprovado (0.6028ms)
+✔ pagamento cancelled não confirma pedido mesmo com body forjado aprovado (0.5282ms)
+✔ pagamento recusado pode ser aprovado em nova tentativa (1.048ms)
+✔ webhook bloqueia divergência transaction_amount (0.6289ms)
+✔ webhook bloqueia divergência currency_id (0.5121ms)
+✔ webhook bloqueia divergência collector_id (0.4226ms)
+✔ webhook bloqueia divergência live_mode (0.4212ms)
+✔ webhook bloqueia divergência metadata (0.3826ms)
+✔ pedido cancelado recebe conciliação pendente, sem voltar para PAGO (0.2365ms)
+✔ falha ao gravar pagamento reverte a confirmação do pedido (0.237ms)
+✔ webhook sem assinatura válida não consulta API nem altera pedido (0.192ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 476.2765
+(código de saída: 0)
+
+Banco do próximo comando: PostgreSQL 17.10 local, banco petplus_test (RUN_DB_INTEGRATION_TESTS=true)
+
+$ node --test --test-reporter=spec tests/integration/cartOrderDb.test.js
+(início: 23/10/2026 13:57:16 -0300)
+◇ injecting env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injecting env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+✔ PGT-1: webhooks concorrentes confirmam pagamento uma única vez no Postgres (344.226ms)
+✔ POST /api/v1/cart/items persiste item com snapshot de preco no banco (232.7513ms)
+✔ POST /api/v1/orders cria pedido, baixa estoque e limpa carrinho (307.3188ms)
+✔ POST /api/v1/orders preserva pedido inexistente, estoque e carrinho quando a transacao falha (220.2662ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3456.4316
+(código de saída: 0)
