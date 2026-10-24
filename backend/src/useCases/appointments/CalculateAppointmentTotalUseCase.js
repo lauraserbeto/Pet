@@ -1,15 +1,19 @@
 const AppError = require('../../utils/AppError');
 
 /**
- * Cálculo do total de um agendamento (AGD-1).
+ * Cálculo do total de um agendamento (AGD-1; fonte do preço pela DEC-B, 23/10/2026).
  *
- * Não expõe endpoint: é a regra reutilizável que a AGD-2 vai consumir ao criar
- * e atualizar agendamentos.
+ * Não expõe endpoint: é a regra reutilizável que a criação do agendamento
+ * (AGD-2) consome.
  *
- * REGRAS DE COBRANÇA, por papel do parceiro:
+ * REGRAS DE COBRANÇA: o preço é o do SERVIÇO reservado (`Service.price`); o
+ * papel do parceiro só define a unidade cobrada.
  *
- *   Hotel (role 3)  → `daily_rate` × número de DIÁRIAS
- *   Sitter (role 4) → `hourly_rate` × número de HORAS
+ *   Hotel (role 3)  → `service.price` × número de DIÁRIAS
+ *   Sitter (role 4) → `service.price` × número de HORAS
+ *
+ * `Provider.daily_rate`/`hourly_rate` continuam no perfil público, mas não
+ * entram no total: um hotel com dois serviços cobra o preço de cada um.
  *
  * ARREDONDAMENTO — decisões tomadas aqui, porque o card pede que sejam
  * explícitas:
@@ -80,12 +84,16 @@ function toCurrency(value) {
 class CalculateAppointmentTotalUseCase {
   /**
    * @param {object} params
-   * @param {object} params.provider  Parceiro com `user.role_id` e a tarifa do papel
+   * @param {object} params.service   Serviço reservado, com `price`
+   * @param {object} params.provider  Parceiro com `user.role_id` (define a unidade)
    * @param {Date|string} params.startTime
    * @param {Date|string} params.endTime
    * @returns {{ total: number, unit: 'DIARIA'|'HORA', quantity: number, unitPrice: number }}
    */
-  execute({ provider, startTime, endTime }) {
+  execute({ service, provider, startTime, endTime }) {
+    if (!service) {
+      throw AppError.badRequest('Serviço é obrigatório para calcular o total.');
+    }
     if (!provider) {
       throw AppError.badRequest('Parceiro é obrigatório para calcular o total.');
     }
@@ -103,11 +111,11 @@ class CalculateAppointmentTotalUseCase {
     const roleId = provider.user?.role_id ?? provider.role_id;
 
     if (roleId === PROVIDER_ROLE.HOTEL) {
-      return this.#build(provider.daily_rate, 'DIARIA', countDailyRates(start, end), 'daily_rate');
+      return this.#build(service.price, 'DIARIA', countDailyRates(start, end));
     }
 
     if (roleId === PROVIDER_ROLE.SITTER) {
-      return this.#build(provider.hourly_rate, 'HORA', countBillableHours(start, end), 'hourly_rate');
+      return this.#build(service.price, 'HORA', countBillableHours(start, end));
     }
 
     throw AppError.badRequest(
@@ -115,12 +123,12 @@ class CalculateAppointmentTotalUseCase {
     );
   }
 
-  #build(rawRate, unit, quantity, fieldName) {
-    const unitPrice = toNumber(rawRate);
+  #build(rawPrice, unit, quantity) {
+    const unitPrice = toNumber(rawPrice);
 
     if (Number.isNaN(unitPrice) || unitPrice <= 0) {
       throw AppError.badRequest(
-        `Parceiro sem ${fieldName} definido — não é possível calcular o total do agendamento.`
+        'Serviço sem preço definido — não é possível calcular o total do agendamento.'
       );
     }
 
@@ -135,7 +143,7 @@ class CalculateAppointmentTotalUseCase {
 
 module.exports = new CalculateAppointmentTotalUseCase();
 module.exports.CalculateAppointmentTotalUseCase = CalculateAppointmentTotalUseCase;
-// Exportados para teste e reuso pela AGD-2.
+// Exportados para teste e para os limites de período da criação (E-04).
 module.exports.countDailyRates = countDailyRates;
 module.exports.countBillableHours = countBillableHours;
 module.exports.BUSINESS_TIMEZONE = BUSINESS_TIMEZONE;

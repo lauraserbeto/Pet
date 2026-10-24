@@ -5,6 +5,7 @@ const {
   formatAppointments,
   asNumber,
   sanitizeUser,
+  toAppointmentTutor,
 } = require('../../src/utils/appointmentFormatter');
 
 test('asNumber converte valores numéricos, strings e objetos com .toNumber()', () => {
@@ -46,6 +47,7 @@ test('formatAppointment remove dados sensíveis do provider e do tutor e convert
     start_time: '2026-11-10T14:00:00Z',
     end_time: '2026-11-12T10:00:00Z',
     status: 'CONFIRMADO',
+    payment_policy: 'PRE_PAGO',
     total_price: {
       toNumber() {
         return 240;
@@ -91,6 +93,7 @@ test('formatAppointment remove dados sensíveis do provider e do tutor e convert
   const formatted = formatAppointment(raw);
 
   assert.equal(formatted.id, 'appt-123');
+  assert.equal(formatted.payment_policy, 'PRE_PAGO');
   assert.equal(typeof formatted.total_price, 'number');
   assert.equal(formatted.total_price, 240);
   assert.equal(typeof formatted.service.price, 'number');
@@ -111,6 +114,34 @@ test('formatAppointment remove dados sensíveis do provider e do tutor e convert
     simulated: true,
     amount: 240,
   });
+});
+
+test('tutor do agendamento sai só com id, nome, telefone e e-mail (AUD-17)', () => {
+  const tutor = {
+    id: 'tutor-1',
+    full_name: 'Maria Tutora',
+    phone: '(11) 99999-0000',
+    email: 'maria@example.com',
+    password_hash: 'hash',
+    avatar_url: 'data:image/png;base64,AAAA',
+    is_active: true,
+    role_id: 5,
+  };
+
+  assert.deepEqual(toAppointmentTutor(tutor), {
+    id: 'tutor-1',
+    full_name: 'Maria Tutora',
+    phone: '(11) 99999-0000',
+    email: 'maria@example.com',
+  });
+  assert.equal(toAppointmentTutor(null), null);
+
+  const formatted = formatAppointment({ id: 'appt-1', total_price: '10', pet: { id: 'pet-1', tutor } });
+  assert.deepEqual(Object.keys(formatted.pet.tutor).sort(), ['email', 'full_name', 'id', 'phone']);
+});
+
+test('agendamento sem política gravada sai com payment_policy null', () => {
+  assert.equal(formatAppointment({ id: 'appt-1', total_price: '10' }).payment_policy, null);
 });
 
 test('formatAppointments lida com array vazio ou nulo com segurança', () => {

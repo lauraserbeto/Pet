@@ -1,4 +1,12 @@
+const { PrismaClient } = require('@prisma/client');
 const prisma = require('../../src/config/database');
+
+// O `node --test` roda cada arquivo em um processo, em paralelo, e todo arquivo
+// com banco trunca as mesmas tabelas. Um advisory lock de SESSÃO, numa conexão
+// dedicada, faz cada arquivo esperar o anterior terminar; se o processo morrer,
+// a conexão cai e o lock é solto pelo próprio Postgres.
+const DB_TEST_LOCK_KEY = 20261024;
+let lockClient = null;
 
 const TRUNCATE_TABLES = [
   'payment_attempts',
@@ -64,8 +72,16 @@ function assertSafeTestDatabaseUrl() {
   }
 }
 
+async function acquireTestDatabaseLock() {
+  const url = new URL(process.env.DATABASE_URL);
+  url.searchParams.set('connection_limit', '1');
+  lockClient = new PrismaClient({ datasources: { db: { url: url.toString() } } });
+  await lockClient.$executeRawUnsafe(`SELECT pg_advisory_lock(${DB_TEST_LOCK_KEY})`);
+}
+
 async function prepareTestDatabase() {
   assertSafeTestDatabaseUrl();
+  await acquireTestDatabaseLock();
   await prisma.$connect();
   await prisma.$queryRaw`SELECT 1`;
 }
@@ -78,6 +94,9 @@ async function resetTestDatabase() {
 
 async function disconnectTestDatabase() {
   await prisma.$disconnect();
+  // Fechar a conexão dedicada solta o advisory lock.
+  await lockClient?.$disconnect();
+  lockClient = null;
 }
 
 module.exports = {

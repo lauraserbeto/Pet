@@ -1,14 +1,14 @@
-// Política de cobrança do parceiro (AGD-1).
+// Política de cobrança do parceiro (AGD-1; regras vigentes pela DEC-A, 23/10/2026).
 //
 // PRESENCIAL (padrão): o tutor paga no local, no momento do serviço. O
-// agendamento vai de PENDENTE direto para CONFIRMADO quando o parceiro aceita.
+// agendamento nasce PENDENTE e o parceiro confirma ou recusa.
 //
-// PRE_PAGO: o parceiro exige pagamento antecipado. Entra o estado intermediário
-// AGUARDANDO_CONFIRMACAO, entre o aceite do parceiro e a confirmação do
-// pagamento.
+// PRE_PAGO: o parceiro exige pagamento antecipado. O tutor paga na reserva e o
+// agendamento passa a AGUARDANDO_CONFIRMACAO; depois o parceiro confirma ou
+// recusa (recusa ou cancelamento de agendamento pago geram estorno — PAG-2).
 //
-// O campo `Provider.payment_policy` é VarChar livre no schema, seguindo o mesmo
-// padrão de `Provider.status` e `Order.status`.
+// `Provider.payment_policy` e `Appointment.payment_policy` são o enum
+// `PaymentPolicy` no banco. O agendamento guarda a política vigente na reserva.
 
 const PAYMENT_POLICY = {
   ON_SITE: 'PRESENCIAL',

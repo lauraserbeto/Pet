@@ -10,10 +10,15 @@ class AppointmentController {
   /** POST /api/v1/appointments — Tutor cria agendamento */
   async create(req, res, next) {
     try {
+      const { service_id, pet_id, start_time, end_time, notes } = req.body;
       const result = await createAppointmentUseCase.execute({
         userId: req.userId,
         userRole: req.userRole,
-        ...req.body,
+        service_id,
+        pet_id,
+        start_time,
+        end_time,
+        notes,
       });
 
       return res.status(201).json(result);

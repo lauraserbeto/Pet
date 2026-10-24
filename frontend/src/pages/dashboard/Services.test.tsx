@@ -93,7 +93,8 @@ it("persiste a política de cobrança ao trocar o seletor", async () => {
   await screen.findByText("Nenhum serviço cadastrado ainda");
 
   await waitFor(() => expect(providerService.fetchMe).toHaveBeenCalled());
-  expect(screen.getByText(/paga no local/i)).toBeTruthy();
+  // Texto da DEC-A: o parceiro decide cada solicitação, inclusive no presencial.
+  expect(screen.getByText("Você confirma ou recusa cada solicitação; o tutor paga no local.")).toBeTruthy();
 });
 
 it("desfaz a troca de política quando o backend recusa", async () => {
