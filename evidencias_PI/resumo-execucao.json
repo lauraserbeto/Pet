@@ -1,0 +1,44 @@
+{
+  "inicio": "2026-10-23 13:55:54.909 -03:00",
+  "fim": "2026-10-23 13:55:58.815 -03:00",
+  "api": "http://localhost:3100/api/v1",
+  "contas": {
+    "admin": {
+      "email": "bonus.admin@petplus.local",
+      "id": null,
+      "providerId": null
+    },
+    "tutorA": {
+      "email": "bonus.tutor.a@petplus.local",
+      "id": "1f10e220-8a9e-4171-804c-2b9932ab9fe4",
+      "providerId": null
+    },
+    "tutorB": {
+      "email": "bonus.tutor.b@petplus.local",
+      "id": "668b223b-575a-41da-86b4-5abdd236ed71",
+      "providerId": null
+    },
+    "tutorC": {
+      "email": "bonus.tutor.c@petplus.local",
+      "id": "7984b09e-9d58-4a07-a7f3-852fb6efb199",
+      "providerId": null
+    },
+    "lojista": {
+      "email": "bonus.lojista@petplus.local",
+      "id": "745a3be8-dc50-4d95-8234-ce5a4e599aa5",
+      "providerId": "0d20e1d5-eb9a-4d57-9d76-9c616ec04090"
+    },
+    "hotel": {
+      "email": "bonus.hotel@petplus.local",
+      "id": "d6bfd9ab-bb89-4660-9cdf-718020b650a5",
+      "providerId": "ef284763-b297-42e5-baf1-321f7f7133b0"
+    }
+  },
+  "verificacoes_automaticas": {
+    "CT-PI-01": "todas atendidas",
+    "CT-PI-02": "todas atendidas",
+    "CT-PI-03": "todas atendidas",
+    "CT-PI-04": "há verificação não atendida",
+    "CT-PI-05": "há verificação não atendida"
+  }
+}

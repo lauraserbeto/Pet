@@ -2,6 +2,8 @@
 
 > Sprint 2 · Semana 5 (22–28/set) · Backend · Prioridade Crítico · Esforço G · Responsável R1
 
+> ⚠️ **Atualizado em 23/10/2026.** Dois pontos do "Contrato definido" foram substituídos pelas decisões DEC-A e DEC-B da Fase 0 de estabilização: o significado de `AGUARDANDO_CONFIRMACAO` e a fonte do preço. O texto original foi mantido como histórico. A regra vigente está na seção [Atualização pós-auditoria](#atualização-pós-auditoria-23102026), ao final.
+
 ## Contexto
 Os modelos `Service` e `Appointment` já existem no schema
 (`prisma/schema.prisma:262-297`), mas são **código morto**: nenhum endpoint os usa e o
@@ -128,3 +130,44 @@ constante `BUSINESS_TIMEZONE` pelo fuso do parceiro.
 **Erros** (todos `AppError` 400): fim anterior ou igual ao início; datas
 inválidas; parceiro sem `daily_rate`/`hourly_rate`; papel que não é hotel nem
 sitter.
+
+---
+
+## Atualização pós-auditoria (23/10/2026)
+
+Decidido na Fase 0 de estabilização (ver `docs/Sprints/PAUTA-FASE-0-DECISOES-ESTABILIZACAO.md` e o §3 do `PLANO-DESENVOLVIMENTO.md`). As regras abaixo **substituem** os trechos correspondentes do contrato acima. Arredondamento, fuso e `payment_policy` no `Provider` continuam valendo.
+
+### Máquina de estados vigente (DEC-A)
+
+`AGUARDANDO_CONFIRMACAO` passa a significar **"pago, aguardando a confirmação do parceiro"** e só é alcançado pelo **pagamento aprovado** do agendamento PRE_PAGO, nunca por alteração manual de status. Deixa de valer a leitura "janela entre o aceite do parceiro e a confirmação do pagamento", assim como a orientação de usar `nextStatusAfterPartnerAccepts`.
+
+```
+PRESENCIAL:  PENDENTE ──parceiro──▶ CONFIRMADO ──parceiro──▶ CONCLUIDO
+             PENDENTE ──parceiro──▶ RECUSADO
+PRE_PAGO:    PENDENTE ──pagamento──▶ AGUARDANDO_CONFIRMACAO ──parceiro──▶ CONFIRMADO ──parceiro──▶ CONCLUIDO
+                                     AGUARDANDO_CONFIRMACAO ──parceiro──▶ RECUSADO (+ estorno)
+```
+
+| De | Para | Quem | Condição |
+|---|---|---|---|
+| `PENDENTE` | `CONFIRMADO` | parceiro | só PRESENCIAL |
+| `PENDENTE` | `RECUSADO` | parceiro | só PRESENCIAL |
+| `PENDENTE` | `AGUARDANDO_CONFIRMACAO` | sistema (pagamento aprovado) | só PRE_PAGO |
+| `PENDENTE` | `CANCELADO` | tutor | antes do início |
+| `AGUARDANDO_CONFIRMACAO` | `CONFIRMADO` | parceiro | — |
+| `AGUARDANDO_CONFIRMACAO` | `RECUSADO` | parceiro | estorno integral |
+| `AGUARDANDO_CONFIRMACAO` | `CANCELADO` | tutor | antes do início; estorno integral |
+| `CONFIRMADO` | `CONCLUIDO` | parceiro | depois do horário de início |
+| `CONFIRMADO` | `CANCELADO` | tutor ou parceiro | antes do início; estorno integral se houve pagamento |
+| `CONCLUIDO` / `RECUSADO` / `CANCELADO` | — | — | terminais |
+
+- A `payment_policy` vigente na reserva é **gravada no agendamento**; transições e estorno usam esse valor, não a política atual do parceiro.
+- Expiração automática de `PENDENTE` não pago: pendência (backlog).
+
+### Fonte do preço (DEC-B)
+
+O total passa a ser **`Service.price` do serviço reservado × quantidade de unidades**, com as mesmas regras de arredondamento e fuso acima: diárias para hotel, horas para sitter. `daily_rate`/`hourly_rate` deixam de ser a base do cálculo e ficam apenas como preço de referência até a `SRV-Fpub`.
+
+### Execução
+
+O ajuste do código (constantes, `CalculateAppointmentTotalUseCase`, comentários de `appointmentStatus.js` e remoção ou adaptação do helper sem uso) é o item **E-04** do plano de estabilização (`docs/Sprints/AUDITORIA-QUALIDADE-ESTABILIZACAO-PRE-SPRINT-4.md`, seção 10). O pagamento e o estorno persistidos ficam com a **PAG-2**.

@@ -1,0 +1,34 @@
+# CT-PI-05 — Pet com agendamento futuro não pode ser removido (RNE-022) — tutor C + hotel
+Início: 2026-10-23 13:55:58.719 -03:00
+API: http://localhost:3100/api/v1
+Obs.: senhas, tokens e password_hash aparecem como <omitido>.
+
+[2026-10-23 13:55:58.720 -03:00] POST http://localhost:3100/api/v1/appointments
+Autenticação: Bearer <token omitido> (tutorC)
+Corpo enviado: {"service_id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","pet_id":"01426141-7cf5-40c1-a646-20a84706d066","start_time":"2026-10-30T15:00:00.000Z","end_time":"2026-10-31T15:00:00.000Z","notes":"Agendamento de teste do bônus"}
+Status HTTP: 201
+Corpo recebido: {"id":"dcb67e29-d546-4066-9283-e195a0b0f1eb","provider_id":"ef284763-b297-42e5-baf1-321f7f7133b0","service_id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","pet_id":"01426141-7cf5-40c1-a646-20a84706d066","start_time":"2026-10-30T15:00:00.000Z","end_time":"2026-10-31T15:00:00.000Z","status":"CONFIRMADO","total_price":120,"notes":"Agendamento de teste do bônus","created_at":"2026-10-23T16:55:58.744Z","updated_at":"2026-10-23T16:55:58.744Z","pet":{"id":"01426141-7cf5-40c1-a646-20a84706d066","tutor_id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","name":"Rex Bônus","species":"DOG","breed":null,"weight_kg":12,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.282Z","updated_at":"2026-10-23T16:55:58.282Z","tutor":{"id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","role_id":5,"full_name":"Tutor C Bônus","email":"bonus.tutor.c@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.659Z","updated_at":"2026-10-23T16:55:56.659Z"}},"service":{"id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","provider_id":"ef284763-b297-42e5-baf1-321f7f7133b0","name":"Hospedagem Bônus","category":"BOARDING","description":null,"price":120,"duration_minutes":null,"is_active":true,"created_at":"2026-10-23T16:55:57.629Z"},"provider":{"id":"ef284763-b297-42e5-baf1-321f7f7133b0","user_id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","business_name":"Hotel Bônus Pet","status":"APROVADO","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":120,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z"}}
+---
+Status inicial do agendamento retornado pela API: CONFIRMADO
+[2026-10-23 13:55:58.752 -03:00] DELETE http://localhost:3100/api/v1/users/me/pets/01426141-7cf5-40c1-a646-20a84706d066
+Autenticação: Bearer <token omitido> (tutorC)
+Corpo enviado: (sem corpo)
+Status HTTP: 409
+Corpo recebido: {"error":{"code":"FOREIGN_KEY_VIOLATION","message":"Referência inválida"},"message":"Referência inválida"}
+---
+[2026-10-23 13:55:58.777 -03:00] GET http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorC)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"01426141-7cf5-40c1-a646-20a84706d066","tutor_id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","name":"Rex Bônus","species":"DOG","breed":null,"weight_kg":12,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.282Z","updated_at":"2026-10-23T16:55:58.282Z"}]
+---
+[2026-10-23 13:55:58.794 -03:00] GET http://localhost:3100/api/v1/appointments/my
+Autenticação: Bearer <token omitido> (tutorC)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"dcb67e29-d546-4066-9283-e195a0b0f1eb","provider_id":"ef284763-b297-42e5-baf1-321f7f7133b0","service_id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","pet_id":"01426141-7cf5-40c1-a646-20a84706d066","start_time":"2026-10-30T15:00:00.000Z","end_time":"2026-10-31T15:00:00.000Z","status":"CONFIRMADO","total_price":120,"notes":"Agendamento de teste do bônus","created_at":"2026-10-23T16:55:58.744Z","updated_at":"2026-10-23T16:55:58.744Z","pet":{"id":"01426141-7cf5-40c1-a646-20a84706d066","tutor_id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","name":"Rex Bônus","species":"DOG","breed":null,"weight_kg":12,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.282Z","updated_at":"2026-10-23T16:55:58.282Z"},"service":{"id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","provider_id":"ef284763-b297-42e5-baf1-321f7f7133b0","name":"Hospedagem Bônus","category":"BOARDING","description":null,"price":120,"duration_minutes":null,"is_active":true,"created_at":"2026-10-23T16:55:57.629Z"},"provider":{"id":"ef284763-b297-42e5-baf1-321f7f7133b0","user_id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","business_name":"Hotel Bônus Pet","status":"APROVADO","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":120,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z"}}]
+---
+VERIFICAÇÃO [OK] agendamento futuro criado — obtido HTTP 201, status CONFIRMADO
+VERIFICAÇÃO [NÃO ATENDIDA] DELETE recusado com 409 e mensagem da regra ("...agendamentos pendentes ou confirmados") — obtido 409
+VERIFICAÇÃO [OK] pet mantido — itens: 1
+VERIFICAÇÃO [OK] agendamento mantido — agendamentos do tutor: 1

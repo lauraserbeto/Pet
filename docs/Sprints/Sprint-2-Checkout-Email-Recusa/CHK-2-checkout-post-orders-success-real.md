@@ -2,6 +2,8 @@
 
 > Sprint 2 · Semana 4 (15–21/set) · Frontend · Prioridade Crítico · Esforço G · Responsável R3
 
+> ⚠️ **Atualizado em 23/10/2026.** A decisão DEC-C da Fase 0 de estabilização definiu a regra dos valores exibidos no carrinho e no checkout. O texto original foi mantido; ver a seção [Atualização pós-auditoria](#atualização-pós-auditoria-23102026), ao final.
+
 ## Contexto
 
 O checkout é uma vitrine falsa: em `frontend/src/pages/CheckoutPage.tsx:68` o
@@ -101,3 +103,25 @@ eliminando qualquer estado intermediário enganoso.
   ou mesclando itens anônimos.
 - Não guardar URL externa como destino pós-login; aceitar somente caminhos internos conhecidos.
 - `VITE_API_URL=http://localhost:3000/api/v1` em dev local; não hardcodar URL no serviço.
+
+---
+
+## Atualização pós-auditoria (23/10/2026)
+
+A auditoria das Sprints 0–3 (`docs/Sprints/AUDITORIA-QUALIDADE-ESTABILIZACAO-PRE-SPRINT-4.md`, AUD-05) encontrou três totais diferentes para a mesma compra:
+
+- no carrinho: cupom `PETMAIS15` e frete de R$ 14,90;
+- no checkout: frete e "5% de desconto no PIX";
+- no backend: só a soma dos itens.
+
+**Regra vigente (DEC-C), que complementa a nota "o back recalcula o total; o front apenas exibe":**
+- Sem frete, desconto por forma de pagamento ou cupom neste semestre. A linha de frete é omitida e o campo de cupom sai do carrinho.
+- O total exibido no carrinho, no checkout e no botão "Confirmar Pedido" é a soma dos itens e **igual ao `total_price` retornado** (somado entre os pedidos de cada lojista).
+- No modo simulado, aviso explícito "Pagamento simulado — nenhum valor real é cobrado". A tela não pede CVV real nem cita "criptografia SSL". Não há texto de QR Code nem de desconto PIX.
+- Frete e cupom ficam no backlog do `PLANO-DESENVOLVIMENTO.md` (§9).
+
+**Pendências desta spec apontadas pela auditoria:**
+- E-05: o endereço escolhido não é gravado no pedido (AUD-04).
+- E-18: a tela de sucesso mostra status e prazo fixos, e o merge do carrinho não tem estado nem nova tentativa (AUD-18).
+
+**Execução da DEC-C:** item **E-06** do plano de estabilização (R3).

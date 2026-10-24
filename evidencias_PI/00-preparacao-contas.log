@@ -1,0 +1,122 @@
+# Preparação — contas e dados de teste
+Início: 2026-10-23 13:55:54.910 -03:00
+API: http://localhost:3100/api/v1
+Obs.: senhas, tokens e password_hash aparecem como <omitido>.
+
+[2026-10-23 13:55:55.250 -03:00] Admin criado direto no banco local (Prisma): {"id":"f8908c73-9c80-4446-a037-9e4118240d0b","email":"bonus.admin@petplus.local","role_id":1}
+---
+[2026-10-23 13:55:55.258 -03:00] POST http://localhost:3100/api/v1/auth/register
+Autenticação: nenhuma
+Corpo enviado: {"full_name":"Tutor A Bônus","email":"bonus.tutor.a@petplus.local","password":"<omitido>","role_id":5,"terms_accepted":true}
+Status HTTP: 201
+Corpo recebido: {"success":true,"user":{"id":"1f10e220-8a9e-4171-804c-2b9932ab9fe4","role_id":5,"full_name":"Tutor A Bônus","email":"bonus.tutor.a@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.491Z","updated_at":"2026-10-23T16:55:56.491Z"}}
+---
+[2026-10-23 13:55:56.508 -03:00] POST http://localhost:3100/api/v1/auth/register
+Autenticação: nenhuma
+Corpo enviado: {"full_name":"Tutor B Bônus","email":"bonus.tutor.b@petplus.local","password":"<omitido>","role_id":5,"terms_accepted":true}
+Status HTTP: 201
+Corpo recebido: {"success":true,"user":{"id":"668b223b-575a-41da-86b4-5abdd236ed71","role_id":5,"full_name":"Tutor B Bônus","email":"bonus.tutor.b@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.585Z","updated_at":"2026-10-23T16:55:56.585Z"}}
+---
+[2026-10-23 13:55:56.587 -03:00] POST http://localhost:3100/api/v1/auth/register
+Autenticação: nenhuma
+Corpo enviado: {"full_name":"Tutor C Bônus","email":"bonus.tutor.c@petplus.local","password":"<omitido>","role_id":5,"terms_accepted":true}
+Status HTTP: 201
+Corpo recebido: {"success":true,"user":{"id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","role_id":5,"full_name":"Tutor C Bônus","email":"bonus.tutor.c@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.659Z","updated_at":"2026-10-23T16:55:56.659Z"}}
+---
+[2026-10-23 13:55:56.660 -03:00] POST http://localhost:3100/api/v1/auth/register
+Autenticação: nenhuma
+Corpo enviado: {"full_name":"Lojista Bônus","email":"bonus.lojista@petplus.local","password":"<omitido>","role_id":2,"terms_accepted":true,"business_name":"Loja Bônus Pet","document":"11222333000181","document_type":"CNPJ"}
+Status HTTP: 201
+Corpo recebido: {"success":true,"user":{"id":"745a3be8-dc50-4d95-8234-ce5a4e599aa5","role_id":2,"full_name":"Lojista Bônus","email":"bonus.lojista@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.751Z","updated_at":"2026-10-23T16:55:56.751Z"}}
+---
+[2026-10-23 13:55:56.762 -03:00] POST http://localhost:3100/api/v1/auth/register
+Autenticação: nenhuma
+Corpo enviado: {"full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","password":"<omitido>","role_id":3,"terms_accepted":true,"business_name":"Hotel Bônus Pet","document":"11444777000161","document_type":"CNPJ"}
+Status HTTP: 201
+Corpo recebido: {"success":true,"user":{"id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","role_id":3,"full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","phone":null,"avatar_url":null,"is_active":true,"terms_accepted":true,"onboarding_step":"INCOMPLETE","rejection_reason":"","created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z"}}
+---
+[2026-10-23 13:55:56.887 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.admin@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"f8908c73-9c80-4446-a037-9e4118240d0b","full_name":"Admin Bônus Local","email":"bonus.admin@petplus.local","role_id":1,"onboarding_step":"INCOMPLETE","business_name":null,"provider_status":null},"token":"<omitido>"}
+---
+[2026-10-23 13:55:56.990 -03:00] GET http://localhost:3100/api/v1/providers
+Autenticação: Bearer <token omitido> (admin)
+Corpo enviado: (sem corpo)
+Status HTTP: 200
+Corpo recebido: [{"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","user_id":"745a3be8-dc50-4d95-8234-ce5a4e599aa5","business_name":"Loja Bônus Pet","status":"PENDENTE","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":null,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"created_at":"2026-10-23T16:55:56.751Z","updated_at":"2026-10-23T16:55:56.751Z","user":{"full_name":"Lojista Bônus","email":"bonus.lojista@petplus.local","role_id":2},"full_name":"Lojista Bônus","email":"bonus.lojista@petplus.local","role_id":2},{"id":"ef284763-b297-42e5-baf1-321f7f7133b0","user_id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","business_name":"Hotel Bônus Pet","status":"PENDENTE","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":null,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z","user":{"full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","role_id":3},"full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","role_id":3}]
+---
+[2026-10-23 13:55:56.996 -03:00] PATCH http://localhost:3100/api/v1/providers/0d20e1d5-eb9a-4d57-9d76-9c616ec04090/status
+Autenticação: Bearer <token omitido> (admin)
+Corpo enviado: {"status":"APROVADO"}
+Status HTTP: 200
+Corpo recebido: {"id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","user_id":"745a3be8-dc50-4d95-8234-ce5a4e599aa5","business_name":"Loja Bônus Pet","document":"11222333000181","document_type":"CNPJ","status":"APROVADO","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":null,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"rejection_reason":null,"created_at":"2026-10-23T16:55:56.751Z","updated_at":"2026-10-23T16:55:56.751Z"}
+---
+[2026-10-23 13:55:57.009 -03:00] PATCH http://localhost:3100/api/v1/providers/ef284763-b297-42e5-baf1-321f7f7133b0/status
+Autenticação: Bearer <token omitido> (admin)
+Corpo enviado: {"status":"APROVADO"}
+Status HTTP: 200
+Corpo recebido: {"id":"ef284763-b297-42e5-baf1-321f7f7133b0","user_id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","business_name":"Hotel Bônus Pet","document":"11444777000161","document_type":"CNPJ","status":"APROVADO","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":null,"rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"rejection_reason":null,"created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z"}
+---
+[2026-10-23 13:55:57.029 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.lojista@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"745a3be8-dc50-4d95-8234-ce5a4e599aa5","full_name":"Lojista Bônus","email":"bonus.lojista@petplus.local","role_id":2,"onboarding_step":"INCOMPLETE","business_name":"Loja Bônus Pet","provider_status":"APROVADO"},"token":"<omitido>"}
+---
+[2026-10-23 13:55:57.138 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.hotel@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","role_id":3,"onboarding_step":"INCOMPLETE","business_name":"Hotel Bônus Pet","provider_status":"APROVADO"},"token":"<omitido>"}
+---
+[2026-10-23 13:55:57.267 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.tutor.a@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"1f10e220-8a9e-4171-804c-2b9932ab9fe4","full_name":"Tutor A Bônus","email":"bonus.tutor.a@petplus.local","role_id":5,"onboarding_step":"INCOMPLETE","business_name":null,"provider_status":null},"token":"<omitido>"}
+---
+[2026-10-23 13:55:57.376 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.tutor.b@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"668b223b-575a-41da-86b4-5abdd236ed71","full_name":"Tutor B Bônus","email":"bonus.tutor.b@petplus.local","role_id":5,"onboarding_step":"INCOMPLETE","business_name":null,"provider_status":null},"token":"<omitido>"}
+---
+[2026-10-23 13:55:57.491 -03:00] POST http://localhost:3100/api/v1/auth/login
+Autenticação: nenhuma
+Corpo enviado: {"email":"bonus.tutor.c@petplus.local","password":"<omitido>"}
+Status HTTP: 200
+Corpo recebido: {"success":true,"user":{"id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","full_name":"Tutor C Bônus","email":"bonus.tutor.c@petplus.local","role_id":5,"onboarding_step":"INCOMPLETE","business_name":null,"provider_status":null},"token":"<omitido>"}
+---
+[2026-10-23 13:55:57.592 -03:00] POST http://localhost:3100/api/v1/products
+Autenticação: Bearer <token omitido> (lojista)
+Corpo enviado: {"name":"Ração Bônus 1kg","category":"GERAL","pet_type":"DOG","description":"Produto de teste do bônus","stock_quantity":10,"price":45.9}
+Status HTTP: 201
+Corpo recebido: {"message":"Produto cadastrado com sucesso!","product":{"id":"064f8ee0-5300-4bc3-a863-cfec7d849fd6","provider_id":"0d20e1d5-eb9a-4d57-9d76-9c616ec04090","name":"Ração Bônus 1kg","category":"GERAL","pet_type":"DOG","description":"Produto de teste do bônus","sku":"PET-557592","stock_quantity":10,"price":"45.9","image_url":null,"status":"ACTIVE","created_at":"2026-10-23T16:55:57.597Z","updated_at":"2026-10-23T16:55:57.597Z"}}
+---
+[2026-10-23 13:55:57.605 -03:00] PUT http://localhost:3100/api/v1/providers/profile
+Autenticação: Bearer <token omitido> (hotel)
+Corpo enviado: {"daily_rate":120}
+Status HTTP: 200
+Corpo recebido: {"id":"ef284763-b297-42e5-baf1-321f7f7133b0","user_id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","business_name":"Hotel Bônus Pet","document":"11444777000161","document_type":"CNPJ","status":"APROVADO","payment_policy":"PRESENCIAL","description":null,"phone":null,"zip_code":null,"address_line":null,"city":null,"state":null,"operating_hours":null,"allowed_animals":null,"amenities":null,"gallery_images":null,"daily_rate":"120","rules_policies":null,"highlights":null,"hourly_rate":null,"sitter_roles":null,"rejection_reason":null,"created_at":"2026-10-23T16:55:56.879Z","updated_at":"2026-10-23T16:55:56.879Z","user":{"id":"d6bfd9ab-bb89-4660-9cdf-718020b650a5","full_name":"Hotel Bônus","email":"bonus.hotel@petplus.local","avatar_url":null,"role_id":3,"phone":null}}
+---
+[2026-10-23 13:55:57.615 -03:00] POST http://localhost:3100/api/v1/providers/services
+Autenticação: Bearer <token omitido> (hotel)
+Corpo enviado: {"name":"Hospedagem Bônus","category":"BOARDING","price":120}
+Status HTTP: 201
+Corpo recebido: {"service":{"id":"af0dd5c8-5d68-4679-b930-a69b8ce2e350","provider_id":"ef284763-b297-42e5-baf1-321f7f7133b0","name":"Hospedagem Bônus","category":"BOARDING","description":null,"price":120,"duration_minutes":null,"billing_unit":"DIARIA","is_active":true,"created_at":"2026-10-23T16:55:57.629Z"}}
+---
+[2026-10-23 13:55:57.638 -03:00] POST http://localhost:3100/api/v1/addresses
+Autenticação: Bearer <token omitido> (tutorB)
+Corpo enviado: {"cep":"01310-100","rua":"Avenida Paulista","numero":"1000","bairro":"Bela Vista","cidade":"São Paulo","estado":"SP"}
+Status HTTP: 201
+Corpo recebido: {"id":"dc12dfaf-8bcc-4bcd-9944-d5396042f9e0","user_id":"668b223b-575a-41da-86b4-5abdd236ed71","cep":"01310100","rua":"Avenida Paulista","numero":"1000","complemento":null,"bairro":"Bela Vista","cidade":"São Paulo","estado":"SP","is_default":true,"created_at":"2026-10-23T16:55:58.252Z"}
+---
+[2026-10-23 13:55:58.259 -03:00] POST http://localhost:3100/api/v1/users/me/pets
+Autenticação: Bearer <token omitido> (tutorC)
+Corpo enviado: {"name":"Rex Bônus","species":"DOG","weight_kg":12}
+Status HTTP: 201
+Corpo recebido: {"id":"01426141-7cf5-40c1-a646-20a84706d066","tutor_id":"7984b09e-9d58-4a07-a7f3-852fb6efb199","name":"Rex Bônus","species":"DOG","breed":null,"weight_kg":12,"birth_date":null,"medical_notes":null,"created_at":"2026-10-23T16:55:58.282Z","updated_at":"2026-10-23T16:55:58.282Z"}
+---
+Fim da preparação: 2026-10-23 13:55:58.287 -03:00
