@@ -1,53 +1,59 @@
-const productRepository = require('../../repositories/ProductRepository');
+const defaultProductRepository = require('../../repositories/ProductRepository');
 const prisma = require('../../config/database');
+const AppError = require('../../utils/AppError');
+const { findOperationalStore } = require('../providers/providerAccess');
 
+const EDITABLE_FIELDS = [
+  'name',
+  'category',
+  'pet_type',
+  'description',
+  'sku',
+  'stock_quantity',
+  'price',
+  'image_url',
+];
+
+// Os dados chegam validados por `updateProductSchema` (rota). Só o LOJISTA
+// aprovado, ativo e dono do produto edita (E-01). Os erros agora são AppError:
+// antes "não encontrado" e "sem permissão" viravam 500.
 class UpdateProductUseCase {
-  async execute(product_id, provider_id, { name, category, pet_type, description, sku, stock_quantity, price, image_url }) {
-    
-    if (!product_id) {
-      throw new Error("ID do produto é obrigatório.");
-    }
-    
-    if (price !== undefined && price < 0) {
-      throw new Error("O preço do produto não pode ser negativo.");
-    }
+  constructor({
+    providerRepository = prisma.provider,
+    productRepository = defaultProductRepository,
+  } = {}) {
+    this.providerRepository = providerRepository;
+    this.productRepository = productRepository;
+  }
 
-    if (stock_quantity !== undefined && stock_quantity < 0) {
-        throw new Error("A quantidade em estoque não pode ser negativa.");
-    }
-
-    const provider = await prisma.provider.findUnique({
-      where: { user_id: provider_id }
+  async execute({ productId, userId, userRole, data }) {
+    const provider = await findOperationalStore({
+      userId,
+      userRole,
+      providerRepository: this.providerRepository,
     });
 
-    if (!provider) {
-      throw new Error("Perfil de Lojista não encontrado para este usuário.");
-    }
-
-    const currentProduct = await productRepository.findById(product_id);
+    const currentProduct = await this.productRepository.findById(productId);
 
     if (!currentProduct) {
-      throw new Error("Produto não encontrado.");
+      throw AppError.notFound('Produto não encontrado.');
     }
 
     if (currentProduct.provider_id !== provider.id) {
-      throw new Error("Você não tem permissão para editar este produto.");
+      throw AppError.forbidden('Você não tem permissão para editar este produto.');
     }
 
-    const updatedProduct = await productRepository.update(product_id, {
-      name: name !== undefined ? name : currentProduct.name,
-      category: category !== undefined ? category : currentProduct.category,
-      pet_type: pet_type !== undefined ? pet_type : currentProduct.pet_type,
-      description: description !== undefined ? description : currentProduct.description,
-      sku: sku !== undefined ? sku : currentProduct.sku,
-      stock_quantity: stock_quantity !== undefined ? stock_quantity : currentProduct.stock_quantity,
-      price: price !== undefined ? price : currentProduct.price,
-      image_url: image_url !== undefined ? image_url : currentProduct.image_url,
-      updated_at: new Date()
-    });
+    const changes = {};
+    for (const field of EDITABLE_FIELDS) {
+      if (data[field] !== undefined) changes[field] = data[field];
+    }
 
-    return updatedProduct;
+    return await this.productRepository.update(productId, {
+      ...changes,
+      updated_at: new Date(),
+    });
   }
 }
 
 module.exports = new UpdateProductUseCase();
+module.exports.UpdateProductUseCase = UpdateProductUseCase;

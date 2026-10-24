@@ -3,6 +3,24 @@ const CartRepository = require('../../repositories/CartRepository');
 const ProductRepository = require('../../repositories/ProductRepository');
 const AppError = require('../../utils/AppError');
 const { ORDER_STATUS } = require('../../constants/orderStatus');
+const {
+  PROVIDER_ROLES,
+  OPERATIONAL_PROVIDER_SELECT,
+  isOperationalProvider,
+} = require('../providers/providerAccess');
+
+// Lojista que deixou de estar apto a vender (desativado, recusado, pendente)
+// não recebe pedido, mesmo com o produto ainda no carrinho do tutor (E-01).
+function assertStoreAvailable(product, productName) {
+  if (!isOperationalProvider(product.provider, { roleId: PROVIDER_ROLES.STORE })) {
+    throw new AppError(
+      `Produto "${productName}" indisponível: a loja não está ativa na plataforma`,
+      409,
+      'PROVIDER_UNAVAILABLE',
+      { product_id: product.id }
+    );
+  }
+}
 
 function asNumber(value) {
   if (value === null || value === undefined) return 0;
@@ -57,6 +75,7 @@ class CreateOrderUseCase {
       if (product.status !== 'ACTIVE') {
         throw AppError.conflict(`Produto "${product.name}" indisponível (status: ${product.status})`);
       }
+      assertStoreAvailable(product, product.name);
       if (product.stock_quantity < item.quantity) {
         throw AppError.conflict(
           `Estoque insuficiente para o produto "${product.name}"`,
@@ -88,6 +107,7 @@ class CreateOrderUseCase {
       for (const item of cart.items) {
         const product = await tx.product.findUnique({
           where: { id: item.product_id },
+          include: { provider: { select: OPERATIONAL_PROVIDER_SELECT } },
         });
 
         if (!product || product.status !== 'ACTIVE') {
@@ -95,6 +115,7 @@ class CreateOrderUseCase {
             `Produto "${item.product.name}" indisponível no momento da finalização`
           );
         }
+        assertStoreAvailable(product, item.product.name);
 
         if (product.stock_quantity < item.quantity) {
           throw AppError.conflict(

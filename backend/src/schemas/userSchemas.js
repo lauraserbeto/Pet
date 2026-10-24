@@ -61,10 +61,23 @@ const listUsersQuery = z.object({
   q: z.string().trim().max(150).optional(),
 });
 
+// Ativar/desativar conta pelo admin (E-01, DEC-G).
+const userIdParamsSchema = z.object({
+  id: z.string().uuid('id inválido'),
+});
+
+const updateUserActiveSchema = z
+  .object({
+    is_active: z.boolean({ message: 'is_active deve ser true ou false' }),
+  })
+  .strict();
+
 module.exports = {
   updateProfileSchema,
   changePasswordSchema,
   uploadAvatarSchema,
   listUsersQuery,
+  userIdParamsSchema,
+  updateUserActiveSchema,
   AVATAR_MAX_CHARS,
 };

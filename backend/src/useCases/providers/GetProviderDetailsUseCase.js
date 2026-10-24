@@ -1,9 +1,13 @@
 const prisma = require('../../config/database');
+const AppError = require('../../utils/AppError');
+const { operationalProviderWhere } = require('./providerAccess');
 
 class GetProviderDetailsUseCase {
+  // Detalhe público: só parceiro operacional (aprovado, conta ativa e, se Pet
+  // Sitter, avaliação aprovada — E-01). Os demais respondem 404, como inexistentes.
   async execute(providerId) {
-    const provider = await prisma.provider.findUnique({
-      where: { id: providerId },
+    const provider = await prisma.provider.findFirst({
+      where: { id: providerId, ...operationalProviderWhere() },
       include: {
         user: {
           select: {
@@ -44,7 +48,7 @@ class GetProviderDetailsUseCase {
     });
 
     if (!provider) {
-      throw new Error('Provedor não encontrado');
+      throw AppError.notFound('Parceiro não encontrado.');
     }
 
     // Mapping products price since Prisma Decimal comes out as an object/string

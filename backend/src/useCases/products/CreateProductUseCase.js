@@ -1,49 +1,55 @@
-const productRepository = require('../../repositories/ProductRepository');
+const defaultProductRepository = require('../../repositories/ProductRepository');
 const prisma = require('../../config/database');
+const { findOperationalStore } = require('../providers/providerAccess');
 
+// Os dados chegam validados por `createProductSchema` (rota). Aqui fica a regra
+// de negócio: só LOJISTA aprovado e com conta ativa cria produto (decisão 5 do
+// PLANO, E-01) — antes bastava existir qualquer cadastro de parceiro.
 class CreateProductUseCase {
-  async execute({ provider_id, name, category, pet_type, description, sku, stock_quantity, price, image_url }) {
-    
-    if (!name || name.trim() === "") {
-      throw new Error("O nome do produto é obrigatório.");
-    }
+  constructor({
+    providerRepository = prisma.provider,
+    productRepository = defaultProductRepository,
+  } = {}) {
+    this.providerRepository = providerRepository;
+    this.productRepository = productRepository;
+  }
 
-    if (price === undefined || price < 0) {
-      throw new Error("O preço do produto não pode ser negativo.");
-    }
-
-    if (stock_quantity < 0) {
-        throw new Error("A quantidade em estoque não pode ser negativa.");
-    }
-
-    // Localizar o Lojista vinculado a este Usuário (req.userId)
-    const provider = await prisma.provider.findUnique({
-      where: { user_id: provider_id }
+  async execute({
+    userId,
+    userRole,
+    name,
+    category,
+    pet_type,
+    description,
+    sku,
+    stock_quantity,
+    price,
+    image_url,
+  }) {
+    const provider = await findOperationalStore({
+      userId,
+      userRole,
+      providerRepository: this.providerRepository,
     });
 
-    if (!provider) {
-      throw new Error("Perfil de Lojista não encontrado para este usuário.");
-    }
-
-    const generatedSku = sku && sku.trim() !== "" 
-      ? sku 
+    const generatedSku = sku && sku.trim() !== ''
+      ? sku.trim()
       : 'PET-' + Date.now().toString().slice(-6);
 
-    const product = await productRepository.create({
+    return await this.productRepository.create({
       provider_id: provider.id,
       name,
-      category: category || "GERAL",
-      pet_type: pet_type || "TODOS",
+      category: category || 'GERAL',
+      pet_type: pet_type || 'TODOS',
       description,
       sku: generatedSku,
-      stock_quantity: stock_quantity || 0,
+      stock_quantity: stock_quantity ?? 0,
       price,
       image_url,
-      status: "ACTIVE" 
+      status: 'ACTIVE',
     });
-
-    return product;
   }
 }
 
 module.exports = new CreateProductUseCase();
+module.exports.CreateProductUseCase = CreateProductUseCase;

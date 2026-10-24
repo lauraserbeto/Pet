@@ -6,7 +6,7 @@ process.env.FRONTEND_URL ||= 'http://localhost:5173';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
+const { signTestToken } = require('../helpers/authState');
 
 const prisma = require('../../src/config/database');
 const CartRepository = require('../../src/repositories/CartRepository');
@@ -14,21 +14,24 @@ const app = require('../../src/app');
 const { ORDER_STATUS } = require('../../src/constants/orderStatus');
 
 function generateToken(roleId = 5, userId = 'user-tutor-123') {
-  const payload = { id: userId };
-  if (roleId !== undefined) {
-    payload.role_id = roleId;
-  }
-  return jwt.sign(payload, process.env.JWT_SECRET);
+  return signTestToken({ id: userId, role_id: roleId });
 }
+
+// Lojistas aptos a vender (aprovados e ativos): o pedido recusa loja inativa (E-01).
+const operationalStoreUser = { role_id: 2, is_active: true, sitter_evaluations: [] };
 
 const mockProvider1 = {
   id: 'provider-uuid-0001',
   business_name: 'Pet Shop Alfa',
+  status: 'APROVADO',
+  user: operationalStoreUser,
 };
 
 const mockProvider2 = {
   id: 'provider-uuid-0002',
   business_name: 'Rações Beta',
+  status: 'APROVADO',
+  user: operationalStoreUser,
 };
 
 const mockProduct1 = {
@@ -187,6 +190,45 @@ test('POST /api/v1/orders: 409 se produto estiver com status INACTIVE', async ()
 
   assert.equal(res.status, 409);
   assert.match(res.body.error.message, /indisponível/i);
+});
+
+test('POST /api/v1/orders: 409 PROVIDER_UNAVAILABLE se a loja foi desativada com o produto no carrinho (E-01)', async () => {
+  const token = generateToken(5);
+  let transactionStarted = false;
+
+  CartRepository.findByUser = async () => ({
+    id: 'cart-123',
+    user_id: 'user-tutor-123',
+    items: [
+      {
+        id: 'item-1',
+        product_id: mockProduct1.id,
+        quantity: 1,
+        unit_price_snapshot: 150.0,
+        product: {
+          ...mockProduct1,
+          provider: { ...mockProvider1, user: { ...operationalStoreUser, is_active: false } },
+        },
+      },
+    ],
+  });
+  const originalTransaction = prisma.$transaction;
+  prisma.$transaction = async () => {
+    transactionStarted = true;
+    throw new Error('a transação não deveria começar');
+  };
+
+  try {
+    const res = await request(app)
+      .post('/api/v1/orders')
+      .set('Authorization', `Bearer ${token}`);
+
+    assert.equal(res.status, 409);
+    assert.equal(res.body.error.code, 'PROVIDER_UNAVAILABLE');
+    assert.equal(transactionStarted, false);
+  } finally {
+    prisma.$transaction = originalTransaction;
+  }
 });
 
 test('POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + OrderItems, congela preço, baixa estoque e limpa carrinho', async () => {

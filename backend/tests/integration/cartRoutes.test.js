@@ -6,7 +6,7 @@ process.env.FRONTEND_URL ||= 'http://localhost:5173';
 const { test, before } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
+const { signTestToken } = require('../helpers/authState');
 
 // 1. Mocka o Prisma Client antes de carregar o app para evitar a necessidade de uma conexão real com o banco de dados
 const prisma = require('../../src/config/database');
@@ -18,7 +18,13 @@ const mockProduct = {
   status: 'ACTIVE',
   stock_quantity: 10,
   image_url: 'http://example.com/image.jpg',
-  provider: { id: 'provider-123', business_name: 'Test Provider' }
+  // Lojista apto a vender (aprovado e ativo): o carrinho recusa produto de loja inativa (E-01).
+  provider: {
+    id: 'provider-123',
+    business_name: 'Test Provider',
+    status: 'APROVADO',
+    user: { role_id: 2, is_active: true, sitter_evaluations: [] },
+  }
 };
 
 const mockCart = {
@@ -53,11 +59,7 @@ const app = require('../../src/app');
 
 // Função auxiliar para gerar um token com um papel (role) específico
 function generateToken(roleId) {
-  const payload = { id: 'user-123' };
-  if (roleId !== undefined) {
-    payload.role_id = roleId;
-  }
-  return jwt.sign(payload, process.env.JWT_SECRET || 'test-secret-key-32-chars-long-minimum');
+  return signTestToken({ id: 'user-123', role_id: roleId });
 }
 
 // Garante que a variável JWT_SECRET esteja definida para os testes
@@ -120,6 +122,29 @@ test('addItem: sem role (requisição anônima com token sem role) retorna suces
     .set('Authorization', `Bearer ${token}`)
     .send({ product_id: mockProduct.id, quantity: 1 });
   assert.ok(res.status === 201 || res.status === 200, `Esperado 200 ou 201, obteve ${res.status}`);
+});
+
+test('addItem: produto de loja não aprovada ou desativada → 409 PROVIDER_UNAVAILABLE (E-01)', async () => {
+  const originalFindUnique = prisma.product.findUnique;
+  const lojasForaDaVitrine = [
+    { ...mockProduct.provider, status: 'PENDENTE' },
+    { ...mockProduct.provider, user: { ...mockProduct.provider.user, is_active: false } },
+  ];
+
+  try {
+    for (const provider of lojasForaDaVitrine) {
+      prisma.product.findUnique = async () => ({ ...mockProduct, provider });
+      const res = await request(app)
+        .post('/api/v1/cart/items')
+        .set('Authorization', `Bearer ${generateToken(5)}`)
+        .send({ product_id: mockProduct.id, quantity: 1 });
+
+      assert.equal(res.status, 409);
+      assert.equal(res.body.error.code, 'PROVIDER_UNAVAILABLE');
+    }
+  } finally {
+    prisma.product.findUnique = originalFindUnique;
+  }
 });
 
 

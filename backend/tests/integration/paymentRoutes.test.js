@@ -11,7 +11,7 @@ process.env.BACKEND_PUBLIC_URL = 'https://api.petplus.test';
 const { test, beforeEach, afterEach, mock } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
+const { signTestToken } = require('../helpers/authState');
 const prisma = require('../../src/config/database');
 const gateway = require('../../src/services/MercadoPagoService');
 const app = require('../../src/app');
@@ -34,7 +34,7 @@ afterEach(() => {
   mock.restoreAll();
 });
 function token(role = 5, userId = fixture.userId) {
-  return jwt.sign({ id: userId, role_id: role }, process.env.JWT_SECRET);
+  return signTestToken({ id: userId, role_id: role });
 }
 
 test('configuração expõe somente modo, sem credenciais', async () => {

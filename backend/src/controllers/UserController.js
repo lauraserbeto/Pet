@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const AppError = require('../utils/AppError');
 const { listUsersQuery } = require('../schemas/userSchemas');
 const { PROVIDER_STATUS } = require('../constants/providerStatus');
+const setUserActiveUseCase = require('../useCases/users/SetUserActiveUseCase');
 
 const PROFILE_SELECT = {
   id: true,
@@ -258,6 +259,20 @@ class UserController {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Erro ao buscar avaliações' });
+    }
+  }
+
+  // Ativa/desativa uma conta (admin) — E-01, DEC-G. Body e params já validados.
+  async setActive(req, res, next) {
+    try {
+      const user = await setUserActiveUseCase.execute({
+        adminId: req.userId,
+        targetUserId: req.params.id,
+        isActive: req.body.is_active,
+      });
+      return res.status(200).json(user);
+    } catch (error) {
+      return next(error);
     }
   }
 

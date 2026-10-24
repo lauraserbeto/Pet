@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const { PROVIDER_ROLES, operationalProviderWhere } = require('../providers/providerAccess');
 
 const PROVIDER_INCLUDE = {
   provider: {
@@ -20,7 +21,12 @@ class ListActiveProductsUseCase {
   // Paginação por offset (skip/take) + contagem total. `take: limit` garante
   // que a query nunca é não-limitada (antes: findMany sem take).
   async execute({ page = 1, limit = 100 } = {}) {
-    const where = { status: 'ACTIVE' };
+    // Vitrine: só produto ativo de lojista aprovado e com conta ativa (decisão 5
+    // do PLANO, E-01) — antes bastava o produto estar ACTIVE.
+    const where = {
+      status: 'ACTIVE',
+      provider: operationalProviderWhere({ roleId: PROVIDER_ROLES.STORE }),
+    };
     const skip = (page - 1) * limit;
 
     const [total, products] = await Promise.all([

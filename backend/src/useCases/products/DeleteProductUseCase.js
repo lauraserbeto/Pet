@@ -1,6 +1,7 @@
 const defaultProductRepository = require('../../repositories/ProductRepository');
 const prisma = require('../../config/database');
 const AppError = require('../../utils/AppError');
+const { findOperationalStore } = require('../providers/providerAccess');
 
 class DeleteProductUseCase {
   constructor({
@@ -12,18 +13,12 @@ class DeleteProductUseCase {
   }
 
   async execute(productId, userId, userRole) {
-    if (userRole !== 2) {
-      throw AppError.forbidden('Apenas lojistas podem excluir produtos.');
-    }
-
-    const provider = await this.providerRepository.findUnique({
-      where: { user_id: userId },
-      select: { id: true },
+    // Papel LOJISTA, cadastro aprovado e conta ativa (E-01).
+    const provider = await findOperationalStore({
+      userId,
+      userRole,
+      providerRepository: this.providerRepository,
     });
-
-    if (!provider) {
-      throw AppError.forbidden('Perfil de lojista não encontrado para este usuário.');
-    }
 
     const product = await this.productRepository.findById(productId);
 

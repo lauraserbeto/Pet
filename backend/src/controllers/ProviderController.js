@@ -3,10 +3,10 @@ const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDeta
 const updateProviderProfileUseCase = require('../useCases/providers/UpdateProviderProfileUseCase');
 const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
 const {
-  APPROVED_PROVIDER_STATUSES,
   PROVIDER_STATUS,
   isOperationalSitter,
 } = require('../constants/providerStatus');
+const { PROVIDER_ROLES, operationalProviderWhere } = require('../useCases/providers/providerAccess');
 const { toPublicProvider, toPublicProviders } = require('../utils/publicProvider');
 const { ADMIN_PROVIDER_SELECT, toAdminProviders } = require('../utils/adminProvider');
 const emailService = require('../services/EmailService');
@@ -42,11 +42,6 @@ class ProviderController {
     return true; // LOJISTA
   }
 
-  // Lista os status que consideramos como "Aprovado/Visível"
-  #getApprovedStatus() {
-    return { in: APPROVED_PROVIDER_STATUSES };
-  }
-
   #withoutSitterEvaluationProbe(provider) {
     const { sitter_evaluations: _omit, ...user } = provider.user || {};
     return { ...provider, user };
@@ -55,10 +50,8 @@ class ProviderController {
   async listHotels(req, res) {
     try {
       const providers = await prisma.provider.findMany({
-        where: {
-          status: this.#getApprovedStatus(),
-          user: { role_id: 3 } // HOTEL
-        },
+        // Vitrine: hotel aprovado e com conta ativa (E-01).
+        where: operationalProviderWhere({ roleId: PROVIDER_ROLES.HOTEL }),
         include: {
           user: {
             select: {
@@ -85,10 +78,8 @@ class ProviderController {
   async listSitters(req, res) {
     try {
       const providers = await prisma.provider.findMany({
-        where: {
-          status: this.#getApprovedStatus(),
-          user: { role_id: 4 } // PET_SITTER
-        },
+        // Vitrine: sitter aprovado, com conta ativa e avaliação aprovada (E-01).
+        where: operationalProviderWhere({ roleId: PROVIDER_ROLES.PET_SITTER }),
         include: {
           user: {
             select: {
@@ -125,10 +116,8 @@ class ProviderController {
   async listStores(req, res) {
     try {
       const providers = await prisma.provider.findMany({
-        where: {
-          status: this.#getApprovedStatus(),
-          user: { role_id: 2 } // LOJISTA
-        },
+        // Vitrine: lojista aprovado e com conta ativa (E-01).
+        where: operationalProviderWhere({ roleId: PROVIDER_ROLES.STORE }),
         include: {
           user: {
             select: {
@@ -165,15 +154,14 @@ class ProviderController {
     }
   }
 
-  async getDetails(req, res) {
+  async getDetails(req, res, next) {
     try {
       const { id } = req.params;
       const provider = await getProviderDetailsUseCase.execute(id);
       // Rota pública: o detalhe do parceiro também não pode carregar CPF/CNPJ.
       return res.status(200).json(toPublicProvider(provider));
     } catch (error) {
-      console.error("[ProviderController] Erro em getDetails:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 

@@ -249,3 +249,38 @@ test(
     assert.equal(Number(cart.items[0].unit_price_snapshot), 30);
   }
 );
+
+test(
+  'E-01: loja desativada entre o carrinho e a finalização não recebe pedido nem baixa estoque',
+  { skip: skipDbIntegration },
+  async () => {
+    const { authorization, tutor } = await createAuthenticatedTutor();
+    const { storeUser, product } = await createStoreWithProduct({
+      price: '25.00',
+      stock_quantity: 5,
+    });
+
+    const addItemRes = await request(app)
+      .post('/api/v1/cart/items')
+      .set('Authorization', authorization)
+      .send({ product_id: product.id, quantity: 2 });
+    assert.equal(addItemRes.status, 201, JSON.stringify(addItemRes.body));
+
+    // Admin desativa a conta do lojista depois que o tutor montou o carrinho.
+    await prisma.user.update({ where: { id: storeUser.id }, data: { is_active: false } });
+
+    const catalogRes = await request(app).get('/api/v1/products');
+    assert.equal(catalogRes.status, 200);
+    assert.equal(catalogRes.body.some((p) => p.id === product.id), false);
+
+    const orderRes = await request(app)
+      .post('/api/v1/orders')
+      .set('Authorization', authorization);
+    assert.equal(orderRes.status, 409, JSON.stringify(orderRes.body));
+    assert.equal(orderRes.body.error.code, 'PROVIDER_UNAVAILABLE');
+
+    assert.equal(await prisma.order.count({ where: { customer_id: tutor.id } }), 0);
+    const unchanged = await prisma.product.findUnique({ where: { id: product.id } });
+    assert.equal(unchanged.stock_quantity, 5);
+  }
+);

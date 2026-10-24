@@ -6,8 +6,18 @@ const {
   MAX_DISTINCT_SKUS,
   CART_EXPIRY_DAYS,
 } = require('../schemas/cartSchemas');
+const {
+  PROVIDER_ROLES,
+  OPERATIONAL_PROVIDER_SELECT,
+  isOperationalProvider,
+} = require('../useCases/providers/providerAccess');
 
 const PRODUCT_ACTIVE = 'ACTIVE';
+const PRODUCT_WITH_PROVIDER = { provider: { select: OPERATIONAL_PROVIDER_SELECT } };
+
+function isStoreAvailable(provider) {
+  return isOperationalProvider(provider, { roleId: PROVIDER_ROLES.STORE });
+}
 
 function asNumber(value) {
   if (value === null || value === undefined) return 0;
@@ -22,10 +32,19 @@ function asNumber(value) {
  * de inconsistência (preço mudou, estoque acabou, etc.).
  */
 function toDTO(cart, warnings = []) {
+  const unavailableWarnings = [];
   const items = (cart.items ?? []).map((item) => {
     const unitPrice = asNumber(item.unit_price_snapshot);
     const currentPrice = asNumber(item.product?.price);
     const priceChanged = currentPrice > 0 && currentPrice !== unitPrice;
+    const provider = item.product.provider;
+    if (!isStoreAvailable(provider)) {
+      unavailableWarnings.push({
+        code: 'PROVIDER_UNAVAILABLE',
+        product_id: item.product_id,
+        message: `"${item.product.name}" está indisponível: a loja não está ativa na plataforma`,
+      });
+    }
     return {
       id: item.id,
       product_id: item.product_id,
@@ -41,7 +60,8 @@ function toDTO(cart, warnings = []) {
         image_url: item.product.image_url,
         stock_quantity: item.product.stock_quantity,
         status: item.product.status,
-        provider: item.product.provider,
+        // Só o necessário para a tela: status e conta do lojista ficam internos.
+        provider: provider ? { id: provider.id, business_name: provider.business_name } : null,
       },
     };
   });
@@ -61,7 +81,7 @@ function toDTO(cart, warnings = []) {
       total: subtotal,
       total_items: totalItems,
     },
-    warnings,
+    warnings: [...warnings, ...unavailableWarnings],
   };
 }
 
@@ -69,6 +89,14 @@ function assertProductPurchasable(product) {
   if (!product) throw AppError.notFound('Produto não encontrado');
   if (product.status !== PRODUCT_ACTIVE) {
     throw AppError.conflict(`Produto indisponível (status: ${product.status})`);
+  }
+  if (!isStoreAvailable(product.provider)) {
+    throw new AppError(
+      'Produto indisponível: a loja não está ativa na plataforma.',
+      409,
+      'PROVIDER_UNAVAILABLE',
+      { product_id: product.id }
+    );
   }
   if (product.stock_quantity <= 0) {
     throw AppError.conflict('Produto sem estoque');
@@ -112,7 +140,10 @@ class CartController {
       const { product_id, quantity } = req.body;
       const warnings = [];
 
-      const product = await prisma.product.findUnique({ where: { id: product_id } });
+      const product = await prisma.product.findUnique({
+        where: { id: product_id },
+        include: PRODUCT_WITH_PROVIDER,
+      });
       assertProductPurchasable(product);
 
       const cart = await CartRepository.findOrCreateByUser(req.userId);
@@ -244,6 +275,7 @@ class CartController {
       const productIds = [...new Set(items.map((i) => i.product_id))];
       const products = await prisma.product.findMany({
         where: { id: { in: productIds } },
+        include: PRODUCT_WITH_PROVIDER,
       });
       const productMap = new Map(products.map((p) => [p.id, p]));
 
@@ -263,6 +295,14 @@ class CartController {
             code: 'PRODUCT_UNAVAILABLE',
             product_id: incoming.product_id,
             message: 'Produto indisponível — ignorado no merge',
+          });
+          continue;
+        }
+        if (!isStoreAvailable(product.provider)) {
+          warnings.push({
+            code: 'PROVIDER_UNAVAILABLE',
+            product_id: incoming.product_id,
+            message: 'Loja indisponível na plataforma — produto ignorado no merge',
           });
           continue;
         }

@@ -19,6 +19,7 @@ interface Partner {
   full_name?: string;
   email?: string;
   role_id?: number;
+  is_active?: boolean;
 }
 
 type TabType = 'PENDENTE' | 'APROVADO' | 'REJEITADO';
@@ -41,6 +42,7 @@ export function Approvals() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [deactivatingPartner, setDeactivatingPartner] = useState<Partner | null>(null);
 
   // Verification step
   useEffect(() => {
@@ -150,12 +152,40 @@ export function Approvals() {
 
       if (!res.ok) throw new Error("Erro ao rejeitar parceiro");
 
-      toast.success(activeTab === 'APROVADO' ? "Parceiro desativado com sucesso." : "Parceiro recusado com sucesso.");
+      toast.success("Parceiro recusado com sucesso.");
       setPartners(prev => prev.map(p => p.id === rejectingId ? { ...p, status: 'REJEITADO', rejection_reason: rejectionReason } : p));
       closeRejectModal();
     } catch (err) {
       console.error("Error rejecting:", err);
       toast.error("Ocorreu um erro ao rejeitar o parceiro.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  // Desativar/reativar suspende a CONTA (is_active), sem e-mail nem fluxo de
+  // correção — recusar cadastro é outra ação, com motivo (DEC-G).
+  const setPartnerActive = async (partner: Partner, isActive: boolean) => {
+    try {
+      setProcessingId(partner.id);
+
+      const res = await fetch(`${API_URL}/users/admin/users/${partner.user_id}/active`, {
+        method: "PATCH",
+        headers: getHeaders(),
+        body: JSON.stringify({ is_active: isActive })
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error?.message ?? body?.error ?? "Não foi possível alterar a conta do parceiro.");
+      }
+
+      toast.success(isActive ? "Conta do parceiro reativada." : "Conta do parceiro desativada.");
+      setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, is_active: isActive } : p));
+      setDeactivatingPartner(null);
+    } catch (err) {
+      console.error("Error updating account:", err);
+      toast.error(err instanceof Error ? err.message : "Não foi possível alterar a conta do parceiro.");
     } finally {
       setProcessingId(null);
     }
@@ -316,6 +346,11 @@ export function Approvals() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="font-medium text-slate-800">{partner.business_name}</span>
+                        {partner.is_active === false && (
+                          <span className="ml-2 inline-flex items-center text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                            Inativo
+                          </span>
+                        )}
                         {partner.rejection_reason && activeTab === 'REJEITADO' && (
                           <p className="text-xs text-red-500 mt-1 line-clamp-1" title={partner.rejection_reason}>
                             Motivo: {partner.rejection_reason}
@@ -366,16 +401,28 @@ export function Approvals() {
                               </Button>
                             </>
                           )}
-                          {activeTab === 'APROVADO' && (
-                            <Button 
-                              onClick={() => openRejectModal(partner.id)}
-                              variant="outline" 
+                          {activeTab === 'APROVADO' && partner.is_active !== false && (
+                            <Button
+                              onClick={() => setDeactivatingPartner(partner)}
+                              variant="outline"
                               size="sm"
                               disabled={isProcessing}
                               className={`text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}
                             >
                               {isProcessing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Ban className="h-4 w-4 mr-1.5" />}
                               Desativar
+                            </Button>
+                          )}
+                          {activeTab === 'APROVADO' && partner.is_active === false && (
+                            <Button
+                              onClick={() => setPartnerActive(partner, true)}
+                              variant="outline"
+                              size="sm"
+                              disabled={isProcessing}
+                              className={`text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}
+                            >
+                              {isProcessing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <RefreshCcw className="h-4 w-4 mr-1.5" />}
+                              Reativar
                             </Button>
                           )}
                           {activeTab === 'REJEITADO' && (
@@ -407,18 +454,16 @@ export function Approvals() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="px-6 py-5 border-b border-slate-100">
               <h3 className="text-lg font-bold text-slate-900">
-                {activeTab === 'APROVADO' ? 'Desativar Parceiro' : 'Recusar Parceiro'}
+                Recusar Parceiro
               </h3>
               <p className="text-sm text-slate-500 mt-1">
-                {activeTab === 'APROVADO' 
-                  ? 'Tem certeza que deseja desativar este parceiro? Ele perderá o acesso ativo.' 
-                  : 'Tem certeza que deseja recusar esta solicitação de cadastro?'}
+                Tem certeza que deseja recusar esta solicitação de cadastro?
               </p>
             </div>
-            
+
             <div className="p-6">
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Motivo da recusa/desativação (Opcional)
+                Motivo da recusa (Opcional)
               </label>
               <textarea 
                 value={rejectionReason}
@@ -446,6 +491,43 @@ export function Approvals() {
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processando...</>
                 ) : (
                   'Confirmar Ação'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivation Modal */}
+      {deactivatingPartner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-5 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-900">Desativar conta do parceiro</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {deactivatingPartner.business_name} perde o acesso imediatamente e os produtos e serviços saem da vitrine.
+                Nenhum e-mail é enviado, e a conta pode ser reativada depois.
+              </p>
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setDeactivatingPartner(null)}
+                disabled={processingId === deactivatingPartner.id}
+                className="text-slate-600 hover:text-slate-900"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => setPartnerActive(deactivatingPartner, false)}
+                disabled={processingId === deactivatingPartner.id}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {processingId === deactivatingPartner.id ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processando...</>
+                ) : (
+                  'Desativar conta'
                 )}
               </Button>
             </div>

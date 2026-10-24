@@ -1,10 +1,11 @@
 const productRepository = require('../../repositories/ProductRepository');
 const prisma = require('../../config/database');
+const AppError = require('../../utils/AppError');
 
 class ListProviderProductsUseCase {
   async execute(provider_id) {
     if (!provider_id) {
-      throw new Error("ID do usuário não fornecido.");
+      throw AppError.unauthorized('ID do usuário não fornecido.');
     }
 
     // Localizar o Lojista vinculado a este Usuário (req.userId)
@@ -13,7 +14,7 @@ class ListProviderProductsUseCase {
     });
 
     if (!provider) {
-      throw new Error("Perfil de Lojista não encontrado para este usuário.");
+      throw AppError.forbidden('Perfil de Lojista não encontrado para este usuário.');
     }
 
     const products = await productRepository.findByProviderId(provider.id);

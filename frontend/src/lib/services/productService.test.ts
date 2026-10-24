@@ -1,6 +1,10 @@
 import { it, expect } from "vitest";
 import { ApiError } from "../httpClient";
-import { describeDeleteProductError, isProductGoneError } from "./productService";
+import {
+  describeDeleteProductError,
+  describeSaveProductError,
+  isProductGoneError,
+} from "./productService";
 
 it("dá a mensagem certa para cada erro do DELETE /products/:id", () => {
   const casos: [number, RegExp][] = [
@@ -43,4 +47,24 @@ it("isProductGoneError identifica só o 404", () => {
   expect(isProductGoneError(new ApiError(404, "NOT_FOUND", "x"))).toBe(true);
   expect(isProductGoneError(new ApiError(409, "CONFLICT", "x"))).toBe(false);
   expect(isProductGoneError(new Error("boom"))).toBe(false);
+});
+
+it("ao salvar, mostra a causa da validação em vez de [object Object]", () => {
+  const validacao = {
+    error: {
+      code: "VALIDATION_ERROR",
+      message: "Dados inválidos",
+      details: [{ message: "O preço deve ser maior que zero." }],
+    },
+  };
+  expect(describeSaveProductError(validacao, "Erro ao criar produto")).toBe(
+    "O preço deve ser maior que zero."
+  );
+});
+
+it("ao salvar, mostra a mensagem do gate de lojista e aceita o formato antigo", () => {
+  const gate = { error: { code: "PROVIDER_NOT_OPERATIONAL", message: "Apenas lojistas aprovados e com conta ativa podem gerenciar produtos." } };
+  expect(describeSaveProductError(gate, "x")).toMatch(/lojistas aprovados/i);
+  expect(describeSaveProductError({ error: "Token inválido" }, "x")).toBe("Token inválido");
+  expect(describeSaveProductError(null, "Erro ao atualizar produto")).toBe("Erro ao atualizar produto");
 });
