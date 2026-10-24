@@ -2,8 +2,10 @@
 //
 // - Converte Prisma.Decimal → Number para total_price, price, daily_rate, hourly_rate
 // - Remove campos sensíveis do Provider (document, document_type, rejection_reason)
-// - Remove password_hash de qualquer User incluído (tutor do pet, user do provider)
-// - Preserva campo `refund` quando presente (estorno simulado — PAG-2)
+// - Tutor do pet sai só com id, full_name, phone e email (AUD-17, antecipado no E-04)
+// - Remove password_hash do user do provider, se incluído
+// - Expõe a payment_policy gravada no agendamento (DEC-A)
+// - Preserva campo `refund` quando presente (estorno da PAG-2)
 
 const { toPublicProvider } = require('./publicProvider');
 
@@ -23,6 +25,17 @@ function sanitizeUser(user) {
   return safe;
 }
 
+/** Campos do tutor visíveis no agendamento (mesmos do APPOINTMENT_TUTOR_SELECT). */
+const APPOINTMENT_TUTOR_FIELDS = ['id', 'full_name', 'phone', 'email'];
+
+/** Reduz o tutor aos campos de contato; ignora o que mais vier carregado. */
+function toAppointmentTutor(user) {
+  if (!user) return null;
+  return Object.fromEntries(
+    APPOINTMENT_TUTOR_FIELDS.filter((field) => field in user).map((field) => [field, user[field]])
+  );
+}
+
 /**
  * Formata um agendamento completo para resposta da API.
  * @param {object} appointment - Appointment do Prisma com includes
@@ -39,17 +52,18 @@ function formatAppointment(appointment) {
     start_time: appointment.start_time,
     end_time: appointment.end_time,
     status: appointment.status,
+    payment_policy: appointment.payment_policy ?? null,
     total_price: asNumber(appointment.total_price),
     notes: appointment.notes ?? null,
     created_at: appointment.created_at,
     updated_at: appointment.updated_at,
   };
 
-  // Pet + tutor (sanitizado)
+  // Pet + tutor (só dados de contato)
   if (appointment.pet) {
     result.pet = { ...appointment.pet };
     if (result.pet.tutor) {
-      result.pet.tutor = sanitizeUser(result.pet.tutor);
+      result.pet.tutor = toAppointmentTutor(result.pet.tutor);
     }
   }
 
@@ -75,7 +89,7 @@ function formatAppointment(appointment) {
     }
   }
 
-  // Estorno simulado (PAG-2) — preserva quando presente
+  // Estorno (PAG-2) — preserva quando presente
   if (appointment.refund !== undefined) {
     result.refund = appointment.refund;
   }
@@ -93,6 +107,7 @@ function formatAppointments(appointments) {
 module.exports = {
   asNumber,
   sanitizeUser,
+  toAppointmentTutor,
   formatAppointment,
   formatAppointments,
 };

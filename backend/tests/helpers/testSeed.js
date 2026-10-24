@@ -110,9 +110,71 @@ async function createStoreWithProduct(productOverrides = {}, storeOverrides = {}
   return { storeUser, provider, product };
 }
 
+// --- Agendamento (E-04) ---
+
+/**
+ * Hotel (3) ou Pet Sitter (4) aprovado e operacional. O sitter recebe a
+ * avaliação aprovada, salvo `sitterEvaluation: false`.
+ */
+async function createApprovedPartner({ role_id = 3, payment_policy = 'PRESENCIAL', sitterEvaluation = true } = {}) {
+  const suffix = uniqueSuffix();
+  const partnerUser = await createUser({
+    role_id,
+    full_name: role_id === 4 ? 'Pet Sitter QA' : 'Hotel QA',
+    email: `partner-${suffix}@petplus.test`,
+  });
+
+  if (role_id === 4 && sitterEvaluation) {
+    await prisma.sitterEvaluation.create({
+      data: { user_id: partnerUser.id, experience_details: 'Experiência QA', status: 'APPROVED' },
+    });
+  }
+
+  const provider = await prisma.provider.create({
+    data: {
+      user_id: partnerUser.id,
+      business_name: role_id === 4 ? 'Sitter QA' : 'Hotel QA',
+      document: `qa-doc-${suffix}`,
+      document_type: role_id === 4 ? 'CPF' : 'CNPJ',
+      status: PROVIDER_STATUS.APPROVED,
+      payment_policy,
+      // Tarifas do perfil diferentes do preço do serviço (DEC-B).
+      daily_rate: '999.00',
+      hourly_rate: '999.00',
+    },
+  });
+
+  return { partnerUser, provider };
+}
+
+async function createService(providerId, overrides = {}) {
+  return prisma.service.create({
+    data: {
+      provider_id: providerId,
+      name: overrides.name ?? 'Serviço QA',
+      category: overrides.category ?? 'BOARDING',
+      price: overrides.price ?? '100.00',
+      is_active: overrides.is_active ?? true,
+    },
+  });
+}
+
+async function createPet(tutorId, overrides = {}) {
+  return prisma.pet.create({
+    data: {
+      tutor_id: tutorId,
+      name: overrides.name ?? 'Rex QA',
+      species: overrides.species ?? 'DOG',
+    },
+  });
+}
+
 module.exports = {
   seedRoles,
   createAuthenticatedTutor,
   createStoreWithProduct,
   createProduct,
+  createApprovedPartner,
+  createService,
+  createPet,
 };

@@ -1,5 +1,7 @@
 /**
- * Espelha `backend/src/constants/paymentPolicy.js` (AGD-1).
+ * Espelha `backend/src/constants/paymentPolicy.js` (AGD-1; regras pela DEC-A, 23/10/2026).
+ * A política vale para os agendamentos criados depois da troca; os já feitos
+ * mantêm a política da reserva.
  */
 export const PAYMENT_POLICY = {
   ON_SITE: "PRESENCIAL",
@@ -16,8 +18,8 @@ export const PAYMENT_POLICY_LABELS: Record<PaymentPolicy, string> = {
 };
 
 export const PAYMENT_POLICY_DESCRIPTIONS: Record<PaymentPolicy, string> = {
-  PRESENCIAL: "O tutor paga no local, no momento do serviço. O agendamento é confirmado assim que você aceita.",
-  PRE_PAGO: "O tutor paga antes do serviço. O agendamento fica aguardando a confirmação do pagamento.",
+  PRESENCIAL: "Você confirma ou recusa cada solicitação; o tutor paga no local.",
+  PRE_PAGO: "O tutor paga ao reservar; você confirma ou recusa depois (a recusa gera estorno integral).",
 };
 
 /** Valor ausente ou desconhecido vale como presencial — nunca como pré-pago. */

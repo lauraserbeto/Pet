@@ -1,4 +1,4 @@
-// Máquina de estados do Appointment (AGD-1).
+// Máquina de estados do Appointment (AGD-1; regras vigentes pela DEC-A, 23/10/2026).
 //
 // Espelha o padrão de orderStatus.js/providerStatus.js. O campo
 // `Appointment.status` é VarChar livre no schema — a validação mora aqui.
@@ -6,19 +6,19 @@
 // ATENÇÃO: esta máquina é independente da de Order/pagamento. Um agendamento
 // CONFIRMADO não diz nada sobre o pedido; são ciclos de vida distintos.
 //
-// Fluxo feliz, por política de cobrança do parceiro:
+// Todo agendamento nasce PENDENTE. Fluxo feliz, pela política de cobrança
+// GRAVADA NO AGENDAMENTO na reserva (`Appointment.payment_policy`):
 //
-//   PRESENCIAL:  PENDENTE ───────────────────────────────▶ CONFIRMADO ─▶ CONCLUIDO
-//   PRE_PAGO:    PENDENTE ─▶ AGUARDANDO_CONFIRMACAO ─────▶ CONFIRMADO ─▶ CONCLUIDO
+//   PRESENCIAL:  PENDENTE ──parceiro──▶ CONFIRMADO ──parceiro──▶ CONCLUIDO
+//   PRE_PAGO:    PENDENTE ──pagamento──▶ AGUARDANDO_CONFIRMACAO ──parceiro──▶ CONFIRMADO ──▶ CONCLUIDO
 //
-// AGUARDANDO_CONFIRMACAO só existe em parceiro PRE_PAGO: é a janela entre o
-// aceite do parceiro e a confirmação do pagamento. Em PRESENCIAL o pagamento
-// acontece no local, então esse estado nunca ocorre.
+// AGUARDANDO_CONFIRMACAO = "pago, aguardando a confirmação do parceiro". Só o
+// pagamento aprovado (PAG-2) leva a esse estado — nunca a rota de status.
 //
-// Saídas: RECUSADO (parceiro nega) e CANCELADO (tutor ou parceiro desiste),
-// ambos terminais.
+// Saídas: RECUSADO (parceiro nega) e CANCELADO (tutor ou parceiro desiste antes
+// do início), ambos terminais. Estorno de agendamento pago é da PAG-2.
 
-const { PAYMENT_POLICY, isPrepaid } = require('./paymentPolicy');
+const { PAYMENT_POLICY, normalizePaymentPolicy } = require('./paymentPolicy');
 
 const APPOINTMENT_STATUS = {
   PENDING: 'PENDENTE',
@@ -34,31 +34,70 @@ const INITIAL_APPOINTMENT_STATUS = APPOINTMENT_STATUS.PENDING;
 
 const APPOINTMENT_STATUS_VALUES = Object.freeze(Object.values(APPOINTMENT_STATUS));
 
+/** Status que ainda ocupam a agenda (contam para conflito de horário). */
+const ACTIVE_APPOINTMENT_STATUSES = Object.freeze([
+  APPOINTMENT_STATUS.PENDING,
+  APPOINTMENT_STATUS.AWAITING_CONFIRMATION,
+  APPOINTMENT_STATUS.CONFIRMED,
+]);
+
+/** Status que tutor e parceiro podem pedir pela rota PATCH /appointments/:id/status. */
+const MANUAL_TARGET_STATUSES = Object.freeze([
+  APPOINTMENT_STATUS.CONFIRMED,
+  APPOINTMENT_STATUS.REJECTED,
+  APPOINTMENT_STATUS.COMPLETED,
+  APPOINTMENT_STATUS.CANCELLED,
+]);
+
+/** Quem provoca a transição. PAYMENT = pagamento aprovado (PAG-2). */
+const APPOINTMENT_ACTOR = Object.freeze({
+  TUTOR: 'TUTOR',
+  PROVIDER: 'PROVIDER',
+  PAYMENT: 'PAYMENT',
+});
+
+const { TUTOR, PROVIDER, PAYMENT } = APPOINTMENT_ACTOR;
+const S = APPOINTMENT_STATUS;
+
+// Recusa por política (PRE_PAGO ainda não pago tentando ser confirmado/recusado).
+const PAYMENT_REQUIRED = Object.freeze({
+  reason: 'PAYMENT_REQUIRED',
+  message: 'Agendamento pré-pago só pode ser confirmado ou recusado depois do pagamento.',
+});
+
 /**
- * Transições permitidas, ignorando a política de cobrança.
- * Use `isValidAppointmentTransition` para aplicar também a regra condicional
- * de AGUARDANDO_CONFIRMACAO.
+ * Regras de transição (DEC-A). `policies` restringe à política gravada no
+ * agendamento (`policyError` diz o motivo da recusa); `beforeStart`/`afterStart`
+ * comparam com o horário de início.
  */
-const ALLOWED_APPOINTMENT_TRANSITIONS = {
-  [APPOINTMENT_STATUS.PENDING]: [
-    APPOINTMENT_STATUS.AWAITING_CONFIRMATION,
-    APPOINTMENT_STATUS.CONFIRMED,
-    APPOINTMENT_STATUS.REJECTED,
-    APPOINTMENT_STATUS.CANCELLED,
-  ],
-  [APPOINTMENT_STATUS.AWAITING_CONFIRMATION]: [
-    APPOINTMENT_STATUS.CONFIRMED,
-    APPOINTMENT_STATUS.REJECTED,
-    APPOINTMENT_STATUS.CANCELLED,
-  ],
-  [APPOINTMENT_STATUS.CONFIRMED]: [
-    APPOINTMENT_STATUS.COMPLETED,
-    APPOINTMENT_STATUS.CANCELLED,
-  ],
-  [APPOINTMENT_STATUS.COMPLETED]: [],
-  [APPOINTMENT_STATUS.REJECTED]: [],
-  [APPOINTMENT_STATUS.CANCELLED]: [],
-};
+const APPOINTMENT_TRANSITION_RULES = Object.freeze([
+  { from: S.PENDING, to: S.CONFIRMED, actors: [PROVIDER], policies: [PAYMENT_POLICY.ON_SITE], policyError: PAYMENT_REQUIRED },
+  { from: S.PENDING, to: S.REJECTED, actors: [PROVIDER], policies: [PAYMENT_POLICY.ON_SITE], policyError: PAYMENT_REQUIRED },
+  {
+    from: S.PENDING,
+    to: S.AWAITING_CONFIRMATION,
+    actors: [PAYMENT],
+    policies: [PAYMENT_POLICY.PREPAID],
+    policyError: {
+      reason: 'INVALID_TRANSITION',
+      message: 'Agendamento com pagamento presencial não passa por AGUARDANDO_CONFIRMACAO.',
+    },
+  },
+  { from: S.PENDING, to: S.CANCELLED, actors: [TUTOR], beforeStart: true },
+  { from: S.AWAITING_CONFIRMATION, to: S.CONFIRMED, actors: [PROVIDER] },
+  { from: S.AWAITING_CONFIRMATION, to: S.REJECTED, actors: [PROVIDER] },
+  { from: S.AWAITING_CONFIRMATION, to: S.CANCELLED, actors: [TUTOR], beforeStart: true },
+  { from: S.CONFIRMED, to: S.COMPLETED, actors: [PROVIDER], afterStart: true },
+  { from: S.CONFIRMED, to: S.CANCELLED, actors: [TUTOR, PROVIDER], beforeStart: true },
+]);
+
+/** Destinos possíveis a partir de cada status (sem considerar ator, política e horário). */
+const ALLOWED_APPOINTMENT_TRANSITIONS = Object.freeze(
+  APPOINTMENT_STATUS_VALUES.reduce((map, status) => {
+    map[status] = APPOINTMENT_TRANSITION_RULES.filter((r) => r.from === status).map((r) => r.to);
+    return map;
+  }, {})
+);
 
 /** Sinônimos em inglês herdados do schema antigo (`PENDING`, `CONFIRMED`, ...). */
 const APPOINTMENT_STATUS_ALIASES = {
@@ -88,37 +127,60 @@ function isValidAppointmentStatus(status) {
 }
 
 /**
- * Próximo status do fluxo feliz depois que o parceiro aceita o agendamento.
- * PRE_PAGO passa por AGUARDANDO_CONFIRMACAO; PRESENCIAL vai direto a CONFIRMADO.
- */
-function nextStatusAfterPartnerAccepts(paymentPolicy) {
-  return isPrepaid(paymentPolicy)
-    ? APPOINTMENT_STATUS.AWAITING_CONFIRMATION
-    : APPOINTMENT_STATUS.CONFIRMED;
-}
-
-/**
- * Valida a transição. A política de cobrança é opcional: sem ela, a regra
- * condicional de AGUARDANDO_CONFIRMACAO não é aplicada.
+ * Decide se `actor` pode levar o agendamento de `from` para `to`.
  *
- * @param {string} currentStatus
- * @param {string} nextStatus
- * @param {string} [paymentPolicy] PRESENCIAL | PRE_PAGO
+ * Devolve `{ allowed: true }` ou `{ allowed: false, reason, message }`, com
+ * `reason` entre: INVALID_TRANSITION, FORBIDDEN_ACTOR, PAYMENT_REQUIRED,
+ * ALREADY_STARTED (cancelar depois do início) e NOT_STARTED (concluir antes).
+ * Checa nessa ordem: transição existe, ator, política, horário.
+ *
+ * @param {object} params
+ * @param {string} params.from      status atual
+ * @param {string} params.to        status pedido
+ * @param {string} params.actor     APPOINTMENT_ACTOR
+ * @param {string} params.policy    política gravada no agendamento
+ * @param {Date}   params.now
+ * @param {Date|string} params.startTime
  */
-function isValidAppointmentTransition(currentStatus, nextStatus, paymentPolicy) {
-  const allowed = ALLOWED_APPOINTMENT_TRANSITIONS[currentStatus];
-  if (!Array.isArray(allowed) || !allowed.includes(nextStatus)) return false;
-
-  // AGUARDANDO_CONFIRMACAO é exclusivo de parceiro PRE_PAGO.
-  if (
-    paymentPolicy !== undefined &&
-    nextStatus === APPOINTMENT_STATUS.AWAITING_CONFIRMATION &&
-    !isPrepaid(paymentPolicy)
-  ) {
-    return false;
+function canTransition({ from, to, actor, policy, now, startTime }) {
+  const rule = APPOINTMENT_TRANSITION_RULES.find((r) => r.from === from && r.to === to);
+  if (!rule) {
+    return {
+      allowed: false,
+      reason: 'INVALID_TRANSITION',
+      message: `Transição inválida: "${from}" → "${to}".`,
+    };
   }
 
-  return true;
+  if (!rule.actors.includes(actor)) {
+    return {
+      allowed: false,
+      reason: 'FORBIDDEN_ACTOR',
+      message: `Você não pode alterar este agendamento para "${to}".`,
+    };
+  }
+
+  if (rule.policies && !rule.policies.includes(normalizePaymentPolicy(policy))) {
+    return { allowed: false, ...rule.policyError };
+  }
+
+  const start = startTime instanceof Date ? startTime : new Date(startTime);
+  if (rule.beforeStart && now >= start) {
+    return {
+      allowed: false,
+      reason: 'ALREADY_STARTED',
+      message: 'O atendimento já começou: não é mais possível cancelar.',
+    };
+  }
+  if (rule.afterStart && now < start) {
+    return {
+      allowed: false,
+      reason: 'NOT_STARTED',
+      message: 'O atendimento só pode ser concluído depois do horário de início.',
+    };
+  }
+
+  return { allowed: true };
 }
 
 function isAppointmentTerminalStatus(status) {
@@ -130,12 +192,15 @@ module.exports = {
   APPOINTMENT_STATUS,
   INITIAL_APPOINTMENT_STATUS,
   APPOINTMENT_STATUS_VALUES,
+  ACTIVE_APPOINTMENT_STATUSES,
+  MANUAL_TARGET_STATUSES,
+  APPOINTMENT_ACTOR,
+  APPOINTMENT_TRANSITION_RULES,
   ALLOWED_APPOINTMENT_TRANSITIONS,
   APPOINTMENT_STATUS_ALIASES,
   PAYMENT_POLICY,
   normalizeAppointmentStatus,
   isValidAppointmentStatus,
-  isValidAppointmentTransition,
+  canTransition,
   isAppointmentTerminalStatus,
-  nextStatusAfterPartnerAccepts,
 };

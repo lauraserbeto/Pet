@@ -308,26 +308,32 @@ model Service {
 }
 
 model Appointment {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  provider_id String   @db.Uuid
-  service_id  String   @db.Uuid
-  pet_id      String   @db.Uuid
-  start_time  DateTime @db.Timestamptz
-  end_time    DateTime @db.Timestamptz
-  // AGD-1 — máquina de estados em src/constants/appointmentStatus.js.
-  // PRESENCIAL: PENDENTE -> CONFIRMADO -> CONCLUIDO
-  // PRE_PAGO:   PENDENTE -> AGUARDANDO_CONFIRMACAO -> CONFIRMADO -> CONCLUIDO
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  provider_id    String        @db.Uuid
+  service_id     String        @db.Uuid
+  pet_id         String        @db.Uuid
+  start_time     DateTime      @db.Timestamptz
+  end_time       DateTime      @db.Timestamptz
+  // Máquina de estados em src/constants/appointmentStatus.js (DEC-A, 23/10/2026).
+  // PRESENCIAL: PENDENTE -> CONFIRMADO (parceiro) -> CONCLUIDO
+  // PRE_PAGO:   PENDENTE -> AGUARDANDO_CONFIRMACAO (só pelo pagamento) -> CONFIRMADO -> CONCLUIDO
   // Terminais de saída: RECUSADO (parceiro nega) e CANCELADO.
   // Independente da máquina de Order/pagamento.
-  status      String   @default("PENDENTE") @db.VarChar(30)
-  total_price Decimal  @db.Decimal(10, 2)
-  notes       String?  @db.Text
-  created_at  DateTime @default(now()) @db.Timestamptz
-  updated_at  DateTime @default(now()) @db.Timestamptz
+  status         String        @default("PENDENTE") @db.VarChar(30)
+  // Política vigente na reserva (DEC-A): mudanças posteriores do parceiro não
+  // alteram transições nem estorno de agendamentos já criados.
+  payment_policy PaymentPolicy @default(PRESENCIAL)
+  total_price    Decimal       @db.Decimal(10, 2)
+  notes          String?       @db.Text
+  created_at     DateTime      @default(now()) @db.Timestamptz
+  updated_at     DateTime      @default(now()) @db.Timestamptz
 
   provider Provider @relation(fields: [provider_id], references: [id])
   service  Service  @relation(fields: [service_id], references: [id])
   pet      Pet      @relation(fields: [pet_id], references: [id])
 
+  // Consultas de conflito de horário por parceiro e por pet (E-04).
+  @@index([provider_id, start_time])
+  @@index([pet_id, start_time])
   @@map("appointments")
 }
