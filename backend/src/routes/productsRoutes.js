@@ -3,7 +3,11 @@ const router = express.Router();
 const ProductController = require('../controllers/ProductController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
-const { productIdParamsSchema } = require('../schemas/productSchemas');
+const {
+  productIdParamsSchema,
+  createProductSchema,
+  updateProductSchema,
+} = require('../schemas/productSchemas');
 
 /**
  * @swagger
@@ -58,8 +62,12 @@ router.get('/provider', authMiddleware, ProductController.listByProvider);
  *     responses:
  *       200:
  *         description: Detalhes do produto
+ *       404:
+ *         description: Produto inexistente, inativo ou de lojista não aprovado/desativado
+ *       422:
+ *         description: id inválido
  */
-router.get('/:id', ProductController.getDetails);
+router.get('/:id', validate({ params: productIdParamsSchema }), ProductController.getDetails);
 
 router.use(authMiddleware);
 
@@ -80,8 +88,12 @@ router.use(authMiddleware);
  *     responses:
  *       201:
  *         description: Produto criado
+ *       403:
+ *         description: Usuário não é lojista aprovado com conta ativa
+ *       422:
+ *         description: Dados inválidos
  */
-router.post('/', ProductController.create);
+router.post('/', validate({ body: createProductSchema }), ProductController.create);
 
 /**
  * @swagger
@@ -106,8 +118,18 @@ router.post('/', ProductController.create);
  *     responses:
  *       200:
  *         description: Produto atualizado
+ *       403:
+ *         description: Produto de outro lojista ou usuário não é lojista aprovado com conta ativa
+ *       404:
+ *         description: Produto não encontrado
+ *       422:
+ *         description: Dados inválidos
  */
-router.put('/:id', ProductController.update);
+router.put(
+  '/:id',
+  validate({ params: productIdParamsSchema, body: updateProductSchema }),
+  ProductController.update
+);
 
 /**
  * @swagger

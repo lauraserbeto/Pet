@@ -47,85 +47,61 @@ class ProductController {
     }
   }
 
-  async getDetails(req, res) {
+  async getDetails(req, res, next) {
     try {
       const { id } = req.params;
       const product = await getProductDetailsUseCase.execute(id);
       return res.status(200).json(product);
     } catch (error) {
-      console.error("[ProductController] Erro em getDetails:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
-  async listByProvider(req, res) {
+  async listByProvider(req, res, next) {
     try {
       const provider_id = req.userId;
       const products = await listProviderProductsUseCase.execute(provider_id);
       return res.status(200).json(products);
     } catch (error) {
-      console.error("[ProductController] Erro em listByProvider:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
-  async create(req, res) {
+  // Body já validado e convertido por `createProductSchema` (preço e estoque numéricos).
+  async create(req, res, next) {
     try {
       const { name, category, pet_type, description, sku, stock_quantity, price, image_url } = req.body;
-      
-      const provider_id = req.userId; 
-
-      // Sanitização do Preço
-      let sanitizedPrice = 0;
-      if (price) {
-        const priceStr = price.toString().replace(/[R$\s]/g, '').replace(',', '.');
-        sanitizedPrice = parseFloat(priceStr);
-      }
 
       const product = await CreateProductUseCase.execute({
-        provider_id,
+        userId: req.userId,
+        userRole: req.userRole,
         name,
         category,
         pet_type,
         description,
         sku,
-        stock_quantity: Number(stock_quantity),
-        price: sanitizedPrice,
-        image_url
+        stock_quantity,
+        price,
+        image_url,
       });
 
       return res.status(201).json({
         message: "Produto cadastrado com sucesso!",
         product
       });
-
     } catch (error) {
-      console.error("[ProductController] Erro em create:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
-  async update(req, res) {
+  // Body já validado e convertido por `updateProductSchema`.
+  async update(req, res, next) {
     try {
-      const { id } = req.params;
-      const { name, category, pet_type, description, sku, stock_quantity, price, image_url } = req.body;
-      const provider_id = req.userId;
-
-      let sanitizedPrice = undefined;
-      if (price !== undefined) {
-        const priceStr = price.toString().replace(/[R$\s]/g, '').replace(',', '.');
-        sanitizedPrice = parseFloat(priceStr);
-      }
-
-      const product = await updateProductUseCase.execute(id, provider_id, {
-        name,
-        category,
-        pet_type,
-        description,
-        sku,
-        stock_quantity: stock_quantity !== undefined ? Number(stock_quantity) : undefined,
-        price: sanitizedPrice,
-        image_url
+      const product = await updateProductUseCase.execute({
+        productId: req.params.id,
+        userId: req.userId,
+        userRole: req.userRole,
+        data: req.body,
       });
 
       return res.status(200).json({
@@ -133,8 +109,7 @@ class ProductController {
         product
       });
     } catch (error) {
-      console.error("[ProductController] Erro em update:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 

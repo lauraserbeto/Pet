@@ -5,8 +5,8 @@ process.env.FRONTEND_URL ||= 'http://localhost:5173';
 
 const { after, beforeEach, test } = require('node:test');
 const assert = require('node:assert/strict');
-const jwt = require('jsonwebtoken');
 const request = require('supertest');
+const { signTestToken } = require('../helpers/authState');
 
 const prisma = require('../../src/config/database');
 const serviceRepository = require('../../src/repositories/ServiceRepository');
@@ -18,6 +18,7 @@ const otherProviderId = '33333333-3333-4333-8333-333333333333';
 const userId = '44444444-4444-4444-8444-444444444444';
 
 const originalProviderFindUnique = prisma.provider.findUnique;
+const originalProviderFindFirst = prisma.provider.findFirst;
 const originalCreate = serviceRepository.create;
 const originalFindByProviderId = serviceRepository.findByProviderId;
 const originalFindById = serviceRepository.findById;
@@ -25,7 +26,7 @@ const originalUpdate = serviceRepository.update;
 const originalDeactivate = serviceRepository.deactivate;
 
 function token(roleId, id = userId) {
-  return jwt.sign({ id, role_id: roleId }, process.env.JWT_SECRET);
+  return signTestToken({ id, role_id: roleId });
 }
 
 function approvedProvider(roleId = 3, status = 'APROVADO') {
@@ -51,18 +52,20 @@ function service(overrides = {}) {
   };
 }
 
+let lastDetailQuery;
+
 beforeEach(() => {
-  prisma.provider.findUnique = async ({ where }) => {
-    if (where.id) {
-      return {
-        ...approvedProvider(),
-        document: '12.345.678/0001-90',
-        user: { full_name: 'Hotel Pet+', avatar_url: null, role_id: 3 },
-        products: [],
-        services: [service()],
-      };
-    }
-    return approvedProvider();
+  prisma.provider.findUnique = async () => approvedProvider();
+  // Detalhe público (GET /providers/:id) consulta com o filtro de parceiro operacional (E-01).
+  prisma.provider.findFirst = async (args) => {
+    lastDetailQuery = args;
+    return {
+      ...approvedProvider(),
+      document: '12.345.678/0001-90',
+      user: { full_name: 'Hotel Pet+', avatar_url: null, role_id: 3 },
+      products: [],
+      services: [service()],
+    };
   };
   serviceRepository.create = async (data) => service(data);
   serviceRepository.findByProviderId = async () => [service()];
@@ -73,6 +76,7 @@ beforeEach(() => {
 
 after(() => {
   prisma.provider.findUnique = originalProviderFindUnique;
+  prisma.provider.findFirst = originalProviderFindFirst;
   serviceRepository.create = originalCreate;
   serviceRepository.findByProviderId = originalFindByProviderId;
   serviceRepository.findById = originalFindById;
@@ -187,4 +191,7 @@ test('GET /providers/:id: detalhe público expõe serviço ativo com preço num�
   assert.equal(response.body.services[0].billing_unit, 'DIARIA');
   assert.equal(response.body.document, undefined);
   assert.equal(response.body.user.email, undefined);
+  // Só parceiro operacional aparece no detalhe público.
+  assert.equal(lastDetailQuery.where.id, providerId);
+  assert.equal(lastDetailQuery.where.status, 'APROVADO');
 });

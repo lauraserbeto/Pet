@@ -76,6 +76,52 @@ it("busca parceiros pelo documento", async () => {
   expect(screen.queryByText("Sitter da Ana")).toBeNull();
 });
 
+const lojaAprovada = {
+  ...parceiros[0],
+  id: "p-3",
+  user_id: "u-3",
+  business_name: "Pet Shop Ativo",
+  status: "APROVADO",
+};
+
+it("desativar pede confirmação e chama a rota de conta, não a de recusa (DEC-G)", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => [lojaAprovada] })
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ id: "u-3", is_active: false }) });
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<Approvals />);
+  fireEvent.click(await screen.findByRole("button", { name: "Aprovados" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Desativar/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Desativar conta" }));
+
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  const [url, options] = fetchMock.mock.calls[1];
+  expect(url).toMatch(/\/users\/admin\/users\/u-3\/active$/);
+  expect(JSON.parse(options.body)).toEqual({ is_active: false });
+
+  expect(await screen.findByText("Inativo")).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Reativar/ })).toBeTruthy();
+});
+
+it("reativar devolve o acesso sem passar pela confirmação", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => [{ ...lojaAprovada, is_active: false }] })
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ id: "u-3", is_active: true }) });
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<Approvals />);
+  fireEvent.click(await screen.findByRole("button", { name: "Aprovados" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Reativar/ }));
+
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ is_active: true });
+  await waitFor(() => expect(screen.queryByText("Inativo")).toBeNull());
+  expect(screen.getByRole("button", { name: /Desativar/ })).toBeTruthy();
+});
+
 it("exibe a mensagem da API quando a listagem é negada", async () => {
   respondeCom(403, { error: "Acesso negado. Apenas administradores podem realizar esta ação." });
 

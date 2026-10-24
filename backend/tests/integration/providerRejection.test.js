@@ -15,7 +15,7 @@ process.env.EMAIL_FROM ||= "no-reply@petplus.test";
 const { test, mock, afterEach } = require("node:test");
 const assert = require("node:assert/strict");
 const request = require("supertest");
-const jwt = require("jsonwebtoken");
+const { signTestToken } = require("../helpers/authState");
 
 const prisma = require("../../src/config/database");
 const app = require("../../src/app");
@@ -24,17 +24,11 @@ const { PROVIDER_STATUS } = require("../../src/constants/providerStatus");
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function generateToken({ userId = "user-partner-1", roleId = 2 } = {}) {
-  return jwt.sign(
-    { id: userId, role_id: roleId },
-    process.env.JWT_SECRET,
-  );
+  return signTestToken({ id: userId, role_id: roleId });
 }
 
 function generateAdminToken(userId = "user-admin-1") {
-  return jwt.sign(
-    { id: userId, role_id: 1 },
-    process.env.JWT_SECRET,
-  );
+  return signTestToken({ id: userId, role_id: 1 });
 }
 
 // Stub genérico de método Prisma com restauração automática via afterEach

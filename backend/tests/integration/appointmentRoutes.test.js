@@ -6,7 +6,7 @@ process.env.FRONTEND_URL ||= 'http://localhost:5173';
 const { test, describe, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
+const { signTestToken } = require('../helpers/authState');
 
 // --- Mock dos repositórios/use cases ANTES de importar o app ---
 // O Prisma Client usa lazy proxies, então mock.method falha.
@@ -23,7 +23,7 @@ const { PAYMENT_POLICY } = require('../../src/constants/paymentPolicy');
 // --- Helpers ---
 
 function generateToken(roleId, userId) {
-  return jwt.sign({ id: userId, role_id: roleId }, process.env.JWT_SECRET);
+  return signTestToken({ id: userId, role_id: roleId });
 }
 
 const TUTOR_A_ID = '00000000-0000-4000-a000-000000000001';

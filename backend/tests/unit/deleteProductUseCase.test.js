@@ -18,13 +18,18 @@ function makeProduct(providerId = 'provider-1') {
   };
 }
 
+function makeProvider({ id = 'provider-1', status = 'APROVADO', isActive = true } = {}) {
+  return { id, status, user: { role_id: 2, is_active: isActive, sitter_evaluations: [] } };
+}
+
 function makeUseCase({
   providerId = 'provider-1',
+  provider = providerId ? makeProvider({ id: providerId }) : null,
   product = makeProduct(),
   deleteImpl = async () => ({ id: PRODUCT_ID }),
 } = {}) {
   const providerRepository = {
-    findUnique: mock.fn(async () => (providerId ? { id: providerId } : null)),
+    findUnique: mock.fn(async () => provider),
   };
   const productRepository = {
     findById: mock.fn(async () => product),
@@ -54,6 +59,34 @@ test('deleteProduct bloqueia usuário que não é lojista', async () => {
 
   await assert.rejects(
     useCase.execute(PRODUCT_ID, USER_ID, 5),
+    (error) => {
+      assert.equal(error.statusCode, 403);
+      return true;
+    }
+  );
+});
+
+test('deleteProduct bloqueia lojista com cadastro pendente (E-01)', async () => {
+  const { useCase, productRepository } = makeUseCase({
+    provider: makeProvider({ status: 'PENDENTE' }),
+  });
+
+  await assert.rejects(
+    useCase.execute(PRODUCT_ID, USER_ID, 2),
+    (error) => {
+      assert.equal(error.statusCode, 403);
+      assert.equal(error.code, 'PROVIDER_NOT_OPERATIONAL');
+      return true;
+    }
+  );
+  assert.equal(productRepository.delete.mock.callCount(), 0);
+});
+
+test('deleteProduct bloqueia lojista com conta desativada (E-01)', async () => {
+  const { useCase } = makeUseCase({ provider: makeProvider({ isActive: false }) });
+
+  await assert.rejects(
+    useCase.execute(PRODUCT_ID, USER_ID, 2),
     (error) => {
       assert.equal(error.statusCode, 403);
       return true;

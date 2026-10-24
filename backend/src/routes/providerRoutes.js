@@ -216,9 +216,11 @@ router.put('/profile', authMiddleware, ProviderController.updateProfile);
  *       200:
  *         description: Detalhes do parceiro
  *       404:
- *         description: Parceiro não encontrado
+ *         description: Parceiro inexistente, não aprovado ou com conta desativada
+ *       422:
+ *         description: id inválido
  */
-router.get('/:id', ProviderController.getDetails);
+router.get('/:id', validate({ params: providerIdParamsSchema }), ProviderController.getDetails);
 
 /**
  * @swagger

@@ -61,6 +61,22 @@ export function isProductGoneError(error: unknown): boolean {
   return error instanceof ApiError && error.status === 404;
 }
 
+type ErrorPayload = {
+  error?: string | { message?: string; details?: Array<{ message?: string }> };
+};
+
+/**
+ * Mensagem de erro ao salvar produto. O backend responde
+ * `{ error: { code, message, details } }` e, em validação, a causa vem em
+ * `details` (ex.: "O preço deve ser maior que zero."). Aceita também o formato
+ * antigo `{ error: "texto" }`.
+ */
+export function describeSaveProductError(payload: ErrorPayload | null, fallback: string): string {
+  const error = payload?.error;
+  if (typeof error === 'string') return error;
+  return error?.details?.[0]?.message ?? error?.message ?? fallback;
+}
+
 export const productService = {
   async fetchOptions(): Promise<{ categories: string[], petTypes: string[] }> {
     const response = await fetch(`${API_URL}/products/options`, {
@@ -124,8 +140,8 @@ export const productService = {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao criar produto');
+      const errorData = await response.json().catch(() => null);
+      throw new Error(describeSaveProductError(errorData, 'Erro ao criar produto'));
     }
 
     const data = await response.json();
@@ -140,8 +156,8 @@ export const productService = {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao atualizar produto');
+      const errorData = await response.json().catch(() => null);
+      throw new Error(describeSaveProductError(errorData, 'Erro ao atualizar produto'));
     }
 
     const data = await response.json();

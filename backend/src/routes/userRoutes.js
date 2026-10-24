@@ -8,6 +8,8 @@ const {
   updateProfileSchema,
   changePasswordSchema,
   uploadAvatarSchema,
+  userIdParamsSchema,
+  updateUserActiveSchema,
 } = require('../schemas/userSchemas');
 
 router.use(authMiddleware);
@@ -165,6 +167,52 @@ router.get('/admin/evaluations', adminMiddleware, UserController.getEvaluations)
  *         description: Lista de usuários (metadados de paginação nos headers X-Total-*)
  */
 router.get('/admin/users', adminMiddleware, UserController.listUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/admin/users/{id}/active:
+ *   patch:
+ *     summary: Ativa ou desativa uma conta (Admin)
+ *     description: >
+ *       Desativar suspende a conta: o login e os tokens já emitidos param de valer
+ *       e os produtos e serviços do parceiro saem da vitrine. Não envia e-mail e não
+ *       altera o status do cadastro de parceiro (recusa é feita em PATCH /providers/{id}/status).
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [is_active]
+ *             properties:
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Conta atualizada (id, nome, e-mail, papel e is_active)
+ *       403:
+ *         description: Não é admin, ou a conta alvo é de administrador
+ *       404:
+ *         description: Usuário não encontrado
+ *       422:
+ *         description: Dados inválidos ou tentativa de alterar a própria conta
+ */
+router.patch(
+  '/admin/users/:id/active',
+  adminMiddleware,
+  validate({ params: userIdParamsSchema, body: updateUserActiveSchema }),
+  UserController.setActive
+);
 
 /**
  * @swagger

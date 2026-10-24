@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const { OPERATIONAL_PROVIDER_SELECT } = require('../useCases/providers/providerAccess');
 
 const ITEM_INCLUDE = {
   product: {
@@ -9,7 +10,9 @@ const ITEM_INCLUDE = {
       stock_quantity: true,
       status: true,
       price: true,
-      provider: { select: { id: true, business_name: true } },
+      // Status e conta do lojista: o carrinho e o pedido recusam produto de
+      // lojista que deixou de estar apto a vender (E-01).
+      provider: { select: { id: true, business_name: true, ...OPERATIONAL_PROVIDER_SELECT } },
     },
   },
 };
