@@ -4,6 +4,8 @@
  * - Calcula line_total por item
  * - Sanitiza o cliente: expõe apenas id, full_name, email, phone (nunca password_hash)
  * - Inclui dados essenciais do produto: id, name, image_url, sku, price
+ * - Expõe a cópia do endereço de entrega (`shipping_address`, E-05); null em
+ *   pedidos anteriores
  */
 
 function asNumber(value) {
@@ -66,6 +68,7 @@ function formatOrder(order) {
     customer_id: order.customer_id,
     total_price: asNumber(order.total_price),
     status: order.status,
+    shipping_address: order.shipping_address ?? null,
     created_at: order.created_at,
     updated_at: order.updated_at,
     provider: order.provider ?? null,

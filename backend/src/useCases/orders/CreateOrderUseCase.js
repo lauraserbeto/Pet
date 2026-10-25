@@ -22,6 +22,17 @@ function assertStoreAvailable(product, productName) {
   }
 }
 
+// Campos do endereço copiados para o pedido (E-05, P4).
+const SHIPPING_ADDRESS_SELECT = {
+  cep: true,
+  rua: true,
+  numero: true,
+  complemento: true,
+  bairro: true,
+  cidade: true,
+  estado: true,
+};
+
 function asNumber(value) {
   if (value === null || value === undefined) return 0;
   if (typeof value === 'object' && typeof value.toNumber === 'function') {
@@ -37,6 +48,7 @@ function formatOrder(order) {
     customer_id: order.customer_id,
     total_price: asNumber(order.total_price),
     status: order.status,
+    shipping_address: order.shipping_address ?? null,
     created_at: order.created_at,
     updated_at: order.updated_at,
     provider: order.provider,
@@ -56,9 +68,19 @@ function formatOrder(order) {
 }
 
 class CreateOrderUseCase {
-  async execute({ userId, userRole }) {
+  async execute({ userId, userRole, addressId }) {
     if (userRole && userRole !== 5) {
       throw AppError.forbidden('Apenas clientes podem realizar pedidos');
+    }
+
+    // Endereço de entrega do próprio tutor. De outro usuário ou inexistente dá
+    // o mesmo 404, sem revelar se o id existe (E-05).
+    const shippingAddress = await prisma.address.findFirst({
+      where: { id: addressId, user_id: userId },
+      select: SHIPPING_ADDRESS_SELECT,
+    });
+    if (!shippingAddress) {
+      throw AppError.notFound('Endereço de entrega não encontrado.');
     }
 
     const cart = await CartRepository.findByUser(userId);
@@ -159,6 +181,8 @@ class CreateOrderUseCase {
             provider_id: providerId,
             total_price: totalPrice,
             status: ORDER_STATUS.AWAITING_PAYMENT,
+            // A mesma cópia em cada pedido do checkout (um por lojista).
+            shipping_address: shippingAddress,
             items: {
               create: orderItemsData,
             },

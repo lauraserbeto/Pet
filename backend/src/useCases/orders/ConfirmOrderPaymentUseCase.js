@@ -44,6 +44,7 @@ function formatOrder(order) {
     customer_id: order.customer_id,
     total_price: asNumber(order.total_price),
     status: order.status,
+    shipping_address: order.shipping_address ?? null,
     created_at: order.created_at,
     updated_at: order.updated_at,
     provider: order.provider,

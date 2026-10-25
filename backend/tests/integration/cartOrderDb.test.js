@@ -18,6 +18,7 @@ const {
 const {
   seedRoles,
   createAuthenticatedTutor,
+  createAddress,
   createStoreWithProduct,
 } = require('../helpers/testSeed');
 
@@ -140,6 +141,7 @@ test(
   { skip: skipDbIntegration },
   async () => {
     const { authorization, tutor } = await createAuthenticatedTutor();
+    const address = await createAddress(tutor.id);
     const { provider, product } = await createStoreWithProduct({
       price: '80.00',
       stock_quantity: 8,
@@ -159,7 +161,8 @@ test(
 
     const orderRes = await request(app)
       .post('/api/v1/orders')
-      .set('Authorization', authorization);
+      .set('Authorization', authorization)
+      .send({ address_id: address.id });
 
     assert.equal(orderRes.status, 201, JSON.stringify(orderRes.body));
     assert.equal(orderRes.body.orders.length, 1);
@@ -196,6 +199,50 @@ test(
     });
     assert.ok(cart);
     assert.equal(cart.items.length, 0);
+
+    // E-05: o pedido guarda uma cópia do endereço; apagá-lo depois não altera o pedido.
+    const expectedAddress = {
+      cep: address.cep,
+      rua: address.rua,
+      numero: address.numero,
+      complemento: address.complemento,
+      bairro: address.bairro,
+      cidade: address.cidade,
+      estado: address.estado,
+    };
+    assert.deepEqual(orderRes.body.order.shipping_address, expectedAddress);
+    assert.deepEqual(order.shipping_address, expectedAddress);
+
+    await prisma.address.delete({ where: { id: address.id } });
+    const afterDelete = await prisma.order.findUnique({ where: { id: order.id } });
+    assert.deepEqual(afterDelete.shipping_address, expectedAddress);
+  }
+);
+
+test(
+  'E-05: endereço de outro tutor responde 404 e não cria pedido',
+  { skip: skipDbIntegration },
+  async () => {
+    const { authorization, tutor } = await createAuthenticatedTutor();
+    const { tutor: otherTutor } = await createAuthenticatedTutor();
+    const otherAddress = await createAddress(otherTutor.id);
+    const { product } = await createStoreWithProduct({ price: '10.00', stock_quantity: 3 });
+
+    const addItemRes = await request(app)
+      .post('/api/v1/cart/items')
+      .set('Authorization', authorization)
+      .send({ product_id: product.id, quantity: 1 });
+    assert.equal(addItemRes.status, 201, JSON.stringify(addItemRes.body));
+
+    const orderRes = await request(app)
+      .post('/api/v1/orders')
+      .set('Authorization', authorization)
+      .send({ address_id: otherAddress.id });
+
+    assert.equal(orderRes.status, 404, JSON.stringify(orderRes.body));
+    assert.equal(await prisma.order.count({ where: { customer_id: tutor.id } }), 0);
+    const unchanged = await prisma.product.findUnique({ where: { id: product.id } });
+    assert.equal(unchanged.stock_quantity, 3);
   }
 );
 
@@ -204,6 +251,7 @@ test(
   { skip: skipDbIntegration },
   async () => {
     const { authorization, tutor } = await createAuthenticatedTutor();
+    const address = await createAddress(tutor.id);
     const { product } = await createStoreWithProduct({
       price: '30.00',
       stock_quantity: 4,
@@ -221,7 +269,8 @@ test(
     try {
       const orderRes = await request(app)
         .post('/api/v1/orders')
-        .set('Authorization', authorization);
+        .set('Authorization', authorization)
+        .send({ address_id: address.id });
 
       assert.equal(orderRes.status, 500, JSON.stringify(orderRes.body));
     } finally {
@@ -255,6 +304,7 @@ test(
   { skip: skipDbIntegration },
   async () => {
     const { authorization, tutor } = await createAuthenticatedTutor();
+    const address = await createAddress(tutor.id);
     const { storeUser, product } = await createStoreWithProduct({
       price: '25.00',
       stock_quantity: 5,
@@ -275,7 +325,8 @@ test(
 
     const orderRes = await request(app)
       .post('/api/v1/orders')
-      .set('Authorization', authorization);
+      .set('Authorization', authorization)
+      .send({ address_id: address.id });
     assert.equal(orderRes.status, 409, JSON.stringify(orderRes.body));
     assert.equal(orderRes.body.error.code, 'PROVIDER_UNAVAILABLE');
 

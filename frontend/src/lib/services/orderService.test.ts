@@ -3,6 +3,7 @@ import {
   formatBRL,
   formatOrderDate,
   formatOrderDateTime,
+  formatShippingAddress,
   getOrderStatusLabel,
   getOrderStatusBadge,
   orderService,
@@ -17,6 +18,26 @@ vi.mock("../httpClient", () => ({
 }));
 
 describe("orderService helpers", () => {
+  it("formata o endereço de entrega gravado no pedido (E-05)", () => {
+    const address = {
+      cep: "01001-000",
+      rua: "Praça da Sé",
+      numero: "100",
+      complemento: "Apto 12",
+      bairro: "Sé",
+      cidade: "São Paulo",
+      estado: "SP",
+    };
+    expect(formatShippingAddress(address)).toEqual([
+      "Praça da Sé, 100 — Apto 12",
+      "Sé, São Paulo/SP",
+      "CEP 01001-000",
+    ]);
+    expect(formatShippingAddress({ ...address, complemento: null })?.[0]).toBe("Praça da Sé, 100");
+    expect(formatShippingAddress(null)).toBeNull();
+    expect(formatShippingAddress(undefined)).toBeNull();
+  });
+
   it("formata valores monetários em BRL corretamente", () => {
     expect(formatBRL(100)).toMatch(/R\$\s?100,00/);
     expect(formatBRL("380.50")).toMatch(/R\$\s?380,50/);

@@ -17,6 +17,25 @@ function generateToken(roleId = 5, userId = 'user-tutor-123') {
   return signTestToken({ id: userId, role_id: roleId });
 }
 
+// Endereço de entrega do tutor (E-05). A busca só acha o endereço quando o id
+// e o dono batem — como o `findFirst({ where: { id, user_id } })` do use case.
+const ADDRESS_ID = '22222222-2222-4222-8222-222222222222';
+const tutorAddress = {
+  cep: '01001-000',
+  rua: 'Praça da Sé',
+  numero: '100',
+  complemento: 'Apto 12',
+  bairro: 'Sé',
+  cidade: 'São Paulo',
+  estado: 'SP',
+};
+const addressQueries = [];
+prisma.address.findFirst = async (args) => {
+  addressQueries.push(args);
+  const { id, user_id } = args.where;
+  return id === ADDRESS_ID && user_id === 'user-tutor-123' ? { ...tutorAddress } : null;
+};
+
 // Lojistas aptos a vender (aprovados e ativos): o pedido recusa loja inativa (E-01).
 const operationalStoreUser = { role_id: 2, is_active: true, sitter_evaluations: [] };
 
@@ -107,7 +126,8 @@ test('POST /api/v1/orders: 403 para usuários que não são clientes (role_id 1 
   const token = generateToken(1);
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
   assert.equal(res.status, 403);
 });
 
@@ -115,7 +135,8 @@ test('POST /api/v1/orders: 403 para Lojistas tentando comprar (role_id 2 - LOJIS
   const token = generateToken(2);
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
   assert.equal(res.status, 403);
 });
 
@@ -130,7 +151,8 @@ test('POST /api/v1/orders: 400 quando o carrinho está vazio', async () => {
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 400);
   assert.match(res.body.error.message, /vazio/i);
@@ -161,7 +183,8 @@ test('POST /api/v1/orders: 409 e rollback se estoque for insuficiente na valida�
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 409);
   assert.equal(transactionCalled, false, 'Transação não deve ter sido iniciada com estoque prévio insuficiente');
@@ -186,7 +209,8 @@ test('POST /api/v1/orders: 409 se produto estiver com status INACTIVE', async ()
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 409);
   assert.match(res.body.error.message, /indisponível/i);
@@ -221,7 +245,8 @@ test('POST /api/v1/orders: 409 PROVIDER_UNAVAILABLE se a loja foi desativada com
   try {
     const res = await request(app)
       .post('/api/v1/orders')
-      .set('Authorization', `Bearer ${token}`);
+      .set('Authorization', `Bearer ${token}`)
+      .send({ address_id: ADDRESS_ID });
 
     assert.equal(res.status, 409);
     assert.equal(res.body.error.code, 'PROVIDER_UNAVAILABLE');
@@ -281,6 +306,7 @@ test('POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + Ord
           provider_id: data.provider_id,
           total_price: data.total_price,
           status: data.status,
+          shipping_address: data.shipping_address,
           created_at: new Date('2026-09-08T12:00:00Z'),
           updated_at: new Date('2026-09-08T12:00:00Z'),
           provider: {
@@ -322,7 +348,8 @@ test('POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + Ord
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 201);
   assert.ok(res.body.order, 'Deve retornar o pedido criado');
@@ -354,6 +381,9 @@ test('POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + Ord
   // Verifica que carrinho foi limpo e atualizado
   assert.equal(cartCleared, true, 'Carrinho deve ser esvaziado');
   assert.equal(cartTouched, true, 'Timestamp do carrinho deve ser atualizado');
+
+  // Cópia do endereço escolhido gravada no pedido (E-05)
+  assert.deepEqual(order.shipping_address, tutorAddress);
 });
 
 test('POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma transação atômica (Opção A)', async () => {
@@ -406,6 +436,7 @@ test('POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma trans
           provider_id: data.provider_id,
           total_price: data.total_price,
           status: data.status,
+          shipping_address: data.shipping_address,
           created_at: new Date('2026-09-08T12:00:00Z'),
           updated_at: new Date('2026-09-08T12:00:00Z'),
           provider: {
@@ -441,7 +472,8 @@ test('POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma trans
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 201);
   assert.equal(res.body.orders.length, 2, 'Deve criar 2 pedidos (1 para cada provider)');
@@ -462,6 +494,10 @@ test('POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma trans
   // Estoques decrementados
   assert.equal(stockDecrements.length, 2);
   assert.equal(cartCleared, true);
+
+  // A mesma cópia do endereço em cada pedido do checkout (E-05)
+  assert.deepEqual(order1.shipping_address, tutorAddress);
+  assert.deepEqual(order2.shipping_address, tutorAddress);
 });
 
 test('POST /api/v1/orders: 409 e rollback se estoque mudar concorrentemente durante a transação', async () => {
@@ -514,12 +550,64 @@ test('POST /api/v1/orders: 409 e rollback se estoque mudar concorrentemente dura
 
   const res = await request(app)
     .post('/api/v1/orders')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({ address_id: ADDRESS_ID });
 
   assert.equal(res.status, 409);
   assert.match(res.body.error.message, /estoque insuficiente/i);
   assert.equal(ordersCreatedCount, 0, 'Nenhum pedido deve ser criado em caso de erro');
   assert.equal(cartCleared, false, 'Carrinho não deve ser limpo');
+});
+
+test('POST /api/v1/orders: 422 sem address_id, antes de tocar no carrinho (E-05)', async () => {
+  const token = generateToken(5);
+  let cartRead = false;
+  CartRepository.findByUser = async () => {
+    cartRead = true;
+    return null;
+  };
+
+  const res = await request(app)
+    .post('/api/v1/orders')
+    .set('Authorization', `Bearer ${token}`)
+    .send({});
+
+  assert.equal(res.status, 422);
+  assert.equal(cartRead, false);
+});
+
+test('POST /api/v1/orders: 422 com address_id que não é UUID (E-05)', async () => {
+  const res = await request(app)
+    .post('/api/v1/orders')
+    .set('Authorization', `Bearer ${generateToken(5)}`)
+    .send({ address_id: 'casa-da-vovo' });
+
+  assert.equal(res.status, 422);
+});
+
+test('POST /api/v1/orders: 404 para endereço de outro usuário, sem criar pedido (E-05)', async () => {
+  const otherTutor = generateToken(5, 'user-tutor-456');
+  let transactionStarted = false;
+  CartRepository.findByUser = async () => ({
+    id: 'cart-456',
+    user_id: 'user-tutor-456',
+    items: [{ id: 'i', product_id: mockProduct1.id, quantity: 1, product: mockProduct1 }],
+  });
+  prisma.$transaction = async () => {
+    transactionStarted = true;
+    throw new Error('a transação não deveria começar');
+  };
+
+  const res = await request(app)
+    .post('/api/v1/orders')
+    .set('Authorization', `Bearer ${otherTutor}`)
+    .send({ address_id: ADDRESS_ID });
+
+  assert.equal(res.status, 404);
+  assert.match(res.body.error.message, /Endereço de entrega não encontrado/);
+  assert.equal(transactionStarted, false);
+  // A busca filtra pelo dono: não revela se o endereço existe para outra pessoa.
+  assert.deepEqual(addressQueries.at(-1).where, { id: ADDRESS_ID, user_id: 'user-tutor-456' });
 });
 
 test('POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO', async () => {

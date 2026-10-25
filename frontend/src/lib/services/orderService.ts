@@ -39,12 +39,25 @@ export interface OrderProvider {
   business_name: string;
 }
 
+/** Cópia do endereço de entrega gravada no pedido (E-05). */
+export interface OrderShippingAddress {
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento?: string | null;
+  bairro: string;
+  cidade: string;
+  estado: string;
+}
+
 export interface Order {
   id: string;
   provider_id: string;
   customer_id: string;
   total_price: number | string;
   status: BackendOrderStatus;
+  /** null em pedidos anteriores ao E-05. */
+  shipping_address?: OrderShippingAddress | null;
   created_at: string;
   updated_at: string;
   provider?: OrderProvider | null;
@@ -68,6 +81,18 @@ export function formatBRL(value: number | string | undefined | null): string {
 }
 
 /** Formata string ISO de data para DD/MM/AAAA */
+/**
+ * Linhas do endereço de entrega para exibição; null quando o pedido não tem
+ * endereço gravado (pedidos anteriores ao E-05).
+ */
+export function formatShippingAddress(address?: OrderShippingAddress | null): string[] | null {
+  if (!address) return null;
+  const street = [address.rua, address.numero].filter(Boolean).join(', ');
+  const firstLine = address.complemento ? `${street} — ${address.complemento}` : street;
+  const cityLine = [address.bairro, `${address.cidade}/${address.estado}`].filter(Boolean).join(', ');
+  return [firstLine, cityLine, `CEP ${address.cep}`];
+}
+
 export function formatOrderDate(dateString: string): string {
   if (!dateString) return '-';
   const date = new Date(dateString);

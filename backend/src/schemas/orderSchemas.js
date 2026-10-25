@@ -14,6 +14,16 @@ const listOrdersQuerySchema = z.object({
 });
 
 /**
+ * Schema de body para POST /orders (E-05): o endereço de entrega escolhido no
+ * checkout é obrigatório e precisa ser do próprio tutor (checado no use case).
+ */
+const createOrderSchema = z.object({
+  address_id: z
+    .string({ message: 'Selecione um endereço de entrega.' })
+    .uuid('Endereço de entrega inválido.'),
+});
+
+/**
  * Schema de body para PATCH /orders/:id/status.
  */
 const updateOrderStatusSchema = z.object({
@@ -22,6 +32,7 @@ const updateOrderStatusSchema = z.object({
 
 module.exports = {
   orderIdParamsSchema,
+  createOrderSchema,
   listOrdersQuerySchema,
   updateOrderStatusSchema,
 };

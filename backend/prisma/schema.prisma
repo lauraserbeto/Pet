@@ -247,6 +247,10 @@ model Order {
   customer_id String   @db.Uuid // O Tutor/Cliente
   total_price Decimal  @db.Decimal(10, 2)
   status      String   @default("AGUARDANDO_PAGAMENTO") // AGUARDANDO_PAGAMENTO, PAGO, PREPARING, SHIPPED, DELIVERED, CANCELLED
+  // Cópia do endereço escolhido no checkout (E-05, P4): cep, rua, numero,
+  // complemento, bairro, cidade, estado. Editar ou excluir o endereço depois
+  // não altera o pedido. Pedidos anteriores ao E-05 ficam com NULL.
+  shipping_address Json?
   created_at  DateTime @default(now()) @db.Timestamptz
   updated_at  DateTime @default(now()) @db.Timestamptz
 

@@ -4,7 +4,7 @@ const OrderController = require('../controllers/OrderController');
 const PaymentController = require('../controllers/PaymentController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
-const { orderIdParamsSchema } = require('../schemas/orderSchemas');
+const { orderIdParamsSchema, createOrderSchema } = require('../schemas/orderSchemas');
 
 /**
  * @swagger
@@ -33,20 +33,40 @@ router.get('/:orderId/payment-status', validate({ params: orderIdParamsSchema })
  * /api/v1/orders:
  *   post:
  *     summary: Cria pedido(s) atomicamente a partir do carrinho do usuário autenticado
+ *     description: |
+ *       Cada pedido (um por lojista) grava em `shipping_address` uma cópia do
+ *       endereço escolhido; editar ou excluir o endereço depois não altera o pedido.
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - address_id
+ *             properties:
+ *               address_id:
+ *                 type: string
+ *                 format: uuid
+ *                 description: Endereço de entrega do próprio tutor
  *     responses:
  *       201:
- *         description: Pedido(s) criado(s) com sucesso
+ *         description: Pedido(s) criado(s) com sucesso, com shipping_address
  *       400:
  *         description: Carrinho vazio ou inválido
  *       403:
  *         description: Acesso restrito a clientes
+ *       404:
+ *         description: Endereço não encontrado (inexistente ou de outro usuário)
  *       409:
  *         description: Estoque insuficiente ou produto indisponível
+ *       422:
+ *         description: address_id ausente ou inválido
  */
-router.post('/', OrderController.create);
+router.post('/', validate({ body: createOrderSchema }), OrderController.create);
 
 /**
  * @swagger

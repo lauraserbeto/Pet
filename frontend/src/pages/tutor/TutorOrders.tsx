@@ -14,6 +14,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { OrderShippingAddress } from "../../components/orders/OrderShippingAddress";
 import { paymentUrl } from '../../lib/services/paymentService';
 import {
   orderService,
@@ -267,6 +268,9 @@ export function TutorOrders() {
                   </div>
                 </div>
               )}
+
+              {/* Endereço de entrega (cópia gravada no pedido) */}
+              <OrderShippingAddress address={selectedOrder.shipping_address} />
 
               {/* Itens do pedido */}
               <div>
