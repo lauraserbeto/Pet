@@ -17,6 +17,7 @@ const logger = require('./config/logger');
 const swaggerDocs = require('./config/swagger.config');
 const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
 const { metricsMiddleware, metricsHandler } = require('./middlewares/metrics');
+const { jsonBodyParser, urlencodedBodyParser } = require('./middlewares/bodyLimits');
 
 const app = express();
 const allowedOrigins = [
@@ -79,8 +80,9 @@ app.use(pinoHttp({
   },
 }));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Corpo JSON: 100 kb por padrão; só as rotas de upload aceitam mais (E-03).
+app.use(jsonBodyParser());
+app.use(urlencodedBodyParser());
 
 // Coleta métricas RED (rate/errors/duration) por rota — alimenta GET /api/metrics.
 app.use(metricsMiddleware);

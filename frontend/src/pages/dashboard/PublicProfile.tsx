@@ -31,6 +31,12 @@ import {
   X,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import {
+  GALLERY_MAX_IMAGES,
+  acceptAttribute,
+  readFileAsDataUrl,
+  validateImageFile,
+} from "../../lib/utils/imageUpload";
 
 interface OperatingHour {
   open: boolean;
@@ -240,24 +246,44 @@ export function PublicProfile() {
     }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Tipo e tamanho conferidos antes de converter (E-03): a API recusa acima de 2 MB.
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setFormData((prev) => ({ ...prev, avatar_url: reader.result as string }));
-    reader.readAsDataURL(file);
+
+    const error = validateImageFile(file);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    const dataUrl = await readFileAsDataUrl(file);
+    setFormData((prev) => ({ ...prev, avatar_url: dataUrl }));
   };
 
-  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    Array.from(e.target.files || []).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () =>
-        setFormData((prev) => ({
-          ...prev,
-          gallery_images: [...prev.gallery_images, reader.result as string],
-        }));
-      reader.readAsDataURL(file);
-    });
+  const handleGalleryChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length) return;
+
+    const freeSlots = GALLERY_MAX_IMAGES - formData.gallery_images.length;
+    if (files.length > freeSlots) {
+      toast.error(`A galeria aceita no máximo ${GALLERY_MAX_IMAGES} fotos.`);
+    }
+
+    const accepted: File[] = [];
+    for (const file of files.slice(0, Math.max(freeSlots, 0))) {
+      const error = validateImageFile(file);
+      if (error) toast.error(error);
+      else accepted.push(file);
+    }
+    if (!accepted.length) return;
+
+    const dataUrls = await Promise.all(accepted.map(readFileAsDataUrl));
+    setFormData((prev) => ({
+      ...prev,
+      gallery_images: [...prev.gallery_images, ...dataUrls].slice(0, GALLERY_MAX_IMAGES),
+    }));
   };
 
   const removeGalleryImage = (index: number, ev: React.MouseEvent) => {
@@ -345,21 +371,29 @@ export function PublicProfile() {
 
     setIsSaving(true);
     try {
-      const { role_id, daily_rate, hourly_rate, operating_hours, rules_policies, ...rest } = formData;
+      const { role_id, daily_rate, hourly_rate, operating_hours, rules_policies, avatar_url, gallery_images, ...rest } = formData;
+      // Imagens só vão quando mudaram (E-03): reenviar avatar e galeria a cada
+      // salvamento mandava megabytes de base64 sem necessidade.
+      const avatarChanged = avatar_url !== initialData?.avatar_url;
+      const galleryChanged =
+        JSON.stringify(gallery_images) !== JSON.stringify(initialData?.gallery_images ?? []);
       const payload = {
         ...rest,
+        ...(avatarChanged ? { avatar_url } : {}),
+        ...(galleryChanged ? { gallery_images } : {}),
         daily_rate: parseCurrency(daily_rate as string),
         hourly_rate: parseCurrency(hourly_rate as string),
         operating_hours: operating_hours,  
         rules_policies: rules_policies,
       };
       await providerService.updatePublicProfile(payload);
+      setInitialData(formData);
       // Revalida a completude para o banner do dashboard refletir o salvamento
       // na hora (antes ficava congelado no estado capturado no login).
       await queryClient.invalidateQueries({ queryKey: completenessQueryKey });
       toast.success("Perfil público atualizado com sucesso!");
-    } catch {
-      toast.error("Erro ao salvar perfil.");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Erro ao salvar perfil.");
     } finally {
       setIsSaving(false);
     }
@@ -465,7 +499,7 @@ export function PublicProfile() {
                     >
                       Escolher Imagem
                     </Button>
-                    <input type="file" ref={avatarInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
+                    <input type="file" ref={avatarInputRef} className="hidden" accept={acceptAttribute()} onChange={handleAvatarChange} aria-label="Escolher foto de perfil" />
                   </div>
                 </div>
 
@@ -774,19 +808,23 @@ export function PublicProfile() {
                         </button>
                       </div>
                     ))}
-                    <div
-                      onClick={() => galleryInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-200 hover:border-[var(--color-primary-400)] hover:bg-[var(--color-primary-50)]/30 transition-all aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-[var(--color-primary-600)] group"
-                    >
-                      <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2 group-hover:bg-[var(--color-primary-100)] transition-colors">
-                        <Plus size={22} />
+                    {formData.gallery_images.length < GALLERY_MAX_IMAGES && (
+                      <div
+                        onClick={() => galleryInputRef.current?.click()}
+                        className="border-2 border-dashed border-slate-200 hover:border-[var(--color-primary-400)] hover:bg-[var(--color-primary-50)]/30 transition-all aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-[var(--color-primary-600)] group"
+                      >
+                        <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2 group-hover:bg-[var(--color-primary-100)] transition-colors">
+                          <Plus size={22} />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider">Adicionar</span>
+                        <input type="file" ref={galleryInputRef} className="hidden" accept={acceptAttribute()} multiple onChange={handleGalleryChange} aria-label="Adicionar fotos à galeria" />
                       </div>
-                      <span className="text-xs font-bold uppercase tracking-wider">Adicionar</span>
-                      <input type="file" ref={galleryInputRef} className="hidden" accept="image/*" multiple onChange={handleGalleryChange} />
-                    </div>
+                    )}
                   </div>
                   <div className="mt-6 p-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 text-center">
-                    <p className="text-sm text-slate-500">Adicione até 12 fotos de alta qualidade para impressionar os clientes.</p>
+                    <p className="text-sm text-slate-500">
+                      Adicione até {GALLERY_MAX_IMAGES} fotos (JPEG, PNG ou WebP, até 2 MB cada) para impressionar os clientes.
+                    </p>
                   </div>
                 </CardContent>
               </Card>

@@ -8,6 +8,7 @@ const {
   updateProfileSchema,
   changePasswordSchema,
   uploadAvatarSchema,
+  submitSitterEvaluationSchema,
   userIdParamsSchema,
   updateUserActiveSchema,
 } = require('../schemas/userSchemas');
@@ -94,12 +95,14 @@ router.patch(
  *             properties:
  *               image:
  *                 type: string
- *                 description: data URL no formato `data:image/<jpeg|png|webp>;base64,...`
+ *                 description: data URL no formato `data:image/<jpeg|png|webp>;base64,...`, arquivo de até 2 MB
  *     responses:
  *       200:
  *         description: Avatar atualizado, retorna o usuário
+ *       413:
+ *         description: Corpo acima do limite da rota (PAYLOAD_TOO_LARGE)
  *       422:
- *         description: Formato inválido ou imagem muito grande
+ *         description: Formato inválido ou imagem acima de 2 MB
  */
 router.post(
   '/me/avatar',
@@ -121,11 +124,34 @@ router.post(
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - experience_details
+ *             properties:
+ *               experience_details:
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: object
+ *               environment_photos:
+ *                 type: array
+ *                 maxItems: 6
+ *                 items:
+ *                   type: string
+ *                   description: data URL JPEG/PNG/WebP de até 2 MB, ou URL https
+ *               quiz_answers:
+ *                 type: object
  *     responses:
  *       201:
  *         description: Avaliação enviada e aguardando revisão
+ *       413:
+ *         description: Corpo acima do limite da rota (PAYLOAD_TOO_LARGE)
+ *       422:
+ *         description: Foto de tipo não permitido, acima de 2 MB ou mais de 6 fotos
  */
-router.post('/me/evaluations', UserController.submitSitterEvaluation);
+router.post(
+  '/me/evaluations',
+  validate({ body: submitSitterEvaluationSchema }),
+  UserController.submitSitterEvaluation
+);
 
 /**
  * @swagger

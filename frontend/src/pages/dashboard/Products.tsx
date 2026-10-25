@@ -24,6 +24,7 @@ import { Search, Plus, Filter, Package, AlertCircle, Trash2, Edit2, Loader2, Upl
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { acceptAttribute, readFileAsDataUrl, validateImageFile } from "../../lib/utils/imageUpload";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
 import { describeDeleteProductError, isProductGoneError, productService, Product, CreateProductDTO } from "../../lib/services/productService";
 import {
@@ -118,19 +119,23 @@ export function Products() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Tipo e tamanho conferidos antes de converter (E-03): a API recusa acima de 2 MB.
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setFormData(prev => ({
-        ...prev,
-        image_url: base64String
-      }));
-    };
-    reader.readAsDataURL(file);
+    const error = validateImageFile(file);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
+    const base64String = await readFileAsDataUrl(file);
+    setFormData(prev => ({
+      ...prev,
+      image_url: base64String
+    }));
   };
 
   const openNewProductModal = () => {
@@ -336,8 +341,9 @@ export function Products() {
                       type="file" 
                       ref={fileInputRef} 
                       className="hidden" 
-                      accept="image/*" 
+                      accept={acceptAttribute()} 
                       onChange={handleFileChange} 
+                      aria-label="Imagem do produto"
                     />
                   </div>
                 </div>

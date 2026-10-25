@@ -8,6 +8,7 @@ const validate = require('../middlewares/validate');
 const {
   providerIdParamsSchema,
   updateProviderStatusSchema,
+  updateProviderProfileSchema,
 } = require('../schemas/providerSchemas');
 
 /**
@@ -185,6 +186,9 @@ router.put('/me', authMiddleware, ProviderController.updateMe);
  * /api/v1/providers/profile:
  *   put:
  *     summary: Atualiza dados do perfil público
+ *     description: |
+ *       Envie só os campos alterados. Imagens (avatar_url e gallery_images) são
+ *       data URL JPEG/PNG/WebP de até 2 MB ou URL https; a galeria tem no máximo 8 fotos.
  *     tags: [Providers]
  *     security:
  *       - bearerAuth: []
@@ -194,11 +198,28 @@ router.put('/me', authMiddleware, ProviderController.updateMe);
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               avatar_url:
+ *                 type: string
+ *               gallery_images:
+ *                 type: array
+ *                 maxItems: 8
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Perfil atualizado
+ *       413:
+ *         description: Corpo acima do limite da rota (PAYLOAD_TOO_LARGE)
+ *       422:
+ *         description: Imagem de tipo não permitido, acima de 2 MB, galeria com mais de 8 fotos ou campo inválido
  */
-router.put('/profile', authMiddleware, ProviderController.updateProfile);
+router.put(
+  '/profile',
+  authMiddleware,
+  validate({ body: updateProviderProfileSchema }),
+  ProviderController.updateProfile
+);
 
 /**
  * @swagger
