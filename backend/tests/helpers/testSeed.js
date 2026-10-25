@@ -57,6 +57,23 @@ async function createAuthenticatedTutor(overrides = {}) {
   };
 }
 
+/** Endereço de entrega do usuário (E-05). */
+async function createAddress(userId, overrides = {}) {
+  return prisma.address.create({
+    data: {
+      user_id: userId,
+      cep: overrides.cep ?? '01001-000',
+      rua: overrides.rua ?? 'Praça da Sé',
+      numero: overrides.numero ?? '100',
+      complemento: overrides.complemento ?? 'Apto 12',
+      bairro: overrides.bairro ?? 'Sé',
+      cidade: overrides.cidade ?? 'São Paulo',
+      estado: overrides.estado ?? 'SP',
+      is_default: overrides.is_default ?? true,
+    },
+  });
+}
+
 async function createApprovedStore(overrides = {}) {
   const suffix = uniqueSuffix();
   const storeUser = await createUser({
@@ -172,6 +189,7 @@ async function createPet(tutorId, overrides = {}) {
 module.exports = {
   seedRoles,
   createAuthenticatedTutor,
+  createAddress,
   createStoreWithProduct,
   createProduct,
   createApprovedPartner,

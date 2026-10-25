@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { OrderShippingAddress } from "../../components/orders/OrderShippingAddress";
 import {
   orderService,
   formatBRL,
@@ -411,6 +412,9 @@ export function Orders() {
                   )}
                 </div>
               )}
+
+              {/* Endereço de entrega (cópia gravada no pedido) */}
+              <OrderShippingAddress address={selectedOrder.shipping_address} />
 
               {/* Itens do Pedido */}
               <div>

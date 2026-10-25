@@ -14,6 +14,7 @@ class OrderController {
       const result = await createOrderUseCase.execute({
         userId: req.userId,
         userRole: req.userRole,
+        addressId: req.body.address_id,
       });
 
       return res.status(201).json(result);
