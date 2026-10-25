@@ -1,4 +1,5 @@
 const { z } = require('zod');
+const { IMAGE_TYPES, imageSchema } = require('./imageSchemas');
 
 // Query de paginação para a listagem pública de produtos.
 // page >= 1; limit 1..100 (o cap protege contra queries não-limitadas — B6).
@@ -15,20 +16,12 @@ const productIdParamsSchema = z.object({
 // --- Criação/edição de produto (E-01) ---
 // Antes as rotas não validavam nada: preço "abc" virava NaN e respondia 500.
 
-// Imagem do produto: data URL base64 (JPEG/PNG/WebP/GIF, até ~2 MB — mesmo teto
-// do avatar) ou endereço http(s) já usado por produtos existentes. String vazia
-// mantém o comportamento atual do formulário (produto sem imagem).
-const PRODUCT_IMAGE_MAX_CHARS = 2_700_000;
-const DATA_IMAGE_REGEX = /^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/i;
-const HTTP_URL_REGEX = /^https?:\/\/\S+$/i;
-
-const productImageSchema = z
-  .string()
-  .max(PRODUCT_IMAGE_MAX_CHARS, 'Imagem muito grande (máx. ~2 MB).')
-  .refine(
-    (value) => value === '' || DATA_IMAGE_REGEX.test(value) || HTTP_URL_REGEX.test(value),
-    'Imagem inválida: envie JPEG, PNG, WebP ou GIF (até ~2 MB) ou um endereço http(s).'
-  );
+// Imagem do produto: data URL base64 (JPEG/PNG/WebP/GIF, até 2 MB — regras de
+// imageSchemas) ou endereço http(s) já usado por produtos existentes. String
+// vazia mantém o comportamento atual do formulário (produto sem imagem).
+const productImageSchema = z.literal('').or(
+  imageSchema({ types: [...IMAGE_TYPES, 'gif'], allowHttp: true, label: 'Imagem do produto' })
+);
 
 // Aceita número ou texto no formato brasileiro ("R$ 1.234,50"), como o
 // controller fazia antes de existir validação.
@@ -74,5 +67,4 @@ module.exports = {
   productIdParamsSchema,
   createProductSchema,
   updateProductSchema,
-  PRODUCT_IMAGE_MAX_CHARS,
 };

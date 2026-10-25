@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { authService } from "../../lib/services/authService";
 import { userService } from "../../lib/services/userService";
+import { EVALUATION_MAX_PHOTOS, acceptAttribute, validateImageFile } from "../../lib/utils/imageUpload";
 import { toast } from 'sonner';
 import {
     Select,
@@ -84,15 +85,31 @@ export const PetSitterOnboarding = () => {
         }
     };
 
+    // Tipo, tamanho e quantidade conferidos na escolha (E-03): a API aceita até
+    // 6 fotos JPEG, PNG ou WebP de no máximo 2 MB cada.
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const newFiles = Array.from(e.target.files);
-            setPhotos(prev => [...prev, ...newFiles]);
-            
-            // Create previews
-            const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-            setPhotoPreviews(prev => [...prev, ...newPreviews]);
+        const selected = Array.from(e.target.files || []);
+        e.target.value = '';
+        if (!selected.length) return;
+
+        const freeSlots = EVALUATION_MAX_PHOTOS - photos.length;
+        if (selected.length > freeSlots) {
+            toast.error(`Envie no máximo ${EVALUATION_MAX_PHOTOS} fotos do ambiente.`);
         }
+
+        const newFiles: File[] = [];
+        for (const file of selected.slice(0, Math.max(freeSlots, 0))) {
+            const error = validateImageFile(file);
+            if (error) toast.error(error);
+            else newFiles.push(file);
+        }
+        if (!newFiles.length) return;
+
+        setPhotos(prev => [...prev, ...newFiles]);
+
+        // Create previews
+        const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+        setPhotoPreviews(prev => [...prev, ...newPreviews]);
     };
 
     const removePhoto = (index: number) => {
@@ -304,12 +321,13 @@ export const PetSitterOnboarding = () => {
                                         Clique para adicionar fotos
                                     </span>
                                     <span className="mt-1 text-xs text-gray-500">
-                                        JPG, PNG, GIF up to 10MB
+                                        JPEG, PNG ou WebP, até 2 MB cada (máx. {EVALUATION_MAX_PHOTOS} fotos)
                                     </span>
                                     <input 
                                         type="file" 
                                         multiple 
-                                        accept="image/*" 
+                                        accept={acceptAttribute()} 
+                                        aria-label="Adicionar fotos do ambiente"
                                         className="hidden" 
                                         onChange={handlePhotoUpload}
                                     />

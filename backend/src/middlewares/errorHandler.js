@@ -5,7 +5,34 @@ function notFoundHandler(req, res, next) {
   next(AppError.notFound(`Rota não encontrada: ${req.method} ${req.originalUrl}`));
 }
 
+/** "3,2 MB" / "100 KB" para mensagens de limite. */
+function formatBytes(bytes) {
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
+  }
+  return `${Math.round(bytes / 1024)} KB`;
+}
+
 function errorHandler(err, req, res, _next) {
+  // Erros do parser de corpo (express.json), antes de qualquer rota (E-03).
+  // Antes caíam no fallback e respondiam 500.
+  if (err?.type === 'entity.too.large') {
+    const message = `Corpo da requisição acima do limite de ${formatBytes(err.limit)} desta rota.`;
+    return res.status(413).json({
+      error: { code: 'PAYLOAD_TOO_LARGE', message, details: { limit: err.limit } },
+      message,
+    });
+  }
+  if (err?.type === 'entity.parse.failed') {
+    const message = 'JSON malformado no corpo da requisição.';
+    return res.status(400).json({ error: { code: 'INVALID_JSON', message }, message });
+  }
+  if (err?.type && Number.isInteger(err.status) && err.status >= 400 && err.status < 500) {
+    // Demais recusas do parser (charset/encoding não suportado, requisição abortada).
+    const message = err.expose ? err.message : 'Corpo da requisição inválido.';
+    return res.status(err.status).json({ error: { code: 'INVALID_BODY', message }, message });
+  }
+
   // Zod errors (vindos do middleware validate)
   if (err?.name === 'ZodError') {
     const details = err.issues?.map((i) => ({

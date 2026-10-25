@@ -319,10 +319,12 @@ Por isso o limite global é de 50 MB (`backend/src/app.js:82-83`). A correção 
    | Padrão | **100 kb** |
    | `POST /users/me/avatar` | 3 MB |
    | `POST` e `PUT /products` | 3 MB |
-   | `PUT /providers/profile` | 16 MB |
-   | `POST /users/me/evaluations` | 16 MB |
+   | `PUT /providers/profile` | ~24,5 MB (avatar + 8 fotos de 2 MB) |
+   | `POST /users/me/evaluations` | ~16,5 MB (6 fotos de 2 MB) |
 
    Substitui os dois `app.use(express.json/urlencoded({ limit: '50mb' }))` em `app.js`.
+
+   > **Ajuste na implementação (24/10/2026):** os 16 MB previstos não cabiam o máximo que as próprias regras permitem (uma imagem de 2 MB vira ~2,7 MB em base64). Os limites das rotas de upload passaram a ser calculados a partir do número máximo de imagens × 2 MB, mais uma folga para os demais campos (`backend/src/middlewares/bodyLimits.js`).
 2. **`backend/src/middlewares/errorHandler.js`:** corpo grande demais → 413 `PAYLOAD_TOO_LARGE`; JSON malformado → 400 `INVALID_JSON`. Hoje os dois viram 500.
 3. **`backend/src/schemas/providerSchemas.js`:** novo `updateProviderProfileSchema`:
    - `avatar_url`: data URL de imagem (JPEG, PNG ou WebP) de até ~2 MB, ou URL `https`;

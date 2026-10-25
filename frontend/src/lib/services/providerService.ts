@@ -114,8 +114,14 @@ export const providerService = {
     });
 
     if (!response.ok) {
+      // A API responde { error: { code, message } }; 413 e 422 trazem o motivo
+      // (imagem grande demais, galeria cheia) para mostrar ao parceiro (E-03).
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao atualizar sua vitrine');
+      const message =
+        errorData.error?.message ??
+        (typeof errorData.error === 'string' ? errorData.error : undefined) ??
+        errorData.message;
+      throw new Error(message || 'Erro ao atualizar sua vitrine');
     }
 
     const data = await response.json();

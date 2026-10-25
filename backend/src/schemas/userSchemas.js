@@ -1,4 +1,10 @@
 const { z } = require('zod');
+const {
+  EVALUATION_MAX_PHOTOS,
+  imageSchema,
+  imageListSchema,
+  httpsImageUrlSchema,
+} = require('./imageSchemas');
 
 const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
 
@@ -15,7 +21,9 @@ const updateProfileSchema = z.object({
     .regex(phoneRegex, 'Telefone inválido. Use o formato (00) 00000-0000')
     .optional()
     .or(z.literal('')),
-  avatar_url: z.string().url('URL de avatar inválida').optional().or(z.literal('')),
+  // Só endereço https: a foto enviada pelo usuário vai por POST /users/me/avatar
+  // (E-03). Bloqueia `data:` e `javascript:` por aqui.
+  avatar_url: httpsImageUrlSchema.optional().or(z.literal('')),
 }).strict();
 
 const changePasswordSchema = z
@@ -34,23 +42,33 @@ const changePasswordSchema = z
     path: ['newPassword'],
   });
 
-// Avatar em base64 (data URL). Limite ~2.7MB de string ≈ 2MB de imagem.
-// Após decodificar base64 (~75% do tamanho da string), ainda fica abaixo do
-// limite global de 50mb do express.json definido em server.js.
-const AVATAR_MAX_CHARS = 2_700_000;
-
+// Avatar em base64 (data URL): JPEG, PNG ou WebP de até 2 MB (imageSchemas).
 const uploadAvatarSchema = z
   .object({
     image: z
       .string()
       .min(1, 'Imagem obrigatória')
-      .max(AVATAR_MAX_CHARS, 'Imagem muito grande (máx ~2MB)')
-      .regex(
-        /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/i,
-        'Formato inválido. Envie uma data URL base64 (JPEG, PNG ou WebP).'
-      ),
+      .regex(/^data:/i, 'Formato inválido. Envie uma data URL base64 (JPEG, PNG ou WebP).')
+      .pipe(imageSchema({ label: 'Foto de perfil' })),
   })
   .strict();
+
+// Avaliação do Pet Sitter no onboarding (E-03): só tipo e tamanho dos campos.
+// Quem pode enviar e em que estado da avaliação fica para o E-11.
+const evaluationTextSchema = z.union([
+  z.string().max(10_000, 'Texto muito longo.'),
+  z.record(z.string(), z.string().max(5_000, 'Resposta muito longa.')),
+]);
+
+const submitSitterEvaluationSchema = z.object({
+  experience_details: evaluationTextSchema,
+  environment_photos: imageListSchema({
+    max: EVALUATION_MAX_PHOTOS,
+    label: 'Foto do ambiente',
+    listLabel: 'fotos do ambiente',
+  }).default([]),
+  quiz_answers: z.record(z.string(), z.string().max(5_000, 'Resposta muito longa.')).optional(),
+});
 
 // Query da listagem de usuários no painel admin.
 // `limit` tem teto para evitar consulta não-limitada (mesma convenção de produtos).
@@ -76,8 +94,8 @@ module.exports = {
   updateProfileSchema,
   changePasswordSchema,
   uploadAvatarSchema,
+  submitSitterEvaluationSchema,
   listUsersQuery,
   userIdParamsSchema,
   updateUserActiveSchema,
-  AVATAR_MAX_CHARS,
 };
