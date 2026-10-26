@@ -33,6 +33,7 @@ for (const provider of ['SIMULATED', 'MERCADO_PAGO']) {
       if (url.pathname.endsWith('/orders') && route.request().method() === 'POST') {
         created++;
         expect(route.request().postDataJSON()).not.toHaveProperty('cardData');
+        expect(route.request().postDataJSON()).toMatchObject({ address_id: 'address' });
         return route.fulfill({ json: { order: orders[0], orders } });
       }
       if (url.pathname.endsWith('/pay')) {
@@ -44,10 +45,18 @@ for (const provider of ['SIMULATED', 'MERCADO_PAGO']) {
     });
     await page.goto('/checkout');
     await page.getByRole('button', { name: 'Continuar para Pagamento' }).click();
+    // P5: nenhum modo pede dados de cartão na tela.
+    await expect(page.getByPlaceholder('0000 0000 0000 0000')).toHaveCount(0);
     if (provider === 'SIMULATED') await page.getByRole('button', { name: 'PIX', exact: true }).click();
-    else await expect(page.getByPlaceholder('0000 0000 0000 0000')).toHaveCount(0);
     await page.getByRole('button', { name: 'Revisar Pedido' }).click();
-    await page.getByRole('button', { name: /Confirmar Pedido/ }).click();
+    // DEC-C: o botão mostra a soma dos itens (2 × R$ 45,00), igual ao total_price somado dos pedidos.
+    const confirm = page.getByRole('button', { name: /Confirmar Pedido/ });
+    await expect(confirm).toHaveText(/R\$\s?90,00/);
+    expect(orders.reduce((sum, order) => sum + order.total_price, 0)).toBe(90);
+    const notice = page.getByText('Pagamento simulado — nenhum valor real é cobrado.');
+    if (provider === 'SIMULATED') await expect(notice).toBeVisible();
+    else await expect(notice).toHaveCount(0);
+    await confirm.click();
     if (provider === 'SIMULATED') {
       await expect(page).toHaveURL(/checkout\/success/);
       expect(payments).toEqual([orderId, secondId]);

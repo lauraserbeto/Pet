@@ -25,8 +25,6 @@ import {
   Camera,
   ThumbsUp,
   Package,
-  Clock,
-  MapPin,
 } from "lucide-react";
 
 /* ═══════════════════════════════════════════════
@@ -72,24 +70,14 @@ const mockedSpecs = [
   { label: "País de origem", value: "Brasil" },
 ];
 
+// DEC-C (E-06): o pedido cobra só os itens. Nada de prazos ou valores de frete
+// que a plataforma não calcula nem cobra.
 const mockedDelivery = [
   {
     icon: Truck,
-    title: "Entrega padrão",
-    desc: "3 a 7 dias úteis — Grátis para compras acima de R$ 199",
+    title: "Entrega pela loja parceira",
+    desc: "Combinada com a loja após a confirmação do pedido. A Pet+ não cobra frete: o total é a soma dos itens.",
     color: "bg-blue-50 text-blue-500",
-  },
-  {
-    icon: Clock,
-    title: "Entrega expressa",
-    desc: "1 a 2 dias úteis — A partir de R$ 14,90",
-    color: "bg-amber-50 text-amber-500",
-  },
-  {
-    icon: MapPin,
-    title: "Retirada na loja",
-    desc: "Disponível em lojas parceiras — Sem custo adicional",
-    color: "bg-emerald-50 text-emerald-500",
   },
 ];
 

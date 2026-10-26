@@ -339,9 +339,15 @@ console.log("ROLE ID:", user?.role_id);
     [items]
   );
 
+  // Logado, o total é o do carrinho no servidor — a mesma conta que o pedido
+  // cobra (E-06). Sem login, a soma local do carrinho anônimo.
+  const serverTotal = isAuthenticated ? serverCartQuery.data?.totals?.total : undefined;
   const totalPrice = useMemo(
-    () => Number(items.reduce((acc, i) => acc + i.price * i.quantity, 0).toFixed(2)),
-    [items]
+    () =>
+      typeof serverTotal === "number"
+        ? serverTotal
+        : Number(items.reduce((acc, i) => acc + i.price * i.quantity, 0).toFixed(2)),
+    [serverTotal, items]
   );
 
   const warnings = serverCartQuery.data?.warnings ?? [];

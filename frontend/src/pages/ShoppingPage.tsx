@@ -10,7 +10,6 @@ import {
   ChevronDown,
   ChevronRight,
   Tag,
-  Truck,
   ShieldCheck,
   PawPrint,
   Dog,
@@ -405,9 +404,6 @@ export function ShoppingPage() {
 
             {/* Trust badges */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 text-white/80 text-xs sm:text-sm">
-              <span className="flex items-center gap-1.5">
-                <Truck className="h-4 w-4" /> Frete grátis acima de R$ 199
-              </span>
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4" /> Compra segura
               </span>
