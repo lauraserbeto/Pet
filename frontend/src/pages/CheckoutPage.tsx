@@ -13,21 +13,16 @@ import {
   ArrowLeft,
   CreditCard,
   QrCode,
-  Barcode,
   MapPin,
-  Truck,
   ShieldCheck,
-  Lock,
   ChevronRight,
   Check,
   Package,
   Plus,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { CreditCardVisual } from "../components/checkout/CreditCardVisual";
 
 type Step = "address" | "payment" | "review";
 
@@ -88,6 +83,16 @@ function getCheckoutErrorMessage(error: any): {
   }
 }
 
+/** Aviso do modo simulado (P5): a escolha Cartão/PIX é só um rótulo. */
+function SimulatedPaymentNotice() {
+  return (
+    <div role="note" className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+      <Info className="h-4 w-4 mt-0.5 shrink-0" />
+      <span>Pagamento simulado — nenhum valor real é cobrado.</span>
+    </div>
+  );
+}
+
 export function CheckoutPage() {
   const { items, totalPrice, totalItems, clearCart, isLoading: isLoadingCart } = useCart();
   const navigate = useNavigate();
@@ -112,36 +117,13 @@ export function CheckoutPage() {
 
   const selectedAddress = addresses?.find((addr) => addr.id === selectedAddressId);
 
-  // Payment
+  // Payment — no modo simulado, Cartão/PIX é só um rótulo: nenhum dado de
+  // pagamento é pedido nem enviado (P5).
   const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix">("credit");
-  const [isCvvFocused, setIsCvvFocused] = useState(false);
-  const [cardData, setCardData] = useState({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: "",
-  });
 
-  const maskCardNumber = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .slice(0, 16)
-      .replace(/(\d{4})(?=\d)/g, "$1 ");
-  };
-
-  const maskExpiry = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .slice(0, 4)
-      .replace(/(\d{2})(\d{1,2})/, "$1/$2");
-  };
-
-  const maskCVV = (value: string) => {
-    return value.replace(/\D/g, "").slice(0, 4);
-  };
-
-  const shipping = mercadoPagoEnabled || totalPrice >= 199 ? 0 : 14.9;
-  const finalTotal = totalPrice + shipping;
+  // Total exibido = soma dos itens = valor cobrado pelo pedido (DEC-C): sem
+  // frete, cupom ou desconto calculados só na tela.
+  const totalLabel = `R$ ${totalPrice.toFixed(2).replace(".", ",")}`;
 
   const stepIndex = STEPS.findIndex((s) => s.key === currentStep);
 
@@ -161,23 +143,6 @@ export function CheckoutPage() {
   };
 
   const handleNextFromPayment = () => {
-    if (!mercadoPagoEnabled && paymentMethod === "credit") {
-      const cleanNumber = cardData.number.replace(/\D/g, "");
-      if (cleanNumber.length < 16 || !cardData.name || cardData.expiry.length < 5 || cardData.cvv.length < 3) {
-        toast.error("Preencha todos os dados do cartão corretamente.");
-        return;
-      }
-
-      const [month, year] = cardData.expiry.split("/").map(Number);
-      const now = new Date();
-      const currentYear = now.getFullYear() % 100;
-      const currentMonth = now.getMonth() + 1;
-
-      if (!month || month > 12 || year < currentYear || (year === currentYear && month < currentMonth)) {
-        toast.error("A validade do cartão está vencida ou inválida.");
-        return;
-      }
-    }
     setCurrentStep("review");
   };
 
@@ -386,21 +351,6 @@ export function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="border border-slate-100 rounded-xl p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-50">
-                      <Truck className="h-5 w-5 text-emerald-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-slate-900">Entrega Padrão</p>
-                      <p className="text-xs text-slate-500">3 a 5 dias úteis</p>
-                    </div>
-                    <span className={`text-sm font-bold ${shipping === 0 ? "text-emerald-600" : "text-slate-900"}`}>
-                      {shipping === 0 ? "Grátis" : `R$ ${shipping.toFixed(2).replace(".", ",")}`}
-                    </span>
-                  </div>
-                </div>
-
                 <Button
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
@@ -461,78 +411,8 @@ export function CheckoutPage() {
                   ))}
                 </div>
 
-                {paymentMethod === "credit" && (
-                  <div className="space-y-6">
-                    <div className="px-4 py-2">
-                      <CreditCardVisual
-                        number={cardData.number}
-                        name={cardData.name}
-                        expiry={cardData.expiry}
-                        cvv={cardData.cvv}
-                        isFlipped={isCvvFocused}
-                      />
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="space-y-1.5">
-                        <Label>Número do Cartão</Label>
-                        <Input
-                          placeholder="0000 0000 0000 0000"
-                          value={cardData.number}
-                          onChange={(e) => setCardData({ ...cardData, number: maskCardNumber(e.target.value) })}
-                          onFocus={() => setIsCvvFocused(false)}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Nome no Cartão</Label>
-                        <Input
-                          placeholder="Como impresso no cartão"
-                          value={cardData.name}
-                          onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
-                          onFocus={() => setIsCvvFocused(false)}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label>Validade</Label>
-                          <Input
-                            placeholder="MM/AA"
-                            value={cardData.expiry}
-                            onChange={(e) => setCardData({ ...cardData, expiry: maskExpiry(e.target.value) })}
-                            onFocus={() => setIsCvvFocused(false)}
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label>CVV</Label>
-                          <Input
-                            placeholder="000"
-                            value={cardData.cvv}
-                            onChange={(e) => setCardData({ ...cardData, cvv: maskCVV(e.target.value) })}
-                            onFocus={() => setIsCvvFocused(true)}
-                            onBlur={() => setIsCvvFocused(false)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === "pix" && (
-                  <div className="bg-slate-50 rounded-xl p-5 text-center space-y-3">
-                    <QrCode className="h-16 w-16 text-slate-300 mx-auto" />
-                    <p className="text-sm text-slate-600">
-                      O QR Code PIX será gerado após a confirmação do pedido.
-                    </p>
-                    <p className="text-xs text-emerald-600 font-medium">
-                      5% de desconto no PIX!
-                    </p>
-                  </div>
-                )}
+                <SimulatedPaymentNotice />
                 </>}
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                  <Lock className="h-3.5 w-3.5" />
-                  <span>Seus dados estão protegidos com criptografia SSL</span>
-                </div>
 
                 <Button
                   size="lg"
@@ -595,11 +475,9 @@ export function CheckoutPage() {
                     </button>
                   </div>
                   <p className="text-sm text-slate-600">
-                    {mercadoPagoEnabled ? 'Mercado Pago (teste)' : paymentMethod === "credit"
-                      ? "Cartão de Crédito"
-                      : paymentMethod === "pix"
-                      ? "PIX (5% de desconto)"
-                      : ""}
+                    {mercadoPagoEnabled
+                      ? 'Mercado Pago (teste)'
+                      : `${paymentMethod === "pix" ? "PIX" : "Cartão de Crédito"} (simulado)`}
                   </p>
                 </div>
 
@@ -632,6 +510,8 @@ export function CheckoutPage() {
                   </div>
                 </div>
 
+                {!mercadoPagoEnabled && <SimulatedPaymentNotice />}
+
                 <Button
                   size="lg"
                   className="w-full gap-2 rounded-xl h-12"
@@ -639,7 +519,7 @@ export function CheckoutPage() {
                   disabled={isProcessing || paymentConfig.isPending || paymentConfig.isError}
                 >
                   <ShieldCheck className="h-4 w-4" />
-                  Confirmar Pedido — R$ {finalTotal.toFixed(2).replace(".", ",")}
+                  Confirmar Pedido — {totalLabel}
                 </Button>
               </motion.div>
             )}
@@ -671,21 +551,11 @@ export function CheckoutPage() {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-slate-100 pt-3 space-y-2 text-sm">
-                <div className="flex justify-between text-slate-600">
-                  <span>Subtotal</span>
-                  <span>R$ {totalPrice.toFixed(2).replace(".", ",")}</span>
-                </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>Frete</span>
-                  <span className={shipping === 0 ? "text-emerald-600 font-medium" : ""}>
-                    {shipping === 0 ? "Grátis" : `R$ ${shipping.toFixed(2).replace(".", ",")}`}
-                  </span>
-                </div>
-                <div className="border-t border-slate-100 pt-2 flex justify-between">
+              <div className="border-t border-slate-100 pt-3 text-sm">
+                <div className="flex justify-between">
                   <span className="font-bold text-slate-900">Total</span>
                   <span className="font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                    R$ {finalTotal.toFixed(2).replace(".", ",")}
+                    {totalLabel}
                   </span>
                 </div>
               </div>

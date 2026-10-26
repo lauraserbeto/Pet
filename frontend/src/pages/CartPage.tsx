@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Truck,
   RotateCcw,
-  Tag,
   PackageOpen,
   LogIn,
   UserPlus,
@@ -34,8 +33,6 @@ export function CartPage() {
   const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [coupon, setCoupon] = useState("");
-  const [discount, setDiscount] = useState(0);
   const [itemToRemove, setItemToRemove] = useState<any | null>(null);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
 
@@ -54,18 +51,6 @@ export function CartPage() {
     setIsAuthPromptOpen(false);
     navigate(destination, { state: redirect });
   };
-
-  const applyCoupon = () => {
-    if (coupon.toUpperCase() === "PETMAIS15") {
-      setDiscount(totalPrice * 0.15);
-      toast.success("Cupom aplicado! 15% de desconto.");
-    } else {
-      toast.error("Cupom inválido. Tente PETMAIS15");
-    }
-  };
-
-  const shipping = totalPrice >= 199 ? 0 : 14.9;
-  const finalTotal = totalPrice - discount + shipping;
 
   if (items.length === 0) {
     return (
@@ -229,53 +214,16 @@ export function CartPage() {
                 Resumo do Pedido
               </h3>
 
-              {/* Coupon */}
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    placeholder="Cupom de desconto"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-200)]"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={applyCoupon}
-                  className="shrink-0 rounded-xl"
-                >
-                  Aplicar
-                </Button>
-              </div>
-
-              {/* Totals */}
+              {/* Totals — o mesmo valor que o pedido cobra (DEC-C: sem frete, cupom ou desconto) */}
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal ({totalItems} itens)</span>
                   <span>R$ {totalPrice.toFixed(2).replace(".", ",")}</span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-emerald-600">
-                    <span>Desconto (cupom)</span>
-                    <span>- R$ {discount.toFixed(2).replace(".", ",")}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-slate-600">
-                  <span>Frete</span>
-                  <span className={shipping === 0 ? "text-emerald-600 font-medium" : ""}>
-                    {shipping === 0 ? "Grátis" : `R$ ${shipping.toFixed(2).replace(".", ",")}`}
-                  </span>
-                </div>
-                {shipping > 0 && (
-                  <p className="text-xs text-slate-400">Frete grátis acima de R$ 199,00</p>
-                )}
                 <div className="border-t border-slate-100 pt-3 flex justify-between">
                   <span className="font-bold text-slate-900">Total</span>
                   <span className="text-xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                    R$ {finalTotal.toFixed(2).replace(".", ",")}
+                    R$ {totalPrice.toFixed(2).replace(".", ",")}
                   </span>
                 </div>
               </div>
