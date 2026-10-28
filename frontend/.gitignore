@@ -7,3 +7,9 @@ dist
 test-results
 playwright-report
 playwright/.cache
+
+# Variáveis de ambiente: não versionar arquivos .env (podem conter credenciais).
+# O modelo .env.example continua versionado.
+.env
+.env.*
+!.env.example
