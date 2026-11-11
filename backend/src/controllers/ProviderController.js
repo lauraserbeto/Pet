@@ -14,44 +14,62 @@ const logger = require('../config/logger');
 const { FRONTEND_URL } = require('../config/env');
 const AppError = require('../utils/AppError');
 
+
 class ProviderController {
+
   // Validador de completitude em memória (JS) para estabilidade de tipagem
   #isProfileComplete(p) {
+
     // Regras Básicas (Gerais)
-    // Flexibilizamos a foto (avatar_url): Se não tiver, ainda consideramos "completo" para listagem, 
+    // Flexibilizamos a foto (avatar_url): Se não tiver, ainda consideramos "completo" para listagem,
     // o frontend lida com o fallback.
     const hasBasicInfo = p.description && p.phone && p.city && p.zip_code;
-    
+
     if (!hasBasicInfo) return false;
 
     // Regras por Role
     const roleId = p.user?.role_id;
 
+    const hasActiveService =
+      Array.isArray(p.services) &&
+      p.services.some(service => service.is_active);
+
     if (roleId === 3) { // HOTEL
-      const hasDailyRate = p.daily_rate && Number(p.daily_rate) > 0;
       const hasImages = Array.isArray(p.gallery_images) && p.gallery_images.length >= 1;
-      return !!(hasDailyRate && hasImages);
+
+      return !!(hasActiveService && hasImages);
     }
 
     if (roleId === 4) { // PET_SITTER
-      const hasHourlyRate = p.hourly_rate && Number(p.hourly_rate) > 0;
       const hasRoles = Array.isArray(p.sitter_roles) && p.sitter_roles.length > 0;
-      return !!(hasHourlyRate && hasRoles);
+
+      return !!(hasActiveService && hasRoles);
     }
 
     return true; // LOJISTA
   }
+
 
   #withoutSitterEvaluationProbe(provider) {
     const { sitter_evaluations: _omit, ...user } = provider.user || {};
     return { ...provider, user };
   }
 
+
   async listHotels(req, res) {
     try {
       const providers = await prisma.provider.findMany({
-        // Vitrine: hotel aprovado e com conta ativa (E-01).
-        where: operationalProviderWhere({ roleId: PROVIDER_ROLES.HOTEL }),
+
+        // Vitrine: hotel aprovado, com conta ativa e pelo menos um serviço ativo.
+        where: {
+          ...operationalProviderWhere({ roleId: PROVIDER_ROLES.HOTEL }),
+          services: {
+            some: {
+              is_active: true,
+            },
+          },
+        },
+
         include: {
           user: {
             select: {
@@ -60,26 +78,56 @@ class ProviderController {
               role_id: true
             }
           },
+
           services: {
             where: { is_active: true },
-            take: 3
+            orderBy: { price: 'asc' },
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              is_active: true,
+            },
           }
         }
       });
 
       const completeHotels = providers.filter(p => this.#isProfileComplete(p));
-      return res.status(200).json(toPublicProviders(completeHotels));
+
+      const hotelsWithStartingPrice = completeHotels.map(p => ({
+        ...p,
+        starting_price: p.services.length > 0
+          ? Number(p.services[0].price)
+          : null,
+        services: p.services.map(service => ({
+          ...service,
+          price: Number(service.price),
+        })),
+      }));
+
+      return res.status(200).json(toPublicProviders(hotelsWithStartingPrice));
+
     } catch (error) {
       console.error("[ProviderController] listHotels:", error);
       return res.status(500).json({ error: 'Erro ao listar hotéis' });
     }
   }
 
+
   async listSitters(req, res) {
     try {
       const providers = await prisma.provider.findMany({
-        // Vitrine: sitter aprovado, com conta ativa e avaliação aprovada (E-01).
-        where: operationalProviderWhere({ roleId: PROVIDER_ROLES.PET_SITTER }),
+
+        // Vitrine: sitter aprovado, com conta ativa, avaliação aprovada e serviço ativo.
+        where: {
+          ...operationalProviderWhere({ roleId: PROVIDER_ROLES.PET_SITTER }),
+          services: {
+            some: {
+              is_active: true,
+            },
+          },
+        },
+
         include: {
           user: {
             select: {
@@ -96,28 +144,50 @@ class ProviderController {
               }
             }
           },
+
           services: {
             where: { is_active: true },
-            take: 3
+            orderBy: { price: 'asc' },
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              is_active: true,
+            },
           }
         }
       });
 
       const completeSitters = providers
         .filter(p => isOperationalSitter(p) && this.#isProfileComplete(p))
+        .map(p => ({
+          ...p,
+          starting_price: p.services.length > 0
+            ? Number(p.services[0].price)
+            : null,
+          services: p.services.map(service => ({
+            ...service,
+            price: Number(service.price),
+          })),
+        }))
         .map(p => this.#withoutSitterEvaluationProbe(p));
+
       return res.status(200).json(toPublicProviders(completeSitters));
+
     } catch (error) {
       console.error("[ProviderController] listSitters:", error);
       return res.status(500).json({ error: 'Erro ao listar pet sitters' });
     }
   }
 
+
   async listStores(req, res) {
     try {
       const providers = await prisma.provider.findMany({
+
         // Vitrine: lojista aprovado e com conta ativa (E-01).
         where: operationalProviderWhere({ roleId: PROVIDER_ROLES.STORE }),
+
         include: {
           user: {
             select: {
@@ -126,6 +196,7 @@ class ProviderController {
               role_id: true
             }
           },
+
           _count: {
             select: { products: true }
           }
@@ -133,12 +204,15 @@ class ProviderController {
       });
 
       const completeStores = providers.filter(p => this.#isProfileComplete(p));
+
       return res.status(200).json(toPublicProviders(completeStores));
+
     } catch (error) {
       console.error("[ProviderController] listStores:", error);
       return res.status(500).json({ error: 'Erro ao listar lojas' });
     }
   }
+
 
   // Listagem administrativa de parceiros (E-02): rota exclusiva do admin, com
   // os dados de moderação (CPF/CNPJ, motivo da recusa e estado da conta).
@@ -149,25 +223,31 @@ class ProviderController {
       });
 
       return res.status(200).json(toAdminProviders(providers));
+
     } catch (error) {
       return next(error);
     }
   }
+
 
   async getDetails(req, res, next) {
     try {
       const { id } = req.params;
       const provider = await getProviderDetailsUseCase.execute(id);
+
       // Rota pública: o detalhe do parceiro também não pode carregar CPF/CNPJ.
       return res.status(200).json(toPublicProvider(provider));
+
     } catch (error) {
       return next(error);
     }
   }
 
+
   async getMe(req, res) {
     try {
       const userId = req.userId;
+
       const provider = await prisma.provider.findUnique({
         where: { user_id: userId },
         include: {
@@ -183,12 +263,15 @@ class ProviderController {
           },
         }
       });
+
       return res.status(200).json(provider);
+
     } catch (error) {
       console.error("[ProviderController] Erro em getMe:", error);
       return res.status(500).json({ error: error.message });
     }
   }
+
 
   // Novo endpoint exclusivo para Vitrine/Perfil Público
   async updateProfile(req, res) {
@@ -197,12 +280,15 @@ class ProviderController {
       console.log("[updateProfile] Atualizando vitrine para:", userId);
 
       const updatedProvider = await updateProviderProfileUseCase.execute(userId, req.body);
+
       return res.status(200).json(updatedProvider);
+
     } catch (error) {
       console.error("[ProviderController] Erro em updateProfile:", error.message);
       return res.status(500).json({ error: error.message });
     }
   }
+
 
   // Endpoint para dados básicos de conta
   async updateMe(req, res) {
@@ -211,16 +297,20 @@ class ProviderController {
       console.log("[updateMe] Atualizando conta para:", userId);
 
       const updatedProvider = await updateProviderAccountUseCase.execute(userId, req.body);
+
       return res.status(200).json(updatedProvider);
+
     } catch (error) {
       console.error("[ProviderController] Erro em updateMe:", error.message);
       return res.status(500).json({ error: error.message });
     }
   }
 
+
   async getCompleteness(req, res) {
     try {
       const userId = req.userId;
+
       const provider = await prisma.provider.findUnique({
         where: { user_id: userId },
         include: {
@@ -232,6 +322,15 @@ class ProviderController {
               avatar_url: true,
               role_id: true,
               phone: true,
+            },
+          },
+
+          services: {
+            where: {
+              is_active: true,
+            },
+            select: {
+              id: true,
             },
           },
         }
@@ -244,6 +343,7 @@ class ProviderController {
       const missingFields = [];
       const roleName = provider.user.role_id === 3 ? 'HOTEL' : (provider.user.role_id === 4 ? 'PET_SITTER' : 'OTHER');
 
+
       // Campos Obrigatórios Gerais
       if (!provider.description) missingFields.push('description');
       if (!provider.phone) missingFields.push('phone');
@@ -252,10 +352,14 @@ class ProviderController {
       if (!provider.city) missingFields.push('city');
       if (!provider.operating_hours || Object.keys(provider.operating_hours).length === 0) missingFields.push('operating_hours');
 
+
       // Campos Obrigatórios por Role
       if (roleName === 'HOTEL') {
-        if (!provider.daily_rate || Number(provider.daily_rate) <= 0) missingFields.push('daily_rate');
-        
+
+        if (!provider.services || provider.services.length === 0) {
+          missingFields.push('services');
+        }
+
         const allowedAnimals = provider.allowed_animals || [];
         if (Array.isArray(allowedAnimals) && allowedAnimals.length < 1) missingFields.push('allowed_animals');
         else if (!Array.isArray(allowedAnimals)) missingFields.push('allowed_animals');
@@ -268,23 +372,30 @@ class ProviderController {
         if (Array.isArray(galleryImages) && galleryImages.length < 3) missingFields.push('gallery_images');
         else if (!Array.isArray(galleryImages)) missingFields.push('gallery_images');
 
+
       } else if (roleName === 'PET_SITTER') {
-        if (!provider.hourly_rate || Number(provider.hourly_rate) <= 0) missingFields.push('hourly_rate');
-        
+
+        if (!provider.services || provider.services.length === 0) {
+          missingFields.push('services');
+        }
+
         const sitterRoles = provider.sitter_roles || [];
         if (Array.isArray(sitterRoles) && sitterRoles.length < 1) missingFields.push('sitter_roles');
         else if (!Array.isArray(sitterRoles)) missingFields.push('sitter_roles');
       }
 
+
       return res.status(200).json({
         isComplete: missingFields.length === 0,
         missingFields
       });
+
     } catch (error) {
       console.error("[ProviderController] Erro em getCompleteness:", error);
       return res.status(500).json({ error: 'Erro ao verificar completitude do perfil' });
     }
   }
+
 
   // Atualiza status do provedor (admin)
   async updateStatus(req, res, next) {
@@ -316,6 +427,7 @@ class ProviderController {
         },
       });
 
+
       // Dispara e-mail de recusa — falha não reverte a persistência
       if (status === PROVIDER_STATUS.REJECTED && existing.user?.email) {
         const correctionUrl = `${FRONTEND_URL}/parceiro/corrigir-cadastro`;
@@ -325,6 +437,7 @@ class ProviderController {
             reason: rejection_reason,
             correctionUrl,
           });
+
         } catch (err) {
           logger.error(
             { err, providerId: id },
@@ -334,10 +447,12 @@ class ProviderController {
       }
 
       return res.status(200).json(updated);
+
     } catch (error) {
       return next(error);
     }
   }
+
 
   // Endpoint de reenvio: parceiro REJEITADO move o próprio cadastro para EM_REVISAO
   async resubmit(req, res, next) {
@@ -366,10 +481,12 @@ class ProviderController {
       });
 
       return res.status(200).json(updated);
+
     } catch (error) {
       return next(error);
     }
   }
 }
+
 
 module.exports = new ProviderController();

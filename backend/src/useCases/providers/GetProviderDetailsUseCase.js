@@ -53,12 +53,10 @@ class GetProviderDetailsUseCase {
 
     // Mapping products price since Prisma Decimal comes out as an object/string
     if (provider.products) {
-       provider.products = provider.products.map(p => ({
-         ...p,
-         price: Number(p.price),
-         rating: 4.5, // Mocked for frontend compatibility
-         badge: "Novo" // Mocked for frontend compatibility
-       }));
+  provider.products = provider.products.map(p => ({
+    ...p,
+    price: Number(p.price),
+  }));
     }
     if (provider.services) {
        provider.services = provider.services.map(s => ({
