@@ -41,6 +41,7 @@ model User {
   cart                Cart?
 
   orders Order[]
+  reviews Review[]
 
   @@map("users")
 }
@@ -81,6 +82,7 @@ model Provider {
   orders       Order[]
   services     Service[]
   appointments Appointment[]
+  reviews      Review[]
 
   @@map("providers")
 }
@@ -237,6 +239,7 @@ model Product {
   provider    Provider    @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   order_items OrderItem[]
   cart_items  CartItem[]
+  reviews     Review[]
 
   @@map("products")
 }
@@ -258,6 +261,7 @@ model Order {
   customer User        @relation(fields: [customer_id], references: [id])
   items    OrderItem[]
   payment_attempt PaymentAttempt?
+  reviews         Review[]
 
   @@map("orders")
 }
@@ -336,8 +340,38 @@ model Appointment {
   service  Service  @relation(fields: [service_id], references: [id])
   pet      Pet      @relation(fields: [pet_id], references: [id])
 
+  reviews Review[]
+
   // Consultas de conflito de horário por parceiro e por pet (E-04).
   @@index([provider_id, start_time])
   @@index([pet_id, start_time])
   @@map("appointments")
+}
+
+model Review {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  author_id      String   @db.Uuid
+  // Alvo polimórfico: exatamente um dos dois é preenchido (validado no use case).
+  product_id     String?  @db.Uuid
+  provider_id    String?  @db.Uuid
+  // Origem da transação concluída: exatamente um dos dois é preenchido.
+  order_id       String?  @db.Uuid
+  appointment_id String?  @db.Uuid
+  rating         Int      // 1–5; validado no use case e schema Zod
+  comment        String?  @db.Text
+  created_at     DateTime @default(now()) @db.Timestamptz
+
+  author      User         @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  product     Product?     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  provider    Provider?    @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  order       Order?       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointment_id], references: [id], onDelete: Cascade)
+
+  // Unicidade por origem: cada produto de um pedido gera no máximo uma review; agendamento gera uma review.
+  @@unique([order_id, product_id])
+  @@unique([appointment_id])
+  // Índices para listagem ordenada por alvo.
+  @@index([product_id, created_at(sort: Desc)])
+  @@index([provider_id, created_at(sort: Desc)])
+  @@map("reviews")
 }
