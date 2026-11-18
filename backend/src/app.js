@@ -139,6 +139,7 @@ app.use('/api/v1/favorites', require('./routes/favoriteRoutes'));
 app.use('/api/v1/cart', require('./routes/cartRoutes'));
 app.use('/api/v1/orders', require('./routes/orderRoutes'));
 app.use('/api/v1/appointments', require('./routes/appointmentRoutes'));
+app.use('/api/v1/reviews', require('./routes/reviewRoutes'));
 
 // 404 + Error Handler (devem ser os últimos)
 app.use(notFoundHandler);
