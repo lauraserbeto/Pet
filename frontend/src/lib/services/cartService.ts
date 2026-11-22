@@ -42,8 +42,8 @@ export type CartDTO = {
 export type MergeItemInput = { product_id: string; quantity: number };
 
 export const cartService = {
-  get() {
-    return httpClient.get<CartDTO>("/cart");
+  get(signal?: AbortSignal) {
+    return httpClient.get<CartDTO>("/cart", { signal });
   },
   addItem(payload: MergeItemInput) {
     return httpClient.post<CartDTO>("/cart/items", payload);
@@ -57,7 +57,7 @@ export const cartService = {
   clear() {
     return httpClient.delete<CartDTO>("/cart");
   },
-  merge(items: MergeItemInput[]) {
-    return httpClient.post<CartDTO>("/cart/merge", { items });
+  merge(items: MergeItemInput[], baseline?: MergeItemInput[]) {
+    return httpClient.post<CartDTO>("/cart/merge", { items, ...(baseline ? { baseline } : {}) });
   },
 };

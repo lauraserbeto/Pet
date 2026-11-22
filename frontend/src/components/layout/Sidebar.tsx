@@ -25,6 +25,7 @@ import { cn } from "../../lib/utils";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import logo from "../../assets/pet+/logo-horizontal.png";
 import logoCollapsed from "../../assets/pet+/icon-transparente.png";
+import { DASHBOARD_ACCESS } from "../../lib/routeAccess";
 
 
 interface SidebarProps {
@@ -55,20 +56,20 @@ export function Sidebar({
   }
 
   const menuItems = [
-    { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard, roles: [1, 2, 3, 4], end: true },
-    { name: 'Aprovações de Parceiros', href: '/dashboard/aprovacoes', icon: ClipboardCheck, roles: [1], end: false },
-    { name: 'Avaliações de Pet Sitters', href: '/dashboard/avaliacoes-sitters', icon: Heart, roles: [1], end: false },
-    { name: 'Usuários', href: '/dashboard/usuarios', icon: Users, roles: [1], end: false },
-    { name: 'Meu Perfil Público', href: '/dashboard/perfil', icon: Store, roles: [2, 3, 4], end: false },
-    { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, roles: [2], end: false },
-    { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, roles: [2], end: false },
-    { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, roles: [3, 4], end: false },
-    { name: 'Meus Serviços', href: '/dashboard/servicos', icon: ClipboardList, roles: [3, 4], end: false },
-    { name: 'Financeiro', href: '/dashboard/financeiro', icon: DollarSign, roles: [2, 3, 4], end: false },
-    { name: 'Configurações', href: '/dashboard/settings', icon: Settings, roles: [1], end: false },
-  ];
+    { name: 'Visão Geral', href: '/dashboard', icon: LayoutDashboard, end: true },
+    { name: 'Aprovações', href: '/dashboard/aprovacoes', icon: ClipboardCheck, end: false },
+    { name: 'Avaliar sitters', href: '/dashboard/avaliacoes-sitters', icon: Heart, end: false },
+    { name: 'Usuários', href: '/dashboard/usuarios', icon: Users, end: false },
+    { name: 'Meu Perfil Público', href: '/dashboard/perfil', icon: Store, end: false },
+    { name: 'Meus Produtos', href: '/dashboard/products', icon: Package, end: false },
+    { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart, end: false },
+    { name: 'Agenda', href: '/dashboard/schedule', icon: CalendarIcon, end: false },
+    { name: 'Meus Serviços', href: '/dashboard/servicos', icon: ClipboardList, end: false },
+    { name: 'Financeiro', href: '/dashboard/financeiro', icon: DollarSign, end: false },
+    { name: 'Configurações', href: '/dashboard/settings', icon: Settings, end: false },
+  ] as const;
 
-  const allowedItems = menuItems.filter(item => item.roles.includes(roleId));
+  const allowedItems = menuItems.filter(item => DASHBOARD_ACCESS[item.href].includes(roleId));
 
   return (
     <aside className={cn(
@@ -79,7 +80,9 @@ export function Sidebar({
       {/* Collapse Toggle Button (Desktop Only) */}
       <button
         onClick={onToggleCollapse}
-        className="hidden md:flex absolute -right-3 top-20 bg-slate-800 text-white p-1 rounded-full border border-slate-700 hover:bg-[var(--color-primary-600)] transition-colors z-50"
+        aria-label={isCollapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+        aria-expanded={!isCollapsed}
+        className="hidden md:flex absolute -right-3 top-20 bg-slate-800 text-white p-1 rounded-full border border-slate-700 hover:bg-[var(--color-primary-700)] transition-colors z-50"
       >
         {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
@@ -106,7 +109,7 @@ export function Sidebar({
               cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group",
                 isActive
-                  ? "bg-[var(--color-primary-600)] text-white shadow-md"
+                  ? "bg-[var(--color-primary-700)] text-white shadow-md"
                   : "hover:bg-slate-800 hover:text-white",
                 isCollapsed && "justify-center px-0"
               )

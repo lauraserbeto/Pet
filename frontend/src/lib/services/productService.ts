@@ -1,7 +1,8 @@
 import { API_URL, getHeaders } from '../api';
 import { httpClient, ApiError } from '../httpClient';
+import type { RatingSummary } from './reviewService';
 
-export interface Product {
+export interface Product extends RatingSummary {
   id: string;
   provider_id: string;
   name: string;

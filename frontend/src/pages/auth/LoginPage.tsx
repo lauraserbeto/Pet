@@ -11,8 +11,6 @@ import {
   Mail,
   Lock,
   Star,
-  ShieldCheck,
-  Clock,
   Bone,
   Heart,
   Sparkles,
@@ -27,10 +25,12 @@ import iconTransparente from "../../assets/pet+/logo-horizontal.png";
 import heroCarePets from "../../assets/imgs/hero_care_pets.png";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { ApiError } from "@/lib/httpClient";
 import {
   clearPostLoginRedirect,
   getPostLoginRedirect,
   rememberPostLoginRedirect,
+  resolvePostLoginDestination,
 } from "@/lib/postLoginRedirect";
 
 export function LoginPage() {
@@ -76,42 +76,26 @@ export function LoginPage() {
         description: "Redirecionando...",
       });
 
-      const userRoleId = user.role_id;
-      const onboardingStep = user.onboarding_step;
-      const providerStatus = user.provider_status;
-
-      if (userRoleId === 4 && onboardingStep !== "COMPLETED") {
-        clearPostLoginRedirect();
-        navigate("/onboarding/sitter");
-      } else if ([2, 3].includes(userRoleId) && providerStatus === "PENDENTE") {
-        clearPostLoginRedirect();
+      const destination = resolvePostLoginDestination(user, postLoginRedirect);
+      clearPostLoginRedirect();
+      if ([2, 3].includes(user.role_id) && destination === "/" && user.provider_status !== "APROVADO") {
         toast.info("Conta em análise", {
           description: "Aguarde a aprovação do administrador para acessar o painel.",
         });
-        navigate("/");
-      } else if (postLoginRedirect && userRoleId === 5) {
-        clearPostLoginRedirect();
-        navigate(postLoginRedirect.returnTo, { replace: true });
-      } else if ([1, 2, 3, 4].includes(userRoleId)) {
-        clearPostLoginRedirect();
-        navigate("/dashboard");
-      } else {
-        clearPostLoginRedirect();
-        navigate("/");
       }
-    } catch (err: any) {
-      console.error("Login error:", err);
-
-      if (err.status === 403 || err.message?.includes("análise")) {
+      navigate(destination, { replace: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Não foi possível entrar. Tente novamente.";
+      if (err instanceof ApiError && err.status === 403 && /cadastro.*análise/i.test(message)) {
         toast.info("Conta em análise", {
           description:
-            "Sua conta está sendo avaliada pelo nosso time. Você receberá um e-mail em breve!",
+            "Seu cadastro aguarda análise. O painel será liberado após a aprovação.",
           duration: 6000,
         });
       } else {
-        setError(err.message);
+        setError(message);
         toast.error("Erro ao entrar", {
-          description: err.message,
+          description: message,
         });
       }
     } finally {
@@ -313,7 +297,7 @@ export function LoginPage() {
                   </Label>
                   <Link
                     to="/recuperar-senha"
-                    className="text-xs font-medium text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
+                    className="text-xs font-medium text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
                   >
                     Esqueceu a senha?
                   </Link>
@@ -332,6 +316,7 @@ export function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -398,7 +383,7 @@ export function LoginPage() {
                   onClick={() => {
                     if (postLoginRedirect) rememberPostLoginRedirect(postLoginRedirect);
                   }}
-                  className="font-bold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
+                  className="font-bold text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
                 >
                   Crie sua conta grátis
                 </Link>
@@ -416,7 +401,7 @@ export function LoginPage() {
 
         {/* Copyright */}
         <p className="text-[10px] text-slate-400/60 mt-4">
-          © 2026 Pet+. Todos os direitos reservados.
+          © {new Date().getFullYear()} Pet+. Todos os direitos reservados.
         </p>
       </div>
     </div>

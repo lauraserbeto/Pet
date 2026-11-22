@@ -1,4 +1,5 @@
 import { API_URL, getHeaders } from "../api";
+import { normalizeEmail } from "../emailIdentity";
 
 export const authService = {
   // === FUNÇÃO DE LOGIN ===
@@ -6,7 +7,7 @@ export const authService = {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({ ...credentials, email: normalizeEmail(credentials.email) }),
     });
 
     const data = await response.json();
@@ -28,13 +29,14 @@ export const authService = {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, email: normalizeEmail(payload.email) }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Erro ao criar conta.");
+      const detail = Array.isArray(data.error?.details) ? data.error.details[0]?.message : null;
+      throw new Error((typeof detail === "string" && detail) || data.message || "Erro ao criar conta.");
     }
 
     return data;
@@ -52,7 +54,7 @@ export const authService = {
     const response = await fetch(`${API_URL}/auth/forgot-password`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email: normalizeEmail(email) }),
     });
     const data = await response.json();
     if (!response.ok) {

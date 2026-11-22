@@ -1,0 +1,14 @@
+[WebServer] (node:48552) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+(node:30452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\order-integrity-real.spec.ts:7:3 › E-08 integrado 1280px: checkout, pagamento e cancelamento preservam pedido e estoque (7.0s)
+  ok 2 [chromium] › e2e\order-integrity-real.spec.ts:7:3 › E-08 integrado 390px: checkout, pagamento e cancelamento preservam pedido e estoque (6.9s)
+  ok 3 [chromium] › e2e\payment.spec.ts:8:3 › checkout SIMULATED: cria uma vez e processa todos os pedidos (3.8s)
+  ok 4 [chromium] › e2e\payment.spec.ts:8:3 › checkout MERCADO_PAGO: cria uma vez e processa todos os pedidos (3.4s)
+  ok 5 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (2.5s)
+
+  5 passed (37.8s)

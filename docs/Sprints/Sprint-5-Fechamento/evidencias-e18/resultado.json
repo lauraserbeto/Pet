@@ -1,0 +1,1 @@
+{"date":"2026-11-22","backend":{"passed":559,"failed":0,"skipped":0},"frontend":{"passed":213,"files":43},"browser":{"passed":28,"realLocalApiAndDatabase":2,"widths":[1280,390],"droppedMergeResponseAfterCommit":true},"typecheck":"passed","build":"passed","lint":{"errors":0,"backendWarnings":1,"frontendWarnings":122},"productionAccess":false,"commit":false}

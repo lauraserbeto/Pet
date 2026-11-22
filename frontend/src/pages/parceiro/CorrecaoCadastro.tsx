@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { AlertCircle, RefreshCw, Save, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { HamsterLoader } from "../../components/ui/HamsterLoader";
 import { providerService } from "../../lib/services/providerService";
 import { PROVIDER_STATUS } from "../../lib/constants/providerStatus";
 import { ApiError } from "../../lib/httpClient";
+import { useAuth } from "../../contexts/AuthContext";
 
 /**
  * Tela de correção de cadastro recusado (REC-2).
@@ -49,8 +50,40 @@ const EMPTY_FORM: FormState = {
   state: "",
 };
 
+// Mesmas UFs e limites aceitos por updateProviderAccountSchema na API.
+const UFS = new Set(
+  "AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split(" ")
+);
+type FieldErrors = Partial<Record<keyof FormState, string>>;
+
+function validateCorrection(form: FormState) {
+  const data = {
+    ...form,
+    business_name: form.business_name.trim(),
+    state: form.state.trim().toUpperCase(),
+    zip_code: form.zip_code.trim(),
+  };
+  const errors: FieldErrors = {};
+  if (data.business_name.length < 2 || data.business_name.length > 150)
+    errors.business_name = "Informe um nome de negócio entre 2 e 150 caracteres.";
+  if (data.state && !UFS.has(data.state)) errors.state = "Selecione uma UF válida, como SP ou GO.";
+  if (data.zip_code && !/^\d{5}-?\d{3}$/.test(data.zip_code))
+    errors.zip_code = "Informe um CEP válido.";
+  for (const [field, max, label] of [
+    ["phone", 20, "Telefone"],
+    ["address_line", 255, "Endereço"],
+    ["city", 100, "Cidade"],
+  ] as const) {
+    if (data[field].length > max) errors[field] = `${label} deve ter no máximo ${max} caracteres.`;
+  }
+  data.zip_code = data.zip_code.replace("-", "");
+  return { data, errors };
+}
+
 export default function CorrecaoCadastro() {
   const navigate = useNavigate();
+  const { refetchMe } = useAuth();
+  const saving = useRef(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -58,6 +91,8 @@ export default function CorrecaoCadastro() {
   const [status, setStatus] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const carregar = async () => {
     setIsLoading(true);
@@ -76,9 +111,7 @@ export default function CorrecaoCadastro() {
       });
     } catch (error) {
       setLoadError(
-        error instanceof ApiError
-          ? error.message
-          : "Não foi possível carregar seu cadastro."
+        error instanceof ApiError ? error.message : "Não foi possível carregar seu cadastro."
       );
     } finally {
       setIsLoading(false);
@@ -87,28 +120,40 @@ export default function CorrecaoCadastro() {
 
   useEffect(() => {
     carregar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = (name: keyof FormState, value: string) =>
+  const handleChange = (name: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
 
   const handleReenviar = async () => {
+    if (saving.current || status !== PROVIDER_STATUS.REJECTED) return;
+    setSubmitError(null);
+    const { data, errors } = validateCorrection(form);
+    setFieldErrors(errors);
+    const firstInvalid = Object.keys(errors)[0];
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
+    saving.current = true;
     setIsSaving(true);
     try {
       // Duas chamadas de propósito: o endpoint de reenvio só troca o status,
       // não grava dados. Se o segundo passo falhar, as correções já estão
       // salvas e o usuário é avisado de que o reenvio não aconteceu.
-      await providerService.updateMe(form);
+      await providerService.updateMe(data);
 
       try {
         await providerService.resubmit();
       } catch (error) {
-        toast.error(
+        const message =
           error instanceof ApiError
             ? `Correções salvas, mas o reenvio falhou: ${error.message}`
-            : "Correções salvas, mas o reenvio falhou. Tente reenviar novamente."
-        );
+            : "Correções salvas, mas o reenvio falhou. Tente reenviar novamente.";
+        setSubmitError(message);
+        toast.error(message);
         return;
       }
 
@@ -116,13 +161,16 @@ export default function CorrecaoCadastro() {
       setStatus(PROVIDER_STATUS.IN_REVIEW);
       setRejectionReason(null);
       toast.success("Cadastro reenviado para análise.");
+      // Atualiza o estado de aprovação da sessão, não apenas este formulário.
+      // refetchMe preserva a sessão se a leitura falhar; não repete o reenvio.
+      await refetchMe();
     } catch (error) {
-      toast.error(
-        error instanceof ApiError
-          ? error.message
-          : "Não foi possível salvar as correções."
-      );
+      const message =
+        error instanceof ApiError ? error.message : "Não foi possível salvar as correções.";
+      setSubmitError(message);
+      toast.error(message);
     } finally {
+      saving.current = false;
       setIsSaving(false);
     }
   };
@@ -182,9 +230,7 @@ export default function CorrecaoCadastro() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-emerald-800">
-                Nenhuma recusa pendente
-              </h2>
+              <h2 className="text-sm font-bold text-emerald-800">Nenhuma recusa pendente</h2>
               <p className="text-sm text-emerald-700 mt-1">
                 {status === PROVIDER_STATUS.IN_REVIEW
                   ? "Seu cadastro está em análise. Você será avisado assim que houver resposta."
@@ -194,7 +240,19 @@ export default function CorrecaoCadastro() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+        <form
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleReenviar();
+          }}
+          className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5"
+        >
+          {submitError && (
+            <p role="alert" className="text-sm text-red-700">
+              {submitError}
+            </p>
+          )}
           {CAMPOS.map(({ name, label, placeholder }) => (
             <div key={name} className="space-y-2">
               <Label htmlFor={name}>{label}</Label>
@@ -203,21 +261,33 @@ export default function CorrecaoCadastro() {
                 value={form[name]}
                 placeholder={placeholder}
                 disabled={!estaRejeitado || isSaving}
+                aria-invalid={Boolean(fieldErrors[name])}
+                aria-describedby={fieldErrors[name] ? `${name}-error` : undefined}
                 onChange={(e) => handleChange(name, e.target.value)}
               />
+              {fieldErrors[name] && (
+                <p id={`${name}-error`} className="text-sm text-red-700">
+                  {fieldErrors[name]}
+                </p>
+              )}
             </div>
           ))}
 
           <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => navigate("/")} disabled={isSaving}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/")}
+              disabled={isSaving}
+            >
               Voltar ao início
             </Button>
-            <Button onClick={handleReenviar} disabled={!estaRejeitado || isSaving}>
+            <Button type="submit" disabled={!estaRejeitado || isSaving}>
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? "Reenviando..." : "Salvar e reenviar para análise"}
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

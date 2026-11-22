@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { OrdersPagination } from '../../components/orders/OrdersPagination';
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../../contexts/AuthContext";
+import { ReviewComposer } from "../../components/reviews/ReviewComposer";
 import {
   ShoppingBag,
   Package,
@@ -14,8 +17,9 @@ import {
   Receipt,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { Button } from "../../components/ui/button";
 import { OrderShippingAddress } from "../../components/orders/OrderShippingAddress";
-import { paymentUrl } from '../../lib/services/paymentService';
+import { paymentUrl } from "../../lib/services/paymentService";
 import {
   orderService,
   formatBRL,
@@ -51,20 +55,27 @@ function StatusIcon({ variant }: { variant: string }) {
 }
 
 export function TutorOrders() {
+  const { user, token } = useAuth();
+  const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const {
-    data: orders = [],
+    data,
     isLoading,
     isError,
     error,
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["tutor-orders"],
-    queryFn: () => orderService.listMyOrders(),
+    queryKey: ["tutor-orders", user?.id, page],
+    queryFn: ({ signal }) => orderService.listMyOrdersPage(page, signal),
+    enabled: !!token && user?.role_id === 5,
   });
 
+  const orders = data?.orders ?? [];
+  useEffect(() => {
+    if (data && page > Math.max(1, data.totalPages)) setPage(Math.max(1, data.totalPages));
+  }, [data, page]);
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -108,7 +119,7 @@ export function TutorOrders() {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
             >
               <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
               Tentar Novamente
@@ -129,7 +140,7 @@ export function TutorOrders() {
             </p>
             <Link
               to="/shopping"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-bold text-sm transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-bold text-sm transition-colors shadow-sm"
             >
               <ShoppingBag className="w-4 h-4" />
               Explorar Shopping
@@ -198,7 +209,10 @@ export function TutorOrders() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-semibold text-slate-800 text-sm">Resumo dos itens</h4>
-                        <p className="text-sm text-slate-600 line-clamp-2 max-w-lg mt-0.5" title={itemsSummary}>
+                        <p
+                          className="text-sm text-slate-600 line-clamp-2 max-w-lg mt-0.5"
+                          title={itemsSummary}
+                        >
                           {itemsSummary}
                         </p>
                       </div>
@@ -211,29 +225,56 @@ export function TutorOrders() {
                         <StatusIcon variant={statusBadge.variant} />
                         {statusBadge.label}
                       </div>
-                      <button
+                      {/* Mesma hierarquia dos agendamentos: pagar é a ação primária (G13). */}
+                      {order.status === "AGUARDANDO_PAGAMENTO" && (
+                        <Button asChild className="w-full sm:w-auto">
+                          <Link to={paymentUrl([order.id])}>Pagar pedido</Link>
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
                         onClick={() => setSelectedOrder(order)}
-                        className="w-full sm:w-auto text-[var(--color-primary-600)] bg-[var(--color-primary-50)] hover:bg-[var(--color-primary-100)] px-4 py-2 rounded-lg text-sm font-bold transition-colors whitespace-nowrap cursor-pointer text-center"
+                        className="w-full sm:w-auto"
                       >
-                        Ver Detalhes
-                      </button>
-                      {order.status === 'AGUARDANDO_PAGAMENTO' && <Link to={paymentUrl([order.id])} className="text-sm font-semibold text-sky-700 hover:underline whitespace-nowrap">Pagar pedido</Link>}
+                        Ver detalhes
+                      </Button>
                     </div>
                   </div>
+                  {order.status === "CONCLUIDO" && (
+                    <div className="flex flex-wrap gap-3 border-t border-slate-100 px-6 py-4">
+                      {(order.items || [])
+                        .filter(
+                          (item, index, all) =>
+                            all.findIndex((value) => value.product_id === item.product_id) === index
+                        )
+                        .map((item) => (
+                          <ReviewComposer
+                            key={item.product_id}
+                            completed
+                            label={item.product?.name || "produto"}
+                            origin={{ product_id: item.product_id, order_id: order.id }}
+                          />
+                        ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         )}
+      {!isError && data && <OrdersPagination page={page} totalPages={data.totalPages} total={data.total} busy={isFetching} onPage={setPage} />}
       </div>
 
       {/* Modal de Detalhes do Pedido */}
       {selectedOrder && (
-        <Dialog open={Boolean(selectedOrder)} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <Dialog
+          open={Boolean(selectedOrder)}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+        >
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
-                <Receipt className="w-5 h-5 text-[var(--color-primary-600)]" />
+                <Receipt className="w-5 h-5 text-[var(--color-primary-700)]" />
                 Pedido #{selectedOrder.id.slice(0, 8).toUpperCase()}
               </DialogTitle>
               <DialogDescription className="text-sm text-slate-500">
@@ -280,7 +321,10 @@ export function TutorOrders() {
                 <div className="space-y-2 border border-slate-100 rounded-xl divide-y divide-slate-100 overflow-hidden">
                   {selectedOrder.items && selectedOrder.items.length > 0 ? (
                     selectedOrder.items.map((item) => (
-                      <div key={item.id} className="p-3 flex items-center justify-between gap-3 text-sm">
+                      <div
+                        key={item.id}
+                        className="p-3 flex items-center justify-between gap-3 text-sm"
+                      >
                         <div className="flex items-center gap-3 min-w-0">
                           {item.product?.image_url ? (
                             <img
@@ -308,7 +352,9 @@ export function TutorOrders() {
                       </div>
                     ))
                   ) : (
-                    <p className="p-4 text-sm text-slate-500 text-center">Nenhum detalhe de itens disponível.</p>
+                    <p className="p-4 text-sm text-slate-500 text-center">
+                      Nenhum detalhe de itens disponível.
+                    </p>
                   )}
                 </div>
               </div>

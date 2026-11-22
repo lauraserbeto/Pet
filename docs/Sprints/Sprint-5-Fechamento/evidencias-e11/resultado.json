@@ -1,0 +1,47 @@
+[
+ {
+  "name": "fixture-parceiros",
+  "ok": true,
+  "detail": "hotel=PENDENTE sitter=EM_REVISAO"
+ },
+ {
+  "name": "ui-aprovacoes-reenvio-e-sitter",
+  "ok": true,
+  "detail": "selo=1 atalhoSitter=1"
+ },
+ {
+  "name": "ui-recusa-exige-motivo",
+  "ok": true,
+  "detail": "vazio=true espaços=true"
+ },
+ {
+  "name": "api-sitter-sem-avaliacao-bloqueado",
+  "ok": true,
+  "detail": "PATCH APROVADO em sitter com avaliação pendente"
+ },
+ {
+  "name": "api-transicoes",
+  "ok": true,
+  "detail": "aprovar=200 repetir=422 aprovado→recusado=422"
+ },
+ {
+  "name": "api-recusa-avaliacao-exige-feedback",
+  "ok": true,
+  "detail": "status=422"
+ },
+ {
+  "name": "ui-aprovar-e-revisao-dupla-409",
+  "ok": true,
+  "detail": "segunda revisão=409"
+ },
+ {
+  "name": "coerencia-provider-aprovado",
+  "ok": true,
+  "detail": "provider=APROVADO"
+ },
+ {
+  "name": "api-candidatura-unica",
+  "ok": true,
+  "detail": "status=409 code=EVALUATION_ALREADY_APPROVED"
+ }
+]

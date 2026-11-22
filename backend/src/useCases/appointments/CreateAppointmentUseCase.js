@@ -1,18 +1,20 @@
-const prisma = require('../../config/database');
-const AppError = require('../../utils/AppError');
-const { formatAppointment } = require('../../utils/appointmentFormatter');
-const { APPOINTMENT_INCLUDE } = require('../../repositories/AppointmentRepository');
-const calculateAppointmentTotal = require('./CalculateAppointmentTotalUseCase');
-const { normalizePaymentPolicy } = require('../../constants/paymentPolicy');
+const prisma = require("../../config/database");
+const AppError = require("../../utils/AppError");
+const { formatAppointment } = require("../../utils/appointmentFormatter");
+const {
+  APPOINTMENT_INCLUDE,
+} = require("../../repositories/AppointmentRepository");
+const calculateAppointmentTotal = require("./CalculateAppointmentTotalUseCase");
+const { normalizePaymentPolicy } = require("../../constants/paymentPolicy");
 const {
   INITIAL_APPOINTMENT_STATUS,
   ACTIVE_APPOINTMENT_STATUSES,
-} = require('../../constants/appointmentStatus');
+} = require("../../constants/appointmentStatus");
 const {
   PROVIDER_ROLES,
   OPERATIONAL_PROVIDER_SELECT,
   assertOperationalProvider,
-} = require('../providers/providerAccess');
+} = require("../providers/providerAccess");
 
 const TUTOR_ROLE = 5;
 
@@ -37,15 +39,27 @@ const MAX_SITTER_HOURS = 12;
  * linha do pet (e do sitter): duas reservas simultâneas não passam juntas.
  */
 class CreateAppointmentUseCase {
-  constructor({ db = prisma, calculateTotal = calculateAppointmentTotal, now = () => new Date() } = {}) {
+  constructor({
+    db = prisma,
+    calculateTotal = calculateAppointmentTotal,
+    now = () => new Date(),
+  } = {}) {
     this.db = db;
     this.calculateTotal = calculateTotal;
     this.now = now;
   }
 
-  async execute({ userId, userRole, service_id, pet_id, start_time, end_time, notes }) {
+  async execute({
+    userId,
+    userRole,
+    service_id,
+    pet_id,
+    start_time,
+    end_time,
+    notes,
+  }) {
     if (userRole !== TUTOR_ROLE) {
-      throw AppError.forbidden('Apenas tutores podem criar agendamentos.');
+      throw AppError.forbidden("Apenas tutores podem criar agendamentos.");
     }
 
     // 1. Serviço + parceiro (com o necessário para checar se opera)
@@ -53,7 +67,11 @@ class CreateAppointmentUseCase {
       where: { id: service_id },
       include: {
         provider: {
-          select: { id: true, payment_policy: true, ...OPERATIONAL_PROVIDER_SELECT },
+          select: {
+            id: true,
+            payment_policy: true,
+            ...OPERATIONAL_PROVIDER_SELECT,
+          },
         },
       },
     });
@@ -63,35 +81,40 @@ class CreateAppointmentUseCase {
     }
 
     if (!service.is_active) {
-      throw AppError.badRequest('Este serviço está desativado.');
+      throw AppError.badRequest("Este serviço está desativado.");
     }
 
     const provider = service.provider;
     if (!provider) {
-      throw AppError.badRequest('Serviço não vinculado a nenhum parceiro.');
+      throw AppError.badRequest("Serviço não vinculado a nenhum parceiro.");
     }
 
     const providerRole = provider.user?.role_id;
-    if (providerRole !== PROVIDER_ROLES.HOTEL && providerRole !== PROVIDER_ROLES.PET_SITTER) {
-      throw AppError.badRequest('Apenas serviços de hotéis e pet sitters podem ser agendados.');
+    if (
+      providerRole !== PROVIDER_ROLES.HOTEL &&
+      providerRole !== PROVIDER_ROLES.PET_SITTER
+    ) {
+      throw AppError.badRequest(
+        "Apenas serviços de hotéis e pet sitters podem ser agendados.",
+      );
     }
 
     assertOperationalProvider(provider, {
-      message: 'Este parceiro não está recebendo agendamentos no momento.',
+      message: "Este parceiro não está recebendo agendamentos no momento.",
     });
 
     // 2. Ownership do pet
     const pet = await this.db.pet.findUnique({
       where: { id: pet_id },
-      select: { id: true, tutor_id: true },
+      select: { id: true, tutor_id: true, archived_at: true },
     });
 
-    if (!pet) {
+    if (!pet || pet.archived_at) {
       throw AppError.notFound(`Pet com ID "${pet_id}" não encontrado.`);
     }
 
     if (pet.tutor_id !== userId) {
-      throw AppError.forbidden('Este pet não pertence a você.');
+      throw AppError.forbidden("Este pet não pertence a você.");
     }
 
     // 3. Datas
@@ -99,13 +122,17 @@ class CreateAppointmentUseCase {
     const endDate = new Date(end_time);
 
     if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-      throw AppError.validation('Datas de início e fim inválidas.');
+      throw AppError.validation("Datas de início e fim inválidas.");
     }
     if (startDate <= this.now()) {
-      throw AppError.validation('O início do agendamento precisa estar no futuro.');
+      throw AppError.validation(
+        "O início do agendamento precisa estar no futuro.",
+      );
     }
     if (endDate <= startDate) {
-      throw AppError.validation('A data de fim deve ser posterior à de início.');
+      throw AppError.validation(
+        "A data de fim deve ser posterior à de início.",
+      );
     }
 
     // 4. Preço (DEC-B) e limite de período (P3)
@@ -116,14 +143,20 @@ class CreateAppointmentUseCase {
       endTime: endDate,
     });
 
-    if (calculation.unit === 'DIARIA' && calculation.quantity > MAX_HOTEL_DAILY_RATES) {
+    if (
+      calculation.unit === "DIARIA" &&
+      calculation.quantity > MAX_HOTEL_DAILY_RATES
+    ) {
       throw AppError.validation(
-        `Hospedagem limitada a ${MAX_HOTEL_DAILY_RATES} diárias por agendamento.`
+        `Hospedagem limitada a ${MAX_HOTEL_DAILY_RATES} diárias por agendamento.`,
       );
     }
-    if (calculation.unit === 'HORA' && calculation.quantity > MAX_SITTER_HOURS) {
+    if (
+      calculation.unit === "HORA" &&
+      calculation.quantity > MAX_SITTER_HOURS
+    ) {
       throw AppError.validation(
-        `Atendimento de pet sitter limitado a ${MAX_SITTER_HOURS} horas por agendamento.`
+        `Atendimento de pet sitter limitado a ${MAX_SITTER_HOURS} horas por agendamento.`,
       );
     }
 
@@ -133,6 +166,16 @@ class CreateAppointmentUseCase {
     const appointment = await this.db.$transaction(async (tx) => {
       // Ordem fixa (pet antes do parceiro) para não haver deadlock.
       await tx.$queryRaw`SELECT id FROM pets WHERE id = ${pet.id}::uuid FOR UPDATE`;
+      // Remoção usa o mesmo lock. A validação feita antes da transação pode
+      // ter ficado desatualizada enquanto esperávamos por outra operação.
+      const currentPet = await tx.pet.findUnique({
+        where: { id: pet.id },
+        select: { id: true, tutor_id: true, archived_at: true },
+      });
+      if (!currentPet || currentPet.archived_at)
+        throw AppError.notFound("Pet não encontrado");
+      if (currentPet.tutor_id !== userId)
+        throw AppError.forbidden("Este pet não pertence a você.");
       if (isSitter) {
         await tx.$queryRaw`SELECT id FROM providers WHERE id = ${provider.id}::uuid FOR UPDATE`;
       }
@@ -153,10 +196,10 @@ class CreateAppointmentUseCase {
       if (conflict) {
         throw new AppError(
           conflict.pet_id === pet.id
-            ? 'Este pet já tem um agendamento ativo nesse período.'
-            : 'Este pet sitter já tem um atendimento nesse período.',
+            ? "Este pet já tem um agendamento ativo nesse período."
+            : "Este pet sitter já tem um atendimento nesse período.",
           409,
-          'SCHEDULE_CONFLICT'
+          "SCHEDULE_CONFLICT",
         );
       }
 

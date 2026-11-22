@@ -68,7 +68,7 @@ export function ForgotPasswordPage() {
               Informe seu e-mail e enviaremos um link seguro para você criar uma nova senha.
             </p>
           </div>
-          <p className="text-xs text-white/40">© 2026 Pet+. Todos os direitos reservados.</p>
+          <p className="text-xs text-white/40">© {new Date().getFullYear()} Pet+. Todos os direitos reservados.</p>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export function ForgotPasswordPage() {
                     </div>
                     <Link
                       to="/login"
-                      className="text-sm font-semibold text-[var(--color-primary-600)] hover:underline"
+                      className="text-sm font-semibold text-[var(--color-primary-700)] hover:underline"
                     >
                       Voltar para o login
                     </Link>

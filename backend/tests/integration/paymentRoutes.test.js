@@ -20,6 +20,7 @@ let fixture;
 const originalMethods = [];
 beforeEach(() => {
   fixture = paymentFixture();
+  mock.method(prisma, '$transaction', fixture.database.$transaction);
   for (const model of ['order', 'paymentAttempt']) {
     for (const [name, implementation] of Object.entries(fixture.database[model])) {
       const original = prisma[model][name];

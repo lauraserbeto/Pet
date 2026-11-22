@@ -2,6 +2,8 @@
   "name": "pet-plus",
   "private": true,
   "version": "0.0.1",
+  "engines": { "node": "24.x", "npm": "11.x" },
+  "packageManager": "npm@11.19.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -104,10 +106,5 @@
     "typescript-eslint": "^8.65.0",
     "vite": "^6.4.1",
     "vitest": "^4.1.10"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
   }
 }

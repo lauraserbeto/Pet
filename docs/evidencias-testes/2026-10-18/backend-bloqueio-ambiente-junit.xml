@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="POST /register com role_id 1 (ADMIN) → 422 e não cria admin (PET-01)" time="0.031291" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63818">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63818">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63818] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63818
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63818,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /register sem senha → 422" time="0.008422" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63826">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63826">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63826] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63826
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63826,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /login sem credenciais → 400" time="0.005020" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63831">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63831">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63831] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63831
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63831,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /reset-password com senha fora da politica → 422 sem acessar o banco" time="0.004106" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63839">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63839">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63839] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63839
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63839,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="respostas trazem cabeçalhos de segurança do helmet (PET-04)" time="0.004685" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63846">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63846">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63846] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63846
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63846,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="rota inexistente → 404 com shape padronizado" time="0.003809" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js" failure="connect EACCES 127.0.0.1:63854">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63854">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63854] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63854
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63854,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: ADMIN (1) retorna 403" time="0.029524" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63820">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63820">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63820] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63820
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63820,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: LOJISTA (2) retorna 403" time="0.009168" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63827">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63827">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63827] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63827
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63827,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: HOTEL (3) retorna 403" time="0.004202" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63834">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63834">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63834] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63834
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63834,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: PET_SITTER (4) retorna 403" time="0.004526" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63841">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63841">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63841] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63841
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63841,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: TUTOR (5) retorna sucesso (2xx)" time="0.005331" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63849">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63849">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63849] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63849
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63849,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="addItem: sem role (requisição anônima com token sem role) retorna sucesso (2xx)" time="0.004312" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63858">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63858">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63858] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63858
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63858,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: ADMIN (1) retorna 403" time="0.005029" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63864">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63864">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63864] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63864
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63864,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: LOJISTA (2) retorna 403" time="0.004028" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63871">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63871">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63871] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63871
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63871,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: HOTEL (3) retorna 403" time="0.005276" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63878">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63878">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63878] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63878
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63878,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: PET_SITTER (4) retorna 403" time="0.003822" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63884">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63884">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63884] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63884
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63884,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: TUTOR (5) retorna sucesso (2xx)" time="0.003500" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63890">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63890">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63890] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63890
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63890,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="merge: sem role (requisição anônima com token sem role) retorna sucesso (2xx)" time="0.003465" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js" failure="connect EACCES 127.0.0.1:63893">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63893">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63893] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63893
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63893,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 401 sem token de autenticação" time="0.030606" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63819">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63819">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63819] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63819
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63819,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 403 para usuários que não são clientes (role_id 1 - ADMIN)" time="0.009219" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63830">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63830">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63830] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63830
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63830,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 403 para Lojistas tentando comprar (role_id 2 - LOJISTA)" time="0.003756" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63838">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63838">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63838] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63838
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63838,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 400 quando o carrinho está vazio" time="0.005210" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63844">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63844">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63844] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63844
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63844,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 409 e rollback se estoque for insuficiente na validação prévia" time="0.003899" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63853">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63853">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63853] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63853
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63853,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 409 se produto estiver com status INACTIVE" time="0.004421" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63860">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63860">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63860] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63860
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63860,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + OrderItems, congela preço, baixa estoque e limpa carrinho" time="0.005991" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63866">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63866">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63866] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63866
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63866,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma transação atômica (Opção A)" time="0.003819" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63874">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63874">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63874] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63874
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63874,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders: 409 e rollback se estoque mudar concorrentemente durante a transação" time="0.004555" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63879">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63879">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63879] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63879
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63879,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO" time="0.005033" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63886">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63886">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63886] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63886
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63886,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders/:id/pay: pagamento já PAGO é idempotente" time="0.003667" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63892">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63892">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63892] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63892
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63892,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders/:id/pay: pedido de outro tutor retorna 404 sem vazar existência" time="0.003729" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63896">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63896">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63896] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63896
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63896,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor" time="0.005104" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63898">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63898">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63898] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63898
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63898,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável" time="0.003091" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63900">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63900">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63900] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63900
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63900,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders: 401 sem token de autenticação" time="0.002707" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63902">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63902">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63902] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63902
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63902,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders: 200 retorna pedidos do tutor logado com headers de paginação" time="0.003420" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63904">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63904">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63904] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63904
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63904,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders: isolamento de tutor — tutor A não vê pedidos de tutor B" time="0.004012" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63906">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63906">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63906] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63906
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63906,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders: resposta não vaza password_hash do cliente" time="0.003417" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63908">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63908">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63908] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63908
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63908,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders/received: 401 sem token" time="0.002616" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63910">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63910">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63910] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63910
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63910,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/providers/orders: 401 sem token" time="0.002447" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63912">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63912">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63912] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63912
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63912,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders/received: 403 para usuário sem perfil de parceiro" time="0.002957" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63914">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63914">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63914] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63914
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63914,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/orders/received: 200 retorna apenas pedidos do parceiro logado com paginação" time="0.004328" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63916">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63916">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63916] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63916
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63916,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /api/v1/providers/orders: 200 retorna pedidos do parceiro (alias da rota /received)" time="0.002861" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63918">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63918">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63918] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63918
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63918,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 401 sem token" time="0.003409" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63920">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63920">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63920] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63920
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63920,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 404 para pedido inexistente" time="0.003513" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63922">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63922">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63922] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63922
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63922,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 403 quando parceiro não é o dono do pedido" time="0.003666" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63924">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63924">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63924] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63924
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63924,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 403 para usuário sem perfil de parceiro" time="0.003520" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63926">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63926">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63926] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63926
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63926,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para status desconhecido" time="0.003310" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63928">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63928">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63928] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63928
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63928,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para transição inválida (CONCLUIDO → AGUARDANDO_PAGAMENTO)" time="0.003707" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63930">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63930">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63930] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63930
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63930,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para transição inválida (ENVIADO → AGUARDANDO_PAGAMENTO)" time="0.003572" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63932">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63932">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63932] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63932
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63932,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (AGUARDANDO_PAGAMENTO → PAGO)" time="0.003495" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63934">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63934">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63934] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63934
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63934,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (PAGO → ENVIADO)" time="0.004246" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63936">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63936">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63936] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63936
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63936,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (ENVIADO → CONCLUIDO)" time="0.004790" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63938">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63938">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63938] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63938
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63938,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PATCH /api/v1/orders/:id/status: aceita alias em inglês (SHIPPED → CONCLUIDO via DELIVERED)" time="0.005027" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js" failure="connect EACCES 127.0.0.1:63940">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63940">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63940] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63940
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63940,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /providers/services: hotel aprovado cria serviço e recebe preço numérico" time="0.038979" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63821">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63821">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63821] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63821
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63821,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /providers/services: parceiro pendente não pode criar serviço" time="0.008097" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63833">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63833">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63833] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63833
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63833,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /providers/services: lojista não pode criar serviço" time="0.005063" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63843">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63843">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63843] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63843
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63843,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /providers/services: rejeita categoria desconhecida" time="0.004006" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63851">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63851">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63851] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63851
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63851,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="POST /providers/services: pet sitter aprovado recebe unidade de cobrança por hora" time="0.003979" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63859">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63859">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63859] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63859
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63859,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PUT /providers/services/:id: bloqueia serviço de outro parceiro" time="0.003623" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63865">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63865">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63865] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63865
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63865,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="PUT /providers/services/:id: atualiza serviço próprio" time="0.003913" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63869">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63869">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63869] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63869
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63869,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="DELETE /providers/services/:id: desativa serviço próprio sem apagar histórico" time="0.003660" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63875">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63875">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63875] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63875
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63875,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /providers/services: lista somente os serviços ativos do parceiro autenticado" time="0.004067" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63880">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63880">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63880] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63880
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63880,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="GET /providers/:id: detalhe público expõe serviço ativo com preço numérico" time="0.003659" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js" failure="connect EACCES 127.0.0.1:63885">
+		<failure type="testCodeFailure" message="connect EACCES 127.0.0.1:63885">
+[Error [ERR_TEST_FAILURE]: connect EACCES 127.0.0.1:63885] {
+  code: 'ERR_TEST_FAILURE',
+  failureType: 'testCodeFailure',
+  cause: Error: connect EACCES 127.0.0.1:63885
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1706:16) {
+    errno: -4092,
+    code: 'EACCES',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 63885,
+    response: undefined
+  }
+}
+		</failure>
+	</testcase>
+	<testcase name="Lojista (2) PENDENTE é bloqueado com 403" time="0.376929" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) PENDENTE é bloqueado com 403" time="0.000737" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Lojista (2) APROVADO entra normalmente" time="0.048305" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) ATIVO é bloqueado após normalização do enum STA-1" time="0.000703" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) ACTIVE é bloqueado após normalização do enum STA-1" time="0.010846" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Pet Sitter (4) PENDENTE/INCOMPLETE CONSEGUE logar (precisa completar o onboarding)" time="0.008460" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Pet Sitter (4) em IN_REVIEW também loga" time="0.001299" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Parceiro REJEITADO agora LOGA — precisa entrar para corrigir o cadastro (REC-2)" time="0.015725" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Sitter (4) REJEITADO também loga para corrigir" time="0.003983" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Tutor (5) sem provider entra normalmente" time="0.003036" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Admin (1) entra normalmente" time="0.004923" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="status desconhecido em Lojista bloqueia (teste por conjunto, não por igualdade)" time="0.000554" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Usuário com is_active = false é bloqueado com 403" time="0.005799" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active = false bloqueia mesmo um parceiro aprovado" time="0.000533" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active null/undefined vale como ativo (default do schema)" time="0.008586" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active = true continua logando normalmente" time="0.007383" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="preferência usa preços congelados do banco, referência do pedido e URLs HTTPS" time="0.077619" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência é reutilizada, sem criar nova cobrança a cada tentativa" time="0.006250" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência bloqueia pedido de outro tutor e conta sem role de tutor" time="0.004636" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência rejeita pedido já pago e total divergente dos itens" time="0.000768" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="SDK valida HMAC real e rejeita assinatura adulterada e cabeçalhos ausentes" time="0.032676" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="gateway desativado não permite iniciar cobrança" time="0.000651" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="gateway exige vendedor de teste mesmo se token começa por APP_USR" time="0.068122" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook consulta pagamento e marca pedido PAGO atomicamente; duplicação não reaplica" time="0.013973" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento pending não confirma pedido mesmo com body forjado aprovado" time="0.001079" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento in_process não confirma pedido mesmo com body forjado aprovado" time="0.009166" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento rejected não confirma pedido mesmo com body forjado aprovado" time="0.000670" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento cancelled não confirma pedido mesmo com body forjado aprovado" time="0.002353" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento recusado pode ser aprovado em nova tentativa" time="0.009559" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência transaction_amount" time="0.000732" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência currency_id" time="0.000509" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência collector_id" time="0.003552" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência live_mode" time="0.000431" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência metadata" time="0.000534" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pedido cancelado recebe conciliação pendente, sem voltar para PAGO" time="0.000765" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="falha ao gravar pagamento reverte a confirmação do pedido" time="0.000884" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook sem assinatura válida não consulta API nem altera pedido" time="0.000555" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="forgot password gera token e envia e-mail de recuperação para usuário existente" time="0.130382" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="forgot password para e-mail inexistente mantém resposta genérica e não envia e-mail" time="0.000812" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="falha no provider de e-mail mantém resposta genérica e invalida token criado" time="0.009632" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="reset de senha rejeita reutilizar a senha atual sem consumir o token" time="0.247106" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="reset de senha atualiza o hash e invalida todos os tokens pendentes" time="4.043989" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<!-- tests 104 -->
+	<!-- suites 0 -->
+	<!-- pass 42 -->
+	<!-- fail 62 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 56596.1055 -->
+</testsuites>

@@ -45,6 +45,8 @@ function stubPrismaMethod(target, methodName, implementation) {
 }
 
 function mockTokenPersistence({ onCreate } = {}) {
+  stubPrismaMethod(prisma, '$transaction', async fn => fn(prisma));
+  stubPrismaMethod(prisma, '$queryRaw', async () => []);
   let updateManyCalled = false;
   let invalidatedTokenId = null;
 
@@ -181,14 +183,16 @@ test("reset de senha atualiza o hash e invalida todos os tokens pendentes", asyn
   }));
   stubPrismaMethod(prisma, "$transaction", async (operation) =>
     operation({
+      $queryRaw: async () => [],
       user: {
-        update: async ({ data }) => {
+        updateMany: async ({ data }) => {
           updatedPasswordHash = data.password_hash;
-          return { id: "user-1" };
+          return { count: 1 };
         },
       },
       passwordResetToken: {
         updateMany: async ({ where }) => {
+          if (where.id) return { count: 1 };
           invalidationWhere = where;
           return { count: 2 };
         },

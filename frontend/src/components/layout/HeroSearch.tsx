@@ -52,7 +52,7 @@ export function HeroSearch() {
 
           {/* CTA Button */}
           <Button 
-            className="w-full md:w-auto md:px-8 h-auto py-4 md:py-3.5 rounded-lg bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold group/btn shrink-0"
+            className="w-full md:w-auto md:px-8 h-auto py-4 md:py-3.5 rounded-lg bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white font-bold group/btn shrink-0"
           >
             Pesquisar
             <motion.div

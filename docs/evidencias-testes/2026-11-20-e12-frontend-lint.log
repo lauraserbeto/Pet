@@ -1,0 +1,203 @@
+
+> pet-plus@0.0.1 lint
+> eslint .
+
+
+C:\PI - 2026\Pet\frontend\src\app\dashboard\Sidebar.tsx
+  11:3  warning  'Bed' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  14:3  warning  'CheckCircle' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\components\ServiceCard.tsx
+  1:24  warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\components\cart\CartContext.tsx
+  353:9  warning  The 'warnings' logical expression could make the dependencies of useMemo Hook (at line 368) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'warnings' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\PI - 2026\Pet\frontend\src\components\layout\AnimatedHeroIllustration.tsx
+  2:10  warning  'Star' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  3:10  warning  'ImageWithFallback' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\components\layout\DashboardLayout.tsx
+  19:10  warning  'sessionUser' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  19:50  warning  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\components\layout\HeroSearch.tsx
+  5:10  warning  'Input' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\components\layout\Navbar.tsx
+   1:16  warning  'NavLink' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+  15:3   warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+  21:3   warning  'User' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  23:3   warning  'MapPin' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  26:10  warning  'toast' is defined but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+  92:9   warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  96:50  warning  Unexpected any. Specify a different type                                             @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\components\layout\Sidebar.tsx
+  20:10  warning  'useState' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+  21:10  warning  'Button' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  22:10  warning  'Avatar' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  43:3   warning  'userName' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+  51:9   warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\lib\httpClient.ts
+  57:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\lib\services\authService.ts
+  28:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\lib\services\orderService.ts
+  243:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  243:82  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:82  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\lib\services\productService.ts
+  19:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\lib\services\providerService.ts
+   22:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   23:14  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:21  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   72:28  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  150:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  163:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\CartPage.tsx
+  36:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\CheckoutPage.tsx
+   36:6   warning  'ApiErrorCode' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   44:41  warning  Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+   48:14  warning  Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+  169:21  warning  Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\ContactPage.tsx
+  216:7   warning  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  307:37  warning  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\HotelDetailsPage.tsx
+   46:44  warning  Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  115:46  warning  Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  138:44  warning  Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  146:43  warning  Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+  243:6   warning  React Hook useEffect has a missing dependency: 'hotel'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  592:47  warning  Unexpected any. Specify a different type                                                                  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\LandingPage.tsx
+    4:35  warning  'useInView' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   29:3   warning  'Search' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+   30:3   warning  'MapPin' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+   35:3   warning  'ShoppingBag' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+   40:3   warning  'Flame' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   43:3   warning  'Gift' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   44:3   warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   46:3   warning  'Instagram' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+   47:3   warning  'Mail' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+   54:3   warning  'Store' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   58:10  warning  'Input' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   59:10  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+   61:10  warning  'HeroSearch' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+   62:10  warning  'AnimatedHeroIllustration' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  358:3   warning  'badge' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+  359:14  warning  'BadgeIcon' is defined but never used. Allowed unused args must match /^_/u                    @typescript-eslint/no-unused-vars
+  397:10  warning  'CountdownTimer' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  712:10  warning  'newsletterEmail' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+  712:27  warning  'setNewsletterEmail' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  721:48  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+  744:21  warning  Unexpected any. Specify a different type                                                       @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\NotFound.tsx
+  3:10  warning  'Link' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\pages\PartnersPage.tsx
+    6:3   warning  'Star' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+    7:3   warning  'Shield' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+    8:3   warning  'Briefcase' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   17:3   warning  'ArrowRight' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   18:3   warning  'Sparkles' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  206:59  warning  Unexpected any. Specify a different type                                      @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\ProductDetailPage.tsx
+  18:3  warning  'ChevronLeft' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  22:3  warning  'RotateCcw' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  24:3  warning  'Store' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  25:3  warning  'MessageCircle' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\pages\ShoppingPage.tsx
+   11:3   warning  'ChevronRight' is defined but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+   25:3   warning  'Loader2' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+   76:7   warning  'brands' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  125:48  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  147:21  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\StorePage.tsx
+    5:10  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   14:38  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+  197:45  warning  Unexpected any. Specify a different type                                 @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\StyleGuide.tsx
+  5:10  warning  'Avatar' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\pages\WalkerDetailsPage.tsx
+  16:3   warning  'CheckCircle2' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  42:46  warning  Unexpected any. Specify a different type                                        @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\auth\LoginPage.tsx
+   14:3   warning  'ShieldCheck' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   15:3   warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  102:19  warning  Unexpected any. Specify a different type                                       @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\auth\RegisterPage.tsx
+   26:3   warning  'Users' is defined but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+   27:3   warning  'MapPin' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  203:21  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+  407:80  warning  Unexpected any. Specify a different type                                  @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\dashboard\Products.tsx
+   19:3   warning  'DialogTrigger' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+   81:21  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  199:21  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\dashboard\PublicProfile.tsx
+   26:3   warning  'FileText' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+   27:3   warning  'Clock' is defined but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  130:7   warning  'value' is never reassigned. Use 'const' instead                                    prefer-const
+  132:7   warning  'floatValue' is never reassigned. Use 'const' instead                               prefer-const
+  360:32  warning  Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  374:15  warning  'role_id' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\PI - 2026\Pet\frontend\src\pages\dashboard\SitterEvaluations.tsx
+    6:16  warning  'TabsContent' is defined but never used. Allowed unused vars must match /^_/u                                        @typescript-eslint/no-unused-vars
+   14:25  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   15:25  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   16:19  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   41:8   warning  React Hook useEffect has a missing dependency: 'fetchEvaluations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   48:25  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   70:25  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   97:25  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  268:57  warning  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  269:95  warning  Empty block statement                                                                                                no-empty
+
+C:\PI - 2026\Pet\frontend\src\pages\onboarding\PetSitterOnboarding.tsx
+   18:5   warning  'Camera' is defined but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+   22:5   warning  'AlertCircle' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+   62:8   warning  React Hook useEffect has a missing dependency: 'checkUserStatus'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  154:25  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+
+C:\PI - 2026\Pet\frontend\src\pages\parceiro\CorrecaoCadastro.tsx
+  90:5  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+C:\PI - 2026\Pet\frontend\src\pages\tutor\TutorProfile.tsx
+   9:10  warning  'useNavigate' is defined but never used. Allowed unused vars must match /^_/u                                   @typescript-eslint/no-unused-vars
+  45:10  warning  'searchParams' is assigned a value but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+  93:6   warning  React Hook useEffect has a missing dependency: 'currentUser'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 129 problems (0 errors, 129 warnings)
+  0 errors and 3 warnings potentially fixable with the `--fix` option.
+

@@ -44,8 +44,8 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 border-t border-slate-800 pt-8 text-center text-xs text-slate-500">
-          &copy; 2024 Pet+ Inc. Todos os direitos reservados.
+        <div className="mt-8 border-t border-slate-800 pt-8 text-center text-xs text-slate-400">
+          &copy; {new Date().getFullYear()} Pet+. Todos os direitos reservados.
         </div>
       </div>
     </footer>

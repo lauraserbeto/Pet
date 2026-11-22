@@ -1,0 +1,166 @@
+
+> pet-plus@0.0.1 test
+> vitest run --pool=threads --maxWorkers=1 --no-file-parallelism --testTimeout=15000 --reporter=dot
+
+
+ RUN  v4.1.10 C:/PI - 2026/Pet/frontend
+
+stderr | src/pages/dashboard/admin/Approvals.test.tsx > exibe a mensagem da API quando a listagem é negada
+Error fetching partners: Error: Acesso negado. Apenas administradores podem realizar esta ação.
+    at fetchPartners (C:/PI - 2026/Pet/frontend/src/pages/dashboard/admin/Approvals.tsx:91:17)
+
+·····································································stdout | src/pages/CartPage.test.tsx > o total exibido é o totals.total do carrinho no servidor (DEC-C)
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+stdout | src/pages/CartPage.test.tsx > o total exibido é o totals.total do carrinho no servidor (DEC-C)
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+stdout | src/pages/CartPage.test.tsx > a tela usa o total do servidor, não uma conta própria
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+stdout | src/pages/CartPage.test.tsx > a tela usa o total do servidor, não uma conta própria
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+·stdout | src/pages/CartPage.test.tsx > não tem cupom nem frete no resumo
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+stdout | src/pages/CartPage.test.tsx > não tem cupom nem frete no resumo
+USUÁRIO NO CARRINHO: { id: 'tutor', role_id: 5 }
+ROLE ID: 5
+
+Error: boom de teste
+    at Boom (C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.test.tsx:6:9)
+    at renderWithHooks (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+Error: boom de teste
+    at Boom (C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.test.tsx:6:9)
+    at renderWithHooks (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+Error: boom de teste
+    at Boom (C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.sentry.test.tsx:8:9)
+    at renderWithHooks (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.sentryWrapped (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js:41:17)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+    at HTMLUnknownElement.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventTarget.js:241:34)
+    at Object.invokeGuardedCallbackDev (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4213:16)
+    at invokeGuardedCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4277:31)
+    at beginWork$1 (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:27490:7)
+    at performUnitOfWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26599:12)
+    at workLoopSync (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26505:5)
+    at renderRootSync (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26473:7)
+    at performConcurrentWorkOnRoot (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:25777:74)
+    at flushActQueue (C:\PI - 2026\Pet\frontend\node_modules\react\cjs\react.development.js:2667:24)
+    at act (C:\PI - 2026\Pet\frontend\node_modules\react\cjs\react.development.js:2582:11)
+    at C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\act-compat.js:46:25
+    at renderRoot (C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\pure.js:189:26)
+    at render (C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\pure.js:291:10)
+    at C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.sentry.test.tsx:35:3
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64
+    at run (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1150:20)
+    at limiterFn (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1162:59)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:38
+    at Traces.$ (file:///C:/PI%20-%202026/Pet/frontend/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+    at trace (file:///C:/PI%20-%202026/Pet/frontend/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:4398:21)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:13
+    at callAroundHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2663:3)
+    at callAroundEachHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2799:2)
+    at runTest (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2940:4)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3159:10
+    at callAroundHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2663:3)
+    at callAroundAllHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2791:2)
+    at runSuite (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3130:4)
+    at runFiles (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3240:3)
+    at startTests (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3281:3)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/vitest/dist/chunks/base.B6Opl8PE.js:90:5
+Error: boom de teste
+    at Boom (C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.sentry.test.tsx:8:9)
+    at renderWithHooks (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:15486:18)
+    at mountIndeterminateComponent (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:20103:13)
+    at beginWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:21626:16)
+    at HTMLUnknownElement.callCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4164:14)
+    at HTMLUnknownElement.sentryWrapped (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@sentry/browser/build/npm/esm/dev/helpers.js:41:17)
+    at HTMLUnknownElement.callTheUserObjectsOperation (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventListener.js:26:30)
+    at innerInvokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:360:16)
+    at invokeEventListeners (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\jsdom\living\events\EventTarget-impl.js:114:17)
+    at HTMLUnknownElement.dispatchEvent (C:\PI - 2026\Pet\frontend\node_modules\jsdom\lib\generated\idl\EventTarget.js:241:34)
+    at Object.invokeGuardedCallbackDev (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4213:16)
+    at invokeGuardedCallback (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:4277:31)
+    at beginWork$1 (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:27490:7)
+    at performUnitOfWork (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26599:12)
+    at workLoopSync (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26505:5)
+    at renderRootSync (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:26473:7)
+    at recoverFromConcurrentError (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:25889:20)
+    at performConcurrentWorkOnRoot (C:\PI - 2026\Pet\frontend\node_modules\react-dom\cjs\react-dom.development.js:25789:22)
+    at flushActQueue (C:\PI - 2026\Pet\frontend\node_modules\react\cjs\react.development.js:2667:24)
+    at act (C:\PI - 2026\Pet\frontend\node_modules\react\cjs\react.development.js:2582:11)
+    at C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\act-compat.js:46:25
+    at renderRoot (C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\pure.js:189:26)
+    at render (C:\PI - 2026\Pet\frontend\node_modules\@testing-library\react\dist\pure.js:291:10)
+    at C:/PI - 2026/Pet/frontend/src/components/ErrorBoundary.sentry.test.tsx:35:3
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64
+    at run (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1150:20)
+    at limiterFn (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:1162:59)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:38
+    at Traces.$ (file:///C:/PI%20-%202026/Pet/frontend/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+    at trace (file:///C:/PI%20-%202026/Pet/frontend/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:4398:21)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:13
+    at callAroundHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2663:3)
+    at callAroundEachHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2799:2)
+    at runTest (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2940:4)
+    at file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3159:10
+    at callAroundHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2663:3)
+    at callAroundAllHooks (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:2791:2)
+    at runSuite (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3130:4)
+    at runFiles (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3240:3)
+    at startTests (file:///C:/PI%20-%202026/Pet/frontend/node_modules/@vitest/runner/dist/chunk-artifact.js:3281:3)
+·····································································
+
+ Test Files  23 passed (23)
+      Tests  139 passed (139)
+   Start at  08:55:45
+   Duration  211.60s (transform 3.19s, setup 22.18s, import 30.72s, tests 31.34s, environment 111.84s)
+

@@ -1,6 +1,9 @@
-const prisma = require('../../config/database');
-const { isValidPaymentPolicy } = require('../../constants/paymentPolicy');
-const AppError = require('../../utils/AppError');
+const prisma = require("../../config/database");
+const { isValidPaymentPolicy } = require("../../constants/paymentPolicy");
+const AppError = require("../../utils/AppError");
+const {
+  updateProviderAccountSchema,
+} = require("../../schemas/providerSchemas");
 
 class UpdateProviderAccountUseCase {
   constructor({ providerRepository = prisma.provider } = {}) {
@@ -8,6 +11,14 @@ class UpdateProviderAccountUseCase {
   }
 
   async execute(userId, data) {
+    if (
+      data.payment_policy !== undefined &&
+      !isValidPaymentPolicy(data.payment_policy)
+    )
+      throw AppError.validation(
+        "Política de cobrança inválida. Use PRESENCIAL ou PRE_PAGO.",
+      );
+    data = updateProviderAccountSchema.parse(data);
     const {
       business_name,
       phone,
@@ -15,23 +26,25 @@ class UpdateProviderAccountUseCase {
       address_line,
       city,
       state,
-      payment_policy
+      payment_policy,
     } = data;
 
     const providerData = {};
 
     if (business_name !== undefined) providerData.business_name = business_name;
-    if (phone !== undefined)         providerData.phone = phone;
-    if (zip_code !== undefined)      providerData.zip_code = zip_code;
-    if (address_line !== undefined)  providerData.address_line = address_line;
-    if (city !== undefined)          providerData.city = city;
-    if (state !== undefined)         providerData.state = state;
+    if (phone !== undefined) providerData.phone = phone;
+    if (zip_code !== undefined) providerData.zip_code = zip_code;
+    if (address_line !== undefined) providerData.address_line = address_line;
+    if (city !== undefined) providerData.city = city;
+    if (state !== undefined) providerData.state = state;
 
     // AGD-1 criou a coluna `payment_policy`, mas nenhum endpoint a gravava —
     // a SRV-F1 precisa do seletor e a AGD-2 vai ler o valor.
     if (payment_policy !== undefined) {
       if (!isValidPaymentPolicy(payment_policy)) {
-        throw AppError.validation('Política de cobrança inválida. Use PRESENCIAL ou PRE_PAGO.');
+        throw AppError.validation(
+          "Política de cobrança inválida. Use PRESENCIAL ou PRE_PAGO.",
+        );
       }
       providerData.payment_policy = payment_policy;
     }
@@ -50,7 +63,7 @@ class UpdateProviderAccountUseCase {
             phone: true,
           },
         },
-      }
+      },
     });
 
     return updatedProvider;

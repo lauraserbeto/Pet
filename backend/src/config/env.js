@@ -4,6 +4,18 @@
 require("dotenv").config();
 
 const NODE_ENV = process.env.NODE_ENV || "development";
+const TRUST_PROXY_HOPS =
+  process.env.TRUST_PROXY_HOPS === undefined
+    ? NODE_ENV === "production"
+      ? 1
+      : 0
+    : Number(process.env.TRUST_PROXY_HOPS);
+if (
+  !Number.isInteger(TRUST_PROXY_HOPS) ||
+  TRUST_PROXY_HOPS < 0 ||
+  TRUST_PROXY_HOPS > 5
+)
+  throw Error("[CONFIG] TRUST_PROXY_HOPS deve ser um inteiro de 0 a 5.");
 
 function requireEnv(name) {
   const value = process.env[name];
@@ -61,26 +73,30 @@ const EMAIL_FROM = requireEnvInProduction("EMAIL_FROM");
 const EMAIL_REPLY_TO = process.env.EMAIL_REPLY_TO?.trim() || null;
 
 function loadMercadoPagoConfig() {
-  const flag = process.env.MERCADO_PAGO_ENABLED?.trim() || 'false';
-  if (!['true', 'false'].includes(flag)) {
-    throw new Error('[CONFIG] MERCADO_PAGO_ENABLED deve ser true ou false.');
+  const flag = process.env.MERCADO_PAGO_ENABLED?.trim() || "false";
+  if (!["true", "false"].includes(flag)) {
+    throw new Error("[CONFIG] MERCADO_PAGO_ENABLED deve ser true ou false.");
   }
-  if (flag === 'false') return Object.freeze({ enabled: false });
+  if (flag === "false") return Object.freeze({ enabled: false });
 
-  const backendUrl = requireEnv('BACKEND_PUBLIC_URL');
+  const backendUrl = requireEnv("BACKEND_PUBLIC_URL");
   const frontendUrl = new URL(FRONTEND_URL);
   const publicUrl = new URL(backendUrl);
-  if (publicUrl.protocol !== 'https:' || frontendUrl.protocol !== 'https:') {
-    throw new Error('[CONFIG] Mercado Pago exige BACKEND_PUBLIC_URL e FRONTEND_URL com HTTPS.');
+  if (publicUrl.protocol !== "https:" || frontendUrl.protocol !== "https:") {
+    throw new Error(
+      "[CONFIG] Mercado Pago exige BACKEND_PUBLIC_URL e FRONTEND_URL com HTTPS.",
+    );
   }
-  const testUserId = requireEnv('MERCADO_PAGO_TEST_USER_ID');
+  const testUserId = requireEnv("MERCADO_PAGO_TEST_USER_ID");
   if (!/^\d+$/.test(testUserId)) {
-    throw new Error('[CONFIG] MERCADO_PAGO_TEST_USER_ID deve ser o ID numérico do vendedor de teste.');
+    throw new Error(
+      "[CONFIG] MERCADO_PAGO_TEST_USER_ID deve ser o ID numérico do vendedor de teste.",
+    );
   }
   return Object.freeze({
     enabled: true,
-    accessToken: requireEnv('MERCADO_PAGO_ACCESS_TOKEN'),
-    webhookSecret: requireEnv('MERCADO_PAGO_WEBHOOK_SECRET'),
+    accessToken: requireEnv("MERCADO_PAGO_ACCESS_TOKEN"),
+    webhookSecret: requireEnv("MERCADO_PAGO_WEBHOOK_SECRET"),
     testUserId,
     backendUrl: publicUrl.origin,
     frontendUrl: frontendUrl.origin,
@@ -131,6 +147,7 @@ module.exports = {
   loadMercadoPagoConfig,
   PORT: process.env.PORT || 3000,
   NODE_ENV,
+  TRUST_PROXY_HOPS,
   // Opcional: sem DSN o Sentry fica desabilitado e a API roda normalmente.
   SENTRY_DSN: process.env.SENTRY_DSN || null,
 };

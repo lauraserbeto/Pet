@@ -1,0 +1,39 @@
+[WebServer] (node:20852) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 26 tests using 2 workers
+
+(node:32380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+⚠ 1 violação(ões) SÉRIA(s) rastreada(s) (requer decisão de design de contraste):
+  - color-contrast: 8 nó(s)
+  ok  2 [chromium] › e2e\a11y.spec.ts:8:1 › landing page sem violações CRÍTICAS de a11y (axe, WCAG 2 A/AA) (4.9s)
+  ok  1 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 390px: cria, acompanha, paga e cancela (5.1s)
+  ok  3 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 1280px: cria, acompanha, paga e cancela (1.6s)
+  ok  4 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 390px: cria, acompanha, paga e cancela (2.2s)
+  ok  6 [chromium] › e2e\booking.spec.ts:140:1 › visitante precisa entrar e mantém o destino de reserva (461ms)
+  ok  7 [chromium] › e2e\legal.spec.ts:11:3 › /terms — leitura linear, headings e listas reais (835ms)
+  ok  5 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 1280px: cria, acompanha, paga e cancela (2.5s)
+  ok  8 [chromium] › e2e\legal.spec.ts:28:3 › /terms — deep-link por âncora posiciona na cláusula (1.3s)
+  ok 10 [chromium] › e2e\legal.spec.ts:11:3 › /privacy — leitura linear, headings e listas reais (518ms)
+  ok  9 [chromium] › e2e\legal.spec.ts:34:3 › /terms — sem violações CRÍTICAS de a11y (axe) (1.7s)
+  ok 11 [chromium] › e2e\legal.spec.ts:28:3 › /privacy — deep-link por âncora posiciona na cláusula (1.3s)
+  ok 12 [chromium] › e2e\legal.spec.ts:34:3 › /privacy — sem violações CRÍTICAS de a11y (axe) (1.5s)
+  ok 13 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 375px (631ms)
+  ok 14 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 1280px (703ms)
+  ok 15 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 375px (686ms)
+  ok 16 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 1280px (691ms)
+  ok 17 [chromium] › e2e\payment.spec.ts:8:3 › checkout SIMULATED: cria uma vez e processa todos os pedidos (1.8s)
+  ok 18 [chromium] › e2e\payment.spec.ts:8:3 › checkout MERCADO_PAGO: cria uma vez e processa todos os pedidos (1.8s)
+  ok 20 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 2 não acessa a agenda diretamente pela URL (468ms)
+  ok 19 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (1.4s)
+  ok 21 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 5 não acessa a agenda diretamente pela URL (493ms)
+  ok 23 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 4, celular (3.6s)
+  ok 22 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 3, desktop (3.7s)
+  ok 24 [chromium] › e2e\smoke.spec.ts:8:1 › landing page carrega e renderiza a navegação (441ms)
+  ok 25 [chromium] › e2e\smoke.spec.ts:22:1 › rota lazy standalone (/login) carrega o formulário (486ms)
+  ok 26 [chromium] › e2e\smoke.spec.ts:27:1 › rota lazy sob layout (/products) renderiza sem cair no ErrorBoundary (436ms)
+
+  26 passed (37.2s)

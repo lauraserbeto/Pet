@@ -25,7 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { HamsterLoader } from "../components/ui/HamsterLoader";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
 import { useFavorites } from "../contexts/FavoritesContext";
@@ -103,7 +103,13 @@ const sortOptions = [
    ═══════════════════════════════════════════════ */
 
 export function ShoppingPage() {
-  const [search, setSearch] = useState("");
+  // A busca do cabeçalho envia para /shopping?q=… (auditoria visual G19).
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const queryParam = searchParams.get("q");
+  useEffect(() => {
+    if (queryParam !== null) setSearch(queryParam);
+  }, [queryParam]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPet, setSelectedPet] = useState("all");
   const [selectedPrice, setSelectedPrice] = useState("all");
@@ -252,7 +258,7 @@ export function ShoppingPage() {
                 onClick={() => setSelectedPet(pt.id)}
                 className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm transition-colors ${
                   selectedPet === pt.id
-                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-semibold"
+                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] font-semibold"
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -283,7 +289,7 @@ export function ShoppingPage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm transition-colors ${
                   selectedCategory === cat.id
-                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-semibold"
+                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] font-semibold"
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -314,7 +320,7 @@ export function ShoppingPage() {
                 onClick={() => setSelectedPrice(pr.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                   selectedPrice === pr.id
-                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-semibold"
+                    ? "bg-[var(--color-primary-50)] text-[var(--color-primary-700)] font-semibold"
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
@@ -378,8 +384,7 @@ export function ShoppingPage() {
               Tudo para o seu <span className="text-amber-200">pet</span>
             </h1>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base text-white/90 max-w-lg mx-auto leading-relaxed">
-              Rações, brinquedos, acessórios e muito mais com os melhores preços e
-              entrega rápida.
+              Rações, brinquedos e acessórios de lojas parceiras do Pet+.
             </p>
 
             {/* Search bar */}
@@ -389,12 +394,14 @@ export function ShoppingPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Buscar produtos"
                 placeholder="Buscar produtos, marcas..."
                 className="w-full pl-12 pr-4 py-3.5 sm:py-4 rounded-2xl bg-white text-slate-800 placeholder:text-slate-400 shadow-lg shadow-orange-600/10 border-0 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm sm:text-base"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
+                  aria-label="Limpar busca"
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X className="h-4 w-4" />
@@ -404,11 +411,12 @@ export function ShoppingPage() {
 
             {/* Trust badges */}
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 text-white/80 text-xs sm:text-sm">
+              {/* Sem "Compra segura"/"Ofertas diárias", que não tinham base (G20). */}
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4" /> Compra segura
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Lojas aprovadas pela Pet+
               </span>
               <span className="flex items-center gap-1.5">
-                <Tag className="h-4 w-4" /> Ofertas diárias
+                <Tag className="h-4 w-4" aria-hidden="true" /> Sem frete da Pet+
               </span>
             </div>
           </motion.div>
@@ -464,7 +472,7 @@ export function ShoppingPage() {
                   <SlidersHorizontal className="h-4 w-4" />
                   Filtros
                   {hasActiveFilters && (
-                    <span className="h-5 w-5 flex items-center justify-center rounded-full bg-[var(--color-primary-500)] text-white text-[10px] font-bold">
+                    <span className="h-5 w-5 flex items-center justify-center rounded-full bg-[var(--color-primary-700)] text-white text-[10px] font-bold">
                       !
                     </span>
                   )}
@@ -540,6 +548,8 @@ export function ShoppingPage() {
                     {/* Favorite */}
                     <button
                       onClick={() => toggleFavorite(product.id)}
+                      aria-label={`${isFavorite("PRODUCT", String(product.id)) ? "Remover dos favoritos" : "Favoritar"}: ${product.name}`}
+                      aria-pressed={isFavorite("PRODUCT", String(product.id))}
                       className="absolute top-2 right-2 sm:top-3 sm:right-3 h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors z-10"
                     >
                       <Heart
@@ -575,7 +585,8 @@ export function ShoppingPage() {
                           </p>
                           <button
                             onClick={() => addToCart(product)}
-                            className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white flex items-center justify-center shadow-md shadow-orange-200 transition-colors"
+                            aria-label={`Adicionar ao carrinho: ${product.name}`}
+                            className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white flex items-center justify-center shadow-md shadow-orange-200 transition-colors"
                           >
                             <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </button>
@@ -599,7 +610,7 @@ export function ShoppingPage() {
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="mt-4 text-sm font-medium text-[var(--color-primary-600)] hover:underline"
+                  className="mt-4 text-sm font-medium text-[var(--color-primary-700)] hover:underline"
                 >
                   Limpar filtros
                 </button>
@@ -647,7 +658,7 @@ export function ShoppingPage() {
               <div className="p-4 border-t border-slate-100">
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="w-full py-3 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold rounded-xl transition-colors"
+                  className="w-full py-3 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white font-bold rounded-xl transition-colors"
                 >
                   Ver {filtered.length} produto{filtered.length !== 1 ? "s" : ""}
                 </button>

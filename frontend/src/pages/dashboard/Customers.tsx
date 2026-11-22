@@ -92,7 +92,7 @@ export function Customers() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" aria-label={`Mais ações para ${customer.name}`}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </TableCell>

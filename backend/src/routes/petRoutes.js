@@ -116,9 +116,9 @@ router.put(
  *           format: uuid
  *     responses:
  *       204:
- *         description: Pet removido
+ *         description: Pet removido da lista; atendimentos encerrados preservam o registro histórico
  *       409:
- *         description: Pet possui agendamentos ativos
+ *         description: Pet possui agendamento em andamento ou estado que exige conferência
  */
 router.delete(
   '/:id',

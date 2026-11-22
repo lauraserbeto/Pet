@@ -1,0 +1,116 @@
+[
+ {
+  "name": "api-g11-starting_price",
+  "ok": true,
+  "detail": "[80]"
+ },
+ {
+  "name": "api-g12-completeness-hotel",
+  "ok": true,
+  "detail": "{\"isComplete\":true,\"missingFields\":[],\"recommendedFields\":[\"gallery_images\",\"allowed_animals\",\"amenities\",\"avatar_url\",\"operating_hours\"]}"
+ },
+ {
+  "name": "g11-vitrine-hoteis-desk",
+  "who": "anon",
+  "route": "/hotels",
+  "vp": 1440,
+  "ok": true,
+  "detail": "card com preço"
+ },
+ {
+  "name": "g11-vitrine-sitters-mob",
+  "who": "anon",
+  "route": "/walkers",
+  "vp": 390,
+  "ok": true,
+  "detail": "sitter"
+ },
+ {
+  "name": "g15-produto-mob",
+  "who": "anon",
+  "route": "/shopping/883b7e5d-c0af-47b0-b3f5-184db94db853",
+  "vp": 390,
+  "ok": true,
+  "detail": "altura=52 imgsVazias=0"
+ },
+ {
+  "name": "g09-admin-conta-desk",
+  "who": "admin",
+  "route": "/dashboard/conta",
+  "vp": 1440,
+  "ok": true,
+  "detail": "conta admin"
+ },
+ {
+  "name": "g09-hotel-conta-desk",
+  "who": "hotel",
+  "route": "/dashboard/conta",
+  "vp": 1440,
+  "ok": true,
+  "detail": "conta hotel"
+ },
+ {
+  "name": "g12-hotel-sem-banner-desk",
+  "who": "hotel",
+  "route": "/dashboard/schedule",
+  "vp": 1440,
+  "ok": true,
+  "detail": "sem banner de bloqueio"
+ },
+ {
+  "name": "g12-hotel-perfil-sugestoes-desk",
+  "who": "hotel",
+  "route": "/dashboard/perfil",
+  "vp": 1440,
+  "ok": true,
+  "detail": "sugestões no perfil"
+ },
+ {
+  "name": "g13-tutor-agendamentos-desk",
+  "who": "tutor",
+  "route": "/tutor/agendamentos",
+  "vp": 1440,
+  "ok": true,
+  "detail": "segundos=false"
+ },
+ {
+  "name": "g13-tutor-agendamentos-mob",
+  "who": "tutor",
+  "route": "/tutor/agendamentos",
+  "vp": 390,
+  "ok": true,
+  "detail": "mob"
+ },
+ {
+  "name": "g13-tutor-pedidos-desk",
+  "who": "tutor",
+  "route": "/tutor/pedidos",
+  "vp": 1440,
+  "ok": true,
+  "detail": "pagar = botão primário"
+ },
+ {
+  "name": "g14-loja-visao-desk",
+  "who": "store",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "atalho=1 idMaiusculo=true"
+ },
+ {
+  "name": "g14-hotel-visao-mob",
+  "who": "hotel",
+  "route": "/dashboard",
+  "vp": 390,
+  "ok": true,
+  "detail": "mob"
+ },
+ {
+  "name": "g14-hotel-schedule-desk",
+  "who": "hotel",
+  "route": "/dashboard/schedule",
+  "vp": 1440,
+  "ok": true,
+  "detail": "agenda (AppointmentSummary com actions)"
+ }
+]

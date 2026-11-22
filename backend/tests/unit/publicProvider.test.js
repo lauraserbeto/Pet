@@ -66,3 +66,11 @@ test('nenhum select público de produto pede password_hash do usuário', () => {
     assert.equal(include.provider.select.user.select.password_hash, undefined);
   }
 });
+
+test('toPublicProvider mantém o preço inicial calculado para as vitrines (G11)', () => {
+  const publico = toPublicProvider({ ...providerFake, starting_price: 80 });
+  const semPreco = toPublicProvider(providerFake);
+
+  assert.equal(publico.starting_price, 80);
+  assert.equal(Object.hasOwn(semPreco, 'starting_price'), false);
+});

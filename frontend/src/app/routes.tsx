@@ -1,5 +1,11 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { createBrowserRouter, type RouteObject } from "react-router";
+import { createBrowserRouter, Navigate, useLocation, type RouteObject } from "react-router";
+
+// /search?q=… → /shopping?q=… (mantém links antigos funcionando).
+function SearchRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/shopping${search}`} replace />;
+}
 
 // Shell e guardas ficam EAGER (necessários já no primeiro paint).
 import { Layout } from "../components/layout/Layout";
@@ -8,6 +14,7 @@ import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import { NotFound } from "../pages/NotFound";
 import { RouteErrorBoundary } from "../components/RouteErrorBoundary";
 import { HamsterLoader } from "../components/ui/HamsterLoader";
+import { DASHBOARD_ROLES, DASHBOARD_ACCESS } from "../lib/routeAccess";
 
 // Páginas em code splitting (React.lazy) — cada rota vira um chunk sob demanda,
 // tirando ~40 páginas do bundle inicial (antes um único chunk de ~2,1 MB).
@@ -23,6 +30,7 @@ const HotelsPage = lazy(() =>
 const HotelDetailsPage = lazy(() =>
   import("../pages/HotelDetailsPage").then((m) => ({ default: m.HotelDetailsPage }))
 );
+const BookingPage = lazy(() => import("../pages/BookingPage").then(m => ({ default: m.BookingPage })));
 const WalkersPage = lazy(() =>
   import("../pages/WalkersPage").then((m) => ({ default: m.WalkersPage }))
 );
@@ -132,7 +140,14 @@ function RouteFallback() {
 // Envolve rotas SEM layout (que teria o Suspense no <Outlet/>) numa fronteira própria.
 const withSuspense = (node: ReactNode) => <Suspense fallback={<RouteFallback />}>{node}</Suspense>;
 
-const rootRoutes: RouteObject[] = [
+// Perfis do painel, espelhando os itens do Sidebar: 1 Admin, 2 Lojista, 3 Hotel, 4 Pet Sitter.
+const dashboardOnly = (roles: readonly number[], node: ReactNode) => (
+  <ProtectedRoute allowedRoles={roles} deniedView="inline">
+    {node}
+  </ProtectedRoute>
+);
+
+export const rootRoutes: RouteObject[] = [
   {
     path: "/login",
     element: withSuspense(<LoginPage />),
@@ -188,8 +203,10 @@ const rootRoutes: RouteObject[] = [
         ],
       },
       {
+        // Rotas antigas que renderizavam a landing (G19): a busca vai ao
+        // Shopping preservando o termo; agendamentos à área do Tutor.
         path: "search",
-        Component: LandingPage,
+        Component: SearchRedirect,
       },
       {
         path: "products",
@@ -247,7 +264,7 @@ const rootRoutes: RouteObject[] = [
       },
       {
         path: "appointments",
-        Component: LandingPage,
+        element: <Navigate to="/tutor/agendamentos" replace />,
       },
       {
         path: "about",
@@ -272,7 +289,7 @@ const rootRoutes: RouteObject[] = [
       {
         path: "tutor/perfil",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={[5]}>
             <TutorProfile />
           </ProtectedRoute>
         ),
@@ -280,7 +297,7 @@ const rootRoutes: RouteObject[] = [
       {
         path: "tutor/pets",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={[5]}>
             <TutorPets />
           </ProtectedRoute>
         ),
@@ -288,15 +305,19 @@ const rootRoutes: RouteObject[] = [
       {
         path: "tutor/agendamentos",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={[5]}>
             <TutorAppointments />
           </ProtectedRoute>
         ),
       },
       {
+        path: "tutor/agendar/:providerId",
+        element: <ProtectedRoute allowedRoles={[5]}><BookingPage /></ProtectedRoute>,
+      },
+      {
         path: "tutor/pedidos",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={[5]}>
             <TutorOrders />
           </ProtectedRoute>
         ),
@@ -308,7 +329,7 @@ const rootRoutes: RouteObject[] = [
         // e `allowRejectedProvider` deixa passar justamente quem foi recusado.
         path: "parceiro/corrigir-cadastro",
         element: (
-          <ProtectedRoute allowRejectedProvider>
+          <ProtectedRoute allowedRoles={[2, 3, 4]} allowRejectedProvider>
             <CorrecaoCadastro />
           </ProtectedRoute>
         ),
@@ -318,7 +339,7 @@ const rootRoutes: RouteObject[] = [
   {
     path: "/onboarding/sitter",
     element: withSuspense(
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={[4]}>
         <PetSitterOnboarding />
       </ProtectedRoute>
     ),
@@ -326,64 +347,69 @@ const rootRoutes: RouteObject[] = [
   {
     path: "/dashboard",
     element: (
-      <ProtectedRoute>
+      // Painel é de Admin e parceiros; o Tutor tem sua área própria.
+      <ProtectedRoute allowedRoles={DASHBOARD_ROLES.ANY} deniedRedirectTo="/tutor/perfil">
         <DashboardLayout />
       </ProtectedRoute>
     ),
+    // Cada rota declara os perfis do item correspondente no Sidebar. Perfil
+    // fora da lista vê AccessDenied dentro do painel (a API continua sendo a
+    // barreira dos dados; isto evita mostrar a tela de outro perfil).
     children: [
       {
         index: true,
-        Component: DashboardHome,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard"], <DashboardHome />),
       },
       {
         path: "schedule",
-        Component: Schedule,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/schedule"], <Schedule />),
       },
       {
         path: "perfil",
-        Component: PublicProfile,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/perfil"], <PublicProfile />),
       },
       {
         path: "conta",
-        Component: Account,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/conta"], <Account />),
       },
       {
         path: "financeiro",
-        Component: Finance,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/financeiro"], <Finance />),
       },
       {
         path: "orders",
-        Component: Orders,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/orders"], <Orders />),
       },
       {
+        // Tela demonstrativa (dados fictícios, fora do menu); restrita a parceiros.
         path: "customers",
-        Component: Customers,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/customers"], <Customers />),
       },
       {
         path: "products",
-        Component: Products,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/products"], <Products />),
       },
       {
         // Gestão de serviços do parceiro (SRV-F1). Hotel e sitter; o backend
         // ainda barra quem não for aprovado.
         path: "servicos",
-        Component: Services,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/servicos"], <Services />),
       },
       {
         path: "settings",
-        Component: Settings,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/settings"], <Settings />),
       },
       {
         path: "aprovacoes",
-        Component: Approvals,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/aprovacoes"], <Approvals />),
       },
       {
         path: "usuarios",
-        Component: Users,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/usuarios"], <Users />),
       },
       {
         path: "avaliacoes-sitters",
-        Component: SitterEvaluations,
+        element: dashboardOnly(DASHBOARD_ACCESS["/dashboard/avaliacoes-sitters"], <SitterEvaluations />),
       },
     ],
   },

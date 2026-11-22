@@ -44,7 +44,7 @@ export function ServiceCard({
         <div className="flex justify-between items-start">
           <div>
              <Badge variant="outline" className="mb-2 text-[10px] uppercase tracking-wider">{category}</Badge>
-            <h3 className="font-bold text-lg text-slate-900 line-clamp-1 group-hover:text-[var(--color-primary-600)] transition-colors font-[family-name:var(--font-display)]">{name}</h3>
+            <h3 className="font-bold text-lg text-slate-900 line-clamp-1 group-hover:text-[var(--color-primary-700)] transition-colors font-[family-name:var(--font-display)]">{name}</h3>
           </div>
         </div>
         <div className="flex items-center gap-1 mt-1">
@@ -60,7 +60,7 @@ export function ServiceCard({
           <span className="truncate">{address}</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-slate-500">
-           <span className="font-medium text-[var(--color-primary-600)]">{distance}</span>
+           <span className="font-medium text-[var(--color-primary-700)]">{distance}</span>
         </div>
       </CardContent>
       

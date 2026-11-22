@@ -38,6 +38,7 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   query?: Record<string, string | number | boolean | undefined | null>;
   /** Sobrescreve o timeout padrão (ms). */
   timeoutMs?: number;
+  onResponse?: (response: Response) => void;
 };
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -91,6 +92,7 @@ export async function request<T = unknown>(
     headers: extraHeaders,
     timeoutMs,
     signal: externalSignal,
+    onResponse,
     ...init
   } = options;
 
@@ -145,6 +147,7 @@ export async function request<T = unknown>(
   if (!response.ok) {
     throw await parseError(response);
   }
+  onResponse?.(response);
 
   if (response.status === 204) {
     return undefined as T;
@@ -160,6 +163,11 @@ export async function request<T = unknown>(
 }
 
 export const httpClient = {
+  getWithHeaders: async <T = unknown>(path: string, options?: RequestOptions) => {
+    let headers = new Headers();
+    const data = await request<T>(path, { ...options, method: "GET", onResponse: response => { headers = response.headers; } });
+    return { data, headers };
+  },
   get: <T = unknown>(path: string, options?: RequestOptions) =>
     request<T>(path, { ...options, method: "GET" }),
   post: <T = unknown>(path: string, body?: unknown, options?: RequestOptions) =>

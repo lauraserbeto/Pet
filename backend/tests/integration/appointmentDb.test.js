@@ -10,7 +10,6 @@ const { test, before, beforeEach, after } = require('node:test');
 const assert = require('node:assert/strict');
 
 const prisma = require('../../src/config/database');
-const appointmentRepository = require('../../src/repositories/AppointmentRepository');
 const { CreateAppointmentUseCase } = require('../../src/useCases/appointments/CreateAppointmentUseCase');
 const { UpdateAppointmentStatusUseCase } = require('../../src/useCases/appointments/UpdateAppointmentStatusUseCase');
 const { APPOINTMENT_STATUS: S } = require('../../src/constants/appointmentStatus');
@@ -198,7 +197,7 @@ test(
 );
 
 test(
-  'E-04: confirmar e recusar ao mesmo tempo — vale a primeira gravação, a outra recebe 409',
+  'E-04/PAG-2: confirmar e recusar ao mesmo tempo são serializados',
   { skip: skipDbIntegration },
   async () => {
     const { tutor } = await createAuthenticatedTutor();
@@ -207,18 +206,13 @@ test(
     const service = await createService(provider.id);
     const created = await book({ tutor, pet, service });
 
-    // As duas requisições leem o agendamento PENDENTE antes de qualquer gravação.
-    const bothRead = barrier(2);
-    let firstReads = 0;
-    const racingRepository = {
-      findById: async (id) => {
-        const appointment = await appointmentRepository.findById(id);
-        firstReads += 1;
-        if (firstReads <= 2) await bothRead();
-        return appointment;
+    const bothStarted = barrier(2);
+    const racing = new UpdateAppointmentStatusUseCase({ db: {
+      $transaction: async fn => {
+        await bothStarted();
+        return prisma.$transaction(fn);
       },
-    };
-    const racing = new UpdateAppointmentStatusUseCase({ repository: racingRepository });
+    } });
     const asPartner = (status) =>
       racing.execute({ appointmentId: created.id, status, userId: partnerUser.id, userRole: 3 });
 
@@ -228,7 +222,7 @@ test(
     const rejected = results.filter((r) => r.status === 'rejected');
     assert.equal(fulfilled.length, 1);
     assert.equal(rejected.length, 1);
-    assert.equal(rejected[0].reason.statusCode, 409);
+    assert.equal(rejected[0].reason.statusCode, 422);
 
     const stored = await prisma.appointment.findUnique({ where: { id: created.id } });
     assert.equal(stored.status, fulfilled[0].value.status);

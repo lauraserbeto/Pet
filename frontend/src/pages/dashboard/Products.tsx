@@ -39,6 +39,9 @@ export function Products() {
   const [products, setProducts] = useState<Product[]>([]);
   const [options, setOptions] = useState<{categories: string[], petTypes: string[]}>({ categories: [], petTypes: [] });
   const [isLoading, setIsLoading] = useState(true);
+  // Falha ao carregar o catálogo não pode virar "lista vazia": o lojista
+  // concluiria que perdeu os produtos (auditoria visual G10).
+  const [loadError, setLoadError] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,19 +73,23 @@ export function Products() {
   }, []);
 
   const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const [productsData, optionsData] = await Promise.all([
-        productService.fetchProducts(),
-        productService.fetchOptions()
-      ]);
-      setProducts(productsData);
-      setOptions(optionsData);
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao carregar os dados.");
-    } finally {
-      setIsLoading(false);
+    setIsLoading(true);
+    setLoadError(false);
+    const [productsResult, optionsResult] = await Promise.allSettled([
+      productService.fetchProducts(),
+      productService.fetchOptions(),
+    ]);
+    if (productsResult.status === "fulfilled") {
+      setProducts(productsResult.value);
+    } else {
+      setLoadError(true);
     }
+    if (optionsResult.status === "fulfilled") {
+      setOptions(optionsResult.value);
+    } else {
+      toast.error("Não foi possível carregar as categorias e os tipos de pet.");
+    }
+    setIsLoading(false);
   };
 
   const formatPrice = (value: string) => {
@@ -297,7 +304,7 @@ export function Products() {
           <p className="text-slate-500">Gerencie seu estoque e catálogo de produtos.</p>
         </div>
         <div className="flex gap-2">
-           <Button variant="outline" onClick={handleExportPDF} className="hidden sm:flex hover:bg-slate-50">
+           <Button variant="outline" onClick={handleExportPDF} disabled={isLoading || loadError} className="hidden sm:flex hover:bg-slate-50">
             <FileDown className="mr-2 h-4 w-4" /> Exportar PDF
            </Button>
            
@@ -442,7 +449,7 @@ export function Products() {
          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                <p className="text-sm font-medium text-slate-500">Valor em Estoque</p>
-               <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(totalValue)}</h3>
+               <h3 className="text-2xl font-bold text-slate-900">{loadError ? "—" : formatCurrency(totalValue)}</h3>
             </div>
             <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
                <Package size={20} />
@@ -451,10 +458,14 @@ export function Products() {
          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                <p className="text-sm font-medium text-slate-500">Alertas de Estoque</p>
-               <div className="flex gap-2 items-baseline mt-1">
-                 <h3 className="text-2xl font-bold text-orange-600">{lowStockCount}</h3>
-                 <span className="text-xs text-red-500 font-medium">({outOfStockCount} esgotados)</span>
-               </div>
+               {loadError ? (
+                 <h3 className="text-2xl font-bold text-slate-900 mt-1">—</h3>
+               ) : (
+                 <div className="flex gap-2 items-baseline mt-1">
+                   <h3 className="text-2xl font-bold text-orange-600">{lowStockCount}</h3>
+                   <span className="text-xs text-red-500 font-medium">({outOfStockCount} esgotados)</span>
+                 </div>
+               )}
             </div>
             <div className="h-10 w-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
                <AlertCircle size={20} />
@@ -463,7 +474,7 @@ export function Products() {
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
                <p className="text-sm font-medium text-slate-500">Total de Itens Cadastrados</p>
-               <h3 className="text-2xl font-bold text-slate-900">{products.length}</h3>
+               <h3 className="text-2xl font-bold text-slate-900">{loadError ? "—" : products.length}</h3>
             </div>
             <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                <Package size={20} />
@@ -487,7 +498,7 @@ export function Products() {
              <Button 
                variant="outline" 
                onClick={() => setShowFilters(prev => !prev)}
-               className={`flex gap-2 bg-white hover:bg-slate-50 transition-colors ${showFilters ? 'border-[var(--color-primary-400)] text-[var(--color-primary-600)] ring-1 ring-[var(--color-primary-200)]' : ''}`}
+               className={`flex gap-2 bg-white hover:bg-slate-50 transition-colors ${showFilters ? 'border-[var(--color-primary-400)] text-[var(--color-primary-700)] ring-1 ring-[var(--color-primary-200)]' : ''}`}
              >
                <Filter className="h-4 w-4" /> Filtrar
                {((selectedCategory !== "all" && selectedCategory !== "") || (selectedPetType !== "all" && selectedPetType !== "")) ? (
@@ -549,14 +560,29 @@ export function Products() {
         <div className="overflow-x-auto min-h-[300px]">
           {isLoading ? (
             <HamsterLoader size="sm" message="Carregando catálogo de produtos..." />
+          ) : loadError ? (
+             <div role="alert" className="flex flex-col items-center justify-center h-64 text-center px-4">
+                <AlertCircle className="h-12 w-12 text-red-400 mb-4" aria-hidden="true" />
+                <h3 className="text-lg font-bold text-slate-700">Não foi possível carregar seus produtos</h3>
+                <p className="text-slate-500 mt-1 mb-4 text-sm max-w-sm">Seu catálogo não foi alterado. Verifique a conexão e tente novamente.</p>
+                <Button onClick={() => void fetchData()}>Tentar novamente</Button>
+             </div>
           ) : filteredProducts.length === 0 ? (
              <div className="flex flex-col items-center justify-center h-64 text-center px-4">
-                <Package className="h-12 w-12 text-slate-300 mb-4" />
-                <h3 className="text-lg font-bold text-slate-700">Nenhum produto encontrado</h3>
-                <p className="text-slate-500 mt-1 mb-4 text-sm max-w-sm">Você ainda não tem produtos cadastrados ou nenhum corresponde à sua busca atual.</p>
-                <Button onClick={openNewProductModal} variant="outline" className="text-[#3699D2] border-[#3699D2] hover:bg-blue-50">
-                   <Plus className="mr-2 h-4 w-4" /> Cadastrar Primeiro Produto
-                </Button>
+                <Package className="h-12 w-12 text-slate-300 mb-4" aria-hidden="true" />
+                <h3 className="text-lg font-bold text-slate-700">
+                  {products.length === 0 ? "Você ainda não tem produtos" : "Nenhum produto encontrado"}
+                </h3>
+                <p className="text-slate-500 mt-1 mb-4 text-sm max-w-sm">
+                  {products.length === 0
+                    ? "Cadastre o primeiro produto para que ele apareça no Shopping."
+                    : "Nenhum produto corresponde à busca ou aos filtros atuais."}
+                </p>
+                {products.length === 0 && (
+                  <Button onClick={openNewProductModal} variant="outline">
+                     <Plus className="mr-2 h-4 w-4" /> Cadastrar Primeiro Produto
+                  </Button>
+                )}
              </div>
           ) : (
             <Table>
@@ -620,6 +646,7 @@ export function Products() {
                           onClick={() => openEditProductModal(product)}
                           className="text-slate-400 hover:text-[#3699D2] hover:bg-blue-50 transition-colors"
                           title="Editar Produto"
+                          aria-label={`Editar ${product.name}`}
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
@@ -629,6 +656,7 @@ export function Products() {
                           onClick={() => setProductToDelete(product)}
                           className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Excluir Produto"
+                          aria-label={`Excluir ${product.name}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

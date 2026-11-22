@@ -1,0 +1,41 @@
+páginas antes=151 depois=151 erros=0
+regra                          telas antes→depois  nós antes→depois
+aria-prohibited-attr           4 → 4                4 → 4
+aria-valid-attr-value          2 → 2                2 → 2
+button-name                    116 → 19             399 → 46
+color-contrast                 134 → 59             679 → 198
+label                          2 → 0                2 → 0
+link-name                      35 → 0               35 → 0
+scrollable-region-focusable    3 → 3                3 → 3
+svg-img-alt                    2 → 2                10 → 10
+foco sem indicador (ocorrências): 38 → 3
+títulos H1–H3 em Inter: 115 → 0 | títulos em preto puro: 22 → 0
+telas com rolagem horizontal: 0 → 0
+
+contraste restante (top 12 seletores):
+  12 1 > .aspect-square.bg-slate-100.overflow-hidden > .left-2.sm\:left-3.bg-blue-500
+  12 e-50.border-slate-100 > .min-w-0.flex-1 > .mb-0\.5.text-\[11px\].tracking-widest
+  12 slate-100.items-start > .min-w-0.flex-1 > .mb-0\.5.text-\[11px\].tracking-widest
+  10 r\:-translate-y-1 > .p-3.sm\:p-4.flex-1 > .tracking-wide.uppercase.text-\[10px\]
+  8 .gap-3.items-center.flex > div > .text-\[11px\].tracking-widest.uppercase
+  6 .hover\:text-slate-700
+  6 .md\:flex-none
+  6 p-4.bg-slate-50.justify-between > .text-right.shrink-0 > .text-xs.text-slate-400
+  6 .hover\:bg-slate-50 > td > .text-xs.text-slate-400
+  4 .mt-2.text-xs
+  4 .sm\:text-xs.bg-red-50.text-red-500
+  4 .border-transparent.px-6.border-b-2
+
+nome acessível restante:
+  16 -4.flex-1 > .mt-2.sm\:mt-3 > .items-end.justify-between.gap-2 > .h-8.w-8.sm\:h-9
+  6 .placeholder\:text-slate-500
+  4  > .overflow-visible.relative > .right-3.hover\:text-slate-600.transition-colors
+  4 \.5 > .relative.overflow-visible > .right-3.hover\:text-slate-600[type="button"]
+  4 .justify-between
+  4 .shadow-none.hover\:shadow-sm.hover\:bg-white
+  2 .right-3\.5
+  2 .hover\:text-slate-800.py-3.px-5
+  1 .from-pink-500
+  1 .bg-blue-600
+
+console/pageerror depois:

@@ -1,0 +1,38 @@
+páginas antes=151 depois=151 erros=0
+regra                          telas antes→depois  nós antes→depois
+aria-prohibited-attr           4 → 4                4 → 4
+aria-valid-attr-value          2 → 2                2 → 2
+button-name                    116 → 13             399 → 17
+color-contrast                 134 → 60             679 → 193
+label                          2 → 0                2 → 0
+link-name                      35 → 0               35 → 0
+scrollable-region-focusable    3 → 3                3 → 3
+svg-img-alt                    2 → 2                10 → 10
+foco sem indicador (ocorrências): 38 → 7
+títulos H1–H3 em Inter: 115 → 0 | títulos em preto puro: 22 → 0
+telas com rolagem horizontal: 0 → 0
+
+contraste restante (top 12 seletores):
+  18 1 > .aspect-square.bg-slate-100.overflow-hidden > .left-2.sm\:left-3.bg-blue-500
+  18 e-50.border-slate-100 > .min-w-0.flex-1 > .mb-0\.5.text-\[11px\].tracking-widest
+  15 r\:-translate-y-1 > .p-3.sm\:p-4.flex-1 > .tracking-wide.uppercase.text-\[10px\]
+  6 .hover\:text-slate-700
+  6 .md\:flex-none
+  6 p-4.bg-slate-50.justify-between > .text-right.shrink-0 > .text-xs.text-slate-400
+  6 g-slate-50.border-slate-100 > .min-w-0.flex-1 > .mb-0\.5.text-\[11px\].uppercase
+  6 .hover\:bg-slate-50 > td > .text-xs.text-slate-400
+  4 .mt-2.text-xs
+  4 .sm\:text-xs.bg-red-50.text-red-500
+  4 .border-transparent.px-6.border-b-2
+  4 .p-4.border-slate-200\/80.flex-col > .text-\[10px\].uppercase.text-slate-400
+
+nome acessível restante:
+  8 .placeholder\:text-slate-500
+  4 .justify-between
+  1 .from-pink-500
+  1 .bg-blue-600
+  1 .bg-slate-800
+  1 .border-slate-200\/50
+  1 .hover\:text-slate-800
+
+console/pageerror depois:

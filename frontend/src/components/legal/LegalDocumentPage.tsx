@@ -3,6 +3,8 @@ import { Link } from "react-router";
 import { motion } from "motion/react";
 import { ArrowUp, ChevronRight, ListTree } from "lucide-react";
 import type { LegalDocument } from "../../content/legal/types";
+import { useLegalPolicy } from "../../lib/hooks/useLegalPolicy";
+import { LEGAL_TEXT_VERSION } from "../../content/legal/version";
 
 /**
  * Página de documento legal (Termos, Privacidade, …).
@@ -28,20 +30,25 @@ type Props = {
 };
 
 // Classes completas (o scanner do Tailwind não resolve strings montadas em runtime).
-const SCHEMES: Record<ColorScheme, { hero: string; chipBg: string; chipText: string; accent: string; activeTab: string }> = {
+const SCHEMES: Record<
+  ColorScheme,
+  { hero: string; chipBg: string; chipText: string; accent: string; activeTab: string }
+> = {
   primary: {
     hero: "from-[var(--color-primary-600)] to-[var(--color-primary-500)]",
     chipBg: "bg-[var(--color-primary-50)]",
     chipText: "text-[var(--color-primary-700)]",
-    accent: "text-[var(--color-primary-600)]",
-    activeTab: "border-[var(--color-primary-500)] text-[var(--color-primary-700)] bg-[var(--color-primary-50)]",
+    accent: "text-[var(--color-primary-700)]",
+    activeTab:
+      "border-[var(--color-primary-500)] text-[var(--color-primary-700)] bg-[var(--color-primary-50)]",
   },
   secondary: {
     hero: "from-[var(--color-secondary-600)] to-[var(--color-secondary-500)]",
     chipBg: "bg-[var(--color-secondary-50)]",
     chipText: "text-[var(--color-secondary-700)]",
     accent: "text-[var(--color-secondary-600)]",
-    activeTab: "border-[var(--color-secondary-500)] text-[var(--color-secondary-700)] bg-[var(--color-secondary-50)]",
+    activeTab:
+      "border-[var(--color-secondary-500)] text-[var(--color-secondary-700)] bg-[var(--color-secondary-50)]",
   },
 };
 
@@ -112,6 +119,7 @@ export function LegalDocumentPage({
   crossLink,
 }: Props) {
   const scheme = SCHEMES[colorScheme];
+  const legalPolicy = useLegalPolicy();
   const [activeId, setActiveId] = useState(doc.sections[0]?.id ?? "");
   const [showTop, setShowTop] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -168,12 +176,29 @@ export function LegalDocumentPage({
           <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold tracking-wide uppercase">
             {badge}
           </span>
-          <h1 className="mt-3 text-3xl font-bold sm:text-4xl font-[family-name:var(--font-display)]">{title}</h1>
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl font-[family-name:var(--font-display)]">
+            {title}
+          </h1>
           <p className="mt-2 max-w-2xl text-white/95">{subtitle}</p>
 
           {/* Contraste corrigido: antes era text-white/50 sobre gradiente (reprovava AA). */}
           <p className="mt-5 inline-block rounded-lg bg-black/25 px-3 py-1.5 text-sm text-white">
             Última atualização: <strong className="font-semibold">{doc.lastUpdated}</strong>
+          </p>
+          <p className="mt-2 text-sm text-white" aria-live="polite">
+            Versão: {LEGAL_TEXT_VERSION}
+            {legalPolicy.isError && (
+              <>
+                {" — Não foi possível conferir a versão vigente. "}
+                <button
+                  type="button"
+                  className="underline"
+                  onClick={() => void legalPolicy.refetch()}
+                >
+                  Tentar novamente
+                </button>
+              </>
+            )}
           </p>
         </div>
       </section>
@@ -184,7 +209,10 @@ export function LegalDocumentPage({
           {/* Sumário */}
           <aside className="mb-8 lg:mb-0">
             <div className="lg:sticky lg:top-20">
-              <details className="rounded-xl border border-slate-200 bg-slate-50 p-4 lg:open:bg-transparent lg:border-0 lg:bg-transparent lg:p-0" open>
+              <details
+                className="rounded-xl border border-slate-200 bg-slate-50 p-4 lg:open:bg-transparent lg:border-0 lg:bg-transparent lg:p-0"
+                open
+              >
                 <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-900 lg:cursor-default lg:list-none">
                   <ListTree className={`h-4 w-4 ${scheme.accent}`} />
                   Índice

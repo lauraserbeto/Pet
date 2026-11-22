@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { authService } from "../../lib/services/authService";
 import { userService } from "../../lib/services/userService";
+import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "../../components/ui/button";
 import { EVALUATION_MAX_PHOTOS, acceptAttribute, validateImageFile } from "../../lib/utils/imageUpload";
 import { toast } from 'sonner';
 import {
@@ -27,7 +29,8 @@ import {
 
 export const PetSitterOnboarding = () => {
     const navigate = useNavigate();
-    const [status, setStatus] = useState<'LOADING' | 'FORM' | 'IN_REVIEW' | 'COMPLETED' | 'REJECTED'>('LOADING');
+    const { setUser } = useAuth();
+    const [status, setStatus] = useState<'LOADING' | 'FORM' | 'IN_REVIEW' | 'COMPLETED' | 'REJECTED' | 'UNAVAILABLE' | 'ERROR'>('LOADING');
     const [currentStep, setCurrentStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitText, setSubmitText] = useState('Enviar para Análise');
@@ -62,6 +65,7 @@ export const PetSitterOnboarding = () => {
     }, []);
 
     const checkUserStatus = async () => {
+        setStatus('LOADING');
         try {
             const userStr = localStorage.getItem('petplus_user');
             if (!userStr) {
@@ -70,18 +74,19 @@ export const PetSitterOnboarding = () => {
             }
 
             const data = await userService.getMe();
+            setUser(data);
 
             if (data.onboarding_step === 'IN_REVIEW') {
                 setStatus('IN_REVIEW');
             } else if (data.onboarding_step === 'COMPLETED') {
-                navigate('/dashboard');
+                if (data.provider_status === 'APROVADO') navigate('/dashboard', { replace: true });
+                else setStatus('UNAVAILABLE');
             } else {
                 setStatus('FORM');
             }
-        } catch (error) {
-            console.error('Error fetching user status:', error);
+        } catch {
             toast.error('Erro ao verificar status.');
-            authService.logout();
+            setStatus('ERROR');
         }
     };
 
@@ -152,8 +157,16 @@ export const PetSitterOnboarding = () => {
             setStatus('IN_REVIEW');
 
         } catch (error: any) {
-            console.error('Submission error:', error);
-            toast.error(error.message || 'Erro ao enviar avaliação. Tente novamente mais tarde.');
+            // Candidatura única (E-11 / DEC-D): reflete o estado real em vez de só avisar.
+            if (error?.code === 'EVALUATION_ALREADY_PENDING') {
+                toast.info(error.message);
+                setStatus('IN_REVIEW');
+            } else if (error?.code === 'EVALUATION_ALREADY_APPROVED') {
+                toast.info(error.message);
+                navigate('/dashboard');
+            } else {
+                toast.error(error?.message || 'Erro ao enviar avaliação. Tente novamente mais tarde.');
+            }
         } finally {
             setIsSubmitting(false);
             setSubmitText('Enviar para Análise');
@@ -186,7 +199,20 @@ export const PetSitterOnboarding = () => {
     if (status === 'LOADING') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-primary-100)] border-t-[var(--color-primary-600)]"></div>
+            </div>
+        );
+    }
+
+    if (status === 'UNAVAILABLE' || status === 'ERROR') {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+                <div role="alert" className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-4">
+                    <h1 className="text-2xl font-bold">{status === 'ERROR' ? 'Não foi possível consultar seu cadastro' : 'Painel ainda indisponível'}</h1>
+                    <p>{status === 'ERROR' ? 'Tente consultar novamente antes de continuar.' : 'A situação do cadastro ainda não permite liberar o painel. Se o problema persistir, entre em contato com a equipe Pet+.'}</p>
+                    <Button onClick={() => void checkUserStatus()}>Consultar novamente</Button>
+                    <Button variant="outline" onClick={() => navigate('/')}>Voltar ao início</Button>
+                </div>
             </div>
         );
     }
@@ -204,7 +230,7 @@ export const PetSitterOnboarding = () => {
                         Isso pode levar até 48 horas úteis.
                     </p>
                     <button 
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate('/')}
                         className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
                     >
                         Voltar para o Início

@@ -1,0 +1,132 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "@sentry/bundler-plugins": {
+      "name": "@sentry/bundler-plugins",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        "glob"
+      ],
+      "effects": [
+        "@sentry/vite-plugin"
+      ],
+      "range": "<=11.10.0",
+      "nodes": [
+        "node_modules/@sentry/bundler-plugins"
+      ],
+      "fixAvailable": {
+        "name": "@sentry/vite-plugin",
+        "version": "11.16.0",
+        "isSemVerMajor": true
+      }
+    },
+    "@sentry/vite-plugin": {
+      "name": "@sentry/vite-plugin",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        "@sentry/bundler-plugins"
+      ],
+      "effects": [],
+      "range": "5.4.0 - 11.10.0",
+      "nodes": [
+        "node_modules/@sentry/vite-plugin"
+      ],
+      "fixAvailable": {
+        "name": "@sentry/vite-plugin",
+        "version": "11.16.0",
+        "isSemVerMajor": true
+      }
+    },
+    "glob": {
+      "name": "glob",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1244013,
+          "name": "glob",
+          "dependency": "glob",
+          "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+          "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-400"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=9.0.0 <=14.0.1"
+        },
+        "minimatch"
+      ],
+      "effects": [
+        "@sentry/bundler-plugins"
+      ],
+      "range": "9.0.0 - 14.0.1",
+      "nodes": [
+        "node_modules/glob"
+      ],
+      "fixAvailable": {
+        "name": "@sentry/vite-plugin",
+        "version": "11.16.0",
+        "isSemVerMajor": true
+      }
+    },
+    "minimatch": {
+      "name": "minimatch",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1244623,
+          "name": "minimatch",
+          "dependency": "minimatch",
+          "title": "minimatch has potential denial of service via globparts amplification",
+          "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-405"
+          ],
+          "cvss": {
+            "score": 0,
+            "vectorString": null
+          },
+          "range": ">=7.0.0 <11.0.1"
+        }
+      ],
+      "effects": [
+        "glob"
+      ],
+      "range": "7.0.0 - 11.0.0",
+      "nodes": [
+        "node_modules/glob/node_modules/minimatch"
+      ],
+      "fixAvailable": {
+        "name": "@sentry/vite-plugin",
+        "version": "11.16.0",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 4,
+      "high": 0,
+      "critical": 0,
+      "total": 4
+    },
+    "dependencies": {
+      "prod": 246,
+      "dev": 368,
+      "optional": 132,
+      "peer": 10,
+      "peerOptional": 0,
+      "total": 629
+    }
+  }
+}

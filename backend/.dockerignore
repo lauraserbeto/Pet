@@ -1,0 +1,12 @@
+# Somente os arquivos necessários ao build podem sair da máquina no contexto.
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!.npmrc
+!prisma/
+!prisma/schema.prisma
+!prisma/migrations/
+!prisma/migrations/**
+!src/
+!src/**

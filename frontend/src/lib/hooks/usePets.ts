@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { petService, type Pet, type PetInput } from "../services/petService";
+import { petService, type PetInput } from "../services/petService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export const petsQueryKey = ["pets"] as const;
@@ -29,23 +29,8 @@ export function usePets() {
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => petService.remove(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: petsQueryKey });
-      const previous = queryClient.getQueryData<Pet[]>(petsQueryKey);
-      if (previous) {
-        queryClient.setQueryData<Pet[]>(
-          petsQueryKey,
-          previous.filter((p) => p.id !== id)
-        );
-      }
-      return { previous };
-    },
-    onError: (_err, _id, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(petsQueryKey, context.previous);
-      }
-    },
-    onSettled: () => invalidate(),
+    // A API pode recusar por vínculo ativo. Manter o cartão até confirmar.
+    onSuccess: () => invalidate(),
   });
 
   return {

@@ -29,7 +29,13 @@ router.get('/options', ProductController.getOptions);
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: Lista de produtos
+ *         description: Lista de produtos, incluindo rating_avg e rating_count reais de cada produto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ReviewSummary'
  */
 router.get('/', ProductController.listActive);
 
@@ -61,7 +67,11 @@ router.get('/provider', authMiddleware, ProductController.listByProvider);
  *           type: string
  *     responses:
  *       200:
- *         description: Detalhes do produto
+ *         description: Detalhes do produto, incluindo rating_avg e rating_count reais
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReviewSummary'
  *       404:
  *         description: Produto inexistente, inativo ou de lojista não aprovado/desativado
  *       422:

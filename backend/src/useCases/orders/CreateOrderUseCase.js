@@ -1,23 +1,26 @@
-const prisma = require('../../config/database');
-const CartRepository = require('../../repositories/CartRepository');
-const ProductRepository = require('../../repositories/ProductRepository');
-const AppError = require('../../utils/AppError');
-const { ORDER_STATUS } = require('../../constants/orderStatus');
+const prisma = require("../../config/database");
+const CartRepository = require("../../repositories/CartRepository");
+const ProductRepository = require("../../repositories/ProductRepository");
+const AppError = require("../../utils/AppError");
+const { ORDER_STATUS } = require("../../constants/orderStatus");
+const { orderConcurrencyError } = require("../../utils/orderConcurrency");
 const {
   PROVIDER_ROLES,
   OPERATIONAL_PROVIDER_SELECT,
   isOperationalProvider,
-} = require('../providers/providerAccess');
+} = require("../providers/providerAccess");
 
 // Lojista que deixou de estar apto a vender (desativado, recusado, pendente)
 // não recebe pedido, mesmo com o produto ainda no carrinho do tutor (E-01).
 function assertStoreAvailable(product, productName) {
-  if (!isOperationalProvider(product.provider, { roleId: PROVIDER_ROLES.STORE })) {
+  if (
+    !isOperationalProvider(product.provider, { roleId: PROVIDER_ROLES.STORE })
+  ) {
     throw new AppError(
       `Produto "${productName}" indisponível: a loja não está ativa na plataforma`,
       409,
-      'PROVIDER_UNAVAILABLE',
-      { product_id: product.id }
+      "PROVIDER_UNAVAILABLE",
+      { product_id: product.id },
     );
   }
 }
@@ -35,7 +38,7 @@ const SHIPPING_ADDRESS_SELECT = {
 
 function asNumber(value) {
   if (value === null || value === undefined) return 0;
-  if (typeof value === 'object' && typeof value.toNumber === 'function') {
+  if (typeof value === "object" && typeof value.toNumber === "function") {
     return value.toNumber();
   }
   return Number(value);
@@ -69,8 +72,8 @@ function formatOrder(order) {
 
 class CreateOrderUseCase {
   async execute({ userId, userRole, addressId }) {
-    if (userRole && userRole !== 5) {
-      throw AppError.forbidden('Apenas clientes podem realizar pedidos');
+    if (userRole !== 5) {
+      throw AppError.forbidden("Apenas clientes podem realizar pedidos");
     }
 
     // Endereço de entrega do próprio tutor. De outro usuário ou inexistente dá
@@ -80,22 +83,26 @@ class CreateOrderUseCase {
       select: SHIPPING_ADDRESS_SELECT,
     });
     if (!shippingAddress) {
-      throw AppError.notFound('Endereço de entrega não encontrado.');
+      throw AppError.notFound("Endereço de entrega não encontrado.");
     }
 
     const cart = await CartRepository.findByUser(userId);
     if (!cart || !cart.items || cart.items.length === 0) {
-      throw AppError.badRequest('O carrinho está vazio');
+      throw AppError.badRequest("O carrinho está vazio");
     }
 
     // Validação prévia de disponibilidade e estoque
     for (const item of cart.items) {
       const product = item.product;
       if (!product) {
-        throw AppError.notFound(`Produto com ID ${item.product_id} não encontrado`);
+        throw AppError.notFound(
+          `Produto com ID ${item.product_id} não encontrado`,
+        );
       }
-      if (product.status !== 'ACTIVE') {
-        throw AppError.conflict(`Produto "${product.name}" indisponível (status: ${product.status})`);
+      if (product.status !== "ACTIVE") {
+        throw AppError.conflict(
+          `Produto "${product.name}" indisponível (status: ${product.status})`,
+        );
       }
       assertStoreAvailable(product, product.name);
       if (product.stock_quantity < item.quantity) {
@@ -105,119 +112,161 @@ class CreateOrderUseCase {
             product_id: item.product_id,
             requested: item.quantity,
             available: product.stock_quantity,
-          }
-        );
-      }
-    }
-
-    // Agrupamento por lojista (Opção A: 1 pedido por provider)
-    const itemsByProvider = new Map();
-    for (const item of cart.items) {
-      const providerId = item.product.provider?.id || item.product.provider_id;
-      if (!providerId) {
-        throw AppError.badRequest(`Produto "${item.product.name}" não está associado a nenhum lojista`);
-      }
-      if (!itemsByProvider.has(providerId)) {
-        itemsByProvider.set(providerId, []);
-      }
-      itemsByProvider.get(providerId).push(item);
-    }
-
-    // Execução da transação atômica única no Prisma
-    const createdOrders = await prisma.$transaction(async (tx) => {
-      // 1. Revalidação concorrente de estoque dentro da transação e decremento
-      for (const item of cart.items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.product_id },
-          include: { provider: { select: OPERATIONAL_PROVIDER_SELECT } },
-        });
-
-        if (!product || product.status !== 'ACTIVE') {
-          throw AppError.conflict(
-            `Produto "${item.product.name}" indisponível no momento da finalização`
-          );
-        }
-        assertStoreAvailable(product, item.product.name);
-
-        if (product.stock_quantity < item.quantity) {
-          throw AppError.conflict(
-            `Estoque insuficiente para o produto "${product.name}"`,
-            {
-              product_id: item.product_id,
-              requested: item.quantity,
-              available: product.stock_quantity,
-            }
-          );
-        }
-
-        await ProductRepository.decrementStock(item.product_id, item.quantity, tx);
-      }
-
-      // 2. Criação dos pedidos e itens por lojista
-      const orders = [];
-      for (const [providerId, groupItems] of itemsByProvider.entries()) {
-        const orderItemsData = groupItems.map((item) => {
-          const unitPrice =
-            item.unit_price_snapshot !== undefined && item.unit_price_snapshot !== null
-              ? asNumber(item.unit_price_snapshot)
-              : asNumber(item.product.price);
-
-          return {
-            product_id: item.product_id,
-            quantity: item.quantity,
-            unit_price: unitPrice,
-          };
-        });
-
-        const totalPrice = Number(
-          orderItemsData
-            .reduce((acc, curr) => acc + curr.unit_price * curr.quantity, 0)
-            .toFixed(2)
-        );
-
-        const order = await tx.order.create({
-          data: {
-            customer_id: userId,
-            provider_id: providerId,
-            total_price: totalPrice,
-            status: ORDER_STATUS.AWAITING_PAYMENT,
-            // A mesma cópia em cada pedido do checkout (um por lojista).
-            shipping_address: shippingAddress,
-            items: {
-              create: orderItemsData,
-            },
           },
-          include: {
-            items: {
+        );
+      }
+    }
+
+    // Uma única leitura transacional do carrinho decide o que será consumido.
+    // SERIALIZABLE impede que duas finalizações consumam a mesma versão.
+    let createdOrders;
+    try {
+      createdOrders = await prisma.$transaction(
+        async (tx) => {
+          // Reler na transação inclui a exclusão/edição concorrente do endereço
+          // na proteção Serializable; o snapshot do pedido sai desta leitura.
+          const currentAddress = await tx.address.findFirst({
+            where: { id: addressId, user_id: userId },
+            select: SHIPPING_ADDRESS_SELECT,
+          });
+          if (!currentAddress)
+            throw AppError.notFound("Endereço de entrega não encontrado.");
+          const currentCart = await CartRepository.findByUser(userId, tx);
+          if (!currentCart?.items?.length)
+            throw AppError.badRequest("O carrinho está vazio");
+          const itemsByProvider = new Map();
+          const sortedItems = [...currentCart.items].sort((a, b) =>
+            a.product_id.localeCompare(b.product_id),
+          );
+          for (const item of sortedItems) {
+            if (
+              !item.product ||
+              !Number.isSafeInteger(item.quantity) ||
+              item.quantity <= 0
+            )
+              throw AppError.conflict(
+                "Item inválido no carrinho. Atualize os dados antes de finalizar.",
+              );
+            const providerId =
+              item.product.provider?.id || item.product.provider_id;
+            if (!providerId) {
+              throw AppError.badRequest(
+                `Produto "${item.product.name}" não está associado a nenhum lojista`,
+              );
+            }
+            if (!itemsByProvider.has(providerId)) {
+              itemsByProvider.set(providerId, []);
+            }
+            itemsByProvider.get(providerId).push(item);
+          }
+
+          // 1. Revalidação concorrente de estoque dentro da transação e decremento
+          for (const item of sortedItems) {
+            const product = await tx.product.findUnique({
+              where: { id: item.product_id },
+              include: { provider: { select: OPERATIONAL_PROVIDER_SELECT } },
+            });
+
+            if (!product || product.status !== "ACTIVE") {
+              throw AppError.conflict(
+                `Produto "${item.product.name}" indisponível no momento da finalização`,
+              );
+            }
+            assertStoreAvailable(product, item.product.name);
+
+            if (product.stock_quantity < item.quantity) {
+              throw AppError.conflict(
+                `Estoque insuficiente para o produto "${product.name}"`,
+                {
+                  product_id: item.product_id,
+                  requested: item.quantity,
+                  available: product.stock_quantity,
+                },
+              );
+            }
+
+            await ProductRepository.decrementStock(
+              item.product_id,
+              item.quantity,
+              tx,
+            );
+          }
+
+          // 2. Criação dos pedidos e itens por lojista
+          const orders = [];
+          for (const [providerId, groupItems] of itemsByProvider.entries()) {
+            const orderItemsData = groupItems.map((item) => {
+              const unitPrice =
+                item.unit_price_snapshot !== undefined &&
+                item.unit_price_snapshot !== null
+                  ? asNumber(item.unit_price_snapshot)
+                  : asNumber(item.product.price);
+              if (!Number.isFinite(unitPrice) || unitPrice <= 0)
+                throw AppError.conflict(
+                  "Preço inválido no carrinho. Atualize os dados antes de finalizar.",
+                );
+
+              return {
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit_price: unitPrice,
+              };
+            });
+
+            const totalPrice = Number(
+              orderItemsData
+                .reduce((acc, curr) => acc + curr.unit_price * curr.quantity, 0)
+                .toFixed(2),
+            );
+
+            const order = await tx.order.create({
+              data: {
+                customer_id: userId,
+                provider_id: providerId,
+                total_price: totalPrice,
+                status: ORDER_STATUS.AWAITING_PAYMENT,
+                // A mesma cópia em cada pedido do checkout (um por lojista).
+                shipping_address: currentAddress,
+                items: {
+                  create: orderItemsData,
+                },
+              },
               include: {
-                product: {
+                items: {
+                  include: {
+                    product: {
+                      select: {
+                        id: true,
+                        name: true,
+                        image_url: true,
+                        sku: true,
+                      },
+                    },
+                  },
+                },
+                provider: {
                   select: {
                     id: true,
-                    name: true,
-                    image_url: true,
-                    sku: true,
+                    business_name: true,
                   },
                 },
               },
-            },
-            provider: {
-              select: {
-                id: true,
-                business_name: true,
-              },
-            },
-          },
-        });
+            });
 
-        orders.push(order);
-      }
+            orders.push(order);
+          }
 
-      // 3. Esvaziamento atômico do carrinho
-      await CartRepository.deleteAllItems(cart.id, tx);
-      await CartRepository.touch(cart.id, tx);
+          // 3. Esvaziamento atômico do carrinho
+          await CartRepository.deleteAllItems(currentCart.id, tx);
+          await CartRepository.touch(currentCart.id, tx);
 
-      return orders;
-    });
+          return orders;
+        },
+        { isolationLevel: "Serializable", timeout: 15000 },
+      );
+    } catch (error) {
+      throw orderConcurrencyError(error);
+    }
 
     const formattedOrders = createdOrders.map(formatOrder);
 

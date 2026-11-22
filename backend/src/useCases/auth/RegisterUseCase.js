@@ -1,89 +1,78 @@
-const UserRepository = require('../../repositories/UserRepository');
-const bcrypt = require('bcryptjs');
-const prisma = require('../../config/database');
-const DocumentVerificationService = require('../../services/DocumentVerificationService');
-const { PROVIDER_STATUS } = require('../../constants/providerStatus');
-
-const CNPJ_ONLY_ROLES = [2, 3];
-const COMMERCIAL_ROLES = [2, 3, 4];
-const SELF_SERVICE_ROLES = [2, 3, 4, 5];
+const UserRepository = require("../../repositories/UserRepository");
+const bcrypt = require("bcryptjs");
+const prisma = require("../../config/database");
+const { PROVIDER_STATUS } = require("../../constants/providerStatus");
+const { PASSWORD_HASH_COST } = require("../../security/passwordPolicy");
+const { normalizeDocument } = require("../../security/documentIdentity");
+const { registerSchema } = require("../../schemas/authSchemas");
+const AppError = require("../../utils/AppError");
 
 class RegisterUseCase {
-  async execute({ full_name, email, password, role_id, business_name, document, document_type, terms_accepted }) {
-    if (!full_name || !email || !password || !role_id) {
-      throw new Error('Nome, e-mail, senha e tipo de usuário são obrigatórios.');
+  async execute(input) {
+    // Também valida chamadas internas; não depende apenas do middleware HTTP.
+    const values = registerSchema.parse(input);
+    let userExists;
+    try {
+      userExists = await UserRepository.findByEmail(values.email);
+    } catch (error) {
+      if (error.code === "EMAIL_COLLISION")
+        throw AppError.conflict(
+          "Este e-mail já está cadastrado em nossa plataforma.",
+        );
+      throw error;
     }
-
-    if (!SELF_SERVICE_ROLES.includes(Number(role_id))) {
-      throw new Error('Tipo de conta inválido para cadastro.');
+    if (userExists)
+      throw AppError.conflict(
+        "Este e-mail já está cadastrado em nossa plataforma.",
+      );
+    const commercial = [2, 3, 4].includes(values.role_id);
+    const document = commercial ? normalizeDocument(values.document) : null;
+    if (commercial) {
+      const duplicates =
+        await prisma.$queryRaw`SELECT id FROM providers WHERE petplus_normalize_document(document) = ${document} LIMIT 1`;
+      if (duplicates.length)
+        throw AppError.conflict(
+          "Este documento já está cadastrado em nossa plataforma.",
+        );
     }
-
-    if (password.length < 6) {
-      throw new Error('A senha deve ter no mínimo 6 caracteres.');
+    const password_hash = await bcrypt.hash(
+      values.password,
+      PASSWORD_HASH_COST,
+    );
+    try {
+      const user = await prisma.user.create({
+        data: {
+          full_name: values.full_name,
+          email: values.email,
+          password_hash,
+          role_id: values.role_id,
+          terms_accepted: values.terms_accepted,
+          terms_accepted_at: new Date(),
+          terms_version: values.terms_version,
+          ...(commercial
+            ? {
+                provider: {
+                  create: {
+                    business_name: values.business_name,
+                    document,
+                    document_type: values.document_type,
+                    status: PROVIDER_STATUS.PENDING,
+                  },
+                },
+              }
+            : {}),
+        },
+      });
+      const { password_hash: _omit, ...safe } = user;
+      return safe;
+    } catch (error) {
+      // O índice arbitra a corrida depois da consulta, sem revelar documento/conta.
+      if (error.code === "P2002")
+        throw AppError.conflict(
+          "E-mail ou documento já cadastrado em nossa plataforma.",
+        );
+      throw error;
     }
-
-    const userExists = await UserRepository.findByEmail(email);
-    if (userExists) {
-      throw new Error('Este e-mail já está cadastrado em nossa plataforma.');
-    }
-
-    if (COMMERCIAL_ROLES.includes(role_id)) {
-      if (!document) {
-        throw new Error("O documento (CPF ou CNPJ) é obrigatório para contas comerciais.");
-      }
-
-      if (!document_type || !['CPF', 'CNPJ'].includes(document_type)) {
-        throw new Error("O tipo de documento (document_type) deve ser 'CPF' ou 'CNPJ'.");
-      }
-
-      if (CNPJ_ONLY_ROLES.includes(role_id) && document_type === 'CPF') {
-        throw new Error("Lojistas e Hotéis devem obrigatoriamente utilizar CNPJ.");
-      }
-
-      const cleanDoc = document.replace(/\D/g, '');
-
-      if (document_type === 'CNPJ') {
-        if (cleanDoc.length !== 14) {
-          throw new Error("O CNPJ deve ter 14 dígitos.");
-        }
-        await DocumentVerificationService.verifyCNPJ(cleanDoc);
-      } else if (document_type === 'CPF') {
-        if (cleanDoc.length !== 11) {
-          throw new Error("O CPF deve ter 11 dígitos.");
-        }
-        if (!DocumentVerificationService.isValidCPF(cleanDoc)) {
-          throw new Error("O CPF informado é matematicamente inválido.");
-        }
-      }
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await prisma.user.create({
-      data: {
-        full_name,
-        email,
-        password_hash: hashedPassword,
-        role_id,
-        terms_accepted: true,
-        ...(COMMERCIAL_ROLES.includes(role_id) ? {
-          provider: {
-            create: {
-              business_name: business_name,
-              document: document,
-              document_type: document_type,
-              status: PROVIDER_STATUS.PENDING
-            }
-          }
-        } : {})
-      }
-    });
-
-    // Remove o hash de senha do retorno (o campo real é `password_hash`).
-    // Antes destruía `password` (inexistente), vazando o hash bcrypt na resposta.
-    const { password_hash: _omit, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
   }
 }
-
 module.exports = new RegisterUseCase();

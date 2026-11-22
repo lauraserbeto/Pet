@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="3" errors="0" time="0">
+    <testsuite name="src/lib/postLoginRedirect.test.ts" timestamp="2026-10-18T22:03:18.888Z" hostname="LAUBS" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/lib/postLoginRedirect.test.ts" name="src/lib/postLoginRedirect.test.ts" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/CheckoutPaymentPage.test.tsx" timestamp="2026-10-18T22:03:18.895Z" hostname="LAUBS" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="src/pages/CheckoutPaymentPage.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/parceiro/CorrecaoCadastro.test.tsx" timestamp="2026-10-18T22:03:18.897Z" hostname="LAUBS" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="src/pages/parceiro/CorrecaoCadastro.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\.tmp-1792360998776-p06phvlc0ak&apos; -&gt; &apos;C:\Users\serbe\AppData\Local\Packages\sandbox.{b096a976-216b-49f9-9633-160c2359c6b8}\AC\Temp\f5Mu6FSSZIK2xpTjnqSqz\client\83fcca59a5e22967b12e24d808920fd8fad118bf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

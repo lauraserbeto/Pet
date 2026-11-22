@@ -1,3 +1,4 @@
+import { useCartSync } from '../../lib/hooks/useCartSync';
 import {
   createContext,
   useCallback,
@@ -51,11 +52,18 @@ type CartContextType = {
   addItem: (item: CartAddInput, quantity?: number) => Promise<boolean>;
   removeItem: (id: string) => Promise<void>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  clearCart: () => Promise<boolean>;
   totalItems: number;
   totalPrice: number;
   warnings: CartWarning[];
   isLoading: boolean;
+  cartError: string;
+  isSyncing: boolean;
+  syncError: string;
+  syncBlocked: boolean;
+  retrySync: () => Promise<void>;
+  acceptServerCart: () => Promise<void>;
+  refreshCart: () => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -82,9 +90,6 @@ function writeAnon(items: AnonItem[]) {
   localStorage.setItem(ANON_KEY, JSON.stringify(items));
 }
 
-function clearAnon() {
-  localStorage.removeItem(ANON_KEY);
-}
 
 /* ===========================================================
    Mappers — DTO do servidor → CartItem público
@@ -120,14 +125,19 @@ function fromAnonItem(item: AnonItem): CartItem {
    Provider
    =========================================================== */
 
-const cartQueryKey = ["cart"] as const;
+
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { token, isAuthenticated, user } = useAuth();
   const queryClient = useQueryClient();
+  const cartQueryKey = useMemo(() => ["cart", user?.id], [user?.id]);
 
   // Estado anônimo (apenas usado quando sem token)
   const [anonItems, setAnonItems] = useState<AnonItem[]>(() => readAnon());
+
+  const onClaim = useCallback(() => setAnonItems([]), []);
+  const sync = useCartSync(user?.id, token, user?.role_id === 5, onClaim);
+  const refreshCart = useCallback(async () => { await queryClient.invalidateQueries({ queryKey: cartQueryKey }); }, [queryClient, cartQueryKey]);
 
   // Persiste localStorage em qualquer mudança quando anônimo
   useEffect(() => {
@@ -137,8 +147,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Query do carrinho do servidor — só roda autenticado
   const serverCartQuery = useQuery({
     queryKey: cartQueryKey,
-    queryFn: () => cartService.get(),
-    enabled: Boolean(token),
+    queryFn: ({ signal }) => cartService.get(signal),
+    enabled: Boolean(token) && user?.role_id === 5 && !sync.syncBlocked,
     staleTime: 15_000,
   });
 
@@ -152,30 +162,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     lastWarningStampRef.current = stamp;
     warnings.forEach((w) => toast.warning(w.message));
   }, [serverCartQuery.data]);
-
-  /* -------- Merge anônimo → autenticado, uma única vez ao logar -------- */
-  const mergedRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!isAuthenticated || !token) return;
-    if (mergedRef.current === token) return;
-    mergedRef.current = token;
-
-    const pending = readAnon();
-    if (pending.length === 0) return;
-
-    cartService
-      .merge(pending.map((i) => ({ product_id: i.id, quantity: i.quantity })))
-      .then((dto) => {
-        queryClient.setQueryData(cartQueryKey, dto);
-        clearAnon();
-        setAnonItems([]);
-        toast.success("Carrinho sincronizado com sua conta");
-      })
-      .catch((err) => {
-        const message = err instanceof ApiError ? err.message : "Erro ao sincronizar carrinho";
-        toast.error(message);
-      });
-  }, [isAuthenticated, token, queryClient]);
 
   /* -------- Mutations do servidor (com optimistic) -------- */
 
@@ -238,12 +224,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   /* -------- API pública -------- */
 
-console.log("USUÁRIO NO CARRINHO:", user);
-console.log("ROLE ID:", user?.role_id);
+
 
 
   const addItem = useCallback(
     async (input: CartAddInput, quantity: number = 1): Promise<boolean> => {
+      if (sync.syncBlocked) { toast.warning('Resolva a sincronização do carrinho antes de alterar os itens.'); return false; }
       if (user && user.role_id !== 5) {
         toast.warning("Funcionalidade indisponível. Apenas clientes podem usar o carrinho.");
         return false;
@@ -272,11 +258,12 @@ console.log("ROLE ID:", user?.role_id);
       });
       return true;
     },
-    [isAuthenticated, addMutation, user]
+    [isAuthenticated, addMutation, user, sync.syncBlocked]
   );
 
   const removeItem = useCallback(
     async (id: string) => {
+      if (sync.syncBlocked) return;
       if (isAuthenticated) {
         try {
           await removeMutation.mutateAsync(id);
@@ -288,11 +275,12 @@ console.log("ROLE ID:", user?.role_id);
       }
       setAnonItems((prev) => prev.filter((i) => i.id !== id));
     },
-    [isAuthenticated, removeMutation]
+    [isAuthenticated, removeMutation, sync.syncBlocked]
   );
 
   const updateQuantity = useCallback(
     async (id: string, quantity: number) => {
+      if (sync.syncBlocked) return;
       const safeQty = Math.max(0, Math.min(99, quantity));
       if (isAuthenticated) {
         try {
@@ -309,21 +297,25 @@ console.log("ROLE ID:", user?.role_id);
           : prev.map((i) => (i.id === id ? { ...i, quantity: safeQty } : i))
       );
     },
-    [isAuthenticated, updateMutation]
+    [isAuthenticated, updateMutation, sync.syncBlocked]
   );
 
-  const clearCart = useCallback(async () => {
+  // Devolve se limpou de fato: quem chama só confirma sucesso após a API (E-20).
+  const clearCart = useCallback(async (): Promise<boolean> => {
+    if (sync.syncBlocked) return false;
     if (isAuthenticated) {
       try {
         await clearMutation.mutateAsync();
+        return true;
       } catch (err) {
         const message = err instanceof ApiError ? err.message : "Erro ao limpar carrinho";
         toast.error(message);
+        return false;
       }
-      return;
     }
     setAnonItems([]);
-  }, [isAuthenticated, clearMutation]);
+    return true;
+  }, [isAuthenticated, clearMutation, sync.syncBlocked]);
 
   /* -------- Derivações expostas -------- */
 
@@ -350,8 +342,9 @@ console.log("ROLE ID:", user?.role_id);
     [serverTotal, items]
   );
 
-  const warnings = serverCartQuery.data?.warnings ?? [];
-  const isLoading = isAuthenticated && serverCartQuery.isLoading;
+  const warnings = useMemo(() => serverCartQuery.data?.warnings ?? [], [serverCartQuery.data]);
+  const cartError = serverCartQuery.isError ? 'Não foi possível consultar o carrinho da conta. Tente novamente.' : '';
+  const isLoading = isAuthenticated && (serverCartQuery.isLoading || sync.isSyncing);
 
   const value = useMemo<CartContextType>(
     () => ({
@@ -364,6 +357,9 @@ console.log("ROLE ID:", user?.role_id);
       totalPrice,
       warnings,
       isLoading,
+      cartError,
+      ...sync,
+      refreshCart,
     }),
     [
       items,
@@ -375,6 +371,9 @@ console.log("ROLE ID:", user?.role_id);
       totalPrice,
       warnings,
       isLoading,
+      cartError,
+      sync,
+      refreshCart,
     ]
   );
 

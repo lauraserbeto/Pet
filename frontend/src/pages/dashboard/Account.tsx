@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { useAuth } from "../../contexts/AuthContext";
 import { isApprovedProviderStatus, PROVIDER_STATUS } from "../../lib/constants/providerStatus";
 
 interface AccountInfo {
@@ -45,9 +46,25 @@ export function Account() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const { user: authUser } = useAuth();
+  const isAdmin = authUser?.role_id === 1;
+
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
+      // Admin não tem cadastro de parceiro: /providers/me responde 403 e o
+      // fallback exibia "Tipo de parceiro · Pendente" (auditoria visual G09).
+      if (isAdmin) {
+        setAccount({
+          full_name: authUser?.full_name || "—",
+          email: authUser?.email || "—",
+          document: "Não se aplica",
+          role_label: ROLE_LABELS[1],
+          status: "",
+        });
+        setIsLoading(false);
+        return;
+      }
       try {
         const data = await providerService.fetchMe();
         const roleId: number = data.user?.role_id ?? 0;
@@ -80,7 +97,7 @@ export function Account() {
       }
     };
     load();
-  }, []);
+  }, [isAdmin, authUser?.full_name, authUser?.email]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -182,23 +199,28 @@ export function Account() {
                 <ShieldCheck size={18} />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                  Tipo de Parceiro
+                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                  {isAdmin ? "Perfil de acesso" : "Tipo de Parceiro"}
                 </p>
-                <p className="font-semibold text-slate-800 mt-0.5">{account?.role_label}</p>
+                <p className="font-semibold text-slate-800 mt-0.5">
+                  {isAdmin ? "Administrador da plataforma" : account?.role_label}
+                </p>
               </div>
             </div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                isApprovedProviderStatus(account?.status)
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-amber-100 text-amber-700"
-              }`}
-            >
-              {getProviderStatusLabel(account?.status)}
-            </span>
+            {!isAdmin && (
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+                  isApprovedProviderStatus(account?.status)
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                {getProviderStatusLabel(account?.status)}
+              </span>
+            )}
           </div>
 
+          {!isAdmin && (
           <div className="mt-5 pt-5 border-t border-slate-100">
             <button
               onClick={() => navigate("/dashboard/perfil")}
@@ -208,7 +230,7 @@ export function Account() {
                 <p className="text-sm font-bold text-[var(--color-primary-700)]">
                   Editar Perfil Público
                 </p>
-                <p className="text-xs text-[var(--color-primary-600)] mt-0.5">
+                <p className="text-xs text-[var(--color-primary-700)] mt-0.5">
                   Logo, descrição, horários, serviços e galeria.
                 </p>
               </div>
@@ -218,6 +240,7 @@ export function Account() {
               />
             </button>
           </div>
+          )}
         </CardContent>
       </Card>
 

@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate, useLocation } from "react-router"; // Se der erro aqui, mude para "react-router"
-import { useState, useRef, useEffect } from "react";
-import { isApprovedProviderStatus } from "../../lib/constants/providerStatus";
+import { useState, useRef, useEffect, type FormEvent } from "react";
+import { isApprovedProviderStatus, PROVIDER_STATUS } from "../../lib/constants/providerStatus";
 import {
   Menu,
   X,
@@ -21,6 +21,7 @@ import {
   User,
   Search,
   MapPin,
+  Pencil,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
@@ -73,7 +74,7 @@ function CartIconButton({ variant = "desktop" }: { variant?: "desktop" | "mobile
     >
       <ShoppingCart className="h-5 w-5" />
       {totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-[var(--color-primary-500)] text-white text-[10px] font-bold flex items-center justify-center shadow-md ring-2 ring-white">
+        <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] px-1 rounded-full bg-[var(--color-primary-700)] text-white text-[10px] font-bold flex items-center justify-center shadow-md ring-2 ring-white">
           {totalItems > 99 ? "99+" : totalItems}
         </span>
       )}
@@ -111,28 +112,26 @@ export function Navbar() {
 
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
-      console.log("⌚ Timeout ativado: Forçando fim do loading...");
       setIsLoading(false);
     }, 2000);
 
+    // Sem logs da sessão: o e-mail não deve ir para o console (minimização da SEC-2).
     const checkAuthStatus = () => {
-      console.log("🔍 Iniciando verificação de sessão...");
       try {
         const token = localStorage.getItem("petplus_token");
         const userStr = localStorage.getItem("petplus_user");
 
         if (token && userStr) {
           const user = JSON.parse(userStr);
-          console.log("✅ Usuário encontrado:", user.email);
           setSessionUser(user);
           setRoleId(user.role_id);
         } else {
-          console.log("❌ Nenhum usuário logado no momento.");
           setSessionUser(null);
           setRoleId(null);
         }
-      } catch (err) {
-        console.error("🚨 Erro ao carregar sessão:", err);
+      } catch {
+        setSessionUser(null);
+        setRoleId(null);
       } finally {
         clearTimeout(fallbackTimer);
         setIsLoading(false);
@@ -165,6 +164,13 @@ export function Navbar() {
 
   const closeMobile = () => setMobileMenuOpen(false);
 
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const term = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+    setMobileMenuOpen(false);
+    navigate(term ? `/shopping?q=${encodeURIComponent(term)}` : "/shopping");
+  };
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
@@ -188,6 +194,30 @@ export function Navbar() {
   const isPendingPartner =
     (roleId === 2 || roleId === 3) && !isApprovedProviderStatus(sessionUser?.provider_status);
   const isDashboardUser = roleId !== null && roleId >= 1 && roleId <= 4 && !isPendingPartner;
+
+  // Parceiro não aprovado usa o mesmo menu de conta do Tutor: sem ele, o
+  // cabeçalho ficava sem conta e sem "Sair" (auditoria visual G06).
+  const isRejectedPartner =
+    isPendingPartner && sessionUser?.provider_status === PROVIDER_STATUS.REJECTED;
+  const showAccountMenu = Boolean(isTutor || isPendingPartner);
+  const accountMenuItems = isTutor
+    ? tutorMenuItems
+    : isRejectedPartner
+      ? [{ name: "Corrigir cadastro", href: "/parceiro/corrigir-cadastro", icon: Pencil }]
+      : [];
+  const partnerStatus = !isPendingPartner
+    ? null
+    : isRejectedPartner
+      ? {
+          label: "Cadastro recusado",
+          hint: "Corrija os dados apontados e reenvie para análise.",
+          className: "bg-red-50 text-red-700 border-red-200",
+        }
+      : {
+          label: "Cadastro em análise",
+          hint: "O painel será liberado após a aprovação da equipe Pet+.",
+          className: "bg-amber-50 text-amber-800 border-amber-200",
+        };
 
   // Cart visível para anônimos e tutores. Escondido para dashboard users (admin/lojista/hotel/walker)
   const showCart = !isLoading && (!sessionUser || isTutor);
@@ -217,18 +247,25 @@ export function Navbar() {
             </div>
 
             {/* ── Center: Search Bar (Desktop) ── */}
-            <div className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-4 transition-all duration-300">
+            {/* Busca de produtos: leva ao Shopping com o termo (antes não fazia nada — G19). */}
+            <form
+              role="search"
+              onSubmit={submitSearch}
+              className="hidden lg:flex flex-1 max-w-md xl:max-w-xl mx-4 transition-all duration-300"
+            >
               <div className="relative w-full group">
                 <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
                   <Search className="h-4 w-4 text-slate-400 group-focus-within:text-[var(--color-primary-500)] transition-colors" />
                 </div>
                 <input
-                  type="text"
-                  placeholder="Buscar hotéis, walkers, produtos..."
+                  type="search"
+                  name="q"
+                  aria-label="Buscar produtos no Shopping"
+                  placeholder="Buscar produtos no Shopping..."
                   className="block w-full pl-11 pr-4 py-2.5 text-sm bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-full focus:bg-white focus:ring-4 focus:ring-[var(--color-primary-50)] focus:border-[var(--color-primary-300)] transition-all outline-none"
                 />
               </div>
-            </div>
+            </form>
 
             {/* ── Right Side: Nav Links + Actions ── */}
             <div className="hidden md:flex items-center gap-6 shrink-0">
@@ -242,7 +279,7 @@ export function Navbar() {
                       to={item.href}
                       className={cn(
                         "relative py-1 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors whitespace-nowrap",
-                        isActive && "text-[var(--color-primary-600)]"
+                        isActive && "text-[var(--color-primary-700)]"
                       )}
                     >
                       {item.name}
@@ -268,7 +305,7 @@ export function Navbar() {
                       }
                     }}
                     className={cn(
-                      "flex items-center gap-1.5 py-1 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors outline-none",
+                      "flex items-center gap-1.5 py-1 px-1 -mx-1 rounded-md text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-700)] focus-visible:ring-offset-2",
                       moreDropdownOpen && "text-slate-900"
                     )}
                     aria-expanded={moreDropdownOpen}
@@ -327,7 +364,7 @@ export function Navbar() {
                     </Link>
                     <Link 
                       to="/register"
-                      className="bg-[var(--color-primary-500)] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[var(--color-primary-600)] shadow-md shadow-primary-500/20 transition-all transform hover:scale-105"
+                      className="bg-[var(--color-primary-700)] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[var(--color-primary-800)] shadow-md shadow-primary-500/20 transition-all transform hover:scale-105"
                     >
                       Cadastrar
                     </Link>
@@ -346,9 +383,10 @@ export function Navbar() {
                       Sair
                     </Button>
                   </div>
-                ) : isTutor && (
+                ) : showAccountMenu && (
                   <div className="relative" ref={dropdownRef}>
                     <button
+                      aria-label={`Menu da conta de ${userName}`}
                       onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -359,13 +397,13 @@ export function Navbar() {
                       aria-expanded={userDropdownOpen}
                       aria-haspopup="true"
                       className={cn(
-                        "flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-200 outline-none",
+                        "flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-700)] focus-visible:ring-offset-2",
                         userDropdownOpen 
                           ? "bg-white border-[var(--color-primary-200)] shadow-md ring-4 ring-[var(--color-primary-50)]" 
                           : "bg-slate-50 border-slate-200 hover:border-[var(--color-primary-200)] hover:bg-white hover:shadow-sm"
                       )}
                     >
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-600)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary-400)] to-[var(--color-primary-800)] flex items-center justify-center text-white text-xs font-bold shadow-sm">
                         {initials}
                       </div>
                       <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">
@@ -389,10 +427,23 @@ export function Navbar() {
                           <div className="px-4 py-3 border-b border-slate-100">
                             <p className="font-bold text-slate-900 text-sm">{userName}</p>
                             <p className="text-xs text-slate-500">{userEmail}</p>
+                            {partnerStatus && (
+                              <div className="mt-2 space-y-1">
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold",
+                                    partnerStatus.className
+                                  )}
+                                >
+                                  {partnerStatus.label}
+                                </span>
+                                <p className="text-xs text-slate-500">{partnerStatus.hint}</p>
+                              </div>
+                            )}
                           </div>
 
                           <div className="py-1">
-                            {tutorMenuItems.map((item) => (
+                            {accountMenuItems.map((item) => (
                               <Link
                                 key={item.name}
                                 to={item.href}
@@ -428,7 +479,12 @@ export function Navbar() {
             {/* Mobile Menu Toggle */}
             <div className="-mr-2 flex items-center md:hidden gap-1">
               {showCart && <CartIconButton variant="mobile" />}
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-400">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+                aria-expanded={mobileMenuOpen}
+                className="p-2 text-slate-400"
+              >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
@@ -440,16 +496,18 @@ export function Navbar() {
         <div className="md:hidden absolute top-full left-0 w-full z-50 bg-white border-b border-slate-100 shadow-xl overflow-y-auto" style={{ maxHeight: "calc(100vh - 4rem)" }}>
           <div className="px-4 pt-4 pb-6 flex flex-col gap-4">
             {/* Mobile Search */}
-            <div className="relative w-full group">
+            <form role="search" onSubmit={submitSearch} className="relative w-full group">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-slate-400" />
               </div>
               <input
-                type="text"
-                placeholder="Buscar no Pet+..."
-                className="block w-full pl-10 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white outline-none"
+                type="search"
+                name="q"
+                aria-label="Buscar produtos no Shopping"
+                placeholder="Buscar produtos no Shopping..."
+                className="block w-full pl-10 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-700)]"
               />
-            </div>
+            </form>
             
             {/* Navegação Pública (Itens do menu) */}
             <div className="flex flex-col gap-2 pt-4">
@@ -463,7 +521,7 @@ export function Navbar() {
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors",
                       isActive 
-                        ? "bg-[var(--color-primary-50)] text-[var(--color-primary-600)]" 
+                        ? "bg-[var(--color-primary-50)] text-[var(--color-primary-700)]" 
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
@@ -491,7 +549,7 @@ export function Navbar() {
                   <Link 
                     to="/register"
                     onClick={closeMobile}
-                    className="flex items-center justify-center w-full py-3 text-sm font-bold text-white bg-[var(--color-primary-500)] rounded-xl hover:bg-[var(--color-primary-600)] shadow-md transition-colors"
+                    className="flex items-center justify-center w-full py-3 text-sm font-bold text-white bg-[var(--color-primary-700)] rounded-xl hover:bg-[var(--color-primary-800)] shadow-md transition-colors"
                   >
                     Cadastrar
                   </Link>
@@ -500,7 +558,7 @@ export function Navbar() {
                 // Admin, Manager, Hotel, Walker Mobile
                 <div className="flex flex-col gap-3 px-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-700)] flex items-center justify-center text-white text-base font-bold">
                       {initials}
                     </div>
                     <div>
@@ -523,11 +581,11 @@ export function Navbar() {
                     Sair da conta
                   </Button>
                 </div>
-              ) : isTutor && (
-                // Tutor Mobile
+              ) : showAccountMenu && (
+                // Tutor e parceiro ainda não aprovado (mobile)
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3 mb-2 px-4 pt-2">
-                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-500)] flex items-center justify-center text-white text-base font-bold shadow-sm">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary-700)] flex items-center justify-center text-white text-base font-bold shadow-sm">
                       {initials}
                     </div>
                     <div>
@@ -535,9 +593,22 @@ export function Navbar() {
                       <p className="text-xs text-slate-500">{userEmail}</p>
                     </div>
                   </div>
-                  
+                  {partnerStatus && (
+                    <div className="mx-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold",
+                          partnerStatus.className
+                        )}
+                      >
+                        {partnerStatus.label}
+                      </span>
+                      <p className="mt-1 text-xs text-slate-600">{partnerStatus.hint}</p>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-1">
-                    {tutorMenuItems.map((item) => (
+                    {accountMenuItems.map((item) => (
                       <Link
                         key={item.name}
                         to={item.href}

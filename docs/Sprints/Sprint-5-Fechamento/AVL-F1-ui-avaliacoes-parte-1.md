@@ -1,5 +1,7 @@
 # AVL-F1 — UI de avaliações (parte 1)
 
+> Implementada localmente em 18/11/2026, junto à AVL-F2; sem commit ou publicação. Escopo, evidências e limites em [AVL-F-IMPLEMENTACAO-E-VALIDACAO.md](AVL-F-IMPLEMENTACAO-E-VALIDACAO.md). O texto abaixo preserva o planejamento original.
+
 > Sprint 5 · Semana 10 (27/out–01/nov) · Frontend · Prioridade Alta · Esforço G · Responsável R3
 
 ## Contexto

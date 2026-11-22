@@ -20,10 +20,10 @@ router.use(adminMiddleware);
  *       - in: query
  *         name: days
  *         schema: { type: integer, default: 30, minimum: 1, maximum: 365 }
- *         description: Janela usada em "novos no período" e no gráfico de crescimento
+ *         description: Janela de dias civis de São Paulo para crescimento e comércio. Os demais contadores institucionais continuam totais globais.
  *     responses:
  *       200:
- *         description: Contagens de usuários, parceiros, moderação, catálogo e engajamento
+ *         description: Contagens institucionais preservadas e bloco commerce com pedidos/reservas por criação, receita de pedidos reconhecidos (também após avançar status), distribuição, série diária e pagamentos simulados de reservas separados. Mesma regra das métricas do parceiro. Não é saldo financeiro de produção.
  *       403:
  *         description: Usuário não é administrador
  */

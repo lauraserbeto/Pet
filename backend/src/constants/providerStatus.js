@@ -36,7 +36,29 @@ function isOperationalSitter(provider) {
     && (evaluationStatus === SITTER_EVALUATION_APPROVED_STATUS || hasApprovedSitterEvaluation(evaluations));
 }
 
+/**
+ * Transições que o ADMIN pode fazer no status do parceiro (E-11 / AUD-15).
+ * - Novo cadastro ou reenvio em análise: aprovar ou recusar.
+ * - Recusado: pode ser reconsiderado e aprovado ("Aprovar novamente").
+ * - Aprovado: não volta a pendente nem vira recusado por aqui; suspender é
+ *   desativar a conta (`User.is_active`, DEC-G).
+ * REJEITADO → EM_REVISAO é do próprio parceiro (POST /providers/me/resubmit).
+ * Pet Sitter só vai a APROVADO com avaliação aprovada (DEC-D), checado no use case.
+ */
+const ADMIN_PROVIDER_TRANSITIONS = Object.freeze({
+  [PROVIDER_STATUS.PENDING]: Object.freeze([PROVIDER_STATUS.APPROVED, PROVIDER_STATUS.REJECTED]),
+  [PROVIDER_STATUS.IN_REVIEW]: Object.freeze([PROVIDER_STATUS.APPROVED, PROVIDER_STATUS.REJECTED]),
+  [PROVIDER_STATUS.REJECTED]: Object.freeze([PROVIDER_STATUS.APPROVED]),
+  [PROVIDER_STATUS.APPROVED]: Object.freeze([]),
+});
+
+function canAdminTransitionProvider(from, to) {
+  return (ADMIN_PROVIDER_TRANSITIONS[from] || []).includes(to);
+}
+
 module.exports = {
+  ADMIN_PROVIDER_TRANSITIONS,
+  canAdminTransitionProvider,
   PROVIDER_STATUS,
   PROVIDER_STATUS_VALUES,
   APPROVED_PROVIDER_STATUSES,

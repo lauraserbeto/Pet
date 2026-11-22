@@ -84,9 +84,11 @@ O sistema adapta as permissões e a interface de acordo com o nível de acesso d
 
 ### 1. Pré-requisitos
 Certifique-se de ter instalado em sua máquina:
-- [Node.js](https://nodejs.org/en/) (v18+)
+- [Node.js](https://nodejs.org/en/) 24 LTS (versão validada em `.nvmrc`: 24.22.3) e npm 11 (validado: 11.19.1).
 - [Git](https://git-scm.com/)
 - Um banco de dados [PostgreSQL](https://www.postgresql.org/) rodando (local ou na nuvem).
+
+Instalação por lockfile, imagem Docker, política da auditoria e preparação de release estão no [runbook de deploy](docs/runbooks/deploy-reprodutivel.md). O build do backend usa somente o contexto `backend`, sem arquivos `.env`. As configurações publicadas na Railway/Vercel precisam ser conferidas antes do release.
 
 ### 2. Clonando o Repositório
 ```bash
@@ -97,7 +99,7 @@ cd Pet
 ### 2. Configuração do Backend
 ```bash
 cd backend
-npm install
+npm ci
 ```
 - Crie um arquivo `.env` baseado no `.env.example`.
 - Certifique-se de configurar a `DATABASE_URL` corretamente (local ou Railway).
@@ -143,7 +145,7 @@ Documentação técnica detalhada por área em `docs/`:
 ### 3. Configuração do Frontend
 ```bash
 cd ../frontend
-npm install
+npm ci
 npm run dev
 ```
 - O frontend estará disponível em `http://localhost:5173`.

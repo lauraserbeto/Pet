@@ -27,6 +27,8 @@ import { useParams, useNavigate } from "react-router";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { RatingBadge } from "../components/reviews/RatingBadge";
+import { ReviewsPanel } from "../components/reviews/ReviewsPanel";
 
 const AUTOPLAY_INTERVAL = 4500;
 
@@ -157,6 +159,7 @@ export function HotelDetailsPage() {
         ].filter(Boolean).join(", ");
 
         setApiHotel({
+          rating_avg: data.rating_avg, rating_count: data.rating_count,
           name: data.business_name || data.user?.full_name || "Hotel",
           logo: data.user?.avatar_url,
           address: address || "Endereço não informado",
@@ -498,6 +501,7 @@ export function HotelDetailsPage() {
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
                 {hotel.name}
               </h1>
+              <div className="mt-2"><RatingBadge {...hotel} /></div>
 
               <div className="flex items-center gap-1.5 text-slate-500 mt-1">
                 <MapPin className="h-4 w-4 shrink-0" />
@@ -635,7 +639,7 @@ export function HotelDetailsPage() {
                   key={`${am.label}-${idx}`}
                   className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-100"
                 >
-                  <div className="p-2 rounded-lg bg-[var(--color-primary-100)] text-[var(--color-primary-600)]">
+                  <div className="p-2 rounded-lg bg-[var(--color-primary-100)] text-[var(--color-primary-700)]">
                     {amenityIcon(am.icon)}
                   </div>
 
@@ -674,6 +678,7 @@ export function HotelDetailsPage() {
       </div>
 
       {/* Botões fixos inferiores */}
+      {id && <div className="container mx-auto max-w-3xl px-4 sm:px-6 pb-28"><ReviewsPanel target={{ provider_id: id }} /></div>}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 p-4 z-40">
         <div className="container mx-auto max-w-3xl flex items-center gap-3">
 
@@ -695,7 +700,8 @@ export function HotelDetailsPage() {
           <div className="flex-1 flex items-center gap-2">
             <Button
               className="flex-1 h-12 rounded-xl font-bold text-base gap-2 shadow-md shadow-orange-200"
-              onClick={() => {}}
+              onClick={() => id && navigate(`/tutor/agendar/${id}`)}
+              disabled={hotel.services.length === 0}
             >
               <CalendarDays className="h-5 w-5" />
               Reservar agora
@@ -704,8 +710,9 @@ export function HotelDetailsPage() {
             <Button
               size="icon"
               variant="outline"
-              className="h-12 w-12 rounded-xl border-slate-200 text-slate-600 hover:text-[var(--color-primary-600)] hover:border-[var(--color-primary-200)]"
-              aria-label="Ligar"
+              className="h-12 w-12 rounded-xl border-slate-200 text-slate-600 hover:text-[var(--color-primary-700)] hover:border-[var(--color-primary-200)]"
+              aria-label="Ligar para o hotel"
+              title="Ligar para o hotel"
               onClick={() => {
                 if (hotel.phone) {
                   window.location.href = `tel:${hotel.phone}`;
@@ -719,8 +726,9 @@ export function HotelDetailsPage() {
             <Button
               size="icon"
               variant="outline"
-              className="h-12 w-12 rounded-xl border-slate-200 text-slate-600 hover:text-[var(--color-primary-600)] hover:border-[var(--color-primary-200)]"
-              aria-label="Mensagem"
+              className="h-12 w-12 rounded-xl border-slate-200 text-slate-600 hover:text-[var(--color-primary-700)] hover:border-[var(--color-primary-200)]"
+              aria-label="Enviar mensagem pelo WhatsApp"
+              title="Enviar mensagem pelo WhatsApp"
               onClick={() => {
                 if (hotel.phone) {
                   const phone = hotel.phone.replace(/\D/g, "");

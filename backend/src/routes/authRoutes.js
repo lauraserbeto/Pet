@@ -19,6 +19,7 @@ const {
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [full_name, email, password, role_id, terms_accepted, terms_version]
  *             properties:
  *               full_name:
  *                 type: string
@@ -26,13 +27,29 @@ const {
  *                 type: string
  *               password:
  *                 type: string
+ *                 minLength: 8
+ *                 description: Uma maiúscula ASCII e um número; no máximo 72 bytes UTF-8. Espaços são preservados.
  *               role_id:
  *                 type: integer
+ *               terms_accepted:
+ *                 type: boolean
+ *                 enum: [true]
+ *               terms_version:
+ *                 type: string
+ *                 description: Deve ser a versão vigente de GET /api/v1/legal/policy, igual ao texto exibido.
+ *               document_type:
+ *                 type: string
+ *                 enum: [CPF, CNPJ]
+ *               document:
+ *                 type: string
+ *                 description: CPF para Pet Sitter ou CNPJ numérico/alfanumérico para parceiros; dígitos verificadores válidos. Lojista/Hotel exigem CNPJ.
  *     responses:
  *       201:
  *         description: Usuário cadastrado com sucesso
- *       400:
- *         description: Erro de validação ou e-mail já existente
+ *       422:
+ *         description: Dados inválidos ou senha fora da política
+ *       409:
+ *         description: E-mail ou documento já cadastrado
  */
 router.post(
   "/register",
@@ -62,6 +79,10 @@ router.post(
  *         description: Login realizado com sucesso
  *       401:
  *         description: Credenciais inválidas
+ *       400:
+ *         description: Credenciais obrigatórias ausentes
+ *       403:
+ *         description: Conta desativada ou aprovação obrigatória pendente
  */
 router.post("/login", AuthController.login);
 
@@ -83,6 +104,8 @@ router.post("/login", AuthController.login);
  *     responses:
  *       200:
  *         description: Instruções enviadas (resposta genérica por segurança)
+ *       422:
+ *         description: Formato de e-mail inválido
  */
 router.post("/forgot-password", AuthController.forgotPassword);
 
@@ -103,11 +126,17 @@ router.post("/forgot-password", AuthController.forgotPassword);
  *                 type: string
  *               password:
  *                 type: string
+ *                 minLength: 8
+ *                 description: Uma maiúscula ASCII e um número; no máximo 72 bytes UTF-8. Deve ser diferente da senha atual.
  *     responses:
  *       200:
  *         description: Senha atualizada com sucesso
  *       400:
  *         description: Token inválido, expirado ou já utilizado
+ *       422:
+ *         description: Senha repetida ou fora da política
+ *       409:
+ *         description: Credenciais alteradas durante a operação; solicite outro link
  */
 router.post(
   "/reset-password",

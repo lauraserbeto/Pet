@@ -9,6 +9,8 @@ const DB_TEST_LOCK_KEY = 20261024;
 let lockClient = null;
 
 const TRUNCATE_TABLES = [
+  'reviews',
+  'appointment_payments',
   'payment_attempts',
   'appointments',
   'services',

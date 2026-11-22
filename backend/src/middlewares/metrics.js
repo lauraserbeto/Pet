@@ -22,17 +22,21 @@ function record(key, ms, isError) {
 
 function percentile(sorted, p) {
   if (sorted.length === 0) return 0;
-  const idx = Math.min(sorted.length - 1, Math.ceil((p / 100) * sorted.length) - 1);
+  const idx = Math.min(
+    sorted.length - 1,
+    Math.ceil((p / 100) * sorted.length) - 1,
+  );
   return sorted[Math.max(0, idx)];
 }
 
 function metricsMiddleware(req, res, next) {
   const start = process.hrtime.bigint();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const ms = Number(process.hrtime.bigint() - start) / 1e6;
     // Usa o TEMPLATE da rota (ex.: /:id) para não explodir a cardinalidade.
-    const routePath = req.route && req.route.path ? req.route.path : req.path || '';
-    const key = `${req.method} ${(req.baseUrl || '') + routePath}`;
+    const routePath =
+      typeof req.route?.path === "string" ? req.route.path : "unmatched";
+    const key = `${req.method} ${routePath === "unmatched" ? "unmatched" : (req.baseUrl || "") + routePath}`;
     record(key, ms, res.statusCode >= 500);
   });
   next();
@@ -48,7 +52,9 @@ function getMetrics() {
       errors: m.errors,
       error_rate: m.count ? Number((m.errors / m.count).toFixed(4)) : 0,
       latency_ms: {
-        avg: m.durations.length ? Number((sum / m.durations.length).toFixed(1)) : 0,
+        avg: m.durations.length
+          ? Number((sum / m.durations.length).toFixed(1))
+          : 0,
         p50: Number(percentile(sorted, 50).toFixed(1)),
         p95: Number(percentile(sorted, 95).toFixed(1)),
         p99: Number(percentile(sorted, 99).toFixed(1)),
@@ -66,4 +72,10 @@ function _reset() {
   store.clear();
 }
 
-module.exports = { metricsMiddleware, getMetrics, metricsHandler, record, _reset };
+module.exports = {
+  metricsMiddleware,
+  getMetrics,
+  metricsHandler,
+  record,
+  _reset,
+};

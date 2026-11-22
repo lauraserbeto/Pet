@@ -1,15 +1,30 @@
 const createReviewUseCase = require('../useCases/reviews/CreateReviewUseCase');
 const listReviewsUseCase = require('../useCases/reviews/ListReviewsUseCase');
-const { createReviewSchema, listReviewsQuerySchema } = require('../schemas/reviewSchemas');
+const { createReviewSchema, listReviewsQuerySchema, reviewOriginQuerySchema } = require('../schemas/reviewSchemas');
 
 // Erros via next(AppError) — o errorHandler central os mapeia para o status correto.
 class ReviewController {
+  async summary(req, res, next) {
+    try {
+      const { product_id, provider_id } = listReviewsQuerySchema.parse(req.query);
+      return res.json(await listReviewsUseCase.summary({ product_id, provider_id }));
+    } catch (error) { return next(error); }
+  }
+
+  async mine(req, res, next) {
+    try {
+      const origin = reviewOriginQuerySchema.parse(req.query);
+      const review = await listReviewsUseCase.mine({ ...origin, userId: req.userId, userRole: req.userRole });
+      return res.json({ review });
+    } catch (error) { return next(error); }
+  }
   async create(req, res, next) {
     try {
       const data = createReviewSchema.parse(req.body);
 
       const review = await createReviewUseCase.execute({
         userId: req.userId,
+        userRole: req.userRole,
         ...data,
       });
 

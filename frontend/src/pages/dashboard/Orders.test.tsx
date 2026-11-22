@@ -3,6 +3,9 @@ import { render, screen, fireEvent, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Orders } from "./Orders";
 import { orderService, type Order } from "../../lib/services/orderService";
+vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'store-qa', role_id: 2 } }) }));
+const pageOf = (orders: Order[]) => ({ orders, page: 1, limit: 20, total: orders.length, totalPages: 1,
+  summary: { totalOrders: orders.length, pendingOrders: orders.length, monthlyRevenue: 0 } });
 
 const pedido = (overrides: Partial<Order> = {}): Order => ({
   id: "abcdef12-0000-4000-8000-000000000001",
@@ -34,7 +37,7 @@ const abrirDetalhe = async () => {
 afterEach(() => vi.restoreAllMocks());
 
 it("mostra ao lojista o endereço de entrega gravado no pedido (E-05)", async () => {
-  vi.spyOn(orderService, "listProviderOrders").mockResolvedValue([
+  vi.spyOn(orderService, "listProviderOrdersPage").mockResolvedValue(pageOf([
     pedido({
       shipping_address: {
         cep: "01001-000",
@@ -46,7 +49,7 @@ it("mostra ao lojista o endereço de entrega gravado no pedido (E-05)", async ()
         estado: "SP",
       },
     }),
-  ]);
+  ]));
 
   renderTela();
   const detalhe = within(await abrirDetalhe());
@@ -58,7 +61,7 @@ it("mostra ao lojista o endereço de entrega gravado no pedido (E-05)", async ()
 });
 
 it("pedido antigo, sem endereço gravado, avisa em vez de quebrar", async () => {
-  vi.spyOn(orderService, "listProviderOrders").mockResolvedValue([pedido({ shipping_address: null })]);
+  vi.spyOn(orderService, "listProviderOrdersPage").mockResolvedValue(pageOf([pedido({ shipping_address: null })]));
 
   renderTela();
   const detalhe = within(await abrirDetalhe());

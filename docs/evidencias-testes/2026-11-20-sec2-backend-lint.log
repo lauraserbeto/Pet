@@ -1,0 +1,13 @@
+
+> backend@1.0.0 lint
+> eslint .
+
+
+C:\PI - 2026\Pet\backend\src\useCases\appointments\ListAppointmentsUseCase.js
+  8:7  warning  'TUTOR_ROLE' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\PI - 2026\Pet\backend\src\useCases\orders\ListCustomerOrdersUseCase.js
+  2:7  warning  'AppError' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

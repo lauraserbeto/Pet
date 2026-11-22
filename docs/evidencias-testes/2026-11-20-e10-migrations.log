@@ -1,0 +1,7 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "petplus_test", schema "public" at "127.0.0.1:55448"
+
+14 migrations found in prisma/migrations
+
+Database schema is up to date!

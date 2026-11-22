@@ -12,7 +12,7 @@ export function Layout() {
       {/* Skip link (WCAG 2.4.1): visível ao receber foco por teclado. */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-medium focus:text-[var(--color-primary-600)] focus:shadow-lg focus:outline focus:outline-2 focus:outline-[var(--color-primary-500)]"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-medium focus:text-[var(--color-primary-700)] focus:shadow-lg focus:outline focus:outline-2 focus:outline-[var(--color-primary-500)]"
       >
         Pular para o conteúdo
       </a>

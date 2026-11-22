@@ -7,12 +7,12 @@
 // - Expõe a payment_policy gravada no agendamento (DEC-A)
 // - Preserva campo `refund` quando presente (estorno da PAG-2)
 
-const { toPublicProvider } = require('./publicProvider');
+const { toPublicProvider } = require("./publicProvider");
 
 /** Converte Decimal/string para número; null fica null. */
 function asNumber(value) {
   if (value === null || value === undefined) return null;
-  if (typeof value === 'object' && typeof value.toNumber === 'function') {
+  if (typeof value === "object" && typeof value.toNumber === "function") {
     return value.toNumber();
   }
   return Number(value);
@@ -21,18 +21,24 @@ function asNumber(value) {
 /** Remove password_hash de um objeto de usuário. */
 function sanitizeUser(user) {
   if (!user) return null;
-  const { password_hash, ...safe } = user;
-  return safe;
+  return Object.fromEntries(
+    ["id", "full_name", "phone", "email", "avatar_url", "role_id"]
+      .filter((field) => Object.hasOwn(user, field))
+      .map((field) => [field, user[field]]),
+  );
 }
 
 /** Campos do tutor visíveis no agendamento (mesmos do APPOINTMENT_TUTOR_SELECT). */
-const APPOINTMENT_TUTOR_FIELDS = ['id', 'full_name', 'phone', 'email'];
+const APPOINTMENT_TUTOR_FIELDS = ["id", "full_name", "phone", "email"];
 
 /** Reduz o tutor aos campos de contato; ignora o que mais vier carregado. */
 function toAppointmentTutor(user) {
   if (!user) return null;
   return Object.fromEntries(
-    APPOINTMENT_TUTOR_FIELDS.filter((field) => field in user).map((field) => [field, user[field]])
+    APPOINTMENT_TUTOR_FIELDS.filter((field) => field in user).map((field) => [
+      field,
+      user[field],
+    ]),
   );
 }
 
@@ -57,6 +63,16 @@ function formatAppointment(appointment) {
     notes: appointment.notes ?? null,
     created_at: appointment.created_at,
     updated_at: appointment.updated_at,
+    payment: appointment.payment
+      ? {
+          id: appointment.payment.id,
+          status: appointment.payment.status,
+          amount: asNumber(appointment.payment.amount),
+          paid_at: appointment.payment.paid_at,
+          refunded_at: appointment.payment.refunded_at ?? null,
+          simulated: true,
+        }
+      : null,
   };
 
   // Pet + tutor (só dados de contato)
@@ -77,7 +93,9 @@ function formatAppointment(appointment) {
 
   // Provider — remove campos sensíveis
   if (appointment.provider) {
-    const publicProvider = toPublicProvider(appointment.provider);
+    const publicProvider = toPublicProvider(appointment.provider, {
+      bookedContact: true,
+    });
     result.provider = {
       ...publicProvider,
       daily_rate: asNumber(publicProvider.daily_rate),

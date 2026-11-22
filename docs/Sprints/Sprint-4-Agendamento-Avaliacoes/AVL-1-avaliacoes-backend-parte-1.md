@@ -2,6 +2,8 @@
 
 > Sprint 4 · Semana 8 (13–19/out) · Backend · Prioridade Alta · Esforço G · Responsável R2
 
+> Base implementada no PR #52 e incorporada à main `d593b03`. Em 18/11/2026, a retomada corrigiu localmente o gate de Tutor e a compatibilidade dos índices por nova migration, sem modificar o histórico aplicado. Ver `AVL-2-IMPLEMENTACAO-E-VALIDACAO.md`. O contexto abaixo é a descrição original, anterior à implementação.
+
 ## Contexto
 Hoje **não existe sistema de avaliações**: todo rating/review no front é FAKE — `HotelsPage.tsx:73` fixa `rating: 5.0` e `reviews: Math.floor(Math.random()...)`, `ProductDetailPage` traz specs/reviews mock e `WalkerDetailsPage` idem. No backend não há modelo, rota nem use case de reviews. Já existem os alvos avaliáveis: `Product` (loja), `Provider` (hotel/sitter) e as transações que os concluem (`Order` ~232-259 e `Appointment` ~279-297). Esta task cria o sistema **real** no backend; o front passa a consumir no Sprint 5.
 

@@ -116,7 +116,7 @@ router.patch(
  *       204:
  *         description: Endereço removido
  *       409:
- *         description: Não pode excluir único endereço com pedidos em andamento
+ *         description: Não pode excluir o único endereço com pedidos em andamento, ou houve alteração concorrente
  */
 router.delete(
   '/:id',

@@ -1,0 +1,11 @@
+[WebServer] (node:45132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:20816) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (8.7s)
+  ok 2 [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: hotel gerencia agenda e tutor recebe alterações (23.2s)
+
+  2 passed (1.0m)

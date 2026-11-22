@@ -1,0 +1,13 @@
+
+> pet-plus@0.0.1 test
+> vitest run src/components/tutor/ResourceRemoval.test.tsx --pool=threads --maxWorkers=1 --no-file-parallelism --testTimeout=15000
+
+
+ RUN  v4.1.10 C:/PI - 2026/Pet/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  16:52:15
+   Duration  4.96s (transform 369ms, setup 532ms, import 1.05s, tests 596ms, environment 2.46s)
+

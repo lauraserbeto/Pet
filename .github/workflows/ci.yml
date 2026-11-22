@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -36,25 +39,35 @@ jobs:
       EMAIL_FROM: no-reply@petplus.test
       LOG_LEVEL: silent
       RUN_DB_INTEGRATION_TESTS: 'true'
+      NODE_ENV: test
+      SENTRY_DSN: ''
+      MERCADO_PAGO_ENABLED: 'false'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Auditoria de dependências (não-bloqueante)
+      - name: Auditoria de dependências (high/critical bloqueantes)
         run: npm audit --audit-level=high
-        continue-on-error: true
       - name: Prisma generate
         run: npx prisma generate
       - name: Migrations do banco de teste
         run: npx prisma migrate deploy
       - name: Testes (node:test + supertest)
-        run: npm test
+        run: npm test -- --test-concurrency=2
+      - name: Build da imagem de produção
+        run: docker build --tag petplus-backend:ci .
+      - name: Imagem sem root e com Prisma gerado
+        run: >-
+          docker run --rm --entrypoint node petplus-backend:ci -e
+          "if (process.getuid() === 0) throw Error('Imagem executando como root');
+          new (require('@prisma/client').PrismaClient)();
+          if (require('node:fs').existsSync('/app/.env')) throw Error('Arquivo .env na imagem');"
 
   frontend:
     name: Frontend — typecheck, testes & build
@@ -63,22 +76,21 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Auditoria de dependências (não-bloqueante)
+      - name: Auditoria de dependências (high/critical bloqueantes)
         run: npm audit --audit-level=high
-        continue-on-error: true
       - name: Typecheck
         run: npm run typecheck
       - name: Testes unitários (Vitest)
-        run: npm test
+        run: npm test -- --pool=forks --maxWorkers=2
       - name: Build
         run: npm run build
 
@@ -90,10 +102,10 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci

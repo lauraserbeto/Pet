@@ -13,6 +13,38 @@ router.use(authMiddleware);
 
 /**
  * @swagger
+ * /api/v1/appointments/{id}/pay:
+ *   post:
+ *     summary: Paga um agendamento PRE_PAGO (simulado, sem cobrança real)
+ *     description: Apenas tutor proprietário. Operação idempotente; move PENDENTE para AGUARDANDO_CONFIRMACAO e retorna payment. Recusa/cancelamento elegível estorna atomicamente.
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: Pagamento simulado registrado ou já aprovado
+ *       401:
+ *         description: Sessão inválida
+ *       403:
+ *         description: Tutor ou propriedade inválidos
+ *       404:
+ *         description: Agendamento inexistente
+ *       409:
+ *         description: Estado ou valor incompatível
+ *       422:
+ *         description: UUID, política ou horário inválido
+ */
+router.post('/:id/pay', validate({ params: appointmentIdParamsSchema }), AppointmentController.pay);
+
+/**
+ * @swagger
  * /api/v1/appointments:
  *   post:
  *     summary: Cria um agendamento (apenas tutores)

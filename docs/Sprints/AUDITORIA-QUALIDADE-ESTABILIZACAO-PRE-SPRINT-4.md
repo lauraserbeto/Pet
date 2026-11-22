@@ -1,5 +1,29 @@
 # Auditoria de Qualidade e Plano de Estabilização — Sprints Anteriores à Sprint 4
 
+> Acompanhamento de 22/11/2026: E-33 implementada e validada localmente, sem commit/publicação. Matriz compartilhada de papéis, retorno pós-login compatível, expiração com destino completo e guard/onboarding do sitter sem montagem indevida ou ciclo. Backend 559, frontend 284/46 arquivos, 39 cenários de navegador (13 reais); critérios e limites em [E-33](Sprint-5-Fechamento/E-33-IMPLEMENTACAO-E-VALIDACAO.md). Contraste sério da landing permanece em dois elementos. Próxima frente sugerida: E-17. Diagnóstico histórico preservado abaixo.
+
+> Acompanhamento de 22/11/2026: E-13 implementada e validada localmente. Login direto de lojista/hotel recusado para correção, validação alinhada à API, erros persistentes e sessão atualizada após reenvio. Critérios, evidências e limites em [E-13](Sprint-5-Fechamento/E-13-IMPLEMENTACAO-E-VALIDACAO.md). Sem commit/publicação ou migration nova. O diagnóstico histórico abaixo foi preservado; a próxima frente é E-33.
+
+> Acompanhamento de 22/11/2026: E-18 implementada e validada localmente, sem commit/publicação. Confirmação real, retomada segura do merge com baseline e invalidação de histórico em [E-18](Sprint-5-Fechamento/E-18-IMPLEMENTACAO-E-VALIDACAO.md). Sem migration nova. Critérios, limites e evidências registrados; diagnóstico histórico abaixo preservado.
+
+> Acompanhamento de 22/11/2026: E-19 (AUD-20) implementada e validada localmente, sem commit/publicação. Paginação, busca e totais globais, compatibilidade e evidências em [E-19](Sprint-5-Fechamento/E-19-IMPLEMENTACAO-E-VALIDACAO.md). O diagnóstico histórico abaixo foi preservado.
+
+> Acompanhamento de 22/11/2026: E-11 (moderação, DEC-D) implementada e validada localmente, sem commit/publicação. Transições de parceiro, aprovação do Pet Sitter só pela avaliação, candidatura única, revisão só de PENDING com lock e painel distinguindo EM_REVISAO em [E-11-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-11-IMPLEMENTACAO-E-VALIDACAO.md). Legado de sitters aprovados sem avaliação não foi saneado.
+
+> Acompanhamento de 22/11/2026: E-20 (AUD-21) concluída localmente, sem commit/publicação. O Contato abre o e-mail do usuário com a mensagem pronta, sem anúncio falso de envio. "Limpar carrinho" só confirma após 2xx. CFG-1 e Agendar já estavam sem simulação. Registro em [E-20-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-20-IMPLEMENTACAO-E-VALIDACAO.md).
+
+> Acompanhamento de 20/11/2026: E-16/INF-2 implementadas e verificadas localmente, sem commit/publicação. Runtime, imagem, boot e auditoria bloqueante em [INF-2-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/INF-2-IMPLEMENTACAO-E-VALIDACAO.md). Backend sem achados npm e frontend sem high/critical, com quatro moderados explícitos. Configuração dos provedores, preflights e aceite de release ainda pendentes; o histórico abaixo foi preservado.
+
+> Acompanhamento de 20/11/2026: pendências reproduzidas E-07/E-14/E-15 e SEC-2 implementadas e validadas localmente, sem commit/publicação. Erros, permissões, privacidade, métricas e política de limites em [SEC-2-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/SEC-2-IMPLEMENTACAO-E-VALIDACAO.md). Proxy publicado, infraestrutura e QA de release continuam pendentes; diagnóstico histórico abaixo preservado.
+
+> Acompanhamento de 20/11/2026: E-12 implementada e validada localmente, sem commit/publicação. Regras de remoção, histórico, concorrência e limites em [E-12-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-12-IMPLEMENTACAO-E-VALIDACAO.md). O registro histórico da auditoria abaixo foi preservado.
+
+> Acompanhamento de 20/11/2026: E-10/DEC-F implementada localmente, sem commit/publicação. Documentos, aceite versionado, preservação do legado e preflight em [E-10-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-10-IMPLEMENTACAO-E-VALIDACAO.md). Dados legados e colisões em produção ainda exigem auditoria e conciliação antes do deploy.
+
+> Acompanhamento de 19/11/2026: E-09/DEC-E implementada e validada localmente, sem commit/publicação. Política de senha, normalização de e-mail, reset atômico e limites em [E-09-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-09-IMPLEMENTACAO-E-VALIDACAO.md). A auditoria e a conciliação de e-mails da produção ainda precisam anteceder o deploy da migration.
+
+> Acompanhamento de 19/11/2026: E-08 implementada e validada localmente, sem commit/publicação. A evidência histórica abaixo foi preservada; regras, migration e limites atuais em [E-08-IMPLEMENTACAO-E-VALIDACAO.md](Sprint-5-Fechamento/E-08-IMPLEMENTACAO-E-VALIDACAO.md).
+
 > **Data:** 23/10/2026 (verificações executadas em 22/10/2026) · **Base auditada:** `origin/main` no commit `c1d53f0` (AGD-2, 15/10/2026), confirmado como ponta remota da `main` em 22/10/2026 · **Escopo:** Sprints 0 a 3 (28 tasks) e os módulos-base dos quais elas dependem · **Natureza:** auditoria somente leitura — nenhuma correção foi aplicada.
 >
 > Os números de linha citados referem-se ao commit `c1d53f0`. A branch `Tasks-Laura` (`176e5a4`) está 8 commits atrás da `main` e não contém AGD-2, CHK-3, SRV-F1/F2 nem o ajuste de migrations no boot.

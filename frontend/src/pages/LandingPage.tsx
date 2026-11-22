@@ -1,7 +1,9 @@
+import { RatingBadge } from "../components/reviews/RatingBadge";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { toast } from "sonner";
+import { useFavorites } from "../contexts/FavoritesContext";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 
 // Import local assets for services section
@@ -32,7 +34,6 @@ import {
   Hotel,
   PawPrint,
   ShoppingBag,
-  Star,
   Heart,
   ShoppingCart,
   ChevronLeft,
@@ -44,7 +45,6 @@ import {
   Clock,
   Zap,
   Instagram,
-  Quote,
   Mail,
   Tag,
   Bone,
@@ -73,17 +73,13 @@ type Product = {
   brand: string;
   price: number;
   originalPrice?: number;
-  rating: number;
-  reviews: number;
+  rating_avg?: number | null;
+  rating_count?: number;
   image: string;
   badge?: string;
   discount?: number;
   soldCount?: number;
 };
-
-
-
-
 
 const popularCategories = [
   {
@@ -151,81 +147,10 @@ const popularCategories = [
   },
 ];
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Juliana Mendes",
-    avatar:
-      "https://images.unsplash.com/photo-1760551936981-d1d74af8c33d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHdvbWFuJTIwc21pbGluZyUyMHBvcnRyYWl0JTIwaGVhZHNob3QlMjBjYXN1YWx8ZW58MXx8fHwxNzcyNDYzNDk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    text: "O Pet+ mudou completamente como cuido do meu golden! A hotelaria é incrível e o shopping tem tudo que preciso. Já comprei ração, brinquedos e cama — entrega super rápida!",
-    petName: "Thor",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "Rafael Costa",
-    avatar:
-      "https://images.unsplash.com/photo-1769071167455-e5779ecc81a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMG1hbiUyMHBvcnRyYWl0JTIwaGVhZHNob3QlMjBjYXN1YWwlMjBmcmllbmRseXxlbnwxfHx8fDE3NzI0NjM0OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    text: "Como parceiro Pet Sitter, a plataforma facilitou muito minha vida. O dashboard é completo, consigo gerenciar agendamentos e recebo avaliações direto no app. Recomendo demais!",
-    petName: "Luna",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Fernanda Oliveira",
-    avatar:
-      "https://images.unsplash.com/photo-1758600433358-b44bf8a32c8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaWRkbGUlMjBhZ2VkJTIwd29tYW4lMjBwb3J0cmFpdCUyMGhlYWRzaG90JTIwd2FybXxlbnwxfHx8fDE3NzI0NjM0OTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    text: "Uso o Pet+ toda semana! Os preços do Shopping são muito competitivos e os Pet Sitters são super carinhosos com minha gatinha. Melhor plataforma pet que já usei.",
-    petName: "Mimi",
-    rating: 5,
-  },
-];
-
-const instagramPhotos = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1565169464865-9f33e7987eb7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMHdvbWFuJTIwaHVnZ2luZyUyMGdvbGRlbiUyMHJldHJpZXZlcnxlbnwxfHx8fDE3NzI0NjM0ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 342,
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1637739393754-1e8fe712583d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjB3YWxraW5nJTIwZG9nJTIwcGFyayUyMGF1dHVtbnxlbnwxfHx8fDE3NzI0NjM0ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 287,
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1760141080554-1ce4c4be4612?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW1pbHklMjBwbGF5aW5nJTIwcHVwcHklMjBiYWNreWFyZHxlbnwxfHx8fDE3NzI0NjM0ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 519,
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1630438994394-3deff7a591bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwZnJlbmNoJTIwYnVsbGRvZyUyMHN3ZWF0ZXIlMjBvdXRmaXR8ZW58MXx8fHwxNzcyNDYzNDkwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 456,
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1736331552060-bd3ed18cb2fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXQlMjBzbGVlcGluZyUyMGNvenklMjBibGFua2V0JTIwaW5kb29yfGVufDF8fHx8MTc3MjQ0MjU4OHww&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 398,
-  },
-  {
-    id: 6,
-    image:
-      "https://images.unsplash.com/photo-1769690093961-5241cea477e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXQlMjBzdG9yZSUyMHNob3BwaW5nJTIwbW9kZXJuJTIwaW50ZXJpb3J8ZW58MXx8fHwxNzcyNDYzNDkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    likes: 267,
-  },
-];
-
-/* ═══════════════════════════════════════════════
-   PRODUCT CARD
-   ═══════════════════════════════════════════════ */
-
 function ProductCard({ product }: { product: Product }) {
-  const [fav, setFav] = useState(false);
+  // Favoritos reais (antes era estado local com toast de sucesso falso — G19).
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite("PRODUCT", String(product.id));
   const { addItem } = useCart();
 
   return (
@@ -235,7 +160,11 @@ function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col h-full bg-white rounded-2xl border border-slate-200 hover:border-slate-300 transition-all overflow-hidden"
     >
       {/* Image */}
-      <Link to={`/shopping/${product.id}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-50/50 p-2.5">
+      <div className="relative">
+      <Link
+        to={`/shopping/${product.id}`}
+        className="relative block aspect-[4/3] overflow-hidden bg-slate-50/50 p-2.5"
+      >
         <ImageWithFallback
           src={product.image}
           alt={product.name}
@@ -245,8 +174,7 @@ function ProductCard({ product }: { product: Product }) {
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.discount && (
             <span className="inline-flex items-center gap-1 bg-red-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
-              <Zap className="h-3 w-3" />
-              -{product.discount}%
+              <Zap className="h-3 w-3" />-{product.discount}%
             </span>
           )}
           {product.badge && (
@@ -255,59 +183,44 @@ function ProductCard({ product }: { product: Product }) {
                 product.badge === "Mais Vendido"
                   ? "bg-amber-400 text-amber-900"
                   : product.badge === "Novo"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-violet-500 text-white"
+                    ? "bg-emerald-700 text-white"
+                    : "bg-violet-500 text-white"
               }`}
             >
               {product.badge}
             </span>
           )}
         </div>
-        {/* Fav */}
+      </Link>
+        {/* Fav: fora do link da imagem, para não aninhar controles. */}
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            setFav(!fav);
-            toast.success(fav ? "Removido dos favoritos" : "Adicionado aos favoritos");
-          }}
+          type="button"
+          aria-label={`${fav ? "Remover dos favoritos" : "Favoritar"}: ${product.name}`}
+          aria-pressed={fav}
+          onClick={() => void toggle("PRODUCT", String(product.id))}
           className="absolute top-3 right-3 h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
         >
           <Heart
             className={`h-4 w-4 transition-colors ${
-              fav ? "fill-red-500 text-red-500" : "text-slate-400"
+              fav ? "fill-red-500 text-red-500" : "text-slate-500"
             }`}
           />
         </button>
-      </Link>
+      </div>
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-3 gap-1.5">
-        <p className="text-[11px] text-slate-400 uppercase tracking-wider font-medium">
+        <p className="text-[11px] text-slate-500 uppercase tracking-wider font-medium">
           {product.brand}
         </p>
         <Link
           to={`/shopping/${product.id}`}
-          className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 hover:text-[var(--color-primary-600)] transition-colors font-[family-name:var(--font-display)]"
+          className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 hover:text-[var(--color-primary-700)] transition-colors font-[family-name:var(--font-display)]"
         >
           {product.name}
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star
-                key={s}
-                className={`h-3 w-3 ${
-                  s <= Math.round(product.rating)
-                    ? "text-amber-400 fill-amber-400"
-                    : "text-slate-200"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-[11px] text-slate-400">({product.reviews})</span>
-        </div>
+        <RatingBadge {...product} />
 
         {/* Price */}
         <div className="mt-auto pt-2">
@@ -339,7 +252,7 @@ function ProductCard({ product }: { product: Product }) {
               toast.success(`${product.name} adicionado ao carrinho!`);
             }
           }}
-          className="mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-500)] to-orange-400 text-white text-xs font-semibold hover:from-[var(--color-primary-600)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-sm"
+          className="mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-700)] to-orange-400 text-white text-xs font-semibold hover:from-[var(--color-primary-800)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-sm"
         >
           <ShoppingCart className="h-4 w-4" />
           Adicionar
@@ -471,7 +384,7 @@ function SectionHeader({
       {action && actionHref && (
         <Link
           to={actionHref}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] transition-colors shrink-0"
         >
           {action}
           <ArrowRight className="h-4 w-4" />
@@ -519,9 +432,7 @@ function CountdownTimer() {
       ].map((t, i) => (
         <div key={t.label} className="flex items-center gap-2">
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-2.5 py-1.5 min-w-[40px] text-center">
-            <span className="text-lg sm:text-xl font-bold font-mono text-white">
-              {t.val}
-            </span>
+            <span className="text-lg sm:text-xl font-bold font-mono text-white">{t.val}</span>
           </div>
           {i < 2 && <span className="text-white/60 font-bold text-lg">:</span>}
         </div>
@@ -539,7 +450,8 @@ const heroSlides = [
     id: 1,
     title: "Cuidado completo para quem é ",
     highlight: "família",
-    description: "De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar do seu melhor amigo em um só lugar.",
+    description:
+      "De cuidados especializados aos melhores produtos. Encontre tudo o que você precisa para garantir o bem-estar do seu melhor amigo em um só lugar.",
     image: heroCarePets,
     bgColor: "bg-[#edf4de]", // Light pastel lime green
     blobColor: "bg-[#cddba9]",
@@ -548,15 +460,17 @@ const heroSlides = [
     ctaLink: "/walkers",
     features: [
       { icon: Shield, title: "Segurança Total", subtitle: "Parceiros verificados" },
-      { icon: Calendar, title: "Agendamento Fácil", subtitle: "Online e instantâneo" }
-    ]
+      { icon: Calendar, title: "Agendamento Fácil", subtitle: "Online e instantâneo" },
+    ],
   },
   {
     id: 2,
-    badgeText: "Ofertas Especiais",
-    title: "Ofertas exclusivas no ",
-    highlight: "Shopping Pet",
-    description: "As melhores marcas com descontos imperdíveis. Ração, brinquedos, acessórios e farmácia com entrega rápida na sua porta.",
+    // Texto revisado (G20): sem descontos, farmácia ou entrega rápida que a plataforma não oferece.
+    badgeText: "Shopping Pet+",
+    title: "Produtos de lojas parceiras no ",
+    highlight: "Shopping Pet+",
+    description:
+      "Ração, brinquedos e acessórios de lojas parceiras aprovadas pela equipe Pet+. A entrega é combinada com cada loja.",
     image: heroShopDog,
     bgColor: "bg-[#eef2ff]", // Light pastel blue/indigo
     blobColor: "bg-[#c7d2fe]",
@@ -564,16 +478,17 @@ const heroSlides = [
     ctaText: "Acessar Loja",
     ctaLink: "/shopping",
     features: [
-      { icon: Zap, title: "Entrega Rápida", subtitle: "Para toda a cidade" },
-      { icon: Tag, title: "Melhores Preços", subtitle: "Ofertas diárias" }
-    ]
+      { icon: Store, title: "Lojas parceiras", subtitle: "Aprovadas pela Pet+" },
+      { icon: Tag, title: "Sem frete da Pet+", subtitle: "Total = soma dos itens" },
+    ],
   },
   {
     id: 3,
     badgeText: "Hospedagem & Cuidados",
     title: "Encontre o Pet Sitter ou ",
     highlight: "Hotel ideal",
-    description: "Viaje tranquilo ou trabalhe sem preocupações. Conectamos você aos melhores cuidadores e hotéis verificados da região.",
+    description:
+      "Viaje tranquilo ou trabalhe sem preocupações. Conectamos você a hotéis e pet sitters com cadastro aprovado pela equipe Pet+.",
     image: heroServicePet,
     bgColor: "bg-[#fdf4e9]", // Light pastel peach/amber
     blobColor: "bg-[#fed7aa]",
@@ -581,10 +496,10 @@ const heroSlides = [
     ctaText: "Buscar Hotéis",
     ctaLink: "/hotels",
     features: [
-      { icon: Hotel, title: "Hospedagem", subtitle: "Conforto garantido" },
-      { icon: PawPrint, title: "Pet Sitters", subtitle: "Cuidados em casa" }
-    ]
-  }
+      { icon: Hotel, title: "Hospedagem", subtitle: "Hotéis aprovados" },
+      { icon: PawPrint, title: "Pet Sitters", subtitle: "Cuidados em casa" },
+    ],
+  },
 ];
 
 function HeroCarousel() {
@@ -624,12 +539,20 @@ function HeroCarousel() {
           className="absolute inset-x-0 top-0 h-[180px] overflow-hidden pointer-events-none z-0"
         >
           {/* Main center-left hanging blob */}
-          <div className={`absolute top-0 left-[35%] w-[160px] h-[70px] rounded-b-[40px] opacity-75 blur-[1px] transition-all duration-700 ${slide.blobColor}`} />
+          <div
+            className={`absolute top-0 left-[35%] w-[160px] h-[70px] rounded-b-[40px] opacity-75 blur-[1px] transition-all duration-700 ${slide.blobColor}`}
+          />
           {/* Top-right hanging blob */}
-          <div className={`absolute top-0 right-[15%] w-[200px] h-[85px] rounded-b-[50px] opacity-60 blur-[2px] transition-all duration-700 ${slide.blobColor}`} />
+          <div
+            className={`absolute top-0 right-[15%] w-[200px] h-[85px] rounded-b-[50px] opacity-60 blur-[2px] transition-all duration-700 ${slide.blobColor}`}
+          />
           {/* Subtle dots or bubbles */}
-          <div className={`absolute top-[40px] left-[32%] w-3 h-3 rounded-full opacity-60 transition-all duration-700 ${slide.blobColor}`} />
-          <div className={`absolute top-[80px] right-[25%] w-4 h-4 rounded-full opacity-50 transition-all duration-700 ${slide.blobColor}`} />
+          <div
+            className={`absolute top-[40px] left-[32%] w-3 h-3 rounded-full opacity-60 transition-all duration-700 ${slide.blobColor}`}
+          />
+          <div
+            className={`absolute top-[80px] right-[25%] w-4 h-4 rounded-full opacity-50 transition-all duration-700 ${slide.blobColor}`}
+          />
         </motion.div>
       </AnimatePresence>
 
@@ -647,23 +570,35 @@ function HeroCarousel() {
           >
             {/* Content */}
             <div className="space-y-6">
-
               <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.5rem] font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-display)] leading-[1.15] filter drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)]">
                 {slide.title}
-                <span className="relative inline-block text-[var(--color-primary-600)]">
+                <span className="relative inline-block text-[var(--color-primary-700)]">
                   {slide.highlight}
-                  <svg viewBox="0 0 200 20" className="absolute -bottom-2 left-0 w-full h-3 text-[var(--color-primary-200)] -z-0">
-                    <path d="M0 10 Q 50 0 100 10 T 200 10" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+                  <svg
+                    viewBox="0 0 200 20"
+                    className="absolute -bottom-2 left-0 w-full h-3 text-[var(--color-primary-200)] -z-0"
+                  >
+                    <path
+                      d="M0 10 Q 50 0 100 10 T 200 10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                </span>.
+                </span>
+                .
               </h1>
               <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-xl leading-relaxed font-semibold">
                 {slide.description}
               </p>
-              
+
               <div className="flex flex-wrap items-center gap-4">
                 <Link to={slide.ctaLink}>
-                  <Button size="lg" className="bg-[var(--color-primary-500)] text-white hover:bg-[var(--color-primary-600)] shadow-lg rounded-full px-10 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 border-none">
+                  <Button
+                    size="lg"
+                    className="bg-[var(--color-primary-700)] text-white hover:bg-[var(--color-primary-800)] shadow-lg rounded-full px-10 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 border-none"
+                  >
                     {slide.ctaText}
                   </Button>
                 </Link>
@@ -728,7 +663,9 @@ function HeroCarousel() {
                   src={slide.image}
                   alt={slide.highlight}
                   className="w-full h-full object-contain select-none"
-                  style={{ filter: "url(#remove-white) drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12))" }}
+                  style={{
+                    filter: "url(#remove-white) drop-shadow(0 20px 25px rgba(0, 0, 0, 0.12))",
+                  }}
                 />
               </motion.div>
             </div>
@@ -743,7 +680,9 @@ function HeroCarousel() {
             key={i}
             onClick={() => setCurrentSlide(i)}
             className={`h-2.5 rounded-full transition-all ${
-              i === currentSlide ? "w-8 bg-[var(--color-primary-600)]" : "w-2.5 bg-slate-300 hover:bg-slate-400"
+              i === currentSlide
+                ? "w-8 bg-[var(--color-primary-600)]"
+                : "w-2.5 bg-slate-300 hover:bg-slate-400"
             }`}
             aria-label={`Ir para slide ${i + 1}`}
           />
@@ -754,12 +693,15 @@ function HeroCarousel() {
       <svg className="absolute w-0 h-0 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="remove-white">
-            <feColorMatrix type="matrix" values="
+            <feColorMatrix
+              type="matrix"
+              values="
               1 0 0 0 0
               0 1 0 0 0
               0 0 1 0 0
               -1 -1 -1 3 0
-            " />
+            "
+            />
           </filter>
         </defs>
       </svg>
@@ -773,18 +715,6 @@ function HeroCarousel() {
 
 export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
-
-  const nextTestimonial = () =>
-    setTestimonialIdx((i) => (i + 1) % testimonials.length);
-  const prevTestimonial = () =>
-    setTestimonialIdx((i) => (i - 1 + testimonials.length) % testimonials.length);
-
-  useEffect(() => {
-    const timer = setInterval(nextTestimonial, 6000);
-    return () => clearInterval(timer);
-  }, []);
-
   const [highlights, setHighlights] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -805,12 +735,12 @@ export default function LandingPage() {
           return {
             id: p.id,
             name: p.name,
-            brand: p.provider_name || 'Desconhecida',
+            brand: p.provider_name || "Desconhecida",
             price: Number(p.price),
-            rating: 4.8, 
-            reviews: Math.floor(Math.random() * 100) + 10,
+            rating_avg: p.rating_avg,
+            rating_count: p.rating_count,
             image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
-            badge: badge
+            badge: badge,
           };
         });
         if (mapped.length > 0) {
@@ -831,167 +761,171 @@ export default function LandingPage() {
           1. HERO
           ═══════════════════════════════════════════════ */}
       <HeroCarousel />
-
       {/* Wrapper to standardize background color between Hero and Footer */}
       <div className="bg-slate-50">
-
-      {/* ═══════════════════════════════════════════════
+        {/* ═══════════════════════════════════════════════
           4. CATEGORIAS POPULARES — Cards Visuais Premium
           ═══════════════════════════════════════════════ */}
-      <section className="relative py-10 sm:py-14 overflow-hidden">
-        {/* Background blob for depth */}
-        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-purple-100 rounded-full blur-[100px] opacity-60 -translate-y-1/2 pointer-events-none" />
+        <section className="relative py-10 sm:py-14 overflow-hidden">
+          {/* Background blob for depth */}
+          <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-purple-100 rounded-full blur-[100px] opacity-60 -translate-y-1/2 pointer-events-none" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Categorias Populares"
-            subtitle="Encontre rapidamente o que seu pet precisa."
-            action="Ver todas as categorias"
-            actionHref="/shopping"
-          />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeader
+              title="Categorias Populares"
+              subtitle="Encontre rapidamente o que seu pet precisa."
+              action="Ver todas as categorias"
+              actionHref="/shopping"
+            />
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-4 sm:gap-6">
-            {popularCategories.map((cat, i) => (
-              <motion.div
-                key={cat.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.35, delay: i * 0.05 }}
-              >
-                <Link
-                  to={`/shopping?category=${cat.id}`}
-                  className="flex flex-col items-center gap-3 group"
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-4 sm:gap-6">
+              {popularCategories.map((cat, i) => (
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35, delay: i * 0.05 }}
                 >
-                  <div className="relative flex items-center justify-center w-30 h-30 sm:w-30 sm:w-30">
-                    {/* Dashed outer border ring */}
-                    <div className="absolute inset-0 rounded-full border-2 border-dashed border-slate-200 group-hover:border-[var(--color-primary-500)] transition-colors duration-300" />
-                    
-                    {/* Sparkles / Shiny lines effect on hover */}
-                    <div className="absolute -top-1.5 -right-1.5 opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 pointer-events-none z-20">
-                      <Sparkles className="h-5 w-5 text-amber-500 fill-amber-300" />
-                    </div>
+                  <Link
+                    to={`/shopping?category=${cat.id}`}
+                    className="flex flex-col items-center gap-3 group"
+                  >
+                    <div className="relative flex items-center justify-center w-30 h-30 sm:w-30 sm:w-30">
+                      {/* Dashed outer border ring */}
+                      <div className="absolute inset-0 rounded-full border-2 border-dashed border-slate-200 group-hover:border-[var(--color-primary-500)] transition-colors duration-300" />
 
-                    {/* Inner circle with pastel bg or solid brand bg on hover */}
-                    <div className={`absolute w-[86%] h-[86%] rounded-full ${cat.pastelBg} group-hover:bg-[var(--color-primary-500)] transition-all duration-300 flex items-center justify-center overflow-visible`}>
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="w-[85%] h-[85%] object-contain transform group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300"
-                      />
+                      {/* Sparkles / Shiny lines effect on hover */}
+                      <div className="absolute -top-1.5 -right-1.5 opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 pointer-events-none z-20">
+                        <Sparkles className="h-5 w-5 text-amber-500 fill-amber-300" />
+                      </div>
+
+                      {/* Inner circle with pastel bg or solid brand bg on hover */}
+                      <div
+                        className={`absolute w-[86%] h-[86%] rounded-full ${cat.pastelBg} group-hover:bg-[var(--color-primary-500)] transition-all duration-300 flex items-center justify-center overflow-visible`}
+                      >
+                        <img
+                          src={cat.image}
+                          alt={cat.name}
+                          className="w-[85%] h-[85%] object-contain transform group-hover:scale-115 group-hover:-translate-y-1 transition-all duration-300"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-[var(--color-primary-600)] transition-colors text-center font-[family-name:var(--font-display)]">
-                    {cat.name}
-                  </span>
-                </Link>
-              </motion.div>
-            ))}
+                    <span className="text-xs sm:text-sm font-semibold text-slate-700 group-hover:text-[var(--color-primary-700)] transition-colors text-center font-[family-name:var(--font-display)]">
+                      {cat.name}
+                    </span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-
-      {/* ═══════════════════════════════════════════════
+        {/* ═══════════════════════════════════════════════
           2. SERVIÇOS — 3 Cards
           ═══════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Tudo que seu pet precisa"
-            subtitle="Navegue por categorias e encontre o serviço ideal."
-          />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              {
-                name: "Hotelaria",
-                bgColor: "bg-[#7148c4]",
-                gradient: "from-[#7148c4] via-[#7148c4]/30 to-transparent",
-                desc: "Hospedagem segura e confortável para o seu pet.",
-                href: "/hotels",
-                image: hotelImg,
-                icon: PawPrint,
-                iconClass: "w-40 h-40 -bottom-10 -left-6 rotate-[15deg] opacity-10"
-              },
-              {
-                name: "Pet Sitter",
-                bgColor: "bg-[#f57a26]",
-                gradient: "from-[#f57a26] via-[#f57a26]/20 to-transparent",
-                desc: "Cuidadores verificados na sua casa ou na deles.",
-                href: "/walkers",
-                image: petSitterImg,
-                icon: PawPrint,
-                iconClass: "w-28 h-28 -bottom-4 left-4 -rotate-12 opacity-20"
-              },
-              {
-                name: "Shopping",
-                bgColor: "bg-[#2563eb]",
-                gradient: "from-[#2563eb] via-[#2563eb]/30 to-transparent",
-                desc: "Rações, brinquedos e tudo para o dia a dia.",
-                href: "/shopping",
-                image: petShopImg,
-                icon: Bone,
-                iconClass: "w-32 h-32 -bottom-4 left-4 rotate-45 opacity-20"
-              },
-            ].map((cat) => (
-              <Link key={cat.name} to={cat.href} className={`group relative block rounded-[2rem] overflow-hidden ${cat.bgColor} hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 min-h-[280px]`}>
-                
-                {/* Decorative blob */}
-                <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
-                
-                {/* Background watermark icon */}
-                <div className={`absolute ${cat.iconClass} transition-transform duration-500 group-hover:scale-105`}>
-                   <cat.icon className="w-full h-full text-white fill-white" />
-                </div>
+        <section className="py-10 sm:py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeader
+              title="Tudo que seu pet precisa"
+              subtitle="Navegue por categorias e encontre o serviço ideal."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {[
+                {
+                  name: "Hotelaria",
+                  bgColor: "bg-[#7148c4]",
+                  gradient: "from-[#7148c4] via-[#7148c4]/30 to-transparent",
+                  desc: "Hospedagem segura e confortável para o seu pet.",
+                  href: "/hotels",
+                  image: hotelImg,
+                  icon: PawPrint,
+                  iconClass: "w-40 h-40 -bottom-10 -left-6 rotate-[15deg] opacity-10",
+                },
+                {
+                  name: "Pet Sitter",
+                  bgColor: "bg-[var(--color-primary-700)]",
+                  gradient: "from-[var(--color-primary-700)] via-[var(--color-primary-700)]/20 to-transparent",
+                  desc: "Cuidadores verificados na sua casa ou na deles.",
+                  href: "/walkers",
+                  image: petSitterImg,
+                  icon: PawPrint,
+                  iconClass: "w-28 h-28 -bottom-4 left-4 -rotate-12 opacity-20",
+                },
+                {
+                  name: "Shopping",
+                  bgColor: "bg-[#2563eb]",
+                  gradient: "from-[#2563eb] via-[#2563eb]/30 to-transparent",
+                  desc: "Rações, brinquedos e tudo para o dia a dia.",
+                  href: "/shopping",
+                  image: petShopImg,
+                  icon: Bone,
+                  iconClass: "w-32 h-32 -bottom-4 left-4 rotate-45 opacity-20",
+                },
+              ].map((cat) => (
+                <Link
+                  key={cat.name}
+                  to={cat.href}
+                  className={`group relative block rounded-[2rem] overflow-hidden ${cat.bgColor} hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 min-h-[280px]`}
+                >
+                  {/* Decorative blob */}
+                  <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700" />
 
-                {/* Right side image with gradient mask */}
-                <div className="absolute top-0 right-0 w-[60%] sm:w-[55%] h-full">
-                   <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} z-10 w-full`} />
-                   <ImageWithFallback 
-                     src={cat.image} 
-                     className="w-full h-full object-cover object-center" 
-                     alt={cat.name} 
-                   />
-                </div>
-                
-                {/* Content */}
-                <div className="relative z-20 flex flex-col h-full p-6 sm:p-8 w-[65%] sm:w-[60%]">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white font-[family-name:var(--font-display)] mb-2 leading-tight">
-                    {cat.name}
-                  </h3>
-                  <p className="text-white/95 font-medium text-sm sm:text-[15px] leading-relaxed mb-6">
-                    {cat.desc}
-                  </p>
-                  
-                  <div className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-white">
-                    <span className="underline underline-offset-[5px] decoration-1 decoration-white/70 group-hover:decoration-white transition-colors">
-                      Explorar
-                    </span>
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform ml-1" />
+                  {/* Background watermark icon */}
+                  <div
+                    className={`absolute ${cat.iconClass} transition-transform duration-500 group-hover:scale-105`}
+                  >
+                    <cat.icon className="w-full h-full text-white fill-white" />
                   </div>
-                </div>
-              </Link>
-            ))}
+
+                  {/* Right side image with gradient mask */}
+                  <div className="absolute top-0 right-0 w-[60%] sm:w-[55%] h-full">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} z-10 w-full`}
+                    />
+                    <ImageWithFallback
+                      src={cat.image}
+                      className="w-full h-full object-cover object-center"
+                      alt={cat.name}
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative z-20 flex flex-col h-full p-6 sm:p-8 w-[65%] sm:w-[60%]">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white font-[family-name:var(--font-display)] mb-2 leading-tight">
+                      {cat.name}
+                    </h3>
+                    <p className="text-white/95 font-medium text-sm sm:text-[15px] leading-relaxed mb-6">
+                      {cat.desc}
+                    </p>
+
+                    <div className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-white">
+                      <span className="underline underline-offset-[5px] decoration-1 decoration-white/70 group-hover:decoration-white transition-colors">
+                        Explorar
+                      </span>
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform ml-1" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      
-
-      {/* ═══════════════════════════════════════════════
+        {/* ═══════════════════════════════════════════════
           3. DESTAQUES DA SEMANA — Carousel Progressivo
           ═══════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Produtos em Destaque"
-            subtitle="Os produtos mais procurados pelos nossos clientes."
-            action="Ver todo o Shopping"
-            actionHref="/shopping"
-          />
+        <section className="py-10 sm:py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeader
+              title="Produtos em Destaque"
+              subtitle="Os produtos mais procurados pelos nossos clientes."
+              action="Ver todo o Shopping"
+              actionHref="/shopping"
+            />
 
-          {/* Timer bar */}
-          {/* <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-8 p-4 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl">
+            {/* Timer bar */}
+            {/* <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-8 p-4 bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-white" />
               <span className="text-sm font-semibold text-white">
@@ -1001,245 +935,109 @@ export default function LandingPage() {
             <CountdownTimer />
           </div> */}
 
-          <HorizontalCarousel>
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 w-full min-h-[200px] col-span-full">
-                <Loader2 className="h-8 w-8 text-[var(--color-primary-500)] animate-spin" />
-                <p className="mt-3 text-sm text-slate-500 font-semibold tracking-wide animate-pulse">
-                  Carregando produtos...
-                </p>
-              </div>
-            ) : highlights.length > 0 ? (
-              highlights.map((product) => (
-                <div
-                  key={product.id}
-                  className="w-[210px] sm:w-[230px] shrink-0 snap-start flex flex-col"
-                >
-                  <ProductCard product={product} />
+            <HorizontalCarousel>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-16 w-full min-h-[200px] col-span-full">
+                  <Loader2 className="h-8 w-8 text-[var(--color-primary-500)] animate-spin" />
+                  <p className="mt-3 text-sm text-slate-500 font-semibold tracking-wide animate-pulse">
+                    Carregando produtos...
+                  </p>
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 w-full text-center text-slate-400 font-medium col-span-full">
-                Nenhum produto em destaque disponível no momento.
-              </div>
-            )}
-          </HorizontalCarousel>
-        </div>
-      </section>
+              ) : highlights.length > 0 ? (
+                highlights.map((product) => (
+                  <div
+                    key={product.id}
+                    className="w-[210px] sm:w-[230px] shrink-0 snap-start flex flex-col"
+                  >
+                    <ProductCard product={product} />
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 w-full text-center text-slate-400 font-medium col-span-full">
+                  Nenhum produto em destaque disponível no momento.
+                </div>
+              )}
+            </HorizontalCarousel>
+          </div>
+        </section>
 
-      
-
-      
-
-      
-      
-
-      {/* ═══════════════════════════════════════════════
+        {/* ═══════════════════════════════════════════════
           6. CTA PARCEIROS - PREMIUM 3D
           ═══════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-[#eef2ff] rounded-[2rem] sm:rounded-[2.5rem] py-8 px-6 sm:py-10 sm:px-10 lg:py-10 lg:px-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 border border-indigo-200/80">
-            
-            {/* Floaty Elements */}
-            <motion.div
-              animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-8 left-8 lg:left-16 text-indigo-300/40 z-0 hidden sm:block"
-            >
-              <PawPrint className="w-10 h-10" />
-            </motion.div>
-            <motion.div
-              animate={{ y: [0, 12, 0], rotate: [0, 10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute bottom-8 right-8 lg:right-1/3 text-purple-300/40 z-0 hidden sm:block"
-            >
-              <Heart className="w-8 h-8" />
-            </motion.div>
+        <section className="py-10 sm:py-14 overflow-hidden">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="relative bg-[#eef2ff] rounded-[2rem] sm:rounded-[2.5rem] py-8 px-6 sm:py-10 sm:px-10 lg:py-10 lg:px-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 border border-indigo-200/80">
+              {/* Floaty Elements */}
+              <motion.div
+                animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-8 left-8 lg:left-16 text-indigo-300/40 z-0 hidden sm:block"
+              >
+                <PawPrint className="w-10 h-10" />
+              </motion.div>
+              <motion.div
+                animate={{ y: [0, 12, 0], rotate: [0, 10, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute bottom-8 right-8 lg:right-1/3 text-purple-300/40 z-0 hidden sm:block"
+              >
+                <Heart className="w-8 h-8" />
+              </motion.div>
 
-            {/* Left side: Text Content */}
-            <div className="flex-1 text-center lg:text-left relative z-10 order-2 lg:order-1">
-              
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-4 leading-tight">
-                Você tem um Pet Shop, Hotel ou é Cuidador?
-              </h2>
-              <p className="text-slate-600 text-base mb-6 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-                Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos, atração de clientes e faturamento em uma única plataforma inteligente.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <Link to="/partners" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold shadow-md shadow-primary-500/10 px-6 rounded-full h-11 text-sm">
-                    Conhecer Área de Parceiros
-                  </Button>
-                </Link>
-                <Link to="/about" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-6 rounded-full h-11 text-sm shadow-sm">
-                    Saiba Mais
-                  </Button>
-                </Link>
+              {/* Left side: Text Content */}
+              <div className="flex-1 text-center lg:text-left relative z-10 order-2 lg:order-1">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] mb-4 leading-tight">
+                  Você tem um Pet Shop, Hotel ou é Cuidador?
+                </h2>
+                <p className="text-slate-600 text-base mb-6 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                  Junte-se ao Pet+ e expanda seu negócio. Gerencie agendamentos, atração de clientes
+                  e faturamento em uma única plataforma inteligente.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                  <Link to="/partners" className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white font-bold shadow-md shadow-primary-500/10 px-6 rounded-full h-11 text-sm"
+                    >
+                      Conhecer Área de Parceiros
+                    </Button>
+                  </Link>
+                  <Link to="/about" className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold px-6 rounded-full h-11 text-sm shadow-sm"
+                    >
+                      Saiba Mais
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
 
-            {/* Right side: 3D Image */}
-            <div className="flex-1 relative z-10 w-full max-w-[240px] sm:max-w-[280px] lg:max-w-[320px] mx-auto order-1 lg:order-2">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="relative aspect-square flex items-center justify-center"
-              >
-                {/* Image Backdrop Blob */}
-                <div className="absolute inset-0 bg-[#c7d2fe]/40 rounded-full blur-2xl opacity-60 mix-blend-multiply" />
-                
-                <ImageWithFallback
-                  src={ctaPartnerHotel}
-                  alt="Profissional trabalhando em hotel pet"
-                  className="relative z-10 w-full h-full object-contain drop-shadow-lg"
-                  style={{ filter: "url(#remove-white)" }}
-                />
-              </motion.div>
-            </div>
-            
-          </div>
-        </div>
-      </section>
+              {/* Right side: 3D Image */}
+              <div className="flex-1 relative z-10 w-full max-w-[240px] sm:max-w-[280px] lg:max-w-[320px] mx-auto order-1 lg:order-2">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 15 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="relative aspect-square flex items-center justify-center"
+                >
+                  {/* Image Backdrop Blob */}
+                  <div className="absolute inset-0 bg-[#c7d2fe]/40 rounded-full blur-2xl opacity-60 mix-blend-multiply" />
 
-      {/* ═══════════════════════════════════════════════
-          7. SOCIAL PROOF — Depoimentos + Instagram
-          ═══════════════════════════════════════════════ */}
-      <section className="py-10 sm:py-14 overflow-hidden">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            badge="Comunidade"
-            badgeIcon={Heart}
-            title="Amado por Tutores"
-            subtitle="Veja o que dizem os tutores que confiam no Pet+."
-          />
-
-          {/* Testimonials carousel */}
-          <div className="relative bg-[#fff7ed] rounded-[2rem] sm:rounded-[2.5rem] border border-orange-200/80 p-6 sm:p-10 mb-12 sm:mb-16">
-            <Quote className="absolute top-6 left-6 h-10 w-10 text-orange-300 opacity-50" />
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={testimonialIdx}
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.35 }}
-                className="flex flex-col md:flex-row items-center gap-6 sm:gap-10"
-              >
-                {/* Avatar */}
-                <div className="shrink-0">
-                  <div className="h-20 w-20 sm:h-28 sm:w-28 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
-                    <ImageWithFallback
-                      src={testimonials[testimonialIdx].avatar}
-                      alt={testimonials[testimonialIdx].name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-
-                {/* Text */}
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex justify-center md:justify-start mb-3">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star
-                        key={s}
-                        className="h-4 w-4 text-amber-400 fill-amber-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-base sm:text-lg text-slate-700 leading-relaxed mb-4 italic">
-                    "{testimonials[testimonialIdx].text}"
-                  </p>
-                  <div>
-                    <p className="font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                      {testimonials[testimonialIdx].name}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Tutor(a) de{" "}
-                      <span className="font-medium text-[var(--color-primary-600)]">
-                        {testimonials[testimonialIdx].petName}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Controls */}
-            <div className="flex items-center justify-center md:justify-end gap-3 mt-6">
-              <button
-                onClick={prevTestimonial}
-                aria-label="Depoimento anterior"
-                className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <div className="flex gap-1.5">
-                {testimonials.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setTestimonialIdx(i)}
-                    aria-label={`Ir para o depoimento ${i + 1}`}
-                    className={`h-2 rounded-full transition-all ${
-                      i === testimonialIdx
-                        ? "w-6 bg-[var(--color-primary-500)]"
-                        : "w-2 bg-slate-300 hover:bg-slate-400"
-                    }`}
+                  <ImageWithFallback
+                    src={ctaPartnerHotel}
+                    alt="Profissional trabalhando em hotel pet"
+                    className="relative z-10 w-full h-full object-contain drop-shadow-lg"
+                    style={{ filter: "url(#remove-white)" }}
                   />
-                ))}
+                </motion.div>
               </div>
-              <button
-                onClick={nextTestimonial}
-                aria-label="Próximo depoimento"
-                className="h-9 w-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:border-slate-300 transition-colors"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
             </div>
           </div>
-
-          {/* Instagram Grid */}
-          {/* <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <Instagram className="h-5 w-5 text-pink-500" />
-              <span>
-                Siga <span className="text-[var(--color-primary-600)]">@petplus</span>{" "}
-                no Instagram
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
-            {instagramPhotos.map((photo, i) => (
-              <motion.div
-                key={photo.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden group cursor-pointer"
-              >
-                <ImageWithFallback
-                  src={photo.image}
-                  alt={`Instagram ${photo.id}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 text-white">
-                    <Heart className="h-4 w-4 fill-white" />
-                    <span className="text-sm font-semibold">{photo.likes}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div> */}
-        </div>
-      </section>
-
-      </div> {/* End of bg-slate-50 wrapper */}
+        </section>
+      </div>{" "}
+      {/* End of bg-slate-50 wrapper */}
     </div>
   );
 }

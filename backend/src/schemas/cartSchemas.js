@@ -29,6 +29,9 @@ const updateItemSchema = z
 
 const mergeCartSchema = z
   .object({
+    baseline: z.array(z.object({
+      product_id: z.string().uuid(), quantity: z.number().int().min(0).max(MAX_QTY_PER_ITEM),
+    })).max(MAX_DISTINCT_SKUS).optional(),
     items: z
       .array(
         z.object({

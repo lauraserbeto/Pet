@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { refreshOrderHistory } from '../lib/orderCache';
 import { AlertCircle, CheckCircle2, CreditCard, ExternalLink, Package, RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -13,6 +14,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function CheckoutPaymentPage() {
   const [params] = useSearchParams();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [busyOrder, setBusyOrder] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
   const storageKey = `petplus-payment-orders:${user?.id}`;
@@ -39,6 +41,7 @@ export function CheckoutPaymentPage() {
     retry: 1,
   });
   const allPaid = !!payments.data?.length && payments.data.every(({ order }) => paymentConfirmed(order.status));
+  useEffect(() => { if (payments.data) void refreshOrderHistory(queryClient, user?.id); }, [payments.data, queryClient, user?.id]);
 
   async function pay(orderId: string) {
     if (busyOrder) return;
@@ -77,7 +80,7 @@ export function CheckoutPaymentPage() {
         {allPaid ? <CheckCircle2 className="size-7 shrink-0 text-emerald-600" /> : <CreditCard className="size-7 shrink-0 text-sky-600" />}
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{allPaid ? 'Pagamento confirmado' : 'Pagamento do pedido'}</h1>
-          <p className="text-sm text-slate-600 mt-2">{allPaid ? 'Seus pedidos já estão disponíveis em Meus Pedidos.' : 'Seu pedido foi salvo. Confira o valor e finalize o pagamento.'}</p>
+          <p className="text-sm text-slate-600 mt-2">{allPaid ? 'Seus pedidos já estão disponíveis em Meus Pedidos.' : 'Consulte o valor e o status antes de finalizar o pagamento.'}</p>
           {configuration.data?.sandbox && !allPaid && <p className="text-sm text-amber-800 mt-2">Ambiente de teste: use apenas a conta e os cartões de teste do Mercado Pago.</p>}
           {orderIds.length > 1 && <p className="text-sm text-slate-600 mt-2">Cada loja possui um pedido e um pagamento separado.</p>}
         </div>
@@ -85,7 +88,7 @@ export function CheckoutPaymentPage() {
       {payments.isPending && <HamsterLoader message="Consultando pagamento..." size="sm" />}
       {(payments.isError || configuration.isError || actionError) && (
         <div role="alert" className="border-l-4 border-rose-500 bg-rose-50 p-4 text-sm text-rose-800 space-y-3">
-          <p className="flex gap-2"><AlertCircle className="size-4 shrink-0" />{actionError || 'Não foi possível consultar o pagamento. Seu pedido continua salvo.'}</p>
+          <p className="flex gap-2"><AlertCircle className="size-4 shrink-0" />{actionError || 'Não foi possível consultar o pagamento. Confira seu histórico e tente novamente.'}</p>
           <Button variant="outline" onClick={() => { void payments.refetch(); void configuration.refetch(); }}><RefreshCw className="size-4" />Tentar novamente</Button>
         </div>
       )}

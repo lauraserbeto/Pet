@@ -4,7 +4,7 @@ const OrderController = require('../controllers/OrderController');
 const PaymentController = require('../controllers/PaymentController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
-const { orderIdParamsSchema, createOrderSchema } = require('../schemas/orderSchemas');
+const { orderIdParamsSchema, orderStatusParamsSchema, createOrderSchema } = require('../schemas/orderSchemas');
 
 /**
  * @swagger
@@ -107,7 +107,12 @@ router.post(
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     description: "Sem view mantém array e headers. view=page retorna orders, total, page, limit, totalPages. Query inválida retorna 422."
  *     parameters:
+ *       - in: query
+ *         name: view
+ *         schema: { type: string, enum: [page] }
+
  *       - in: query
  *         name: page
  *         schema:
@@ -154,7 +159,16 @@ router.get('/', OrderController.listMine);
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     description: "Sem view mantém array e headers. view=page retorna orders, total, page, limit, totalPages, summary global (independente de q/página), receita por criação no mês civil de São Paulo conforme DSH. Query inválida retorna 422."
  *     parameters:
+ *       - in: query
+ *         name: view
+ *         schema: { type: string, enum: [page] }
+ *       - in: query
+ *         name: q
+ *         description: Busca literal por ID parcial, nome ou e-mail do cliente em todos os pedidos próprios
+ *         schema: { type: string, maxLength: 100 }
+
  *       - in: query
  *         name: page
  *         schema:
@@ -194,6 +208,7 @@ router.get('/received', OrderController.listReceived);
  * /api/v1/orders/{id}/status:
  *   patch:
  *     summary: Atualiza o status de um pedido (apenas o parceiro dono)
+ *     description: Lojista não pode confirmar PAGO. Cancelamento elegível sem tentativa de gateway restitui estoque atomicamente e pode ser repetido sem nova reposição. Qualquer tentativa no Mercado Pago exige conciliação antes de cancelar localmente.
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
@@ -216,7 +231,7 @@ router.get('/received', OrderController.listReceived);
  *               status:
  *                 type: string
  *                 description: Novo status do pedido
- *                 example: PAGO
+ *                 example: PREPARANDO
  *     responses:
  *       200:
  *         description: Status atualizado com sucesso
@@ -226,9 +241,11 @@ router.get('/received', OrderController.listReceived);
  *         description: Acesso negado (não é o parceiro dono do pedido)
  *       404:
  *         description: Pedido não encontrado
+ *       409:
+ *         description: Alteração concorrente ou PAYMENT_RECONCILIATION_REQUIRED (tentativa de gateway vinculada)
  *       422:
  *         description: Status inválido ou transição não permitida
  */
-router.patch('/:id/status', OrderController.updateStatus);
+router.patch('/:id/status', validate({ params: orderStatusParamsSchema }), OrderController.updateStatus);
 
 module.exports = router;

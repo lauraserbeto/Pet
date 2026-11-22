@@ -334,6 +334,17 @@ test('POST /reviews: sem token → 401', async () => {
   assert.equal(createdReview, null);
 });
 
+test('POST /reviews: outro perfil com origem própria concluída recebe 403', async () => {
+  for (const role_id of [1, 2, 3, 4]) {
+    const res = await request(app)
+      .post('/api/v1/reviews')
+      .set('Authorization', `Bearer ${tutorToken({ role_id, provider_status: 'APROVADO' })}`)
+      .send({ rating: 4, product_id: PRODUCT_ID, order_id: ORDER_ID });
+    assert.equal(res.status, 403, `role ${role_id}`);
+    assert.equal(createdReview, null);
+  }
+});
+
 test('POST /reviews: produto + appointment (incoerente) → 422', async () => {
   const res = await request(app)
     .post('/api/v1/reviews')
@@ -418,7 +429,7 @@ test('GET /reviews: ordenação explícita por created_at desc', async () => {
   const res = await request(app).get(`/api/v1/reviews?product_id=${PRODUCT_ID}`);
 
   assert.equal(res.status, 200);
-  assert.deepEqual(capturedQuery.orderBy, { created_at: 'desc' });
+  assert.deepEqual(capturedQuery.orderBy, [{ created_at: 'desc' }, { id: 'desc' }]);
 });
 
 test('GET /reviews: sem filtro → 422', async () => {
@@ -451,4 +462,32 @@ test('GET /reviews: author não vaza password_hash no select', async () => {
   assert.equal(authorSelect.password_hash, undefined);
   assert.equal(authorSelect.document, undefined);
   assert.ok(authorSelect.full_name, 'full_name deve estar no select');
+});
+
+test('GET /reviews/summary: distribuição considera o conjunto completo, sem exigir autenticação', async () => {
+  stub(prisma.review, 'groupBy', async args => {
+    assert.equal(args.where.product_id, PRODUCT_ID);
+    assert.equal(args.where.order.is.status, 'CONCLUIDO');
+    return [{ rating: 5, _count: { _all: 12 } }, { rating: 3, _count: { _all: 3 } }];
+  });
+  const res = await request(app).get(`/api/v1/reviews/summary?product_id=${PRODUCT_ID}`);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.rating_count, 15);
+  assert.equal(res.body.rating_avg, 4.6);
+  assert.deepEqual(res.body.distribution, [{ rating: 5, count: 12 }, { rating: 4, count: 0 }, { rating: 3, count: 3 }, { rating: 2, count: 0 }, { rating: 1, count: 0 }]);
+});
+
+test('GET /reviews/mine: exige tutor e recorta origem pelo autor autenticado', async () => {
+  stub(prisma.review, 'findFirst', async args => {
+    assert.equal(args.where.author_id, TUTOR_ID);
+    assert.equal(args.where.product_id, PRODUCT_ID);
+    assert.equal(args.where.order_id, ORDER_ID);
+    return { id: REVIEW_ID, rating: 5 };
+  });
+  const url = `/api/v1/reviews/mine?product_id=${PRODUCT_ID}&order_id=${ORDER_ID}`;
+  assert.equal((await request(app).get(url)).status, 401);
+  assert.equal((await request(app).get(url).set('Authorization', `Bearer ${tutorToken({ role_id: 1 })}`)).status, 403);
+  const own = await request(app).get(url).set('Authorization', `Bearer ${tutorToken()}`);
+  assert.equal(own.status, 200); assert.equal(own.body.review.id, REVIEW_ID);
+  assert.equal((await request(app).get(`/api/v1/reviews/mine?product_id=${PRODUCT_ID}`).set('Authorization', `Bearer ${tutorToken()}`)).status, 422);
 });

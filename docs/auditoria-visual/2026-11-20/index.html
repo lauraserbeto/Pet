@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoria visual Pet+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p50:#fff8eb;--p100:#fdecd1;--p500:#f58b05;--p600:#d67000;--p700:#b35602;--p800:#8f4107;
+  --s500:#3699d2;--s600:#267ab0;--s700:#206390;
+  --ink:#0f172a;--ink2:#334155;--mut:#64748b;--line:#e2e8f0;--bg:#f8fafc;--card:#fff;
+  --p0:#b91c1c;--p0bg:#fef2f2;--p1:#b35602;--p1bg:#fff7ed;--p2:#206390;--p2bg:#f0f7fb;--p3:#475569;--p3bg:#f1f5f9;
+  --hl:#e11d48;--ok:#047857;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 Inter,system-ui,sans-serif}
+h1,h2,h3,h4{font-family:Nunito,Inter,sans-serif;color:var(--ink);line-height:1.25}
+a{color:var(--p700)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{background:var(--ink);color:#e2e8f0;padding:40px 0 32px}
+header.top h1{color:#fff;font-size:34px;margin:0 0 8px}
+header.top p{margin:4px 0;color:#cbd5e1;max-width:860px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+.kpi{background:#1e293b;border-radius:12px;padding:12px 14px}
+.kpi b{display:block;font:800 26px Nunito;color:#fff}
+.kpi span{font-size:13px;color:#94a3b8}
+nav.toc{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+nav.toc .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:8px;padding-bottom:8px}
+nav.toc a{white-space:nowrap;text-decoration:none;color:var(--ink2);font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--p500);color:var(--p800);outline:none}
+section.block{padding:28px 0 8px}
+section.block>h2{font-size:26px;margin:0 0 6px}
+.lead{color:var(--ink2);max-width:900px}
+.callout{background:var(--p2bg);border:1px solid #c4e9f2;border-radius:10px;padding:14px 16px;margin:14px 0}
+.callout.warn{background:var(--p1bg);border-color:#fcd9a3}
+table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f1f5f9;font-weight:600}
+.tw{overflow-x:auto}
+.f{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:22px 0;overflow:hidden}
+.f>.hd{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.f>.hd h3{margin:0;font-size:19px;flex:1 1 420px}
+.id{font:700 12px Inter;color:var(--mut)}
+.pill{font:600 12px Inter;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.P0{background:var(--p0bg);color:var(--p0)}.P1{background:var(--p1bg);color:var(--p1)}.P2{background:var(--p2bg);color:var(--p2)}.P3{background:var(--p3bg);color:var(--p3)}
+.cat{background:#f1f5f9;color:var(--ink2)}
+.f .bd{padding:16px 18px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 16px;font-size:13px;color:var(--ink2);margin-bottom:12px}
+.meta b{color:var(--ink)}
+.f h4{margin:16px 0 6px;font-size:15px}
+.f ul{margin:6px 0;padding-left:20px}
+.f li{margin:3px 0}
+.ev{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:12px 0}
+figure.wide{grid-column:1/-1}
+figure{margin:0;background:#f1f5f9;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+figure svg{display:block;width:100%;height:auto;background:#fff}
+figcaption{font-size:12.5px;color:var(--ink2);padding:8px 10px;border-top:1px solid var(--line);background:#fff}
+figcaption b{color:var(--ink)}
+.tag-atual,.tag-prop{display:inline-block;font:700 11px Inter;letter-spacing:.04em;border-radius:4px;padding:1px 6px;margin-right:6px}
+.tag-atual{background:#fee2e2;color:#991b1b}.tag-prop{background:#dcfce7;color:#166534}
+.hl{fill:rgba(225,29,72,.08);stroke:var(--hl);stroke-width:4;stroke-dasharray:10 6}
+.hlg{fill:rgba(4,120,87,.07);stroke:var(--ok);stroke-width:4;stroke-dasharray:10 6}
+.lbl{font:700 22px Inter;fill:#fff;paint-order:stroke;stroke:var(--hl);stroke-width:8px}
+.lblg{font:700 22px Inter;fill:#fff;paint-order:stroke;stroke:var(--ok);stroke-width:8px}
+.ac{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-top:12px}
+.ac h4{margin-top:4px}
+code{background:#f1f5f9;border-radius:4px;padding:1px 5px;font-size:12.5px}
+/* mockups */
+.mock{background:#fff;padding:16px;font-family:Inter;color:var(--ink);border-radius:0}
+.mock .m-card{border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.06);overflow:hidden;margin-bottom:12px}
+.mock .m-head{background:#f8fafc;padding:12px 14px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.mock .m-lab{font:700 10px Inter;letter-spacing:.06em;color:#64748b;text-transform:uppercase}
+.mock .m-ttl{font:800 17px Nunito;margin:0}
+.mock .m-body{padding:12px 14px}
+.mock .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:13px}
+.mock .m-grid dt{color:#64748b;font-size:11px}
+.mock .m-grid dd{margin:0 0 4px;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:4px;font:600 11px Inter;border-radius:999px;padding:3px 9px;border:1px solid}
+.b-pend{background:#fffbeb;color:#92400e;border-color:#fde68a}.b-ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}.b-info{background:#f0f7fb;color:#206390;border-color:#c4e9f2}.b-err{background:#fef2f2;color:#991b1b;border-color:#fecaca}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;border-radius:10px;font:700 13px Nunito;border:1px solid transparent}
+.btn-p{background:var(--p500);color:#fff}.btn-p7{background:var(--p700);color:#fff}.btn-pd{background:var(--p500);color:var(--ink)}
+.btn-o{background:#fff;border-color:#e2e8f0;color:var(--ink)}.btn-g{background:transparent;color:var(--ink2)}
+.m-actions{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid #f1f5f9}
+.m-in{height:40px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;display:flex;align-items:center;padding:0 12px;color:#94a3b8;font-size:13px}
+.m-sel{height:40px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px}
+.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.sw div{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;font-size:12.5px}
+.sw .btn{width:100%;margin-bottom:6px}
+.plan td:first-child{font-weight:700;white-space:nowrap}
+footer{padding:30px 0 50px;color:var(--mut);font-size:13px}
+@media (max-width:640px){header.top h1{font-size:26px}.f>.hd h3{font-size:17px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Auditoria visual e de usabilidade — Pet+</h1>
+    <p>20/11/2026 · branch <code>codex/retomada-servicos</code> (working tree local, sem commit) · análise somente; nenhum código foi alterado.</p>
+    <p>Ambiente: Vite local + API local + PostgreSQL 16 descartável com dados fictícios. 151 capturas automatizadas (desktop 1440×900 e celular 390×844), axe-core WCAG 2.1 AA, navegação por Tab e conferências manuais.</p>
+    <div class="kpis">
+      <div class="kpi"><b>26</b><span>grupos de problemas (G01–G26)</span></div>
+      <div class="kpi"><b>4</b><span>P0: bloqueiam ou enganam</span></div>
+      <div class="kpi"><b>10</b><span>P1: alto impacto ou frequência</span></div>
+      <div class="kpi"><b>8</b><span>perfis/estados avaliados</span></div>
+      <div class="kpi"><b>134/151</b><span>telas com falha de contraste (axe)</span></div>
+    </div>
+  </div>
+</header>
+<nav class="toc" aria-label="Seções"><div class="wrap">
+  <a href="#metodo">Método e limites</a><a href="#resumo">Resumo</a><a href="#p0">P0</a><a href="#p1">P1</a><a href="#p2">P2</a><a href="#p3">P3</a><a href="#plano">Plano de execução</a><a href="#nao-avaliado">Não avaliado</a>
+</div></nav>
+
+<main class="wrap">
+<section class="block" id="metodo">
+  <h2>Método e limites da evidência</h2>
+  <p class="lead">Fontes: <code>docs/CONTEXTO-HANDOFF-IMPLEMENTACOES-2026-11-20.md</code>, <code>docs/design-system.md</code>, <code>frontend/src/styles/theme.css</code>, <code>components/ui/*</code>, layouts (<code>Navbar</code>, <code>DashboardLayout</code>, <code>Sidebar</code>) e as telas alteradas nas entregas recentes.</p>
+  <table>
+    <tr><th>Perfil / estado</th><th>Como foi obtido</th></tr>
+    <tr><td>Visitante</td><td>Sem sessão</td></tr>
+    <tr><td>Tutor, Admin, Lojista, Lojista sem dados, Hotel, Pet Sitter</td><td>Fixtures de teste (<code>tests/helpers/testSeed</code>) no banco descartável; sessão por token injetado no navegador</td></tr>
+    <tr><td>Parceiro pendente e recusado</td><td>Mesmo método, com status alterado apenas no banco descartável</td></tr>
+    <tr><td>Carregamento / erro</td><td>Respostas da API atrasadas 15 s ou trocadas por HTTP 500 no navegador de teste</td></tr>
+  </table>
+  <div class="callout warn"><b>Limites.</b> (1) Prints de página inteira mostram barras <code>fixed</code> no meio da página; isso foi descartado como problema (ex.: barra “Reservar agora”). (2) No painel, o conteúdo rola dentro de <code>&lt;main&gt;</code>; os prints do painel foram refeitos com esse contêiner expandido, o que deixa área branca abaixo de páginas curtas — também artefato. (3) Ao final, o Docker Desktop desta máquina parou (backend com <i>exit status 150</i>); as marcações foram posicionadas sobre os prints já capturados, não medidas no DOM. (4) Sessões foram injetadas por token; achados de navegação de parceiro pendente/recusado também foram confirmados no código. E-mails de teste foram tarjados nos arquivos.</div>
+</section>
+
+<section class="block" id="resumo">
+  <h2>Resumo por causa</h2>
+  <div class="tw"><table>
+    <tr><th>#</th><th>Problema</th><th>Tipo</th><th>Prioridade</th><th>Correção concentrada em</th></tr>
+    <tbody id="sumrows"></tbody>
+  </table></div>
+</section>
+
+<div id="findings"></div>
+
+<section class="block" id="plano">
+  <h2>Plano de execução</h2>
+  <p class="lead">Ordem pensada para corrigir primeiro o que bloqueia ou engana, depois as fundações compartilhadas (que resolvem várias telas de uma vez) e só então ajustes por tela. Cada fase deve terminar com a varredura automatizada repetida e os testes existentes.</p>
+  <div class="tw"><table class="plan">
+    <tr><th>Fase</th><th>Itens</th><th>Arquivos / componentes</th><th>Depende de</th><th>Risco de regressão</th></tr>
+    <tr><td>0 · Decisões ✓</td><td>Decididas em 20/11 (ver <code>FASE0-DECISOES.md</code>): G03 laranja escuro (<code>primary-700</code>) em botões e links; G12 mínimo da vitrine + recomendados; G20 remover promessas e números fictícios; G07 planejar backend próprio</td><td>—</td><td>Laura</td><td>Nenhum (sem código).</td></tr>
+    <tr><td>1 · P0 ✓</td><td>G06 cabeçalho de parceiro pendente/recusado · G07 Configurações · G08 guardas de rota · G10 erro × vazio em Produtos</td><td><code>Navbar.tsx</code>, <code>ProtectedRoute.tsx</code>, <code>app/routes.tsx</code>, <code>dashboard/Settings.tsx</code>, <code>dashboard/Products.tsx</code>; extrair o bloco “Acesso Negado” de <code>admin/Users.tsx</code> para um componente compartilhado</td><td>Fase 0 (G07)</td><td>Médio: guardas podem barrar o Pet Sitter pendente que precisa do onboarding (exceção já existe no <code>ProtectedRoute</code>). Testar os 5 perfis e os estados pendente/recusado.</td></tr>
+    <tr><td>2 · Fundações ✓</td><td>G01 cor de borda padrão · G02 títulos · G04 nomes acessíveis · G05 foco visível · G03 (após decisão)</td><td><code>styles/index.css</code> ou <code>theme.css</code> (camada base), <code>ui/button.tsx</code>, <code>Navbar.tsx</code>, <code>DashboardLayout.tsx</code>, <code>Sidebar.tsx</code>, cards de produto</td><td>Fase 0 (G03)</td><td>Alto alcance visual: toda <code>border</code> sem cor e todo título mudam. Comparar as 151 capturas antes/depois; procurar usos intencionais de <code>currentColor</code> (spinners).</td></tr>
+    <tr><td>3 · P1 por tela ✓</td><td>G11 preço na vitrine · G13 históricos do Tutor · G15 detalhe do produto · G09 Minha Conta · G12 aviso de visibilidade · G14 visão geral do parceiro</td><td><code>backend/src/utils/publicProvider.js</code> (+ teste), <code>TutorAppointments</code>, <code>AppointmentSummary</code>, <code>TutorOrders</code>, <code>ProductDetailPage</code>, <code>dashboard/Account</code>, <code>PartnerMetricsPage</code>, <code>CommerceMetricsPanel</code></td><td>Fase 2</td><td>G11 altera contrato público da API (rever teste de campos públicos da SEC-2). G13/G14 tocam telas com testes E2E (<code>booking</code>, <code>metrics-real</code>).</td></tr>
+    <tr><td>4 · P2 ✓</td><td>G16 filtros do diretório · G17 aprovações no celular · G18 avaliações · G19 controles sem função · G20 textos · G21 detalhe do sitter</td><td><code>PartnerDirectory.tsx</code>, <code>admin/Approvals.tsx</code>, <code>reviews/ReviewsPanel.tsx</code>, <code>Navbar.tsx</code>, <code>DashboardLayout.tsx</code>, <code>app/routes.tsx</code>, <code>PartnersPage</code>, <code>ProductDetailPage</code>, <code>WalkerDetailsPage</code></td><td>Fases 0 e 2</td><td>Baixo a médio; atenção aos testes de <code>partner-directory</code> e <code>reviews</code>.</td></tr>
+    <tr><td>5 · P3 / limpeza ✓</td><td>G22–G26</td><td><code>TutorPets</code>, <code>AddressesSection</code>, telas de auth, rodapé, <code>src/app/components/ui</code> (não usado), <code>Navbar</code> (console.log)</td><td>—</td><td>Baixo. Remover a pasta duplicada só após confirmar 0 importações (hoje: 0, exceto <code>figma/ImageWithFallback</code>).</td></tr>
+  </table></div>
+  <div class="callout"><b>Classificação.</b> <b>Defeito visual</b>: G01, G02, G15, G16, G17, G25. <b>Interação/fluxo</b>: G06, G08, G09, G10, G11, G12, G13, G14, G18, G22, G23, G24. <b>Acessibilidade</b>: G03, G04, G05. <b>Funcionalidade não implementada ou simulada</b>: G07, G19, G20, G21 (parte). <b>Manutenção</b>: G26.</div>
+  <div class="callout"><b>Como validar o conjunto.</b> Repetir a varredura (rotas × perfis × 2 viewports) com axe e Tab; meta: zero <code>button-name</code>/<code>link-name</code>, nenhum elemento com borda escura não intencional, títulos em Nunito, contraste conforme decisão da Fase 0. Rodar <code>npm test</code> e os E2E existentes do frontend; para G11, teste de contrato público no backend.</div>
+</section>
+
+<section class="block" id="nao-avaliado">
+  <h2>Não avaliado ou não confirmado</h2>
+  <ul>
+    <li><b>Modais de ação</b> (cancelar/pagar agendamento, recusar parceiro, editar serviço): exigem executar ações; não foram abertos. As confirmações nativas (G22) foram verificadas apenas no código.</li>
+    <li><b>Checkout com itens</b>: o carrinho de teste estava vazio e <code>/checkout</code> redirecionou para <code>/cart</code>. Falta um carrinho com produto.</li>
+    <li><b>Onboarding do Pet Sitter (E-11)</b>: a conta de teste já estava aprovada; o primeiro rótulo apareceu cortado, mas provavelmente pela rolagem do teste de teclado. Precisa de uma conta em cada etapa.</li>
+    <li><b>Login real</b> de parceiro pendente/recusado (a sessão foi injetada). O comportamento do cabeçalho foi confirmado no código.</li>
+    <li><b>Tablet</b> (768–1024 px), listas longas e paginação com muitos registros, textos muito longos de usuário.</li>
+    <li><b>Teclado completo</b>: só os 14 primeiros saltos de Tab por tela; armadilhas de foco em modais não testadas.</li>
+    <li><b>Mobile real</b> (Safari iOS/Android): somente emulação Chromium.</li>
+  </ul>
+</section>
+</main>
+<footer><div class="wrap">Capturas em <code>img/</code>. Dados fictícios de teste; nenhuma informação pessoal real. Gerado a partir do working tree local, sem commit, push ou publicação.</div></footer>
+
+<script>
+// shot(src, w, h, crop[x,y,w,h], boxes[[x,y,w,h,label,good?]])
+function shot(src, W, H, c, boxes, cap, kind){
+  const k = Math.max(c[2], 360) / 1100, fs = Math.max(7, 19 * k);
+  const b = (boxes||[]).map(([x,y,w,h,l,g])=>`<rect class="${g?'hlg':'hl'}" style="stroke-width:${3.2*k};stroke-dasharray:${9*k} ${5*k}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${5*k}"/>`+(l?`<text class="${g?'lblg':'lbl'}" style="font-size:${fs}px;stroke-width:${6*k}px" x="${x+3*k}" y="${Math.max(y-5*k,c[1]+fs+2)}">${l}</text>`:'')).join('');
+  const tag = kind==='prop'?'<span class="tag-prop">PROPOSTA</span>':'<span class="tag-atual">ATUAL</span>';
+  const wide = c[2] / c[3] > 1.5 && c[2] > 600;
+  return `<figure${wide ? ' class="wide"' : ''}><svg viewBox="${c.join(' ')}" role="img" aria-label="${cap.replace(/<[^>]+>/g,'')}"><image href="img/${src}.png" width="${W}" height="${H}"/>${b}</svg><figcaption>${tag}${cap}</figcaption></figure>`;
+}
+function mock(html, cap){ return `<figure><div class="mock">${html}</div><figcaption><span class="tag-prop">PROPOSTA</span>${cap}</figcaption></figure>`; }
+
+const F = [
+/* ---------------- P0 ---------------- */
+{id:'G06',p:'P0',cat:'Interação',t:'Parceiro pendente ou recusado fica sem conta, sem “Sair” e sem caminho para o status',
+ where:'<b>Rotas:</b> /dashboard → redireciona para /, /parceiro/corrigir-cadastro · <b>Perfis:</b> Hotel/Lojista pendente e recusado · <b>Viewport:</b> desktop 1440 (no celular, o menu também não mostra a conta)',
+ fix:'Navbar.tsx',
+ ev:()=>shot('pendente-desk',1440,900,[700,0,740,120],[[1290,6,146,52,'vazio']],'<b>Pendente</b>, após abrir /dashboard: volta à home sem aviso; à direita do cabeçalho não há conta, carrinho ou “Sair”.')
+   +shot('recusado-desk',1440,1262,[300,0,1140,300],[[1290,6,146,52,'vazio'],[336,197,768,78,'']],'<b>Recusado</b> na tela de correção: o aviso existe, mas o cabeçalho também não oferece conta nem saída.')
+   +mock(`<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;border-bottom:1px solid #e2e8f0;padding-bottom:10px">
+      <span class="badge b-pend">● Cadastro em análise</span>
+      <span class="btn btn-o" style="height:34px">HQ · Hotel QA ▾</span></div>
+      <div style="margin-top:10px;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;max-width:280px;margin-left:auto;font-size:13px">
+      <div class="m-lab">Status do cadastro</div><b>Em análise pela equipe Pet+</b>
+      <div style="color:#64748b;font-size:12px;margin:4px 0 8px">Avisaremos por e-mail quando for aprovado.</div>
+      <div style="border-top:1px solid #f1f5f9;padding-top:8px">Corrigir cadastro <span style="color:#94a3b8">(se recusado)</span><br>Termos e privacidade<br><span style="color:#b91c1c">Sair da conta</span></div></div>`,
+      'Menu da conta para parceiro não aprovado: status visível, atalho para correção quando recusado e “Sair”. Reutiliza o dropdown do Tutor e <code>Badge</code>.'),
+ desc:'Em <code>Navbar.tsx:349</code> o bloco direito só renderiza para <code>isDashboardUser</code> ou <code>isTutor</code>. O parceiro não aprovado (papéis 2/3) não é nenhum dos dois e fica sem menu. Ao abrir /dashboard, o <code>ProtectedRoute</code> o leva à home sem mensagem. Impacto: a pessoa não entende o estado do cadastro, não encontra a correção e não consegue sair da conta (relaciona-se com E-13 do handoff).',
+ prop:['Adicionar um terceiro ramo no <code>Navbar</code> para parceiro não aprovado, reutilizando o dropdown do Tutor com: status (Badge), “Corrigir cadastro” quando <code>REJEITADO</code>, “Sair”.','No <code>ProtectedRoute</code>, redirecionar o recusado para <code>/parceiro/corrigir-cadastro</code> e o pendente para a home com aviso (toast <code>sonner</code> já usado no projeto) em vez de redirecionamento silencioso.'],
+ ac:['Pendente e recusado veem nome, status e “Sair” no desktop e no menu do celular.','Recusado chega à tela de correção em 1 clique a partir do cabeçalho.','Abrir /dashboard sem aprovação mostra explicação; nenhuma tela fica sem saída.','Validar: login real com contas pendente/recusada; E2E de navegação; Tab até “Sair”.']},
+
+{id:'G07',p:'P0',cat:'Não implementado · Acesso',t:'“Configurações da Plataforma” é simulada e abre para qualquer perfil',
+ where:'<b>Rota:</b> /dashboard/settings · <b>Perfis:</b> Admin (menu) e, por URL, Lojista, Hotel, Pet Sitter e Tutor · <b>Viewport:</b> desktop',
+ fix:'Settings.tsx, routes.tsx',
+ ev:()=>shot('loja-config-desk',1440,900,[0,60,1440,620],[[288,256,1120,393,'salvar sem API'],[654,187,390,33,''],[16,128,224,270,'Lojista']],'Conta <b>Lojista</b> vendo as configurações globais (aprovação automática de parceiros, taxas, segurança).'),
+ desc:'<code>Settings.tsx:30–43</code> apenas dispara <code>toast.success</code>: “Configurações gerais salvas”, “Regras de taxa salvas” e “Logout forçado disparado para todos os usuários ativos” — nada é enviado à API. A rota não tem <code>allowedRoles</code>; só o item de menu é restrito ao Admin. O handoff (CFG-1) pede expressamente não simular sucesso nem logout global.',
+ prop:['Proteger a rota com <code>allowedRoles={[1]}</code> e reutilizar o estado “Acesso Negado” de <code>admin/Users.tsx</code> (ver G08).','Manter na tela apenas o que tiver endpoint; o restante vira texto informativo desabilitado (“Ainda não disponível”) sem botão de salvar. Remover “Logout forçado” até existir revogação de sessão.'],
+ ac:['Nenhum perfil diferente de Admin vê a tela.','Nenhuma ação mostra sucesso sem resposta 2xx da API.','Validar: teste de rota por perfil; teste unitário garantindo que salvar chama o serviço.']},
+
+{id:'G08',p:'P0',cat:'Interação · Acesso',t:'Telas do painel abrem para perfis errados ou caem em mensagens cruas',
+ where:'<b>Rotas:</b> /dashboard (Tutor), /dashboard/orders (Pet Sitter), /dashboard/financeiro (Admin → home) · <b>Viewport:</b> desktop',
+ fix:'routes.tsx + componente de acesso negado',
+ ev:()=>shot('tutor-painel-desk',1440,900,[0,0,900,500],[[280,92,240,34,'texto cru'],[12,120,236,600,'menu vazio']],'<b>Tutor</b> em /dashboard: sidebar vazia e texto sem estilo, sem caminho de volta além do menu inferior.')
+   +shot('sitter-pedidos-desk',1440,900,[256,60,1184,500],[[320,199,1056,106,'“da sua loja”']],'<b>Pet Sitter</b> em /dashboard/orders: tela de pedidos de loja, que não se aplica ao perfil.')
+   +shot('loja-usuarios-desk',1440,900,[256,60,1184,400],[[620,200,450,190,'padrão a reutilizar',1]],'Padrão já existente e adequado: “Acesso Negado” em /dashboard/usuarios.'),
+ desc:'Em <code>app/routes.tsx</code>, <code>orders</code>, <code>customers</code>, <code>products</code>, <code>servicos</code>, <code>settings</code>, <code>aprovacoes</code>, <code>usuarios</code>, <code>avaliacoes-sitters</code>, <code>perfil</code> e <code>conta</code> não declaram <code>allowedRoles</code>. Os dados continuam protegidos pela API, mas a interface mostra telas de outro perfil ou mensagens soltas. O Admin, ao abrir Financeiro, é levado à home pública.',
+ prop:['Declarar <code>allowedRoles</code> em todas as rotas filhas do painel conforme o menu do <code>Sidebar</code> (fonte única: a mesma lista de papéis).','Extrair o bloco “Acesso Negado” de <code>Users.tsx</code> para <code>components/dashboard/AccessDenied.tsx</code> com ação “Voltar para Visão Geral”, e usá-lo no <code>ProtectedRoute</code> dentro do painel em vez de redirecionar à home.','Tutor que abre /dashboard: redirecionar para /tutor/perfil.'],
+ ac:['Matriz perfil × rota documentada e coberta por teste.','Nenhuma rota do painel exibe conteúdo de outro perfil.','Acesso indevido mostra o mesmo componente, com ação de retorno.']},
+
+{id:'G10',p:'P0',cat:'Interação',t:'Falha da API aparece como catálogo vazio no painel do Lojista',
+ where:'<b>Rota:</b> /dashboard/products · <b>Perfil:</b> Lojista · <b>Estado:</b> API respondendo 500 · <b>Viewport:</b> desktop',
+ fix:'Products.tsx',
+ ev:()=>shot('loja-produtos-erro-desk',1440,900,[256,60,1184,840],[[288,176,1120,106,'zeros falsos'],[640,410,420,200,'“nenhum produto”'],[1060,820,356,56,'erro vago']],'Com a API falhando, a tela diz que não há produtos, mostra estoque R$ 0,00 e convida a cadastrar o “primeiro produto”.')
+   +shot('hotels-erro-desk',1440,1262,[240,60,960,360],[[560,285,320,92,'erro distinto',1]],'Referência no próprio projeto: o diretório público já separa erro de lista vazia, com “Tentar novamente”.')
+   +mock(`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">${['Valor em Estoque','Alertas de Estoque','Itens cadastrados'].map(t=>`<div class="m-card" style="padding:10px;margin:0"><div style="font-size:12px;color:#64748b">${t}</div><b style="font:800 20px Nunito;color:#94a3b8">—</b></div>`).join('')}</div>
+      <div class="m-card" style="padding:18px;text-align:center"><span class="badge b-err">Falha ao carregar</span><div class="m-ttl" style="margin:8px 0 4px">Não foi possível carregar seus produtos</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:10px">Seu catálogo não foi alterado. Verifique a conexão e tente novamente.</div><span class="btn btn-p">Tentar novamente</span></div>`,
+      'Estado de erro explícito: indicadores em “—”, mensagem que tranquiliza e ação de repetir. Mesmo padrão de <code>PartnerMetricsPage</code>.'),
+ desc:'O erro da consulta é tratado como lista vazia. O lojista pode concluir que perdeu o catálogo e tentar recadastrar produtos. O toast “Erro ao buscar opções” não diz o que falhou.',
+ prop:['Usar o estado <code>isError</code> da consulta (React Query já em uso) para exibir o bloco de erro com repetição; indicadores mostram “—”.','Padronizar a mensagem do toast com o recurso que falhou.','Revisar as outras listas do painel (Pedidos, Clientes, Financeiro) com o mesmo teste de 500.'],
+ ac:['Com 500, nenhum texto afirma ausência de produtos.','“Tentar novamente” refaz a consulta e, com sucesso, mostra o catálogo.','Teste de componente simulando erro.']},
+
+/* ---------------- P1 ---------------- */
+{id:'G01',p:'P1',cat:'Defeito visual · causa compartilhada',t:'Bordas pretas nas telas novas (cor de borda padrão do Tailwind v4)',
+ where:'<b>Rotas:</b> /hotels, /walkers, /tutor/agendamentos, /tutor/agendar/:id, /dashboard/schedule (e <code>Orders</code>, <code>TutorOrders</code>, <code>AppointmentSummary</code>) · <b>Perfis:</b> todos · <b>Viewport:</b> desktop e celular',
+ fix:'styles (camada base)',
+ ev:()=>shot('hotels-desk',1440,1262,[240,80,960,440],[[272,145,562,57,'borda preta'],[838,165,330,37,''],[0,231,1440,6,'']],'Diretório de hotéis: busca, selects e divisória com borda escura.')
+   +shot('agenda-desk',1440,900,[256,170,1184,380],[[288,275,1120,148,'contorno preto'],[288,443,1120,90,'']],'Agenda do parceiro (entrega recente).')
+   +shot('servicos-desk',1440,1275,[256,170,1184,300],[[288,271,1120,186,'padrão da marca',1]],'“Meus Serviços”: mesmo painel, bordas <code>slate-200</code> como no design system.'),
+ desc:'No Tailwind v4 a classe <code>border</code> sem cor usa <code>currentColor</code> (no v3 era cinza claro). O projeto não tem a regra base de compatibilidade (verificado em <code>styles/index.css</code> e <code>theme.css</code>). Componentes antigos declaram <code>border-slate-200</code>; os novos usam <code>border</code> puro e ficam pretos. O mesmo efeito deixa preto o spinner de carregamento (G23).',
+ prop:['Adicionar à camada base a regra oficial de compatibilidade do Tailwind v4: <code>*, ::before, ::after, ::backdrop { border-color: var(--color-slate-200, currentColor) }</code>. Uma linha corrige todas as telas; não altera quem já declara cor.','Nas telas novas, trocar <code>&lt;input&gt;</code>/<code>&lt;select&gt;</code> nativos por <code>ui/input</code> e <code>ui/select</code>, como em Serviços.'],
+ ac:['Nenhuma borda preta não intencional nas rotas listadas (comparação visual antes/depois).','Spinners que dependem de <code>currentColor</code> revisados.','Varredura repetida sem diferenças inesperadas nas demais telas.']},
+
+{id:'G02',p:'P1',cat:'Defeito visual · causa compartilhada',t:'Títulos das telas novas fogem da tipografia oficial',
+ where:'<b>Rotas:</b> /hotels, /walkers, /tutor/agendamentos, /tutor/agendar/:id, /tutor/pedidos, /dashboard (parceiro), /dashboard/financeiro, /dashboard/schedule, /parceiro/corrigir-cadastro · <b>Viewport:</b> ambos',
+ fix:'styles (camada base)',
+ ev:()=>shot('agend-desk',1440,1890,[270,80,900,420],[[284,96,262,42,'Inter, preto'],[288,160,280,46,'abas com borda preta'],[309,318,150,24,'segundos']],'“Meus Agendamentos”: H1 em Inter preto (#000); o padrão é Nunito <code>slate-900</code>.')
+   +shot('booking-mob',1440>0?390:390,1571,[0,60,390,780],[[10,92,280,40,'Inter'],[16,229,358,136,'nativos'],[16,383,96,22,'azul'],[16,775,146,44,'sem motivo']],'Solicitar agendamento (celular): título fora do padrão, controles nativos, link azul e botão desabilitado sem explicação.'),
+ desc:'A medição automática encontrou H1/H2 em <b>Inter</b> e cor <b>rgb(0,0,0)</b> nas telas novas, enquanto as demais usam <b>Nunito</b> e <code>slate-900</code> (design system, seção Tipografia). Não há regra base para títulos; cada página repete classes e as novas não repetiram.',
+ prop:['Definir na camada base <code>h1,h2,h3 { font-family: var(--font-display); color: var(--color-slate-900) }</code> (classes utilitárias continuam prevalecendo, então heróis com texto branco não mudam).','Opcional: extrair o cabeçalho usado no Admin (título + subtítulo + ações) para um <code>PageHeader</code> — hoje não existe componente equivalente.','Datas: usar o formatador sem segundos já usado em Pedidos.'],
+ ac:['Todos os H1/H2 auditados em Nunito e slate-900.','Datas de agendamento sem segundos.','Repetir a medição de fontes da varredura.']},
+
+{id:'G03',p:'P1',cat:'Acessibilidade · decisão de identidade',t:'Texto branco sobre o laranja da marca não atinge contraste mínimo',
+ where:'<b>Onde:</b> botão padrão (<code>ui/button</code>), CTAs, item ativo da sidebar, links laranja · <b>axe:</b> falha de contraste em 134 de 151 capturas · <b>Viewport:</b> ambos',
+ fix:'ui/button.tsx, tokens',
+ ev:()=>shot('carrinho-desk',1440,992,[480,330,480,230],[[603,466,234,52,'2,45 : 1']],'CTA padrão: branco sobre <code>primary-500</code>.')
+   +mock(`<div class="sw">
+     <div><span class="btn btn-p">Ir para o Shopping</span><b>Atual</b><br>branco / #f58b05 = <b style="color:#b91c1c">2,45:1</b> (AA exige 4,5; texto grande 3,0)</div>
+     <div><span class="btn btn-pd">Ir para o Shopping</span><b>Opção A</b><br>texto slate-900 / #f58b05 ≈ <b style="color:#047857">7,6:1</b>; mantém o laranja como está</div>
+     <div><span class="btn btn-p7">Ir para o Shopping</span><b>Opção B</b><br>branco / primary-700 #b35602 = <b style="color:#047857">4,94:1</b>; laranja mais fechado</div>
+     <div><span class="btn btn-o" style="color:#b35602;border-color:#fcd9a3">Ver todo o Shopping</span><b>Links</b><br>primary-700 em branco = 4,94:1 (hoje primary-600 = 3,40:1)</div></div>`,
+     'Alternativas medidas. A escolha afeta a identidade visual e precisa de decisão da equipe; a recomendação técnica é a <b>Opção B</b> para botões com texto pequeno, mantendo o <code>primary-500</code> em ícones, ilustrações e fundos.'),
+ desc:'Medições: branco sobre <code>primary-500</code> 2,45:1; sobre <code>primary-600</code> (hover e item ativo da sidebar) 3,40:1; <code>primary-600</code> como texto 3,40:1; <code>slate-500</code> sobre <code>slate-900</code> (rodapé) 3,75:1; <code>slate-400</code> sobre branco 2,56:1. O handoff já registrava contraste pendente na landing; a causa está nos tokens, não em uma página.',
+ prop:['Decidir entre A e B e aplicar uma única vez na variante <code>default</code> do <code>Button</code> e no item ativo do <code>Sidebar</code>.','Links: usar <code>primary-700</code>; textos secundários sobre fundo escuro: <code>slate-400</code> em vez de <code>slate-500</code>.','Atualizar <code>docs/design-system.md</code> com a justificativa.'],
+ ac:['axe sem <code>color-contrast</code> nos botões, links e sidebar.','Identidade aprovada pela equipe.','Varredura repetida comparando contagens.']},
+
+{id:'G04',p:'P1',cat:'Acessibilidade · causa compartilhada',t:'Botões só com ícone não têm nome acessível',
+ where:'<b>axe <code>button-name</code>:</b> 116 telas · <b><code>link-name</code>:</b> 35 · <b>Onde:</b> favorito nos cards de produto, recolher sidebar, menu hambúrguer, sino, atalho “Início”, ações de tabela (Usuários) · <b>Viewport:</b> ambos',
+ fix:'Navbar, DashboardLayout, Sidebar, card de produto',
+ ev:()=>shot('servicos-mob',390,1519,[0,0,390,80],[[8,8,52,52,'sem nome'],[226,8,52,52,''],[278,8,52,52,'']],'Cabeçalho do painel no celular: menu, Início e sino são anunciados apenas como “botão”.'),
+ desc:'Leitores de tela anunciam “botão” sem propósito. O atalho “Início” é um <code>&lt;Button&gt;</code> dentro de <code>&lt;Link&gt;</code> (controle interativo aninhado, <code>DashboardLayout.tsx</code>). A maioria das ocorrências vem de poucos componentes compartilhados.',
+ prop:['Adicionar <code>aria-label</code> descritivo (“Favoritar Ração Premium”, “Abrir menu”, “Recolher menu lateral”, “Notificações”).','Trocar <code>&lt;Link&gt;&lt;Button&gt;</code> por <code>&lt;Button asChild&gt;&lt;Link/&gt;&lt;/Button&gt;</code> (o <code>Button</code> já suporta <code>asChild</code>).'],
+ ac:['axe sem <code>button-name</code> e <code>link-name</code>.','Teste com leitor de tela em uma tela pública e uma do painel.']},
+
+{id:'G09',p:'P1',cat:'Interação',t:'“Minha Conta” do Admin mostra dados de parceiro',
+ where:'<b>Rotas:</b> /dashboard/conta e /dashboard/perfil · <b>Perfil:</b> Admin · <b>Viewport:</b> desktop',
+ fix:'dashboard/Account (e Profile)',
+ ev:()=>shot('admin-conta-desk',1440,1078,[480,60,740,960],[[512,665,672,205,'não se aplica']],'Admin vê “Tipo de parceiro: Administrador · PENDENTE” e “Editar Perfil Público”. A tela chama <code>/providers/me</code> e recebe 403.'),
+ desc:'A tela trata qualquer usuário do painel como parceiro. A falha 403 é convertida em status “Pendente”, o que é falso, e oferece edição de perfil público que o Admin não tem.',
+ prop:['Renderizar o bloco de parceiro apenas para papéis 2/3/4; para Admin, mostrar “Administrador da plataforma”.','Não chamar <code>/providers/me</code> para Admin; tratar 403 como ausência de perfil, nunca como “Pendente”.'],
+ ac:['Admin não vê status de parceiro nem atalho de perfil público.','Nenhuma requisição 403 ao abrir as telas.']},
+
+{id:'G11',p:'P1',cat:'Interação · regressão de contrato',t:'Vitrine mostra “Preço não informado” para quem tem preço',
+ where:'<b>Rotas:</b> /hotels e /walkers (lista) × /hotels/:id (detalhe) · <b>Perfil:</b> visitante e Tutor · <b>Viewport:</b> ambos',
+ fix:'backend/src/utils/publicProvider.js',
+ ev:()=>shot('hotels-desk',1440,1262,[280,280,880,230],[[458,450,180,28,'sem preço']],'Card da lista.')
+   +shot('hotel-detalhe-desk',1440,2134,[340,520,760,260],[[920,680,150,60,'R$ 80,00',1]],'Detalhe do mesmo hotel: “R$ 80,00 menor preço por diária”.'),
+ desc:'O controlador calcula <code>starting_price</code>, mas o contrato público criado na SEC-2 (<code>PROVIDER_FIELDS</code> em <code>publicProvider.js</code>) não inclui esse campo e o remove. Consequências: todos os cards dizem “Preço não informado” e a ordenação “Menor preço” do diretório deixa de funcionar.',
+ prop:['Incluir <code>starting_price</code> na lista de campos públicos (é derivado de serviços ativos, já públicos).','Adicionar teste de contrato garantindo o campo nas rotas <code>/providers/hotels</code> e <code>/providers/sitters</code>.'],
+ ac:['Card e detalhe exibem o mesmo menor preço.','Ordenar por “Menor preço” muda a ordem conforme o valor.','Teste de backend cobrindo o campo.']},
+
+{id:'G12',p:'P1',cat:'Interação · decisão de regra',t:'Aviso “perfil não visível” contradiz a vitrine',
+ where:'<b>Rotas:</b> painel do Hotel e do Pet Sitter (todas as páginas) × /hotels e /walkers · <b>Viewport:</b> ambos',
+ fix:'regra única de completude',
+ ev:()=>shot('agenda-desk',1440,900,[256,60,1184,110],[[258,66,1180,88,'“não visível”']],'Painel do Hotel QA: afirma que o perfil não aparece para tutores.')
+   +shot('hotels-mob',390,1630,[0,300,390,520],[[16,364,358,445,'mas aparece']],'Mesmo Hotel QA listado publicamente.'),
+ desc:'Há duas regras de completude: a da vitrine (<code>ProviderController#isProfileComplete</code>: descrição, telefone, cidade, CEP e 1 imagem) e a do aviso (<code>/providers/completeness</code>: foto de perfil, horários, animais, comodidades e 3 imagens). O parceiro recebe informação falsa e pode concluir que não está recebendo clientes.',
+ prop:['Decidir qual regra vale (Fase 0) e usar uma função única nos dois pontos.','O aviso deve dizer exatamente o que falta para a vitrine; itens recomendados vão em uma lista separada (“melhore seu perfil”).'],
+ ac:['Banner e vitrine sempre concordam (teste com perfis nos dois lados da fronteira).']},
+
+{id:'G13',p:'P1',cat:'Consistência · Interação',t:'Históricos do Tutor com linguagens visuais diferentes',
+ where:'<b>Rotas:</b> /tutor/agendamentos × /tutor/pedidos · <b>Perfil:</b> Tutor · <b>Viewport:</b> desktop e celular',
+ fix:'AppointmentSummary + TutorOrders',
+ ev:()=>shot('agend-desk',1440,1890,[270,1030,900,540],[[309,1232,162,42,'botão laranja'],[288,1045,864,250,'']],'Agendamentos: card plano com borda preta, rótulos soltos, pagamento como botão primário.')
+   +shot('pedidos-mob',390,3513,[0,670,390,900],[[140,1046,110,30,'link azul'],[16,683,357,408,'']],'Pedidos (celular): card com sombra e ícones; a mesma ação de pagar vira link azul abaixo de “Ver Detalhes”.')
+   +mock(`<div class="m-card"><div class="m-head"><div><div class="m-lab">Hotel QA · Hospedagem</div><p class="m-ttl">Hospedagem Teste · Thor</p></div><span class="badge b-pend">Aguardando pagamento</span></div>
+      <div class="m-body"><dl class="m-grid"><div><dt>Início</dt><dd>21/11/2026, 22:07</dd></div><div><dt>Fim</dt><dd>22/11/2026, 02:07</dd></div><div><dt>Total</dt><dd>R$ 80,00</dd></div><div><dt>Pagamento</dt><dd>Antecipado (simulado)</dd></div></dl></div>
+      <div class="m-actions"><span class="btn btn-p">Pagar agora</span><span class="btn btn-o">Ver detalhes</span><span class="btn btn-g" style="color:#b91c1c">Cancelar</span></div></div>
+      <div class="m-card"><div class="m-head"><div><div class="m-lab">Pedido #DA088C62 · Loja Teste QA</div><p class="m-ttl">1× Ração Premium Teste</p></div><span class="badge b-pend">Aguardando pagamento</span></div>
+      <div class="m-actions"><span class="btn btn-p">Pagar agora</span><span class="btn btn-o">Ver detalhes</span></div></div>`,
+      'Card único de histórico (<code>ui/card</code> + <code>ui/badge</code>): cabeçalho com identificação e status, dados em grade, ações com a mesma hierarquia — primária para pagar, contorno para detalhes e avaliar, texto vermelho para cancelar.'),
+ desc:'Telas irmãs (histórico do que o Tutor contratou) usam estrutura, cores de status, posição e estilo de ações diferentes. Pagar é botão laranja em uma e link azul na outra; avaliar fica em lugares distintos; abas de filtro com borda preta.',
+ prop:['Criar um card de histórico compartilhado a partir de <code>ui/card</code> e <code>ui/badge</code>, com mapa único de status → cor (hoje existem dois).','Ordem das ações fixa: Pagar (primária) · Ver detalhes · Avaliar (contorno) · Cancelar (destrutiva discreta, com <code>Dialog</code> já existente).','Abas com <code>ui/tabs</code>, como nas Aprovações do Admin.'],
+ ac:['Os dois históricos usam o mesmo componente e o mesmo mapa de status.','Ação de pagar idêntica nas duas telas.','E2E <code>booking</code> e <code>reviews</code> passando.']},
+
+{id:'G14',p:'P1',cat:'Consistência',t:'Visão geral do parceiro destoa da visão geral do Admin',
+ where:'<b>Rota:</b> /dashboard · <b>Perfis:</b> Lojista, Hotel, Pet Sitter × Admin · <b>Viewport:</b> desktop',
+ fix:'PartnerMetricsPage, CommerceMetricsPanel',
+ ev:()=>shot('loja-visao-desk',1440,1493,[256,80,1184,820],[[284,186,200,26,'links azuis'],[1102,124,310,44,'select nativo'],[288,478,1120,102,'texto técnico'],[288,604,548,282,'meia largura']],'Lojista: atalhos como links sublinhados azuis, select nativo, aviso longo e “Pedidos por estado” ocupando meia linha.')
+   +shot('admin-visao-desk',1440,900,[256,80,1184,420],[[900,104,512,52,'padrão do Admin',1]],'Admin: cabeçalho com ações agrupadas e <code>ui/select</code>.')
+   +mock(`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div><p class="m-ttl" style="font-size:24px">Visão Geral</p><div style="color:#64748b;font-size:13px">Loja Teste QA · atualizado às 20:17</div></div>
+      <div style="display:flex;gap:8px"><span class="btn btn-o">Ver pedidos</span><span class="btn btn-o">Financeiro</span><span class="m-sel" style="width:150px">Últimos 30 dias ▾</span><span class="btn btn-o">↻</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><div class="m-card" style="padding:12px;margin:0"><b>Pedidos por estado</b><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><span class="badge b-ok">Pago 1</span><span class="badge b-info">Enviado 1</span><span class="badge b-pend">Aguardando 1</span><span class="badge b-err">Cancelado 1</span></div></div>
+      <div class="m-card" style="padding:12px;margin:0"><b>Como contamos</b><div style="font-size:12px;color:#64748b">Valores de teste, pela data de criação. <u>Saiba mais</u></div></div></div>`,
+      'Cabeçalho no padrão do Admin, atalhos como botões de contorno, estados como <code>Badge</code>, explicação curta com detalhe sob demanda.'),
+ desc:'O painel do parceiro (entrega DSH) foi construído fora dos padrões do painel do Admin: <code>text-sky-800 underline</code>, <code>&lt;select&gt;</code> nativo, status como texto simples, IDs de pedido em minúsculas (no Tutor aparecem em maiúsculas) e texto técnico (“Pedidos sem registro do gateway mantêm a classificação pelo estado, inclusive legados”).',
+ prop:['Reaproveitar o cabeçalho do <code>AdminOverview</code>, <code>ui/select</code>, <code>StatCard</code> e <code>Badge</code>.','Resumir a explicação em uma linha com detalhes em <code>&lt;details&gt;</code> (já usado no painel).','Formatar o ID de pedido igual ao do Tutor.'],
+ ac:['Lado a lado, Admin e parceiro têm o mesmo cabeçalho, seletor e estilo de status.','Teste E2E <code>metrics-real</code> passando.']},
+
+{id:'G15',p:'P1',cat:'Defeito visual',t:'Botão “Adicionar ao Carrinho” achatado e logo da loja quebrado (celular)',
+ where:'<b>Rota:</b> /shopping/:id · <b>Perfis:</b> visitante e Tutor · <b>Viewport:</b> celular 390',
+ fix:'ProductDetailPage.tsx',
+ ev:()=>shot('produto-mob',390,844,[0,100,390,500],[[36,284,318,36,'24 px de altura'],[33,376,64,64,'imagem quebrada']],'Botão com <code>h-[52px]</code> renderizado com 24 px; logo com <code>src</code> vazio mostra o texto alternativo.'),
+ desc:'O botão tem <code>flex-1</code> dentro de um contêiner em coluna no celular; a flexão encolhe a altura (medido: 308×24 px). O logo usa <code>&lt;img src=""&gt;</code> em vez do fallback.',
+ prop:['Trocar <code>flex-1</code> por <code>w-full sm:flex-1</code> (ou <code>shrink-0</code>) para manter 52 px.','Usar <code>ui/avatar</code> com <code>AvatarFallback</code> (iniciais), já existente.'],
+ ac:['Botão com pelo menos 44 px de altura em 360–430 px de largura.','Nenhuma imagem quebrada sem logo cadastrado.']},
+
+/* ---------------- P2 ---------------- */
+{id:'G05',p:'P2',cat:'Acessibilidade',t:'Foco de teclado invisível no menu “Mais” e no menu do Tutor',
+ where:'<b>Onde:</b> cabeçalho público (29 telas) e botão da conta do Tutor (8 telas) · <b>Viewport:</b> desktop · <b>Evidência:</b> navegação por Tab automatizada (outline e box-shadow ausentes no foco)',
+ fix:'Navbar.tsx',
+ ev:()=>shot('home-desk',1440,3172,[640,0,800,70],[[944,12,66,40,'sem foco visível'],[1204,8,124,48,'',1]],'“Mais” recebe foco sem nenhum indicador; os botões baseados em <code>ui/button</code> mostram anel (verde).'),
+ desc:'Os dois controles são <code>&lt;button&gt;</code> próprios com <code>focus:outline-none</code> sem substituto. Quem navega por teclado perde a posição ao passar pelo cabeçalho.',
+ prop:['Aplicar o mesmo <code>focus-visible:ring-2 ring-offset-2</code> do <code>Button</code> (com cor de anel definida na decisão de G03) ou usar o próprio <code>Button variant="ghost"</code>.'],
+ ac:['Todos os controles do cabeçalho com indicador de foco visível (contraste ≥ 3:1).','Varredura de Tab sem itens “sem indicador”.']},
+
+{id:'G16',p:'P2',cat:'Responsividade',t:'Filtros do diretório espremidos no celular',
+ where:'<b>Rotas:</b> /hotels e /walkers · <b>Viewport:</b> celular 390',
+ fix:'PartnerDirectory.tsx',
+ ev:()=>shot('hotels-mob',390,1630,[0,80,390,230],[[14,143,184,62,'placeholder cortado'],[14,212,156,62,'sozinho']],'Busca encolhida ao lado do select; “Ordenar por” quebra sozinho na linha de baixo.')
+   +mock(`<div class="m-in" style="margin-bottom:8px">🔍 Buscar por nome, local ou serviço</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><div style="font-size:11px;color:#64748b">Serviço</div><div class="m-sel">Todos ▾</div></div><div><div style="font-size:11px;color:#64748b">Ordenar por</div><div class="m-sel">Nome ▾</div></div></div>`,
+      'Busca em largura total; os dois seletores em duas colunas.'),
+ desc:'A linha usa <code>flex-wrap</code> com a busca em <code>flex-1</code>, que perde espaço para o select de largura fixa. O placeholder fica ilegível.',
+ prop:['Grade: busca <code>col-span-2</code> no celular; seletores <code>grid-cols-2</code>; em <code>sm:</code> volta a uma linha.','Usar <code>ui/input</code> e <code>ui/select</code> (resolve também G01 aqui).'],
+ ac:['Placeholder inteiro visível em 360 px; nenhum controle isolado em linha própria.']},
+
+{id:'G17',p:'P2',cat:'Responsividade',t:'Aprovações do Admin no celular escondem as ações',
+ where:'<b>Rota:</b> /dashboard/aprovacoes (e Usuários) · <b>Perfil:</b> Admin · <b>Viewport:</b> celular 390',
+ fix:'admin/Approvals.tsx',
+ ev:()=>shot('aprovacoes-mob',390,844,[0,380,390,330],[[16,412,358,280,'Aprovar/Recusar fora da tela'],[0,64,18,640,'']],'Tabela larga: só Contato e Negócio aparecem; não há indicação de rolagem horizontal. Faixa de sombra à esquerda vem da sidebar fechada.')
+   +mock(`<div class="m-card"><div class="m-head"><div><div class="m-lab">Hotel · enviado em 20/11</div><p class="m-ttl">Hotel Pendente QA</p><div style="font-size:12px;color:#64748b">Hotel QA · CNPJ ••.•••.•••/0001-81</div></div><span class="badge b-pend">Novo</span></div><div class="m-actions"><span class="btn btn-p7" style="background:#047857">Aprovar</span><span class="btn btn-o" style="color:#b91c1c">Recusar</span><span class="btn btn-g">Detalhes</span></div></div>`,
+      'Abaixo de <code>md</code>, cada solicitação vira um card com as ações visíveis.'),
+ desc:'Ação principal da tela inacessível sem descobrir a rolagem. axe também aponta <code>scrollable-region-focusable</code> no contêiner.',
+ prop:['Renderizar lista de cards abaixo de <code>md</code> (mesmo dado, componente <code>ui/card</code>).','Ocultar a sombra da sidebar quando fechada (<code>Sidebar</code>/<code>DashboardLayout</code>).'],
+ ac:['Aprovar e Recusar visíveis sem rolagem lateral em 360 px.']},
+
+{id:'G18',p:'P2',cat:'Consistência',t:'Bloco de avaliações fora da grade e com mensagens duplicadas',
+ where:'<b>Rotas:</b> /hotels/:id, /walkers/:id, /shopping/:id · <b>Viewport:</b> ambos',
+ fix:'reviews/ReviewsPanel.tsx',
+ ev:()=>shot('hotel-detalhe-desk',1440,2134,[200,1150,1040,480],[[224,1335,992,278,'mais largo que a coluna'],[360,1170,720,160,'coluna',1],[245,1448,320,64,'duplicado'],[245,1545,382,46,'paginação vazia']],'Detalhe do hotel: avaliações em 992 px contra coluna de 720 px; “Ainda sem avaliações” + “Este item ainda não recebeu avaliações.”; “Página 1 de 1” sem itens.'),
+ desc:'O componente novo não herda a largura da coluna da página, repete a mensagem de vazio e mostra paginação inútil. O link para “Meus Agendamentos” usa <code>text-sky-700</code> e leva visitantes a uma rota protegida.',
+ prop:['Receber a largura do contêiner (sem <code>max-w</code> próprio).','Uma única mensagem de vazio; ocultar paginação com uma página.','Link em <code>primary-700</code>; para visitante, texto “Entre para avaliar”.'],
+ ac:['Bloco alinhado às demais seções; sem repetição de texto; sem paginação quando vazio.']},
+
+{id:'G19',p:'P2',cat:'Não implementado',t:'Busca, notificações e rotas que parecem funcionar, mas não fazem nada',
+ where:'<b>Onde:</b> busca do cabeçalho público, “Buscar no painel…”, sino do painel, rotas /search e /appointments · <b>Viewport:</b> ambos',
+ fix:'Navbar, DashboardLayout, routes.tsx',
+ ev:()=>shot('home-desk',1440,3172,[260,0,1180,70],[[310,8,346,48,'sem ação']],'Busca pública: campo sem envio nem rótulo.')
+   +shot('admin-visao-desk',1440,900,[256,0,1184,70],[[278,10,452,44,'sem ação'],[1330,10,40,44,'ponto fixo']],'Painel: busca sem ação e sino com ponto vermelho pulsante fixo no código.'),
+ desc:'<code>Navbar.tsx</code> e <code>DashboardLayout.tsx</code> renderizam campos sem manipulador. O sino exibe um ponto vermelho com <code>animate-pulse</code> sempre. <code>/search</code> e <code>/appointments</code> renderizam a landing (<code>routes.tsx</code>). O handoff orienta não simular funcionalidade ausente.',
+ prop:['Busca pública: enviar para <code>/products?q=</code> ou para o diretório, ou remover até existir busca.','Busca do painel e sino: remover até existir backend de notificações.','/search e /appointments: redirecionar para destino real ou para 404.'],
+ ac:['Nenhum controle visível sem efeito; nenhum indicador de notificação sem dado.']},
+
+{id:'G20',p:'P2',cat:'Conteúdo · Não implementado',t:'Textos prometem recursos e números que não existem',
+ where:'<b>Rotas:</b> /shopping/:id, /partners, / · <b>Viewport:</b> ambos',
+ fix:'ProductDetailPage, PartnersPage, LandingPage',
+ ev:()=>shot('produto-mob',390,844,[0,100,390,500],[[36,128,250,26,'parcelamento'],[12,474,366,104,'frete/segurança']],'Produto: “10x de R$ 4,99 sem juros”, “Frete Rápido — Entrega garantida”, “Ambiente 100% blindado”.')
+   +shot('partners-desk',1440,3986,[60,560,1240,1180],[[108,630,360,72,'números fictícios'],[250,1570,450,40,'WhatsApp'],[740,1330,450,336,'painel ilustrativo']],'Parceiros: “+150k agendamentos”, “98% eficiência”, lembretes por WhatsApp, abas “Clínicas & Vets”.'),
+ desc:'Parcelamento, frete, WhatsApp, clínicas e repasse estão fora do escopo (handoff, seção 7); o pagamento é simulado. Os números não vêm de dados reais — o handoff registra a remoção de indicadores fictícios nas outras telas.',
+ prop:['Revisar textos com a equipe (Fase 0); remover ou marcar como “em breve”.','Painel ilustrativo de /partners: rotular como exemplo.'],
+ ac:['Nenhuma promessa de recurso inexistente; números reais ou ausentes.']},
+
+{id:'G21',p:'P2',cat:'Conteúdo · Consistência',t:'Detalhe do Pet Sitter: unidade fixa e CTA em outra cor',
+ where:'<b>Rota:</b> /walkers/:id × /hotels/:id · <b>Viewport:</b> celular',
+ fix:'WalkerDetailsPage.tsx',
+ ev:()=>shot('sitter-detalhe-mob',390,2027,[0,280,390,560],[[140,452,112,20,'“a partir de /hora”'],[16,507,358,90,'azul'],[218,776,162,56,'CTA azul']],'Texto fixo “a partir de /hora” e CTA azul; no hotel o CTA equivalente é laranja.'),
+ desc:'A unidade é texto fixo (<code>WalkerDetailsPage.tsx</code>), embora o serviço tenha <code>billing_unit</code>. O CTA principal usa a cor secundária, diferente do hotel (“Reservar agora”, laranja).',
+ prop:['Exibir “a partir de R$ X por {unidade}” com <code>billing_unit</code> do serviço mais barato.','CTA com a variante primária do <code>Button</code>; azul fica para selo “Verificado”.'],
+ ac:['Mesmo padrão de preço e CTA em hotel e sitter.']},
+
+/* ---------------- P3 ---------------- */
+{id:'G22',p:'P3',cat:'Consistência',t:'Remoções do Tutor usam confirm() do navegador',
+ where:'<b>Rotas:</b> /tutor/pets, /tutor/perfil (endereços) · <b>Evidência:</b> código (diálogo nativo não aparece em captura)',
+ fix:'TutorPets.tsx, AddressesSection.tsx',
+ ev:()=>'',
+ desc:'<code>TutorPets.tsx:123</code> e <code>AddressesSection.tsx:187</code> usam <code>confirm()</code>; cancelamentos de agendamento usam <code>ui/dialog</code> (<code>AppointmentActions</code>). O diálogo nativo não segue a marca nem permite explicar consequências com formatação.',
+ prop:['Reaproveitar o padrão de <code>AppointmentActions</code> (Dialog com título, consequência e botões).'],
+ ac:['Mesmo diálogo para remover pet, endereço e cancelar agendamento; foco retorna ao gatilho.']},
+
+{id:'G23',p:'P3',cat:'Interação',t:'Carregamento inicial do painel: tela branca com spinner preto',
+ where:'<b>Rota:</b> /dashboard (qualquer parceiro) · <b>Estado:</b> API lenta · <b>Viewport:</b> desktop',
+ fix:'ProtectedRoute / DashboardLayout',
+ ev:()=>shot('carregando-desk',1440,900,[420,250,600,400],[[690,420,60,60,'genérico']],'Enquanto valida a sessão, a página inteira fica branca com um anel preto (efeito de G01).'),
+ desc:'O restante do produto usa o <code>HamsterLoader</code> com mensagem. Aqui não há layout nem texto.',
+ prop:['Usar <code>HamsterLoader</code> com “Carregando seu painel…”, ou exibir o layout com <code>ui/skeleton</code>.'],
+ ac:['Carregamento com identidade e texto; sem tela branca.']},
+
+{id:'G24',p:'P3',cat:'Formulários',t:'Cadastro no celular e link de redefinição inválido',
+ where:'<b>Rotas:</b> /register (celular), /redefinir-senha (desktop)',
+ fix:'RegisterPage, ResetPasswordPage',
+ ev:()=>shot('cadastro-mob',390,844,[0,470,390,150],[[33,494,324,48,'placeholders cortados'],[33,546,194,22,'texto técnico']],'Senha e confirmação lado a lado em 390 px; “Versão dos termos: 2026-02-20” exposto.')
+   +shot('reset-desk',1440,900,[840,230,420,440],[[873,322,342,74,'sem link'],[873,564,342,48,'formulário inútil']],'Link inválido: aviso pede “Solicite um novo”, mas não há link; o formulário continua visível.'),
+ desc:'Problemas pequenos, mas em fluxos de entrada.',
+ prop:['Campos de senha em coluna única abaixo de <code>sm</code>.','Mostrar a versão dos termos só no texto legal; no formulário, “Termos de Uso (versão vigente)”.','Link inválido: ocultar campos e oferecer botão “Pedir novo link” para /recuperar-senha.'],
+ ac:['Placeholders inteiros em 360 px; link inválido leva a uma ação útil em 1 clique.']},
+
+{id:'G25',p:'P3',cat:'Defeito visual',t:'Pequenas inconsistências de layout e conteúdo',
+ where:'<b>Onde:</b> sidebar do Admin, rodapé, Avaliações de Pet Sitters',
+ fix:'Sidebar, Footer, páginas do painel',
+ ev:()=>shot('admin-visao-desk',1440,900,[0,120,300,180],[[14,186,230,100,'rótulos cortados']],'Sidebar do Admin: “Aprovações de Par…”, “Avaliações de Pet …”.'),
+ desc:'Rótulos da sidebar truncados na largura padrão; rodapé público “© 2024 Pet+ Inc.” e telas de autenticação “© 2026 Pet+”; Avaliações de Pet Sitters com recuo diferente das outras páginas do painel (título em x=313 contra 288).',
+ prop:['Rótulos curtos (“Aprovações”, “Avaliar sitters”) ou quebra em duas linhas; tooltip quando recolhida.','Ano dinâmico e razão social única no <code>Footer</code>.','Remover o padding extra do contêiner da página.'],
+ ac:['Nenhum rótulo truncado em 1280–1440 px; mesmo texto de copyright em todo o site.']},
+
+{id:'G26',p:'P3',cat:'Manutenção · Privacidade',t:'Componentes duplicados e log de e-mail no navegador',
+ where:'<b>Onde:</b> <code>src/app/components/ui</code> (48 arquivos), <code>src/app/dashboard/LoadingState.tsx</code>, <code>Navbar.tsx</code>',
+ fix:'limpeza',
+ ev:()=>'',
+ desc:'Há um segundo kit de UI sem nenhuma importação (só <code>app/components/figma/ImageWithFallback</code> é usado) e um <code>LoadingState</code> órfão — facilita que telas novas importem o componente errado. O <code>Navbar</code> registra “Usuário encontrado: &lt;e-mail&gt;” no console, em desacordo com a minimização de dados da SEC-2.',
+ prop:['Remover o kit duplicado após confirmar 0 importações; mover <code>ImageWithFallback</code> para <code>components/</code>.','Remover os <code>console.log</code> do <code>Navbar</code>.'],
+ ac:['Build e testes passando; nenhum dado pessoal no console.']},
+];
+
+const order = {P0:0,P1:1,P2:2,P3:3};
+document.getElementById('sumrows').innerHTML = F.slice().sort((a,b)=>order[a.p]-order[b.p]).map(f=>`<tr><td><a href="#${f.id}">${f.id}</a></td><td>${f.t}</td><td>${f.cat}</td><td><span class="pill ${f.p}">${f.p}</span></td><td>${f.fix}</td></tr>`).join('');
+let html='', cur='';
+const titles={P0:'P0 — bloqueiam a tarefa, enganam ou expõem telas indevidas',P1:'P1 — alto impacto ou presentes em muitas telas',P2:'P2 — impacto médio ou pontual',P3:'P3 — baixo impacto ou manutenção'};
+for (const f of F.slice().sort((a,b)=>order[a.p]-order[b.p])) {
+  if (f.p!==cur){ cur=f.p; html+=`<section class="block" id="${cur.toLowerCase()}"><h2>${titles[cur]}</h2></section>`; }
+  const ev=f.ev();
+  html+=`<article class="f" id="${f.id}"><div class="hd"><span class="id">${f.id}</span><h3>${f.t}</h3><span class="pill ${f.p}">${f.p}</span><span class="pill cat">${f.cat}</span></div><div class="bd">
+  <div class="meta"><div>${f.where}</div></div>
+  ${ev?`<div class="ev">${ev}</div>`:''}
+  <h4>Problema e impacto</h4><p>${f.desc}</p>
+  <h4>Proposta</h4><ul>${f.prop.map(x=>`<li>${x}</li>`).join('')}</ul>
+  <div class="ac"><h4>Critérios de aceite e validação</h4><ul>${f.ac.map(x=>`<li>${x}</li>`).join('')}</ul></div></div></article>`;
+}
+document.getElementById('findings').innerHTML=html;
+</script>
+</body>
+</html>

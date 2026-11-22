@@ -1,0 +1,42 @@
+[WebServer] (node:21836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 28 tests using 2 workers
+
+(node:34976) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:27192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+⚠ 1 violação(ões) SÉRIA(s) rastreada(s) (requer decisão de design de contraste):
+  - color-contrast: 2 nó(s)
+  ok  2 [chromium] › e2e\a11y.spec.ts:8:1 › landing page sem violações CRÍTICAS de a11y (axe, WCAG 2 A/AA) (1.9s)
+  ok  1 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 390px: cria, acompanha, paga e cancela (2.2s)
+  ok  3 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 1280px: cria, acompanha, paga e cancela (1.5s)
+  ok  4 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 390px: cria, acompanha, paga e cancela (2.1s)
+  ok  6 [chromium] › e2e\booking.spec.ts:140:1 › visitante precisa entrar e mantém o destino de reserva (391ms)
+  ok  5 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 1280px: cria, acompanha, paga e cancela (2.0s)
+  ok  7 [chromium] › e2e\checkout-recovery-real.spec.ts:5:34 › E-18 API/PostgreSQL reais 1280px: merge perdido, checkout, reload e propriedade (2.6s)
+  ok  9 [chromium] › e2e\legal.spec.ts:11:3 › /terms — leitura linear, headings e listas reais (440ms)
+  ok  8 [chromium] › e2e\checkout-recovery-real.spec.ts:5:34 › E-18 API/PostgreSQL reais 390px: merge perdido, checkout, reload e propriedade (2.7s)
+  ok 10 [chromium] › e2e\legal.spec.ts:28:3 › /terms — deep-link por âncora posiciona na cláusula (1.3s)
+  ok 11 [chromium] › e2e\legal.spec.ts:34:3 › /terms — sem violações CRÍTICAS de a11y (axe) (1.2s)
+  ok 12 [chromium] › e2e\legal.spec.ts:11:3 › /privacy — leitura linear, headings e listas reais (437ms)
+  ok 13 [chromium] › e2e\legal.spec.ts:28:3 › /privacy — deep-link por âncora posiciona na cláusula (1.3s)
+  ok 14 [chromium] › e2e\legal.spec.ts:34:3 › /privacy — sem violações CRÍTICAS de a11y (axe) (1.2s)
+  ok 15 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 375px (631ms)
+  ok 16 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 1280px (669ms)
+  ok 17 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 375px (612ms)
+  ok 18 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 1280px (636ms)
+  ok 19 [chromium] › e2e\payment.spec.ts:8:3 › checkout SIMULATED: cria uma vez e processa todos os pedidos (1.7s)
+  ok 20 [chromium] › e2e\payment.spec.ts:8:3 › checkout MERCADO_PAGO: cria uma vez e processa todos os pedidos (1.7s)
+  ok 22 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 2 não acessa a agenda diretamente pela URL (377ms)
+  ok 23 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 5 não acessa a agenda diretamente pela URL (407ms)
+  ok 21 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (1.2s)
+  ok 24 [chromium] › e2e\schedule.spec.ts:35:3 › agenda real na interface: perfil 3, desktop (3.2s)
+  ok 25 [chromium] › e2e\schedule.spec.ts:35:3 › agenda real na interface: perfil 4, celular (3.1s)
+  ok 26 [chromium] › e2e\smoke.spec.ts:8:1 › landing page carrega e renderiza a navegação (409ms)
+  ok 27 [chromium] › e2e\smoke.spec.ts:22:1 › rota lazy standalone (/login) carrega o formulário (380ms)
+  ok 28 [chromium] › e2e\smoke.spec.ts:27:1 › rota lazy sob layout (/products) renderiza sem cair no ErrorBoundary (381ms)
+
+  28 passed (22.6s)
+

@@ -1,15 +1,42 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const ProviderController = require('../controllers/ProviderController');
-const OrderController = require('../controllers/OrderController');
-const authMiddleware = require('../middlewares/authMiddleware');
-const adminMiddleware = require('../middlewares/adminMiddleware');
-const validate = require('../middlewares/validate');
+const ProviderController = require("../controllers/ProviderController");
+const OrderController = require("../controllers/OrderController");
+const authMiddleware = require("../middlewares/authMiddleware");
+const adminMiddleware = require("../middlewares/adminMiddleware");
+const providerMiddleware = require("../middlewares/providerMiddleware");
+const validate = require("../middlewares/validate");
+
+/**
+ * @swagger
+ * /api/v1/providers/me/metrics:
+ *   get:
+ *     summary: Métricas do parceiro autenticado (aprovado), sem acesso cruzado
+ *     description: Janela de dias civis em America/Sao_Paulo. Pedidos e reservas por criação. Receita reconhecida nos estados PAGO/PREPARANDO/ENVIADO/CONCLUIDO; cancelados e tentativas não aprovadas ficam fora. Não representa saldo disponível. Pagamentos simulados de agendamentos usam paid_at/refunded_at e ficam separados.
+ *     tags: [Providers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: days
+ *         schema: { type: integer, default: 30, minimum: 1, maximum: 365 }
+ *     responses:
+ *       200:
+ *         description: commerce com orders, appointments, revenue/daily, appointment_payments, service_mix e dez registros recentes de cada tipo; totais do período completo.
+ *       401:
+ *         description: Sessão inválida
+ *       403:
+ *         description: Perfil não permitido ou parceiro não aprovado
+ *       422:
+ *         description: Janela inválida
+ */
+router.get("/me/metrics", authMiddleware, ProviderController.getMetrics);
 const {
   providerIdParamsSchema,
   updateProviderStatusSchema,
   updateProviderProfileSchema,
-} = require('../schemas/providerSchemas');
+  updateProviderAccountSchema,
+} = require("../schemas/providerSchemas");
 
 /**
  * @swagger
@@ -19,7 +46,16 @@ const {
  *     tags: [Providers]
  *     security:
  *       - bearerAuth: []
+ *     description: "Sem view mantém array e headers. view=page retorna orders, total, page, limit, totalPages, summary global (independente de q/página), receita por criação no mês civil de São Paulo conforme DSH. Query inválida retorna 422."
  *     parameters:
+ *       - in: query
+ *         name: view
+ *         schema: { type: string, enum: [page] }
+ *       - in: query
+ *         name: q
+ *         description: Busca literal por ID parcial, nome ou e-mail do cliente em todos os pedidos próprios
+ *         schema: { type: string, maxLength: 100 }
+
  *       - in: query
  *         name: page
  *         schema:
@@ -52,7 +88,7 @@ const {
  *       403:
  *         description: Acesso restrito a parceiros cadastrados
  */
-router.get('/orders', authMiddleware, OrderController.listReceived);
+router.get("/orders", authMiddleware, OrderController.listReceived);
 
 /**
  * @swagger
@@ -62,9 +98,17 @@ router.get('/orders', authMiddleware, OrderController.listReceived);
  *     tags: [Providers]
  *     responses:
  *       200:
- *         description: Lista de hotéis
+ *         description: Lista de hotéis, incluindo rating_avg e rating_count reais por parceiro
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ReviewSummary'
  */
-router.get('/hotels', (req, res) => ProviderController.listHotels(req, res));
+router.get("/hotels", (req, res, next) =>
+  ProviderController.listHotels(req, res, next),
+);
 
 /**
  * @swagger
@@ -74,9 +118,17 @@ router.get('/hotels', (req, res) => ProviderController.listHotels(req, res));
  *     tags: [Providers]
  *     responses:
  *       200:
- *         description: Lista de pet sitters
+ *         description: Lista de pet sitters, incluindo rating_avg e rating_count reais por parceiro
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ReviewSummary'
  */
-router.get('/sitters', (req, res) => ProviderController.listSitters(req, res));
+router.get("/sitters", (req, res, next) =>
+  ProviderController.listSitters(req, res, next),
+);
 
 /**
  * @swagger
@@ -88,7 +140,9 @@ router.get('/sitters', (req, res) => ProviderController.listSitters(req, res));
  *       200:
  *         description: Lista de lojistas
  */
-router.get('/stores', (req, res) => ProviderController.listStores(req, res));
+router.get("/stores", (req, res, next) =>
+  ProviderController.listStores(req, res, next),
+);
 
 /**
  * @swagger
@@ -109,7 +163,12 @@ router.get('/stores', (req, res) => ProviderController.listStores(req, res));
  */
 // A listagem expõe dados de moderação (e-mail, CPF/CNPJ, motivo da recusa) e
 // por isso é exclusiva do admin; as vitrines públicas usam /hotels, /sitters e /stores.
-router.get('/', authMiddleware, adminMiddleware, ProviderController.listPartners);
+router.get(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  ProviderController.listPartners,
+);
 
 /**
  * @swagger
@@ -125,7 +184,7 @@ router.get('/', authMiddleware, adminMiddleware, ProviderController.listPartners
  *       401:
  *         description: Não autorizado
  */
-router.get('/me', authMiddleware, ProviderController.getMe);
+router.get("/me", authMiddleware, providerMiddleware, ProviderController.getMe);
 
 /**
  * @swagger
@@ -139,7 +198,12 @@ router.get('/me', authMiddleware, ProviderController.getMe);
  *       200:
  *         description: Dados de completitude
  */
-router.get('/completeness', authMiddleware, ProviderController.getCompleteness);
+router.get(
+  "/completeness",
+  authMiddleware,
+  providerMiddleware,
+  ProviderController.getCompleteness,
+);
 
 /**
  * @swagger
@@ -159,7 +223,7 @@ router.get('/completeness', authMiddleware, ProviderController.getCompleteness);
  *       404:
  *         description: Perfil de parceiro não encontrado
  */
-router.post('/me/resubmit', authMiddleware, ProviderController.resubmit);
+router.post("/me/resubmit", authMiddleware, ProviderController.resubmit);
 
 /**
  * @swagger
@@ -179,7 +243,13 @@ router.post('/me/resubmit', authMiddleware, ProviderController.resubmit);
  *       200:
  *         description: Parceiro atualizado
  */
-router.put('/me', authMiddleware, ProviderController.updateMe);
+router.put(
+  "/me",
+  authMiddleware,
+  providerMiddleware,
+  validate({ body: updateProviderAccountSchema }),
+  ProviderController.updateMe,
+);
 
 /**
  * @swagger
@@ -215,10 +285,11 @@ router.put('/me', authMiddleware, ProviderController.updateMe);
  *         description: Imagem de tipo não permitido, acima de 2 MB, galeria com mais de 8 fotos ou campo inválido
  */
 router.put(
-  '/profile',
+  "/profile",
   authMiddleware,
+  providerMiddleware,
   validate({ body: updateProviderProfileSchema }),
-  ProviderController.updateProfile
+  ProviderController.updateProfile,
 );
 
 /**
@@ -235,13 +306,21 @@ router.put(
  *           type: string
  *     responses:
  *       200:
- *         description: Detalhes do parceiro
+ *         description: Detalhes do parceiro com rating_avg/rating_count e agregados dos produtos públicos incluídos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReviewSummary'
  *       404:
  *         description: Parceiro inexistente, não aprovado ou com conta desativada
  *       422:
  *         description: id inválido
  */
-router.get('/:id', validate({ params: providerIdParamsSchema }), ProviderController.getDetails);
+router.get(
+  "/:id",
+  validate({ params: providerIdParamsSchema }),
+  ProviderController.getDetails,
+);
 
 /**
  * @swagger
@@ -274,11 +353,14 @@ router.get('/:id', validate({ params: providerIdParamsSchema }), ProviderControl
 // Aprovar/recusar parceiro é ação exclusiva do admin. Sem estes middlewares a
 // rota ficava aberta, permitindo auto-aprovação por qualquer um sem token.
 router.patch(
-  '/:id/status',
+  "/:id/status",
   authMiddleware,
   adminMiddleware,
-  validate({ params: providerIdParamsSchema, body: updateProviderStatusSchema }),
-  ProviderController.updateStatus
+  validate({
+    params: providerIdParamsSchema,
+    body: updateProviderStatusSchema,
+  }),
+  ProviderController.updateStatus,
 );
 
 module.exports = router;

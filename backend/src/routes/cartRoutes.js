@@ -116,6 +116,7 @@ router.delete('/', CartController.clearCart);
  * /api/v1/cart/merge:
  *   post:
  *     summary: Funde um carrinho anônimo (localStorage) ao do usuário após login
+ *     description: "Sem baseline conserva merge aditivo legado. Com baseline, cada alvo é quantidade anterior + quantidade anônima, limitada por estoque/99; repetir o mesmo alvo não soma novamente. Transação integral, conflito 409 se a quantidade atual não é a anterior nem o alvo. Persistir/reutilizar a mesma baseline ao repetir por perda de resposta."
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -126,6 +127,16 @@ router.delete('/', CartController.clearCart);
  *           schema:
  *             type: object
  *             properties:
+ *               baseline:
+ *                 type: array
+ *                 maxItems: 50
+ *                 description: Quantidades da conta antes da primeira tentativa; ausência do produto equivale a zero
+ *                 items:
+ *                   type: object
+ *                   required: [product_id, quantity]
+ *                   properties:
+ *                     product_id: { type: string, format: uuid }
+ *                     quantity: { type: integer, minimum: 0, maximum: 99 }
  *               items:
  *                 type: array
  *                 maxItems: 50

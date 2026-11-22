@@ -2,6 +2,8 @@ const prisma = require('../config/database');
 const AppError = require('../utils/AppError');
 const { metricsQuery } = require('../schemas/adminSchemas');
 const { bucketProviderStatus, groupByDay, toCountMap } = require('../utils/adminMetrics');
+const { metricsWindow } = require('../utils/commerceMetrics');
+const { CommerceMetricsRepository } = require('../repositories/CommerceMetricsRepository');
 
 // Papéis (tabela `roles`, ver prisma/seed.js)
 const ROLE_NAMES = { 1: 'admin', 2: 'lojista', 3: 'hotel', 4: 'pet_sitter', 5: 'tutor' };
@@ -11,17 +13,15 @@ class AdminController {
   /**
    * Métricas da plataforma para a Visão Geral do admin.
    *
-   * Só expõe o que tem dado real. Receita, pedidos e agendamentos ficam de
-   * fora de propósito: não existe checkout (nada cria `Order`) nem rota de
-   * agendamento, então esses números seriam sempre zero.
+   * Contagens existentes e comércio real. O cálculo comercial é compartilhado
+   * com o parceiro; não representa dinheiro de produção nem saldo para saque.
    */
   async getMetrics(req, res, next) {
     try {
       const { days } = metricsQuery.parse(req.query);
 
-      const since = new Date();
-      since.setDate(since.getDate() - (days - 1));
-      since.setHours(0, 0, 0, 0);
+      const now = new Date();
+      const { since } = metricsWindow(days, now);
 
       const [
         usersTotal,
@@ -38,12 +38,13 @@ class AdminController {
         petsTotal,
         favoritesByType,
         activeCarts,
+        commerce,
       ] = await Promise.all([
         prisma.user.count(),
         prisma.user.groupBy({ by: ['role_id'], _count: { _all: true } }),
-        prisma.user.count({ where: { created_at: { gte: since } } }),
+        prisma.user.count({ where: { created_at: { gte: since, lte: now } } }),
         prisma.user.findMany({
-          where: { created_at: { gte: since } },
+          where: { created_at: { gte: since, lte: now } },
           select: { created_at: true },
         }),
         prisma.provider.groupBy({ by: ['status'], _count: { _all: true } }),
@@ -57,9 +58,10 @@ class AdminController {
         prisma.product.count({ where: { status: 'ACTIVE' } }),
         prisma.product.count({ where: { stock_quantity: 0 } }),
         prisma.product.groupBy({ by: ['category'], _count: { _all: true } }),
-        prisma.pet.count(),
+        prisma.pet.count({ where: { archived_at: null } }),
         prisma.favorite.groupBy({ by: ['target_type'], _count: { _all: true } }),
         prisma.cart.count({ where: { items: { some: {} } } }),
+        prisma.$transaction(tx => new CommerceMetricsRepository(tx).summary({ days, now }), { isolationLevel: 'RepeatableRead', timeout: 15000 }),
       ]);
 
       // Normaliza os status livres de Provider em 3 baldes.
@@ -70,8 +72,9 @@ class AdminController {
       const partnersTotal = Object.values(partnerStatus).reduce((a, b) => a + b, 0);
 
       return res.status(200).json({
-        generated_at: new Date().toISOString(),
+        generated_at: now.toISOString(),
         range_days: days,
+        commerce,
         users: {
           total: usersTotal,
           new_in_range: newUsersInRange,
@@ -99,7 +102,7 @@ class AdminController {
         },
         growth: groupByDay(
           newUserDates.map((u) => u.created_at),
-          days
+          days, now
         ),
       });
     } catch (error) {

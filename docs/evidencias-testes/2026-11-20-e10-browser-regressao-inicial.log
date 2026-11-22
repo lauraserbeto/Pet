@@ -1,0 +1,15 @@
+[WebServer] (node:42544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:42492) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\credentials-real.spec.ts:8:3 › E-09 integrado 1280px: recuperação, senha repetida, reset e login normalizado (8.8s)
+  ok 2 [chromium] › e2e\credentials-real.spec.ts:8:3 › E-09 integrado 390px: recuperação, senha repetida, reset e login normalizado (7.0s)
+  ok 3 [chromium] › e2e\registration-real.spec.ts:26:3 › E-10 integrado 1280px: tutor, parceiro e textos legais (6.3s)
+  ok 4 [chromium] › e2e\registration-real.spec.ts:26:3 › E-10 integrado 390px: tutor, parceiro e textos legais (5.5s)
+  ok 5 [chromium] › e2e\registration-real.spec.ts:104:1 › E-10: falha de metadados bloqueia cadastro e retry consulta a API local (1.5s)
+  ok 6 [chromium] › e2e\registration-real.spec.ts:124:1 › E-10: versão diferente do texto incluído no build impede cadastro (611ms)
+
+  6 passed (38.1s)

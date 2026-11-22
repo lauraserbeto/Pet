@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { MapPin, Plus, Edit2, Trash2, Loader2, Star, CheckCircle2 } from "lucide-react";
 import { HamsterLoader } from "../ui/HamsterLoader";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { ApiError } from "../../lib/httpClient";
 import { useAddresses } from "../../lib/hooks/useAddresses";
 import { useCepLookup } from "../../lib/hooks/useCepLookup";
@@ -20,20 +15,45 @@ import type { Address } from "../../lib/services/addressService";
 
 /** Indicador visual de campo obrigatório */
 function RequiredMark() {
-  return <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>;
+  return (
+    <span className="text-red-500 ml-0.5" aria-hidden="true">
+      *
+    </span>
+  );
 }
 
 const UF_LIST = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS",
-  "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR",
-  "SC", "SP", "SE", "TO",
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
 ] as const;
 
 const addressSchema = z.object({
-  cep: z
-    .string()
-    .trim()
-    .regex(CEP_MASKED_REGEX, "CEP inválido (use 00000-000)"),
+  cep: z.string().trim().regex(CEP_MASKED_REGEX, "CEP inválido (use 00000-000)"),
   rua: z.string().trim().min(2, "Rua é obrigatória").max(255),
   numero: z.string().trim().max(20).optional().or(z.literal("")),
   complemento: z.string().trim().max(255).optional().or(z.literal("")),
@@ -69,6 +89,8 @@ export function AddressesSection() {
     isUpdating,
     setDefault,
     removeAddress,
+    isRemoving,
+    isSettingDefault,
   } = useAddresses();
 
   const [showForm, setShowForm] = useState(false);
@@ -159,8 +181,17 @@ export function AddressesSection() {
     }
   };
 
-  const handleDelete = async (addr: Address) => {
-    if (!confirm("Tem certeza que deseja excluir este endereço?")) return;
+  // Confirmação no diálogo do app em vez de window.confirm() (G22).
+  const [addressToDelete, setAddressToDelete] = useState<Address | null>(null);
+  const handleDelete = (addr: Address) => {
+    if (isRemoving || isSettingDefault) return;
+    setAddressToDelete(addr);
+  };
+
+  const confirmDelete = async () => {
+    const addr = addressToDelete;
+    setAddressToDelete(null);
+    if (!addr || isRemoving || isSettingDefault) return;
     try {
       await removeAddress(addr.id);
       toast.success("Endereço excluído!");
@@ -174,6 +205,15 @@ export function AddressesSection() {
 
   return (
     <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <ConfirmDialog
+        open={!!addressToDelete}
+        title="Excluir este endereço?"
+        description="O endereço sai da sua conta. Os endereços gravados nos pedidos já realizados são preservados."
+        confirmLabel="Excluir endereço"
+        destructive
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setAddressToDelete(null)}
+      />
       <div className="p-6 sm:p-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2 font-[family-name:var(--font-display)]">
@@ -183,7 +223,7 @@ export function AddressesSection() {
           {!showForm && (
             <button
               onClick={openCreate}
-              className="flex items-center gap-2 text-sm font-medium text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] bg-[var(--color-primary-50)] px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] bg-[var(--color-primary-50)] px-4 py-2 rounded-lg transition-colors"
             >
               <Plus className="w-4 h-4" /> Novo Endereço
             </button>
@@ -198,7 +238,8 @@ export function AddressesSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  CEP<RequiredMark />
+                  CEP
+                  <RequiredMark />
                   {isFetchingCep && <Loader2 className="inline w-3 h-3 animate-spin ml-1" />}
                 </label>
                 <input
@@ -217,7 +258,8 @@ export function AddressesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Rua<RequiredMark />
+                  Rua
+                  <RequiredMark />
                 </label>
                 <input
                   type="text"
@@ -227,15 +269,15 @@ export function AddressesSection() {
                 {errors.rua && <p className="text-xs text-red-500 mt-1">{errors.rua.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Número
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Número</label>
                 <input
                   type="text"
                   {...register("numero")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
-                {errors.numero && <p className="text-xs text-red-500 mt-1">{errors.numero.message}</p>}
+                {errors.numero && (
+                  <p className="text-xs text-red-500 mt-1">{errors.numero.message}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Complemento</label>
@@ -247,19 +289,23 @@ export function AddressesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Bairro<RequiredMark />
+                  Bairro
+                  <RequiredMark />
                 </label>
                 <input
                   type="text"
                   {...register("bairro")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
-                {errors.bairro && <p className="text-xs text-red-500 mt-1">{errors.bairro.message}</p>}
+                {errors.bairro && (
+                  <p className="text-xs text-red-500 mt-1">{errors.bairro.message}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Cidade<RequiredMark />
+                    Cidade
+                    <RequiredMark />
                   </label>
                   <input
                     type="text"
@@ -272,7 +318,8 @@ export function AddressesSection() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    UF<RequiredMark />
+                    UF
+                    <RequiredMark />
                   </label>
                   <Controller
                     name="estado"
@@ -309,7 +356,7 @@ export function AddressesSection() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-70"
+                className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-70"
               >
                 {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
                 Salvar Endereço
@@ -341,10 +388,11 @@ export function AddressesSection() {
                   </span>
                 )}
 
-                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex justify-end gap-2 mb-2">
                   {!addr.is_default && (
                     <button
                       onClick={() => handleSetDefault(addr.id)}
+                      disabled={isRemoving || isSettingDefault}
                       title="Tornar principal"
                       className="text-slate-400 hover:text-amber-500 bg-slate-50 p-1.5 rounded-lg"
                     >
@@ -353,6 +401,7 @@ export function AddressesSection() {
                   )}
                   <button
                     onClick={() => openEdit(addr)}
+                    disabled={isRemoving || isSettingDefault}
                     title="Editar"
                     className="text-slate-400 hover:text-blue-500 bg-slate-50 p-1.5 rounded-lg"
                   >
@@ -360,6 +409,9 @@ export function AddressesSection() {
                   </button>
                   <button
                     onClick={() => handleDelete(addr)}
+                    disabled={isRemoving || isSettingDefault}
+                    aria-label={`Excluir endereço ${addr.rua}, ${addr.numero}`}
+                    aria-busy={isRemoving}
                     title="Excluir"
                     className="text-slate-400 hover:text-red-500 bg-slate-50 p-1.5 rounded-lg"
                   >
@@ -368,11 +420,10 @@ export function AddressesSection() {
                 </div>
 
                 <p className="font-semibold text-slate-800">
-                  {addr.rua}{addr.numero ? `, ${addr.numero}` : ''}
+                  {addr.rua}
+                  {addr.numero ? `, ${addr.numero}` : ""}
                 </p>
-                {addr.complemento && (
-                  <p className="text-sm text-slate-500">{addr.complemento}</p>
-                )}
+                {addr.complemento && <p className="text-sm text-slate-500">{addr.complemento}</p>}
                 <p className="text-sm text-slate-600 mt-1">
                   {addr.bairro} - {addr.cidade}/{addr.estado}
                 </p>

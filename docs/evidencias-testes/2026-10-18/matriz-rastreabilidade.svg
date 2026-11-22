@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1320" viewBox="0 0 1800 1320">
+<title>Rastreabilidade de requisitos e testes do Pet+</title>
+<desc>Oito exemplos relacionam requisitos, cenários executados e seus resultados. A execução selecionada possui 119 testes, sendo 119 aprovados.</desc>
+<rect width="1800" height="1320" fill="#ffffff"/>
+<rect x="0" y="0" width="1800" height="10" fill="#168fca"/>
+<text x="60" y="74" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#123149"><tspan x="60" dy="0">Pet+ | Requisitos e evidências de teste</tspan></text>
+<text x="60" y="120" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="60" dy="0">Execução: 18/10/2026 | Tasks-Laura | commit 176e5a4</tspan></text>
+<text x="60" y="160" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#146d4a"><tspan x="60" dy="0">Recorte: 119 testes | 119 aprovados | 0 falhas | 0 ignorados</tspan></text>
+<rect x="50" y="192" width="1700" height="64" fill="#eaf4fa"/>
+<text x="70" y="234" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#123149"><tspan x="70" dy="0">REQUISITO</tspan></text>
+<text x="550" y="234" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#123149"><tspan x="550" dy="0">CENÁRIO EXECUTADO</tspan></text>
+<text x="1480" y="234" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#123149"><tspan x="1480" dy="0">RESULTADO</tspan></text>
+<rect x="50" y="256" width="1700" height="108" fill="#ffffff"/>
+  <text x="70" y="290" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-01 · RF-001; RNE-001</tspan></text>
+  <text x="70" y="328" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Cadastro público</tspan></text>
+  <text x="550" y="293" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Tentativa de criar administrador pelo cadastro público.</tspan></text>
+  <text x="1480" y="313" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="364" width="1700" height="108" fill="#f5f8fa"/>
+  <text x="70" y="398" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-02 · RF-002; RNF-001</tspan></text>
+  <text x="70" y="436" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Controle de acesso</tspan></text>
+  <text x="550" y="401" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Login de usuário com is_active=false.</tspan></text>
+  <text x="1480" y="421" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="472" width="1700" height="108" fill="#ffffff"/>
+  <text x="70" y="506" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-03 · RF-016*</tspan></text>
+  <text x="70" y="544" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Recuperação de senha</tspan></text>
+  <text x="550" y="509" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Redefinição com a mesma senha atual.</tspan></text>
+  <text x="1480" y="529" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="580" width="1700" height="108" fill="#f5f8fa"/>
+  <text x="70" y="614" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-05 · RF-022*; RNE-013*</tspan></text>
+  <text x="70" y="652" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Geração de pedidos</tspan></text>
+  <text x="550" y="617" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Finalização de carrinho com um lojista.</tspan></text>
+  <text x="1480" y="637" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="688" width="1700" height="108" fill="#ffffff"/>
+  <text x="70" y="722" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-08 · RF-026*; RNE-010*</tspan></text>
+  <text x="70" y="760" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Propriedade do serviço</tspan></text>
+  <text x="550" y="725" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Parceiro tenta editar serviço de outra conta.</tspan></text>
+  <text x="1480" y="745" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="796" width="1700" height="108" fill="#f5f8fa"/>
+  <text x="70" y="830" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-09 · RF-023*; RNE-023*</tspan></text>
+  <text x="70" y="868" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Pagamento idempotente</tspan></text>
+  <text x="550" y="833" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Repetição de notificação de pagamento aprovado.</tspan></text>
+  <text x="1480" y="853" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="904" width="1700" height="108" fill="#ffffff"/>
+  <text x="70" y="938" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-10 · RF-023*; RNE-023*</tspan></text>
+  <text x="70" y="976" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Confirmação na interface</tspan></text>
+  <text x="550" y="941" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Retorno com aprovação na URL, sem confirmação do</tspan><tspan x="550" dy="1.25em">backend.</tspan></text>
+  <text x="1480" y="961" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<rect x="50" y="1012" width="1700" height="108" fill="#f5f8fa"/>
+  <text x="70" y="1046" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#123149"><tspan x="70" dy="0">CT-11 · RF-017*; RNE-016*</tspan></text>
+  <text x="70" y="1084" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#465b6c"><tspan x="70" dy="0">Correção de cadastro</tspan></text>
+  <text x="550" y="1049" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#16334b"><tspan x="550" dy="0">Parceiro salva correções e solicita reanálise.</tspan></text>
+  <text x="1480" y="1069" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#146d4a"><tspan x="1480" dy="0">APROVADO</tspan></text>
+<line x1="50" y1="1140" x2="1750" y2="1140" stroke="#cbd6de"/>
+<text x="60" y="1186" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#123149"><tspan x="60" dy="0">Resultado do teste não equivale ao aceite integral do requisito.</tspan></text>
+<text x="60" y="1227" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#465b6c"><tspan x="60" dy="0">* IDs propostos na revisão documental; confirmar numeração no documento final.</tspan></text>
+<text x="60" y="1263" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#465b6c"><tspan x="60" dy="0">Recorte local com simulações. Não inclui PostgreSQL real, navegador E2E ou validação externa.</tspan></text>
+</svg>

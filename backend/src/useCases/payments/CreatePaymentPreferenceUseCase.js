@@ -2,6 +2,7 @@ const prisma = require('../../config/database');
 const mercadoPago = require('../../services/MercadoPagoService');
 const AppError = require('../../utils/AppError');
 const { ORDER_STATUS } = require('../../constants/orderStatus');
+const { lockOrder } = require('../../utils/orderConcurrency');
 
 function cents(value) {
   return Math.round(Number(value) * 100);
@@ -32,10 +33,17 @@ class CreatePaymentPreferenceUseCase {
     }
 
     await this.gateway.assertTestAccount();
-    const attempt = await this.database.paymentAttempt.upsert({
-      where: { order_id: order.id },
-      create: { order_id: order.id, amount: order.total_price },
-      update: {},
+    // Reserva a tentativa antes de chamar o gateway. Cancelamento e pagamento
+    // simulado usam o mesmo lock e não podem ultrapassar essa decisão.
+    const attempt = await this.database.$transaction(async tx => {
+      await lockOrder(tx, order.id);
+      const current = await tx.order.findFirst({ where: { id: order.id, customer_id: userId } });
+      if (!current || current.status !== ORDER_STATUS.AWAITING_PAYMENT || cents(current.total_price) !== total) throw AppError.conflict('O pedido mudou antes de iniciar o pagamento.');
+      return tx.paymentAttempt.upsert({
+        where: { order_id: order.id },
+        create: { order_id: order.id, amount: order.total_price },
+        update: {},
+      });
     });
     if (cents(attempt.amount) !== total || attempt.currency !== 'BRL') {
       throw AppError.conflict('O valor da tentativa de pagamento não confere com o pedido.');

@@ -8,6 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { httpClient, setUnauthorizedHandler } from "../lib/httpClient";
+import { rememberProtectedLocation } from "../lib/postLoginRedirect";
+import { normalizeEmail } from "../lib/emailIdentity";
 
 export type AuthUser = {
   id: string;
@@ -100,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (credentials: LoginPayload): Promise<AuthUser> => {
-      const data = await httpClient.post<LoginResponse>("/auth/login", credentials, {
+      const data = await httpClient.post<LoginResponse>("/auth/login", { ...credentials, email: normalizeEmail(credentials.email) }, {
         auth: false,
       });
       localStorage.setItem(TOKEN_KEY, data.token);
@@ -112,7 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    setUnauthorizedHandler(() => logout(true));
+    setUnauthorizedHandler(() => {
+      rememberProtectedLocation(window.location);
+      logout(true);
+    });
     return () => setUnauthorizedHandler(null);
   }, [logout]);
 

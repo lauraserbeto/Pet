@@ -1,17 +1,20 @@
-import { API_URL, getHeaders } from '../api';
-import { httpClient } from '../httpClient';
+import { httpClient } from "../httpClient";
+import type { ProfileCompleteness } from "../profileCompleteness";
+import type { RatingSummary } from "./reviewService";
+import type { ProviderMetrics } from "./commerceMetrics";
 
-export interface ProviderDetails {
+export interface ProviderDetails extends RatingSummary {
   id: string;
   business_name: string;
-  document: string;
+  document?: string;
   status: string;
+  payment_policy?: "PRESENCIAL" | "PRE_PAGO";
   description?: string;
   phone?: string;
   created_at: string;
   user: {
     full_name: string;
-    email: string;
+    email?: string;
     avatar_url?: string;
     role_id: number;
     phone?: string;
@@ -34,64 +37,23 @@ export interface ProviderDetails {
 }
 
 export const providerService = {
-  async fetchCompleteness(): Promise<{ isComplete: boolean; missingFields: string[] }> {
-    const response = await fetch(`${API_URL}/providers/completeness`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar completude do perfil');
-    }
-
-    const data = await response.json();
-    return data;
+  getMetrics(days = 30) {
+    return httpClient.get<ProviderMetrics>("/providers/me/metrics", { query: { days } });
+  },
+  async fetchCompleteness(): Promise<ProfileCompleteness> {
+    return httpClient.get("/providers/completeness");
   },
 
   async fetchProviderDetails(id: string): Promise<ProviderDetails> {
-    const response = await fetch(`${API_URL}/providers/${id}`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar detalhes do parceiro');
-    }
-
-    const data = await response.json();
-    return data;
+    return httpClient.get<ProviderDetails>(`/providers/${id}`, { auth: false });
   },
 
   async fetchMe(): Promise<any> {
-    const response = await fetch(`${API_URL}/providers/me`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar seu perfil');
-    }
-
-    const data = await response.json();
-    return data;
+    return httpClient.get("/providers/me");
   },
 
   async updateMe(updateData: any): Promise<any> {
-    const response = await fetch(`${API_URL}/providers/me`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(updateData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao atualizar seu perfil');
-    }
-
-    const data = await response.json();
-    return data;
+    return httpClient.put("/providers/me", updateData);
   },
 
   /**
@@ -103,67 +65,22 @@ export const providerService = {
    * Erros: 400 se o parceiro não estiver REJEITADO, 404 se não houver perfil.
    */
   async resubmit(): Promise<unknown> {
-    return httpClient.post('/providers/me/resubmit');
+    return httpClient.post("/providers/me/resubmit");
   },
 
   async updatePublicProfile(updateData: any): Promise<any> {
-    const response = await fetch(`${API_URL}/providers/profile`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(updateData),
-    });
-
-    if (!response.ok) {
-      // A API responde { error: { code, message } }; 413 e 422 trazem o motivo
-      // (imagem grande demais, galeria cheia) para mostrar ao parceiro (E-03).
-      const errorData = await response.json().catch(() => ({}));
-      const message =
-        errorData.error?.message ??
-        (typeof errorData.error === 'string' ? errorData.error : undefined) ??
-        errorData.message;
-      throw new Error(message || 'Erro ao atualizar sua vitrine');
-    }
-
-    const data = await response.json();
-    return data;
+    return httpClient.put("/providers/profile", updateData);
   },
 
   async fetchHotels(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/providers/hotels`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar hotéis');
-    }
-
-    return await response.json();
+    return httpClient.get<any[]>("/providers/hotels", { auth: false });
   },
 
   async fetchSitters(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/providers/sitters`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar sitters');
-    }
-
-    return await response.json();
+    return httpClient.get<any[]>("/providers/sitters", { auth: false });
   },
 
   async fetchStores(): Promise<any[]> {
-    const response = await fetch(`${API_URL}/providers/stores`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || 'Erro ao buscar lojas');
-    }
-
-    return await response.json();
-  }
+    return httpClient.get<any[]>("/providers/stores", { auth: false });
+  },
 };

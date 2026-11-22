@@ -1,0 +1,40 @@
+{
+  "data": "2026-11-22",
+  "resultados": [
+    {
+      "name": "contato-vazio-nao-abre",
+      "ok": true,
+      "detail": "toastErro=1 mailto=null"
+    },
+    {
+      "name": "contato-mailto-montado",
+      "ok": true,
+      "detail": "assunto e corpo presentes"
+    },
+    {
+      "name": "contato-sem-falso-sucesso",
+      "ok": true,
+      "detail": "pronta=1 \"enviada\"=0"
+    },
+    {
+      "name": "contato-escrever-outra",
+      "ok": true,
+      "detail": "formulário de volta"
+    },
+    {
+      "name": "fixture-carrinho",
+      "ok": true,
+      "detail": "POST /cart/items → 201"
+    },
+    {
+      "name": "carrinho-falha-sem-sucesso",
+      "ok": true,
+      "detail": "sucesso=0 erro=1"
+    },
+    {
+      "name": "carrinho-sucesso-apos-2xx",
+      "ok": true,
+      "detail": "sucesso=1 itensNaAPI=0"
+    }
+  ]
+}

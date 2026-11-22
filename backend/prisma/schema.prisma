@@ -25,7 +25,9 @@ model User {
   phone            String?  @db.VarChar(20)
   avatar_url       String?  @db.Text
   is_active        Boolean? @default(true)
-  terms_accepted   Boolean  @default(true)
+  terms_accepted   Boolean  @default(false)
+  terms_accepted_at DateTime? @db.Timestamptz
+  terms_version    String? @db.VarChar(30)
   onboarding_step  String?  @default("INCOMPLETE") @db.Text
   rejection_reason String?  @default("") @db.Text
   created_at       DateTime @default(now()) @db.Timestamptz
@@ -129,6 +131,7 @@ model Pet {
   weight_kg     Float?
   birth_date    DateTime? @db.Date
   medical_notes String?   @db.Text
+  archived_at   DateTime? @db.Timestamptz
   created_at    DateTime  @default(now()) @db.Timestamptz
   updated_at    DateTime  @default(now()) @db.Timestamptz
 
@@ -339,6 +342,7 @@ model Appointment {
   provider Provider @relation(fields: [provider_id], references: [id])
   service  Service  @relation(fields: [service_id], references: [id])
   pet      Pet      @relation(fields: [pet_id], references: [id])
+  payment AppointmentPayment?
 
   reviews Review[]
 
@@ -374,4 +378,16 @@ model Review {
   @@index([product_id, created_at(sort: Desc)])
   @@index([provider_id, created_at(sort: Desc)])
   @@map("reviews")
+}
+
+model AppointmentPayment {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  appointment_id String    @unique @db.Uuid
+  status         String    @default("APPROVED") @db.VarChar(20)
+  amount         Decimal   @db.Decimal(10, 2)
+  paid_at        DateTime  @default(now()) @db.Timestamptz
+  refunded_at    DateTime? @db.Timestamptz
+  appointment Appointment @relation(fields: [appointment_id], references: [id], onDelete: Restrict)
+
+  @@map("appointment_payments")
 }

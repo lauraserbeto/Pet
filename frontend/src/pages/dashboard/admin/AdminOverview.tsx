@@ -26,6 +26,8 @@ import {
 import { useAuth } from "../../../contexts/AuthContext";
 import { useAdminMetrics } from "../../../lib/hooks/useAdminMetrics";
 import { StatCard } from "../../../components/dashboard/StatCard";
+import { CommerceMetricsPanel } from "../../../components/dashboard/CommerceMetricsPanel";
+import { Button } from "../../../components/ui/button";
 import { HamsterLoader } from "../../../components/ui/HamsterLoader";
 import {
   Card,
@@ -45,9 +47,8 @@ import {
 /**
  * Visão Geral da plataforma (admin).
  *
- * Só exibe métrica com dado real. Receita, ticket médio e agendamentos ficaram
- * de fora de propósito: sem checkout implementado, as tabelas `orders` e
- * `appointments` estão sempre vazias e os cards seriam zero permanente.
+ * Mantém indicadores institucionais e usa o mesmo contrato comercial do
+ * parceiro para pedidos, agendamentos e valores de teste.
  */
 
 const ROLE_LABELS: Record<string, string> = {
@@ -96,7 +97,7 @@ export function AdminOverview() {
   const isAdmin = user?.role_id === 1;
   const [days, setDays] = useState("30");
 
-  const { data, isLoading, isError, error } = useAdminMetrics(isAdmin, Number(days));
+  const { data, isLoading, isError, error, refetch, isFetching } = useAdminMetrics(isAdmin, Number(days));
 
   const growthData = useMemo(
     () => (data?.growth ?? []).map((d) => ({ ...d, label: formatDay(d.date) })),
@@ -172,6 +173,7 @@ export function AdminOverview() {
           <p className="text-slate-500">
             {error instanceof Error ? error.message : "Tente novamente em alguns instantes."}
           </p>
+          <Button className="mt-4" onClick={() => void refetch()}>Tentar novamente</Button>
         </CardContent>
       </Card>
     );
@@ -194,6 +196,7 @@ export function AdminOverview() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" disabled={isFetching} onClick={() => void refetch()}>Atualizar métricas</Button>
           <span className="hidden text-sm text-slate-500 md:inline">{today}</span>
           <div className="w-40">
             <Select value={days} onValueChange={setDays}>
@@ -257,6 +260,8 @@ export function AdminOverview() {
         />
         <StatCard title="Pets cadastrados" value={data.engagement.pets} icon={PawPrint} />
       </section>
+
+      <CommerceMetricsPanel data={data.commerce} />
 
       {/* Crescimento + distribuição por perfil */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">

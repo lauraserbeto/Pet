@@ -37,6 +37,7 @@ let updatedWith;
 let storeProvider;
 
 beforeEach(() => {
+  stub(prisma.review, 'groupBy', async () => []);
   createdWith = undefined;
   updatedWith = undefined;
   storeProvider = {
