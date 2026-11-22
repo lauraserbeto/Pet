@@ -109,7 +109,7 @@ test("E-11 DB: Pet Sitter só é aprovado pela avaliação (DEC-D)", { skip }, a
   assert.equal((await setStatus(adm, comAvaliacao.provider.id, { status: PROVIDER_STATUS.APPROVED })).status, 200);
 });
 
-test("E-11 DB: aprovar e recusar ao mesmo tempo — só a primeira decisão é gravada", { skip }, async () => {
+test("E-11 DB: aprovação e recusa concorrentes respeitam a ordem serializada das transições", { skip }, async () => {
   const adm = await admin();
   const { provider } = await partner({ status: PROVIDER_STATUS.IN_REVIEW });
 
@@ -117,11 +117,44 @@ test("E-11 DB: aprovar e recusar ao mesmo tempo — só a primeira decisão é g
     setStatus(adm, provider.id, { status: PROVIDER_STATUS.APPROVED }),
     setStatus(adm, provider.id, { status: PROVIDER_STATUS.REJECTED, rejection_reason: "Motivo QA" }),
   ]);
-  const codes = results.map((r) => r.status).sort();
-  assert.deepEqual(codes, [200, 422]);
+  // Aprovar primeiro impede recusar APROVADO. Recusar primeiro permite a
+  // reconsideração REJEITADO → APROVADO (DEC-D), portanto dois 200 são válidos.
+  const [approval, rejection] = results;
+  assert.equal(approval.status, 200);
+  assert.equal(approval.body.status, PROVIDER_STATUS.APPROVED);
+  if (rejection.status === 200) {
+    assert.equal(rejection.body.status, PROVIDER_STATUS.REJECTED);
+  } else {
+    assert.equal(rejection.status, 422);
+    assert.equal(rejection.body.error.code, "INVALID_PROVIDER_TRANSITION");
+    assert.equal(rejection.body.error.details.from, PROVIDER_STATUS.APPROVED);
+  }
+  const final = await prisma.provider.findUnique({ where: { id: provider.id } });
+  assert.equal(final.status, PROVIDER_STATUS.APPROVED);
+  assert.equal(final.rejection_reason, null);
+});
 
-  const winner = results.find((r) => r.status === 200).body.status;
-  assert.equal((await prisma.provider.findUnique({ where: { id: provider.id } })).status, winner);
+test("E-11 DB: recusa seguida de reconsideração permite duas decisões e remove o motivo", { skip }, async () => {
+  const adm = await admin();
+  const { provider } = await partner({ status: PROVIDER_STATUS.IN_REVIEW });
+  assert.equal((await setStatus(adm, provider.id, { status: PROVIDER_STATUS.REJECTED, rejection_reason: "Motivo QA" })).status, 200);
+  assert.equal((await prisma.provider.findUnique({ where: { id: provider.id } })).status, PROVIDER_STATUS.REJECTED);
+  assert.equal((await setStatus(adm, provider.id, { status: PROVIDER_STATUS.APPROVED })).status, 200);
+  const final = await prisma.provider.findUnique({ where: { id: provider.id } });
+  assert.equal(final.status, PROVIDER_STATUS.APPROVED);
+  assert.equal(final.rejection_reason, null);
+});
+
+test("E-11 DB: aprovação seguida de recusa mantém a aprovação e responde 422", { skip }, async () => {
+  const adm = await admin();
+  const { provider } = await partner({ status: PROVIDER_STATUS.IN_REVIEW });
+  assert.equal((await setStatus(adm, provider.id, { status: PROVIDER_STATUS.APPROVED })).status, 200);
+  const rejected = await setStatus(adm, provider.id, { status: PROVIDER_STATUS.REJECTED, rejection_reason: "Motivo QA" });
+  assert.equal(rejected.status, 422);
+  assert.equal(rejected.body.error.code, "INVALID_PROVIDER_TRANSITION");
+  const final = await prisma.provider.findUnique({ where: { id: provider.id } });
+  assert.equal(final.status, PROVIDER_STATUS.APPROVED);
+  assert.equal(final.rejection_reason, null);
 });
 
 test("E-11 DB: candidatura única — bloqueia reenvio pendente ou aprovado, permite após recusa", { skip }, async () => {

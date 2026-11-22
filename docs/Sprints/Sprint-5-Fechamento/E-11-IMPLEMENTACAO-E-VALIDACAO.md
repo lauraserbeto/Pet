@@ -1,5 +1,9 @@
 # E-11 — Moderação de parceiros e candidaturas de Pet Sitter: implementação e validação
 
+> Correção após o CI do commit `ed8a142` (22/11): a asserção de concorrência exigia sempre 200/422, apesar de a regra permitir REJEITADO → APROVADO. O teste agora verifica as duas serializações válidas, o código da transição recusada quando aplicável e o estado final APROVADO sem motivo de recusa. Acrescentados dois cenários sequenciais determinísticos, sem alterar comportamento da API ou migrations. A suíte focada passou três vezes consecutivas (oito testes por execução); resultado da regressão completa registrado no contexto atualizado.
+
+> Regressão da correção: **561 testes backend aprovados**, sem falhas/ignorados/cancelados, PostgreSQL 16 descartável. Lint direcionado sem avisos/erros e diff-check aprovado. Banco exclusivo de QA removido após a validação; demais bancos preservados. Sem commit, push, acesso a produção ou confirmação de novo CI remoto.
+
 22/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**. Sem migration nova.
 
 Origem: auditoria pré-Sprint 4, E-11 / AUD-15 (RF-008, RF-009, RF-010), decisão **DEC-D** (D1 — aprovação do Pet Sitter só pela avaliação; nova candidatura só após recusa, uma de cada vez). Já entregues antes e mantidos: candidatura exclusiva de Pet Sitter, revisão recusando candidatura de outro perfil e transações com rollback (SEC-2); verificador único de "parceiro operacional" exigindo avaliação aprovada (E-01).
@@ -17,7 +21,7 @@ Origem: auditoria pré-Sprint 4, E-11 / AUD-15 (RF-008, RF-009, RF-010), decisã
 
 - Transição fora da tabela (inclusive repetir o status atual) → **422 `INVALID_PROVIDER_TRANSITION`**, sem alterar o registro.
 - Pet Sitter só vai a APROVADO com avaliação aprovada → **422 `SITTER_APPROVAL_REQUIRES_EVALUATION`** (DEC-D).
-- Lock da linha do parceiro (`SELECT … FOR UPDATE`) em transação: decisões simultâneas são serializadas; a segunda recebe 422.
+- Lock da linha do parceiro (`SELECT … FOR UPDATE`) em transação: decisões simultâneas são serializadas e cada uma revalida o estado atual. Aprovação seguida de recusa resulta em 200/422; recusa seguida de aprovação pode resultar em dois 200, pois REJEITADO → APROVADO é uma reconsideração permitida. Nos dois casos, o estado final é APROVADO e o motivo da recusa é removido.
 - Reenvio do parceiro (REJEITADO → EM_REVISAO) passou a ser condicional ao status lido: reenvio concorrente com decisão do admin responde **409** em vez de sobrescrever.
 
 **Candidatura do Pet Sitter (`POST /users/me/evaluations`)**

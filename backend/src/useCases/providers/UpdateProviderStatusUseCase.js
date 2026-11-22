@@ -12,7 +12,8 @@ const { PROVIDER_ROLES } = require('./providerAccess');
  *
  * - Lock da linha do parceiro: duas decisões simultâneas (aprovar e recusar,
  *   ou dois cliques) são serializadas; a segunda vê o estado já alterado e
- *   recebe 422 em vez de sobrescrever a primeira.
+ *   revalida a transição. Se recusar primeiro, uma aprovação posterior ainda
+ *   é permitida por REJEITADO → APROVADO; a ordem inversa recebe 422.
  * - Só transições de ADMIN_PROVIDER_TRANSITIONS são aceitas.
  * - Pet Sitter só é aprovado com avaliação aprovada; o caminho normal é a
  *   revisão da candidatura (UserController.reviewEvaluation).
