@@ -1,0 +1,83 @@
+[WebServer] (node:27824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 33 tests using 1 worker
+
+(node:33132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+⚠ 1 violação(ões) SÉRIA(s) rastreada(s) (requer decisão de design de contraste):
+  - color-contrast: 8 nó(s)
+  ok  1 [chromium] › e2e\a11y.spec.ts:8:1 › landing page sem violações CRÍTICAS de a11y (axe, WCAG 2 A/AA) (2.9s)
+  ok  2 [chromium] › e2e\booking-real.spec.ts:9:3 › BKG integrado com API e Postgres: hotel (7.3s)
+  ok  3 [chromium] › e2e\booking-real.spec.ts:9:3 › BKG integrado com API e Postgres: sitter (5.1s)
+  ok  4 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 390px: cria, acompanha, paga e cancela (3.1s)
+  ok  5 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 1280px: cria, acompanha, paga e cancela (3.2s)
+  ok  6 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 390px: cria, acompanha, paga e cancela (4.3s)
+  ok  7 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 1280px: cria, acompanha, paga e cancela (4.7s)
+  ok  8 [chromium] › e2e\booking.spec.ts:140:1 › visitante precisa entrar e mantém o destino de reserva (833ms)
+  ok  9 [chromium] › e2e\legal.spec.ts:11:3 › /terms — leitura linear, headings e listas reais (996ms)
+  ok 10 [chromium] › e2e\legal.spec.ts:28:3 › /terms — deep-link por âncora posiciona na cláusula (1.8s)
+  ok 11 [chromium] › e2e\legal.spec.ts:34:3 › /terms — sem violações CRÍTICAS de a11y (axe) (2.4s)
+  ok 12 [chromium] › e2e\legal.spec.ts:11:3 › /privacy — leitura linear, headings e listas reais (936ms)
+  ok 13 [chromium] › e2e\legal.spec.ts:28:3 › /privacy — deep-link por âncora posiciona na cláusula (1.7s)
+  ok 14 [chromium] › e2e\legal.spec.ts:34:3 › /privacy — sem violações CRÍTICAS de a11y (axe) (2.4s)
+  ok 15 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 375px (1.0s)
+  ok 16 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 1280px (1.3s)
+  ok 17 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 375px (1.0s)
+  ok 18 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 1280px (1.4s)
+  ok 19 [chromium] › e2e\payment.spec.ts:8:3 › checkout SIMULATED: cria uma vez e processa todos os pedidos (3.6s)
+  ok 20 [chromium] › e2e\payment.spec.ts:8:3 › checkout MERCADO_PAGO: cria uma vez e processa todos os pedidos (3.1s)
+  ok 21 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (2.4s)
+  ok 22 [chromium] › e2e\reviews-real.spec.ts:9:3 › AVL integrado: product escreve, persiste e exibe avaliação real (9.3s)
+  x  23 [chromium] › e2e\reviews-real.spec.ts:9:3 › AVL integrado: hotel escreve, persiste e exibe avaliação real (1.0m)
+(node:32056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 24 [chromium] › e2e\reviews-real.spec.ts:9:3 › AVL integrado: sitter escreve, persiste e exibe avaliação real (3.8s)
+  ok 25 [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: hotel gerencia agenda e tutor recebe alterações (9.6s)
+  ok 26 [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: sitter gerencia agenda e tutor recebe alterações (7.4s)
+  ok 27 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 2 não acessa a agenda diretamente pela URL (919ms)
+  ok 28 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 5 não acessa a agenda diretamente pela URL (834ms)
+  ok 29 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 3, desktop (5.2s)
+  ok 30 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 4, celular (4.1s)
+  ok 31 [chromium] › e2e\smoke.spec.ts:8:1 › landing page carrega e renderiza a navegação (711ms)
+  ok 32 [chromium] › e2e\smoke.spec.ts:22:1 › rota lazy standalone (/login) carrega o formulário (848ms)
+  ok 33 [chromium] › e2e\smoke.spec.ts:27:1 › rota lazy sob layout (/products) renderiza sem cair no ErrorBoundary (898ms)
+
+
+  1) [chromium] › e2e\reviews-real.spec.ts:9:3 › AVL integrado: hotel escreve, persiste e exibe avaliação real 
+
+    Test timeout of 60000ms exceeded.
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Avaliações de clientes', exact: true }).getByText('Tutora Avaliações QA', { exact: true })
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Avaliações de clientes', exact: true }).getByText('Tutora Avaliações QA', { exact: true })
+
+
+      54 |     );
+      55 |     const panel = page.getByRole("region", { name: "Avaliações de clientes", exact: true });
+    > 56 |     await expect(panel.getByText("Tutora Avaliações QA", { exact: true })).toBeVisible();
+         |                                                                            ^
+      57 |     await expect(
+      58 |       panel.getByText(`Minha experiência ${kind} foi positiva.`, { exact: true })
+      59 |     ).toBeVisible();
+        at C:\PI - 2026\Pet\frontend\e2e\reviews-real.spec.ts:56:76
+
+    Error Context: test-results\reviews-real-AVL-integrado-6e47e-iste-e-exibe-avaliação-real-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\reviews-real-AVL-integrado-6e47e-iste-e-exibe-avaliação-real-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\reviews-real-AVL-integrado-6e47e-iste-e-exibe-avaliação-real-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\reviews-real.spec.ts:9:3 › AVL integrado: hotel escreve, persiste e exibe avaliação real 
+  32 passed (2.9m)

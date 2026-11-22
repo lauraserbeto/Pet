@@ -66,8 +66,10 @@ Para Pet Sitters, existe um passo extra de **Avaliação Técnica**:
 - Ao definir outro endereço como principal, o anterior é desmarcado na mesma transação.
 
 ### Exclusão de endereço
-- Se for o **único** endereço E existir pedido com status `PENDING/PREPARING/SHIPPED` → **excluir é bloqueado** (HTTP 409).
+- Se for o **único** endereço e existir pedido em `AGUARDANDO_PAGAMENTO`, `PAGO`, `PREPARANDO` ou `ENVIADO` → **exclusão bloqueada** (409). Os aliases oficiais legados são reconhecidos; estado desconhecido exige conferência e também impede excluir o último endereço.
+- Pedidos em `CONCLUIDO`/`CANCELADO` não bloqueiam. Havendo outro endereço, a remoção é permitida mesmo com pedido ativo. O snapshot `Order.shipping_address` permanece inalterado.
 - Se for o principal e há outros endereços → o mais recente é **promovido a principal automaticamente** após a exclusão.
+- Criação, edição, definição de principal e exclusão usam transação Serializable e bloqueio por conta. Conflito concorrente retorna 409 para atualização dos dados, sem repetição automática da exclusão. O checkout relê o endereço na própria transação.
 
 ### Limites e validações
 - Máximo de **5 endereços por usuário**.
@@ -84,7 +86,9 @@ Para Pet Sitters, existe um passo extra de **Avaliação Técnica**:
 - **Peso:** entre 0 e 200 kg (não inclui 0).
 - **Data de nascimento:** não pode ser no futuro.
 - **Limite de 10 pets por tutor.**
-- **Exclusão bloqueada (409)** se houver agendamento (`Appointment`) com status `PENDING` ou `CONFIRMED` E data de início no futuro. Agendamentos concluídos ou cancelados não bloqueiam — preserva-se o histórico mas permite limpeza.
+- **Remoção bloqueada (409)** enquanto houver agendamento em `PENDENTE`, `AGUARDANDO_CONFIRMACAO` ou `CONFIRMADO`, mesmo que sua data já tenha passado. Uma data vencida não encerra o atendimento. Os aliases oficiais são reconhecidos; estado desconhecido também impede remoção até conferência.
+- Sem agendamentos, o pet é apagado fisicamente. Com histórico somente em `CONCLUIDO`, `CANCELADO` ou `RECUSADO`, ele é arquivado: sai da lista e do limite de pets ativos, e não pode ser editado ou usado em nova reserva. Os atendimentos, pagamentos e avaliações existentes permanecem consultáveis pelo tutor e parceiro autorizado.
+- Remoção e criação de agendamento usam o mesmo lock do pet; a criação relê a disponibilidade após obtê-lo. Pet de outra conta, inexistente ou já removido retorna 404 nas operações do tutor.
 
 ---
 

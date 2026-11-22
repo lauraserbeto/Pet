@@ -19,6 +19,7 @@ const userId = '44444444-4444-4444-8444-444444444444';
 
 const originalProviderFindUnique = prisma.provider.findUnique;
 const originalProviderFindFirst = prisma.provider.findFirst;
+const originalReviewGroupBy = prisma.review.groupBy;
 const originalCreate = serviceRepository.create;
 const originalFindByProviderId = serviceRepository.findByProviderId;
 const originalFindById = serviceRepository.findById;
@@ -55,6 +56,7 @@ function service(overrides = {}) {
 let lastDetailQuery;
 
 beforeEach(() => {
+  prisma.review.groupBy = async () => [];
   prisma.provider.findUnique = async () => approvedProvider();
   // Detalhe público (GET /providers/:id) consulta com o filtro de parceiro operacional (E-01).
   prisma.provider.findFirst = async (args) => {
@@ -75,6 +77,7 @@ beforeEach(() => {
 });
 
 after(() => {
+  prisma.review.groupBy = originalReviewGroupBy;
   prisma.provider.findUnique = originalProviderFindUnique;
   prisma.provider.findFirst = originalProviderFindFirst;
   serviceRepository.create = originalCreate;

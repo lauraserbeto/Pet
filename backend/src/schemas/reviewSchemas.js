@@ -80,4 +80,13 @@ const listReviewsQuerySchema = z
     }
   });
 
-module.exports = { createReviewSchema, listReviewsQuerySchema, ratingSchema };
+const reviewOriginQuerySchema = z.object({
+  product_id: z.string().uuid().optional(), provider_id: z.string().uuid().optional(),
+  order_id: z.string().uuid().optional(), appointment_id: z.string().uuid().optional(),
+}).superRefine((data, ctx) => {
+  const product = !!data.product_id && !!data.order_id && !data.provider_id && !data.appointment_id;
+  const provider = !!data.provider_id && !!data.appointment_id && !data.product_id && !data.order_id;
+  if (!product && !provider) ctx.addIssue({ code: 'custom', message: 'Informe produto/pedido ou parceiro/agendamento.', path: ['order_id'] });
+});
+
+module.exports = { createReviewSchema, listReviewsQuerySchema, ratingSchema, reviewOriginQuerySchema };

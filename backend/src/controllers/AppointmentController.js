@@ -1,12 +1,20 @@
 const createAppointmentUseCase = require('../useCases/appointments/CreateAppointmentUseCase');
 const listAppointmentsUseCase = require('../useCases/appointments/ListAppointmentsUseCase');
 const updateAppointmentStatusUseCase = require('../useCases/appointments/UpdateAppointmentStatusUseCase');
+const payAppointmentUseCase = require('../useCases/appointments/PayAppointmentUseCase');
 
 
 // Roles
 const PARTNER_ROLES = [3, 4]; // HOTEL, PET_SITTER
 
 class AppointmentController {
+  async pay(req, res, next) {
+    try {
+      return res.status(200).json(await payAppointmentUseCase.execute({
+        appointmentId: req.params.id, userId: req.userId, userRole: req.userRole,
+      }));
+    } catch (err) { return next(err); }
+  }
   /** POST /api/v1/appointments — Tutor cria agendamento */
   async create(req, res, next) {
     try {

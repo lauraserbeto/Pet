@@ -24,8 +24,8 @@ const item = (id: string, unit_price: number, quantity: number) => ({
 });
 
 let client: QueryClient;
-function show(dto: CartDTO) {
-  vi.spyOn(cartService, 'get').mockResolvedValue(dto);
+function show(dto: CartDTO, error?: Error) {
+  vi.spyOn(cartService, 'get').mockImplementation(async () => { if (error) throw error; return dto; });
   client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   return render(
     <QueryClientProvider client={client}>
@@ -42,6 +42,11 @@ afterEach(() => {
   cleanup();
   client?.clear();
   vi.restoreAllMocks();
+});
+test('falha na consulta do carrinho não aparece como carrinho vazio', async () => {
+  show({ id: 'cart', updated_at: '', items: [], warnings: [], totals: { total: 0, total_items: 0, discount: 0, subtotal: 0 } }, Error('offline'));
+  await screen.findByText('Não foi possível consultar o carrinho da conta. Tente novamente.');
+  expect(screen.queryByText('Seu carrinho está vazio')).toBeNull();
 });
 
 test('o total exibido é o totals.total do carrinho no servidor (DEC-C)', async () => {

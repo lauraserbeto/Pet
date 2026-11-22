@@ -15,19 +15,9 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { authService } from "@/lib/services/authService";
+import { newPasswordSchema, passwordChecks } from "../../lib/passwordPolicy";
 import { AuthBrandLogo } from "../../components/auth/AuthBrandLogo";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-
-interface PasswordCheck {
-  label: string;
-  test: (pw: string) => boolean;
-}
-
-const passwordChecks: PasswordCheck[] = [
-  { label: "Mínimo 8 caracteres", test: (pw) => pw.length >= 8 },
-  { label: "Uma letra maiúscula", test: (pw) => /[A-Z]/.test(pw) },
-  { label: "Um número", test: (pw) => /\d/.test(pw) },
-];
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -72,9 +62,10 @@ export function ResetPasswordPage() {
       setErrorMsg("As senhas não coincidem.");
       return;
     }
-    if (strength < 3) {
+    const passwordValidation = newPasswordSchema.safeParse(password);
+    if (!passwordValidation.success) {
       setStatus("error");
-      setErrorMsg("Sua senha não atende aos requisitos mínimos.");
+      setErrorMsg(passwordValidation.error.issues[0].message);
       return;
     }
 
@@ -118,7 +109,7 @@ export function ResetPasswordPage() {
               Escolha uma senha forte para proteger sua conta Pet+. O link tem validade de 1 hora.
             </p>
           </div>
-          <p className="text-xs text-white/40">© 2026 Pet+. Todos os direitos reservados.</p>
+          <p className="text-xs text-white/40">© {new Date().getFullYear()} Pet+. Todos os direitos reservados.</p>
         </div>
       </div>
 
@@ -171,7 +162,7 @@ export function ResetPasswordPage() {
                     </div>
                     <Link
                       to="/login"
-                      className="text-sm font-semibold text-[var(--color-primary-600)] hover:underline"
+                      className="text-sm font-semibold text-[var(--color-primary-700)] hover:underline"
                     >
                       Ir para o login agora
                     </Link>
@@ -186,9 +177,21 @@ export function ResetPasswordPage() {
                   >
                     {/* Token ausente */}
                     {!token && (
-                      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-sm p-3 rounded-lg">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        Link inválido ou expirado. Solicite um novo.
+                      <div
+                        role="alert"
+                        className="flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-lg"
+                      >
+                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+                        <span>
+                          Link inválido ou expirado.{" "}
+                          {/* Ação direta em vez de só pedir que a pessoa procure (G24). */}
+                          <Link
+                            to="/recuperar-senha"
+                            className="font-semibold underline underline-offset-2 text-[var(--color-primary-700)]"
+                          >
+                            Pedir um novo link
+                          </Link>
+                        </span>
                       </div>
                     )}
 
@@ -214,6 +217,7 @@ export function ResetPasswordPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
+                          aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                         >
                           {showPassword ? (
@@ -297,6 +301,7 @@ export function ResetPasswordPage() {
                         <button
                           type="button"
                           onClick={() => setShowConfirm(!showConfirm)}
+                          aria-label={showConfirm ? "Ocultar confirmação de senha" : "Mostrar confirmação de senha"}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                         >
                           {showConfirm ? (

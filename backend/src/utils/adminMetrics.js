@@ -1,4 +1,5 @@
 const { isApprovedProviderStatus, PROVIDER_STATUS } = require('../constants/providerStatus');
+const { dayKey, metricsWindow } = require('./commerceMetrics');
 
 /**
  * Reduz os valores de `Provider.status` a três baldes estáveis.
@@ -13,10 +14,7 @@ function bucketProviderStatus(status) {
 
 /** Chave de dia local no formato YYYY-MM-DD. */
 function toDayKey(date) {
-  const d = new Date(date);
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${month}-${day}`;
+  return dayKey(date);
 }
 
 /**
@@ -28,11 +26,7 @@ function toDayKey(date) {
 function groupByDay(dates, days, now = new Date()) {
   const buckets = new Map();
 
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    buckets.set(toDayKey(d), 0);
-  }
+  metricsWindow(days, now).keys.forEach(key => buckets.set(key, 0));
 
   dates.forEach((raw) => {
     const key = toDayKey(raw);

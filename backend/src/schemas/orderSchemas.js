@@ -9,7 +9,9 @@ const orderIdParamsSchema = z.object({
  * Suporta paginação com coerção de string → número (query strings chegam como string).
  */
 const listOrdersQuerySchema = z.object({
-  page: z.coerce.number().int().min(1, 'Página mínima: 1').default(1),
+  view: z.enum(['page']).optional(),
+  q: z.string().trim().max(100).optional(),
+  page: z.coerce.number().int().min(1, 'Página mínima: 1').max(1000000, 'Página fora do limite').default(1),
   limit: z.coerce.number().int().min(1, 'Limite mínimo: 1').max(100, 'Limite máximo: 100').default(20),
 });
 
@@ -31,6 +33,7 @@ const updateOrderStatusSchema = z.object({
 });
 
 module.exports = {
+  orderStatusParamsSchema: z.object({ id: z.string().uuid('ID de pedido inválido') }),
   orderIdParamsSchema,
   createOrderSchema,
   listOrdersQuerySchema,

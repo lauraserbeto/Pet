@@ -1,4 +1,4 @@
-import { httpClient } from '../httpClient';
+import { httpClient, ApiError } from '../httpClient';
 
 export type BackendOrderStatus =
   | 'AGUARDANDO_PAGAMENTO'
@@ -69,6 +69,15 @@ export interface OrderStatusBadgeInfo {
   label: string;
   className: string;
   variant: 'pending' | 'paid' | 'preparing' | 'shipped' | 'completed' | 'cancelled';
+}
+
+export interface OrdersPage {
+  orders: Order[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  summary?: { totalOrders: number; pendingOrders: number; monthlyRevenue: number };
 }
 
 /** Formata valores numéricos ou strings decimais em Moeda BRL (pt-BR) sem recalcular */
@@ -221,7 +230,21 @@ export function getOrderStatusBadge(status: string): OrderStatusBadgeInfo {
   };
 }
 
+async function fetchOrdersPage(path: string, page: number, q?: string, signal?: AbortSignal) {
+  const result = await httpClient.get<OrdersPage>(path, { query: { page, limit: 20, view: 'page', q }, signal });
+  if (!result || !Array.isArray(result.orders) ||
+    !Number.isInteger(result.total) || result.total < 0 || result.page !== page ||
+    result.limit !== 20 || result.totalPages !== Math.ceil(result.total / result.limit) ||
+    (path.includes('providers') && (!result.summary ||
+      ![result.summary.totalOrders, result.summary.pendingOrders, result.summary.monthlyRevenue].every(n => Number.isFinite(n) && n >= 0))))
+    throw new ApiError(502, 'INVALID_RESPONSE', 'Não foi possível conferir a paginação dos pedidos. Tente novamente.');
+  return result;
+}
 export const orderService = {
+  listMyOrdersPage: (page: number, signal?: AbortSignal) =>
+    fetchOrdersPage('/orders', page, undefined, signal),
+  listProviderOrdersPage: (page: number, q: string, signal?: AbortSignal) =>
+    fetchOrdersPage('/providers/orders', page, q, signal),
   // 1. Cria o pedido real baseado no carrinho e endereço
   createOrder: async (payload: { address_id?: string | null }) => {
     const response = await httpClient.post<{ order: Order; orders?: Order[] }>('/orders', payload);

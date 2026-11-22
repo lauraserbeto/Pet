@@ -1,0 +1,90 @@
+import { test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { CartProvider, useCart } from './CartContext';
+import { cartService, type CartDTO } from '../../lib/services/cartService';
+import { ApiError } from '../../lib/httpClient';
+const auth = vi.hoisted(() => ({ token: 'test', isAuthenticated: true, user: { id: 'tutor', role_id: 5 } }));
+vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => auth }));
+vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn(), warning: vi.fn() } }));
+const dto = (quantity: number): CartDTO => ({ id: 'cart', updated_at: '', warnings: [], totals: { total: quantity * 10, subtotal: quantity * 10, discount: 0, total_items: quantity }, items: quantity ? [{ id: 'i', product_id: 'p', quantity, unit_price: 10, current_unit_price: 10, line_total: quantity * 10, price_changed: false, added_at: '', product: { id: 'p', name: 'Produto QA', stock_quantity: 30, image_url: null, status: 'ACTIVE' } }] : [] });
+function Consumer() { const cart = useCart(); return <><p>{cart.syncBlocked ? 'bloqueado' : 'pronto'}</p><p>{cart.totalItems} itens</p><p>{cart.syncError}</p><button onClick={() => void cart.retrySync()}>Retry</button><button onClick={() => void cart.acceptServerCart()}>Usar conta</button></>; }
+let client: QueryClient;
+function show() { client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } }); return render(<QueryClientProvider client={client}><CartProvider><Consumer /></CartProvider></QueryClientProvider>); }
+beforeEach(() => { localStorage.clear(); auth.user.id = 'tutor'; auth.token = 'test'; });
+afterEach(() => { cleanup(); client?.clear(); localStorage.clear(); vi.restoreAllMocks(); });
+test('Merge bloqueia compra, preserva soma e só libera após resposta', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 2, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockResolvedValue(dto(3));
+  let resolve!: (value: CartDTO) => void;
+  const merge = vi.spyOn(cartService, 'merge').mockImplementation(() => new Promise(r => { resolve = r; }));
+  show(); await waitFor(() => expect(merge).toHaveBeenCalled());
+  expect(screen.getByText('bloqueado')).toBeTruthy();
+  expect(merge).toHaveBeenCalledWith([{ product_id: 'p', quantity: 2 }], [{ product_id: 'p', quantity: 3 }]);
+  fireEvent.click(screen.getByText('Retry')); fireEvent.click(screen.getByText('Retry'));
+  expect(merge).toHaveBeenCalledTimes(1);
+  resolve(dto(5)); await screen.findByText('pronto');
+  expect(screen.getByText('5 itens')).toBeTruthy();
+  expect(localStorage.getItem('petplus-cart-sync:tutor')).toBeNull();
+});
+test('Timeout e reload reutilizam baseline em vez de somar de novo', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 2, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockResolvedValue(dto(3));
+  const merge = vi.spyOn(cartService, 'merge').mockRejectedValueOnce(new ApiError(0, 'TIMEOUT', 'Falha QA')).mockResolvedValue(dto(5));
+  const view = show(); await screen.findByText('Falha QA');
+  const ledger = localStorage.getItem('petplus-cart-sync:tutor'); expect(ledger).toBeTruthy();
+  view.unmount(); client.clear();
+  vi.mocked(cartService.get).mockResolvedValue(dto(5));
+  show(); await screen.findByText('pronto');
+  expect(merge.mock.calls[1]).toEqual(merge.mock.calls[0]);
+  expect(screen.getByText('5 itens')).toBeTruthy();
+});
+test('Falha permite retry explícito sem apagar intenção pendente', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 1, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockResolvedValue(dto(0));
+  const merge = vi.spyOn(cartService, 'merge').mockRejectedValueOnce(new ApiError(500, 'INTERNAL_ERROR', 'Falha QA')).mockResolvedValue(dto(1));
+  show(); await screen.findByText('Falha QA');
+  expect(screen.getByText('bloqueado')).toBeTruthy();
+  expect(merge).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByText('Retry')); await screen.findByText('pronto');
+  expect(screen.getByText('1 itens')).toBeTruthy();
+});
+test('Resposta tardia da conta anterior não altera carrinho nem intenção da conta nova', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 2, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockImplementation(async () => dto(auth.user.id === 'tutor' ? 3 : 1));
+  let resolve!: (value: CartDTO) => void;
+  const merge = vi.spyOn(cartService, 'merge').mockImplementation(() => new Promise(r => { resolve = r; }));
+  const view = show(); await waitFor(() => expect(merge).toHaveBeenCalled());
+  auth.user = { id: 'outra-conta', role_id: 5 }; auth.token = 'outra-sessao';
+  view.rerender(<QueryClientProvider client={client}><CartProvider><Consumer /></CartProvider></QueryClientProvider>);
+  await screen.findByText('1 itens');
+  await act(async () => { resolve(dto(5)); });
+  expect(screen.getByText('1 itens')).toBeTruthy();
+  expect(localStorage.getItem('petplus-cart-sync:tutor')).toBeTruthy();
+  expect(client.getQueryData<CartDTO>(['cart', 'outra-conta'])?.totals.total_items).toBe(1);
+});
+test('Usar carrinho da conta exige confirmação e não apaga itens do servidor', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 1, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockResolvedValue(dto(2));
+  const merge = vi.spyOn(cartService, 'merge').mockRejectedValue(new ApiError(409, 'CONFLICT', 'Conflito QA'));
+  const clear = vi.spyOn(cartService, 'clear');
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  show(); await screen.findByText('Conflito QA');
+  fireEvent.click(screen.getByText('Usar conta'));
+  expect(localStorage.getItem('petplus-cart-sync:tutor')).toBeTruthy();
+  confirm.mockReturnValue(true);
+  fireEvent.click(screen.getByText('Usar conta'));
+  await screen.findByText('2 itens'); await screen.findByText('pronto');
+  expect(localStorage.getItem('petplus-cart-sync:tutor')).toBeNull();
+  expect(clear).not.toHaveBeenCalled(); expect(merge).toHaveBeenCalledTimes(1);
+});
+test('Retry reconhece sincronização concluída em outra aba sem novo POST', async () => {
+  localStorage.setItem('petplus_anon_cart', JSON.stringify([{ id: 'p', quantity: 1, price: 10, name: 'Produto QA' }]));
+  vi.spyOn(cartService, 'get').mockResolvedValue(dto(2));
+  const merge = vi.spyOn(cartService, 'merge').mockRejectedValue(new ApiError(409, 'CONFLICT', 'Conflito QA'));
+  show(); await screen.findByText('Conflito QA');
+  localStorage.removeItem('petplus-cart-sync:tutor');
+  fireEvent.click(screen.getByText('Retry'));
+  await screen.findByText('pronto'); await screen.findByText('2 itens');
+  expect(merge).toHaveBeenCalledTimes(1);
+});

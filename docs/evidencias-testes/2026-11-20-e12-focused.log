@@ -1,0 +1,28 @@
+◇ injecting env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+◇ injecting env (0) from .env // tip: ⌘ override existing { override: true }
+✔ E-12 DB: todos os estados ativos impedem exclusão do pet, mesmo com datas vencidas (1306.1866ms)
+✔ E-12 DB: pet próprio sem histórico é apagado; outro tutor/inexistente não revela o recurso (798.3197ms)
+✔ E-12 DB: remover pet com histórico terminal preserva atendimentos, pagamentos, avaliações e acesso dos dois lados (895.1997ms)
+✔ E-12 DB: cancelados/recusados e aliases terminais permitem remoção, liberando o limite de pets (848.7074ms)
+✔ E-12 DB: reserva concorrente com remoção não usa pet apagado (631.3628ms)
+✔ E-12 DB: reserva concorrente com remoção preserva histórico (612.2346ms)
+✔ E-12 DB: duas remoções do mesmo pet não apagam ou duplicam histórico (608.2317ms)
+✔ E-12 DB: último endereço bloqueia estados oficiais, aliases e desconhecidos, mesmo com snapshot do pedido (818.4228ms)
+✔ E-12 DB: endereço alheio/inexistente retorna 404; só dono remove e pedidos de outra conta não bloqueiam (728.8829ms)
+✔ E-12 DB: estados terminais permitem remover último endereço sem alterar o snapshot (764.3513ms)
+✔ E-12 DB: excluir principal com outro endereço promove o mais recente e preserva entrega do pedido (648.1604ms)
+✔ E-12 DB: duas exclusões concorrentes não removem todos os endereços de cliente com pedido ativo (695.2193ms)
+✔ E-12 DB: definir principal e excluir o alvo concorrentemente mantém no máximo um principal (689.1064ms)
+✔ E-12 DB: cadastros simultâneos mantêm principal único e respeitam limite de cinco (826.2825ms)
+✔ E-12 DB: erro ao promover próximo endereço reverte a exclusão (691.8105ms)
+✔ E-12 DB: checkout concorrente com exclusão do último endereço não usa endereço removido nem perde o carrinho (764.7096ms)
+✔ E-12: pet não pode ser removido com atendimento ativo, inclusive pré-pago aguardando confirmação (1.087ms)
+✔ E-12: último endereço só libera com pedidos terminais reconhecidos (0.4472ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15278.2154

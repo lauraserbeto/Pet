@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { providerService } from "../../lib/services/providerService";
 import { useCepLookup } from "../../lib/hooks/useCepLookup";
-import { completenessQueryKey } from "../../lib/hooks/useCompleteness";
+import { completenessQueryKey, useCompleteness } from "../../lib/hooks/useCompleteness";
+import { recommendedFieldLabel } from "../../lib/profileCompleteness";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -176,6 +177,9 @@ export function PublicProfile() {
   const isLoja = formData.role_id === 2;
   const isHotel = formData.role_id === 3;
   const isSitter = formData.role_id === 4;
+  // Recomendações não bloqueiam a vitrine; aparecem só aqui, como sugestão (G12).
+  const { data: completeness } = useCompleteness(isHotel || isSitter);
+  const recommendations = completeness?.isComplete ? completeness.recommendedFields ?? [] : [];
 
   useEffect(() => {
     const load = async () => {
@@ -438,6 +442,18 @@ export function PublicProfile() {
         <p className="text-slate-500 mt-2 text-base">
           Configure como sua marca e serviços são exibidos para os clientes na vitrine Pet+.
         </p>
+        {recommendations.length > 0 && (
+          <div
+            role="status"
+            className="mt-4 rounded-xl border border-[var(--color-secondary-200)] bg-[var(--color-secondary-50)] px-4 py-3 text-sm text-slate-700"
+          >
+            <p className="font-semibold text-slate-900">Seu perfil já aparece na vitrine.</p>
+            <p className="mt-0.5">
+              Para atrair mais tutores, considere adicionar:{" "}
+              <span className="font-medium">{recommendations.map(recommendedFieldLabel).join(", ")}</span>.
+            </p>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -811,7 +827,7 @@ export function PublicProfile() {
                     {formData.gallery_images.length < GALLERY_MAX_IMAGES && (
                       <div
                         onClick={() => galleryInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-200 hover:border-[var(--color-primary-400)] hover:bg-[var(--color-primary-50)]/30 transition-all aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-[var(--color-primary-600)] group"
+                        className="border-2 border-dashed border-slate-200 hover:border-[var(--color-primary-400)] hover:bg-[var(--color-primary-50)]/30 transition-all aspect-square rounded-2xl flex flex-col items-center justify-center cursor-pointer text-slate-400 hover:text-[var(--color-primary-700)] group"
                       >
                         <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2 group-hover:bg-[var(--color-primary-100)] transition-colors">
                           <Plus size={22} />

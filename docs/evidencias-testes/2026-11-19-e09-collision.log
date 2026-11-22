@@ -1,0 +1,1 @@
+PASS: upgrade 11->12 bloqueado com E09_EMAIL_COLLISIONS; contas preservadas, função/índice revertidos; auditoria sem endereços.

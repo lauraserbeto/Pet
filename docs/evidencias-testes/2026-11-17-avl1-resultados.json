@@ -1,0 +1,54 @@
+{
+  "commit": "ad21e2666de5bed9f9c77bacf7046c648d04d553",
+  "results": [
+    {
+      "name": "pedido concluído: criação real e autor sem senha/documento",
+      "passed": true
+    },
+    {
+      "name": "duplicata do produto/pedido retorna 409",
+      "passed": true
+    },
+    {
+      "name": "outro produto do mesmo pedido é avaliável",
+      "passed": true
+    },
+    {
+      "name": "outro tutor recebe 403",
+      "passed": true
+    },
+    {
+      "name": "agendamento pendente rejeitado",
+      "passed": true
+    },
+    {
+      "name": "agendamento concluído: concorrência gera uma avaliação e conflitos 409",
+      "passed": true
+    },
+    {
+      "name": "alvo incompatível com agendamento rejeitado",
+      "passed": true
+    },
+    {
+      "name": "rating inválido recusado pelo PostgreSQL",
+      "passed": true
+    },
+    {
+      "name": "listagem pública filtra produto correto e retorna metadados",
+      "passed": true
+    },
+    {
+      "name": "paginação com datas iguais não repete avaliações entre páginas",
+      "passed": true
+    },
+    {
+      "name": "página válida muito alta não causa erro interno",
+      "passed": true
+    },
+    {
+      "name": "somente tutor pode criar avaliação (contrato Swagger)",
+      "passed": false,
+      "message": "Usuário role 1 proprietário de origem concluída recebeu 201.\n\n201 !== 403\n"
+    }
+  ]
+}

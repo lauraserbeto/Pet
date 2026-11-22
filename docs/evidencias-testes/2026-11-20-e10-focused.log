@@ -1,0 +1,32 @@
+◇ injecting env (0) from .env // tip: ⌘ override existing { override: true }
+◇ injecting env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+✔ E-10 DB: metadados públicos e cadastro dos quatro perfis gravam aceite atual e documento canônico (3410.473ms)
+✔ E-10 DB: sem aceite verdadeiro ou com versão ausente/antiga não cria usuário (513.0037ms)
+✔ E-10 DB: documento inválido ou CPF para loja/hotel falham antes de persistir (483.6277ms)
+✔ E-10 DB: duplicata de documento legado formatado não cria nova conta nem reescreve o legado (560.663ms)
+✔ E-10 DB: corrida com o mesmo documento cria um único usuário/parceiro e aceite (1299.3545ms)
+✔ E-10 DB: falha na criação comercial reverte também usuário e metadados de aceite (962.3475ms)
+✔ E-10 DB: default não presume aceite e constraint impede metadados incompletos (506.7893ms)
+✔ E-10 DB: auditoria somente leitura identifica inválidos sem imprimir documentos (498.6243ms)
+✔ rejeita role_id 1 (ADMIN) — trava a escalada de privilégio (PET-01) (6.0398ms)
+✔ aceita todas as roles self-service (2,3,4,5) (1.0464ms)
+✔ rejeita role_id fora do conjunto (0, 6, 99) (0.4649ms)
+✔ rejeita role_id como string "1" (tipo inválido) (0.5254ms)
+✔ rejeita e-mail inválido (0.4442ms)
+✔ rejeita senha curta (< 8 caracteres) (0.354ms)
+✔ remove campos não declarados (anti mass-assignment) (0.2209ms)
+✔ reset de senha exige token, oito caracteres, maiúscula e número (1.2414ms)
+✔ E-09: mesma política em cadastro, troca e reset, sem remover espaços da senha (6.2181ms)
+✔ E-09: e-mail normaliza caixa/bordas, preservando pontos e aliases + (0.2647ms)
+✔ E-10: CPF e CNPJ numérico/alfanumérico verificam DV, formato e normalização (2.2418ms)
+✔ E-10: serviço de CNPJ deixou de aceitar somente pelo tamanho (2.682ms)
+✔ E-10: aceite exige booleano true e versão vigente, não presença ou coerção (3.8872ms)
+✔ E-10: CNPJ obrigatório para loja/hotel; sitter aceita CPF ou CNPJ (1.5757ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16594.3654

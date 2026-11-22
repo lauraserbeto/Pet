@@ -18,12 +18,15 @@ test("POST /register com role_id 1 (ADMIN) → 422 e não cria admin (PET-01)", 
     .send({
       full_name: "Atacante",
       email: "atk@evil.com",
-      password: "senha123",
+      password: "Senha123",
       role_id: 1,
+      terms_accepted: true,
+      terms_version: require("../../src/constants/legalPolicy").version,
     });
 
   assert.equal(res.status, 422);
   assert.equal(res.body.error.code, "VALIDATION_ERROR");
+  assert.ok(res.body.error.details.some((issue) => issue.path === "role_id"));
 });
 
 test("POST /register sem senha → 422", async () => {

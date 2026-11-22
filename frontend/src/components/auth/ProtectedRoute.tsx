@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { useAuth } from "../../contexts/AuthContext";
-import { isApprovedProviderStatus, PROVIDER_STATUS } from "../../lib/constants/providerStatus";
+import { AccessDenied } from "../dashboard/AccessDenied";
+import { HamsterLoader } from "../ui/HamsterLoader";
+import { PROVIDER_STATUS } from "../../lib/constants/providerStatus";
+import { restrictedAccountDestination } from "../../lib/routeAccess";
 import { rememberPostLoginRedirect, type PostLoginIntent } from "../../lib/postLoginRedirect";
 
 // Lojista (2) e Hotel (3) só acessam áreas internas após aprovação do admin.
@@ -11,7 +15,7 @@ const ROLES_REQUIRING_APPROVAL = [2, 3];
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
-  allowedRoles?: number[];
+  allowedRoles?: readonly number[];
   unauthenticatedReturnTo?: string;
   unauthenticatedIntent?: PostLoginIntent;
   /**
@@ -20,7 +24,17 @@ interface ProtectedRouteProps {
    * tela existe para atender, e o sitter recusado cairia no onboarding.
    */
   allowRejectedProvider?: boolean;
+  /**
+   * Perfil fora de `allowedRoles`: "redirect" (padrão) navega para
+   * `deniedRedirectTo`; "inline" mostra AccessDenied no lugar da tela — usado
+   * nas rotas internas do painel, onde a pessoa já está no layout dele.
+   */
+  deniedView?: "redirect" | "inline";
+  deniedRedirectTo?: string;
+  deniedMessage?: string;
 }
+
+const PENDING_TOAST_ID = "provider-pending-access";
 
 export const ProtectedRoute = ({
   children,
@@ -29,6 +43,9 @@ export const ProtectedRoute = ({
   unauthenticatedReturnTo,
   unauthenticatedIntent,
   allowRejectedProvider = false,
+  deniedView = "redirect",
+  deniedRedirectTo = "/",
+  deniedMessage,
 }: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,6 +53,13 @@ export const ProtectedRoute = ({
 
   const isRejectedAndAllowed =
     allowRejectedProvider && user?.provider_status === PROVIDER_STATUS.REJECTED;
+  const onSitterOnboarding = /^\/onboarding\/sitter\/?$/i.test(location.pathname);
+  const restriction = user && !isRejectedAndAllowed ? restrictedAccountDestination(user) : null;
+  const accountRedirect =
+    restriction === "/onboarding/sitter" && onSitterOnboarding
+      ? null
+      : restriction ||
+        (user?.role_id === 4 && onSitterOnboarding && !isRejectedAndAllowed ? "/dashboard" : null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -56,35 +80,19 @@ export const ProtectedRoute = ({
     }
 
     if (allowedRoles && !allowedRoles.includes(user.role_id)) {
-      navigate("/", { replace: true });
+      if (deniedView === "redirect") navigate(deniedRedirectTo, { replace: true });
       return;
     }
 
-    // Parceiro ainda não aprovado não acessa o dashboard. O backend já barra o
-    // login desses perfis; isto é defesa em profundidade (sessão/token antigo).
-    if (
-      !isRejectedAndAllowed &&
-      ROLES_REQUIRING_APPROVAL.includes(user.role_id) &&
-      !isApprovedProviderStatus(user.provider_status)
-    ) {
-      navigate("/", { replace: true });
+    if (accountRedirect) {
+      if (accountRedirect === "/" && ROLES_REQUIRING_APPROVAL.includes(user.role_id)) {
+        toast.info("Seu cadastro de parceiro ainda está em análise.", {
+          id: PENDING_TOAST_ID,
+          description: "O painel será liberado após a aprovação da equipe Pet+.",
+        });
+      }
+      navigate(accountRedirect, { replace: true });
       return;
-    }
-
-    // Pet Sitter (role_id 4): enforce onboarding state machine
-    if (user.role_id === 4 && !isRejectedAndAllowed) {
-      const step = user.onboarding_step || "INCOMPLETE";
-      const onSitterOnboarding = location.pathname === "/onboarding/sitter";
-      const needsOnboarding = ["INCOMPLETE", "REJECTED", "IN_REVIEW"].includes(step);
-
-      if (needsOnboarding && !onSitterOnboarding) {
-        navigate("/onboarding/sitter", { replace: true });
-        return;
-      }
-      if (step === "COMPLETED" && onSitterOnboarding) {
-        navigate("/dashboard", { replace: true });
-        return;
-      }
     }
   }, [
     isLoading,
@@ -92,6 +100,8 @@ export const ProtectedRoute = ({
     user,
     adminOnly,
     allowedRoles,
+    deniedView,
+    deniedRedirectTo,
     navigate,
     location.pathname,
     location.search,
@@ -99,25 +109,22 @@ export const ProtectedRoute = ({
     unauthenticatedReturnTo,
     unauthenticatedIntent,
     isRejectedAndAllowed,
+    accountRedirect,
   ]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <HamsterLoader size="sm" message="Verificando sua sessão..." />
       </div>
     );
   }
 
   if (!isAuthenticated || !user) return null;
   if (adminOnly && user.role_id !== 1) return null;
-  if (allowedRoles && !allowedRoles.includes(user.role_id)) return null;
-  if (
-    !isRejectedAndAllowed &&
-    ROLES_REQUIRING_APPROVAL.includes(user.role_id) &&
-    !isApprovedProviderStatus(user.provider_status)
-  )
-    return null;
+  if (allowedRoles && !allowedRoles.includes(user.role_id))
+    return deniedView === "inline" ? <AccessDenied message={deniedMessage} /> : null;
+  if (accountRedirect) return null;
 
   return <>{children}</>;
 };

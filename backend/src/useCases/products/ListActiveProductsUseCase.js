@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const reviewRepository = require('../../repositories/ReviewRepository');
 const { PROVIDER_ROLES, operationalProviderWhere } = require('../providers/providerAccess');
 
 const PROVIDER_INCLUDE = {
@@ -47,7 +48,8 @@ class ListActiveProductsUseCase {
       provider_avatar: product.provider?.user?.avatar_url || null,
     }));
 
-    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+    const ratedData = await reviewRepository.withProductRatings(data);
+    return { data: ratedData, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 }
 

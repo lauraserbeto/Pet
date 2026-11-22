@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import {
@@ -7,9 +6,6 @@ import {
   Shield,
   Target,
   Users,
-  Star,
-  ChevronLeft,
-  ChevronRight,
   Hotel,
   ShoppingBag,
   Dog,
@@ -21,7 +17,10 @@ import { Link } from "react-router";
 
 /* ─── Data ─── */
 const milestones = [
-  { year: "2023", text: "Identificamos a carência de um hub centralizado para o setor pet. Nossa solução une a curadoria de serviços confiáveis a uma ferramenta de gestão estratégica de fornecedores." },
+  {
+    year: "2023",
+    text: "Identificamos a carência de um hub centralizado para o setor pet. Nossa solução une a curadoria de serviços confiáveis a uma ferramenta de gestão estratégica de fornecedores.",
+  },
   { year: "2025", text: "Criação de nossa plataforma web." },
 ];
 
@@ -29,7 +28,8 @@ const values = [
   {
     icon: Heart,
     title: "Amor pelos animais",
-    description: "Cada funcionalidade é pensada para o bem-estar do pet e a tranquilidade do tutor.",
+    description:
+      "Cada funcionalidade é pensada para o bem-estar do pet e a tranquilidade do tutor.",
     color: "bg-rose-50 text-rose-500",
   },
   {
@@ -41,13 +41,15 @@ const values = [
   {
     icon: Users,
     title: "Comunidade",
-    description: "Conectamos tutores apaixonados a profissionais rigorosamente selecionados e dedicados ao cuidado animal.",
+    description:
+      "Conectamos tutores apaixonados a profissionais rigorosamente selecionados e dedicados ao cuidado animal.",
     color: "bg-teal-50 text-teal-500",
   },
   {
     icon: Sparkles,
     title: "Inovação",
-    description: "Tecnologia de ponta para tornar a experiência pet cada vez mais simples e prática.",
+    description:
+      "Tecnologia de ponta para tornar a experiência pet cada vez mais simples e prática.",
     color: "bg-amber-50 text-amber-500",
   },
 ];
@@ -71,7 +73,7 @@ const features = [
     icon: ShoppingBag,
     title: "Shopping Pet",
     description:
-      "Produtos selecionados, de ração premium a brinquedos, com entrega rápida e preços especiais para membros Pet+.",
+      "Produtos de lojas parceiras, de ração a brinquedos, com a entrega combinada com cada loja.",
     link: "/shopping",
   },
 ];
@@ -94,45 +96,6 @@ const goals = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Ana Silva",
-    text: "Serviço incrível! Meu cachorro nunca esteve tão feliz e bem cuidado. Recomendo a todos!",
-    rating: 5,
-    time: "1 semana atrás",
-  },
-  {
-    name: "Carlos Pereira",
-    text: "Ótimos produtos e entrega rápida. Apenas uma sugestão de melhoria na embalagem.",
-    rating: 5,
-    time: "3 dias atrás",
-  },
-  {
-    name: "Mariana Costa",
-    text: "A equipe é super atenciosa e profissional. Viramos clientes fiéis com certeza.",
-    rating: 5,
-    time: "1 mês atrás",
-  },
-  {
-    name: "Ricardo Almeida",
-    text: "Meu gato ficou super tranquilo com a pet sitter. Melhor plataforma que já usei!",
-    rating: 5,
-    time: "2 semanas atrás",
-  },
-  {
-    name: "Juliana Santos",
-    text: "Hotel maravilhoso com webcam ao vivo. Fiquei tranquila durante toda a viagem.",
-    rating: 5,
-    time: "5 dias atrás",
-  },
-  {
-    name: "Fernando Lima",
-    text: "Encontrei tudo que precisava no Shopping. Preços ótimos e entrega no prazo!",
-    rating: 4,
-    time: "3 semanas atrás",
-  },
-];
-
 /* ─── Helpers ─── */
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -145,59 +108,6 @@ const fadeUp = {
 
 /* ─── Component ─── */
 export function AboutPage() {
-  const [carouselIndex, setCarouselIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(1);
-  const [cardWidth, setCardWidth] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Touch / swipe state
-  const touchStartX = useRef(0);
-  const touchDelta = useRef(0);
-
-  const GAP = 16; // gap between cards in px
-
-  const updateLayout = useCallback(() => {
-    const w = window.innerWidth;
-    const newVisible = w < 640 ? 1 : w < 1024 ? 2 : 3;
-    setVisibleCount(newVisible);
-
-    if (containerRef.current) {
-      const containerW = containerRef.current.offsetWidth;
-      setCardWidth((containerW - GAP * (newVisible - 1)) / newVisible);
-    }
-  }, []);
-
-  useEffect(() => {
-    updateLayout();
-    window.addEventListener("resize", updateLayout);
-    return () => window.removeEventListener("resize", updateLayout);
-  }, [updateLayout]);
-
-  // Clamp index when visibleCount changes
-  useEffect(() => {
-    const max = Math.max(0, testimonials.length - visibleCount);
-    setCarouselIndex((prev) => Math.min(prev, max));
-  }, [visibleCount]);
-
-  const maxIndex = Math.max(0, testimonials.length - visibleCount);
-  const prev = () => setCarouselIndex((p) => Math.max(0, p - 1));
-  const next = () => setCarouselIndex((p) => Math.min(maxIndex, p + 1));
-
-  const offsetX = -(carouselIndex * (cardWidth + GAP));
-
-  // Touch handlers for mobile swipe
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchDelta.current = e.touches[0].clientX - touchStartX.current;
-  };
-  const handleTouchEnd = () => {
-    if (touchDelta.current < -40) next();
-    else if (touchDelta.current > 40) prev();
-    touchDelta.current = 0;
-  };
-
   return (
     <div className="font-[family-name:var(--font-body)] overflow-x-hidden">
       {/* ═══════ Hero ═══════ */}
@@ -221,12 +131,11 @@ export function AboutPage() {
                 <PawPrint className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Sobre o Pet+
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white font-[family-name:var(--font-display)] leading-tight">
-                Cuidar é a nossa{" "}
-                <span className="text-amber-200">missão</span>
+                Cuidar é a nossa <span className="text-amber-200">missão</span>
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg text-white/90 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                Nascemos da paixão por animais e da vontade de tornar a vida de
-                tutores e pets mais simples, segura e feliz.
+                Nascemos da paixão por animais e da vontade de tornar a vida de tutores e pets mais
+                simples, segura e feliz.
               </p>
 
               {/* Stats — mobile only */}
@@ -234,10 +143,6 @@ export function AboutPage() {
                 <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
                   <p className="font-extrabold text-white text-xl">10k+</p>
                   <p className="text-[11px] text-white/70">Tutores ativos</p>
-                </div>
-                <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
-                  <p className="font-extrabold text-white text-xl">4.9</p>
-                  <p className="text-[11px] text-white/70">Nota média</p>
                 </div>
                 <div className="bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 text-center">
                   <p className="font-extrabold text-white text-xl">500+</p>
@@ -248,7 +153,7 @@ export function AboutPage() {
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 sm:gap-4 mt-6 sm:mt-8">
                 <Link
                   to="/hotels"
-                  className="inline-flex items-center justify-center gap-2 bg-white text-[var(--color-primary-600)] font-bold px-5 sm:px-6 py-3 rounded-xl hover:bg-white/90 transition-colors shadow-lg shadow-orange-600/20 text-sm sm:text-base"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-[var(--color-primary-700)] font-bold px-5 sm:px-6 py-3 rounded-xl hover:bg-white/90 transition-colors shadow-lg shadow-orange-600/20 text-sm sm:text-base"
                 >
                   <Hotel className="h-4 w-4 sm:h-5 sm:w-5" />
                   Explorar serviços
@@ -297,15 +202,6 @@ export function AboutPage() {
                     <p className="text-xs text-slate-500">Tutores ativos</p>
                   </div>
                 </div>
-                <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3">
-                  <div className="p-2 bg-amber-50 rounded-xl">
-                    <Star className="h-6 w-6 text-amber-500" />
-                  </div>
-                  <div>
-                    <p className="font-extrabold text-slate-900 text-lg">4.9</p>
-                    <p className="text-xs text-slate-500">Nota média</p>
-                  </div>
-                </div>
               </div>
             </motion.div>
           </div>
@@ -323,16 +219,22 @@ export function AboutPage() {
             custom={0}
             className="text-center max-w-2xl mx-auto mb-10 sm:mb-16"
           >
-            <span className="inline-flex items-center gap-1.5 bg-[var(--color-primary-50)] text-[var(--color-primary-600)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-3 sm:mb-4">
+            <span className="inline-flex items-center gap-1.5 bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-3 sm:mb-4">
               <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Nossa história
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
               De uma ideia a milhares de pets felizes
             </h2>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-500 leading-relaxed px-2">
-              O Pet+ nasceu da visão de quatro graduandos de Engenharia de Software que, ao identificarem as lacunas e a fragmentação do mercado pet, decidiram aplicar a tecnologia para simplificar esse universo. O que começou como um projeto acadêmico focado em solucionar problemas reais, transformou-se em uma experiência digital integrada que converte a complexidade do setor em facilidade.
-
-              Por meio de uma plataforma web acessível, conectamos o desejo de cuidado dos tutores à eficiência operacional de parceiros e especialistas. Somos o ponto de encontro onde a gestão inteligente encontra a dedicação animal, promovendo um mercado mais organizado, profissional e confiável.
+              O Pet+ nasceu da visão de quatro graduandos de Engenharia de Software que, ao
+              identificarem as lacunas e a fragmentação do mercado pet, decidiram aplicar a
+              tecnologia para simplificar esse universo. O que começou como um projeto acadêmico
+              focado em solucionar problemas reais, transformou-se em uma experiência digital
+              integrada que converte a complexidade do setor em facilidade. Por meio de uma
+              plataforma web acessível, conectamos o desejo de cuidado dos tutores à eficiência
+              operacional de parceiros e especialistas. Somos o ponto de encontro onde a gestão
+              inteligente encontra a dedicação animal, promovendo um mercado mais organizado,
+              profissional e confiável.
             </p>
           </motion.div>
 
@@ -353,8 +255,9 @@ export function AboutPage() {
                   viewport={{ once: true, margin: "-60px" }}
                   variants={fadeUp}
                   custom={i}
-                  className={`relative md:flex md:items-center md:mb-16 last:md:mb-0 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-                    }`}
+                  className={`relative md:flex md:items-center md:mb-16 last:md:mb-0 ${
+                    i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
                 >
                   {/* ── Mobile: dot + card ── */}
                   <div className="md:hidden flex items-start gap-4 pl-1">
@@ -362,7 +265,7 @@ export function AboutPage() {
                     <div className="relative z-10 mt-5 w-3.5 h-3.5 shrink-0 rounded-full bg-[var(--color-primary-500)] border-[3px] border-white shadow-md" />
                     {/* Card */}
                     <div className="flex-1 bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
-                      <span className="inline-block bg-gradient-to-r from-[var(--color-primary-500)] to-amber-400 text-white font-extrabold text-xs px-2.5 py-0.5 rounded-lg mb-2">
+                      <span className="inline-block bg-gradient-to-r from-[var(--color-primary-700)] to-amber-400 text-white font-extrabold text-xs px-2.5 py-0.5 rounded-lg mb-2">
                         {m.year}
                       </span>
                       <p className="text-sm text-slate-600 leading-relaxed">{m.text}</p>
@@ -372,10 +275,11 @@ export function AboutPage() {
                   {/* ── Desktop: alternating sides ── */}
                   <div className="hidden md:block md:w-1/2 md:px-10">
                     <div
-                      className={`bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${i % 2 === 0 ? "md:text-right" : "md:text-left"
-                        }`}
+                      className={`bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${
+                        i % 2 === 0 ? "md:text-right" : "md:text-left"
+                      }`}
                     >
-                      <span className="inline-block bg-gradient-to-r from-[var(--color-primary-500)] to-amber-400 text-white font-extrabold text-sm px-3 py-1 rounded-lg mb-3">
+                      <span className="inline-block bg-gradient-to-r from-[var(--color-primary-700)] to-amber-400 text-white font-extrabold text-sm px-3 py-1 rounded-lg mb-3">
                         {m.year}
                       </span>
                       <p className="text-slate-600 leading-relaxed">{m.text}</p>
@@ -424,15 +328,15 @@ export function AboutPage() {
                 custom={i}
                 className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all"
               >
-                <div className={`inline-flex p-2 sm:p-3 rounded-lg sm:rounded-xl mb-3 sm:mb-4 ${v.color}`}>
+                <div
+                  className={`inline-flex p-2 sm:p-3 rounded-lg sm:rounded-xl mb-3 sm:mb-4 ${v.color}`}
+                >
                   <v.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <h3 className="font-bold text-slate-900 mb-1 sm:mb-2 text-sm sm:text-base font-[family-name:var(--font-display)]">
                   {v.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                  {v.description}
-                </p>
+                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">{v.description}</p>
               </motion.div>
             ))}
           </div>
@@ -450,15 +354,15 @@ export function AboutPage() {
               transition={{ duration: 0.5 }}
               className="text-center lg:text-left"
             >
-              <span className="inline-flex items-center gap-1.5 bg-[var(--color-primary-50)] text-[var(--color-primary-600)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-3 sm:mb-4">
+              <span className="inline-flex items-center gap-1.5 bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-3 sm:mb-4">
                 <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> O que oferecemos
               </span>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] leading-tight">
                 Tudo para o seu pet em um só lugar
               </h2>
               <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-500 leading-relaxed max-w-md mx-auto lg:mx-0">
-                A Pet+ reúne os melhores serviços e produtos para o cuidado do
-                seu animal de estimação, com segurança, praticidade e muito amor.
+                A Pet+ reúne os melhores serviços e produtos para o cuidado do seu animal de
+                estimação, com segurança, praticidade e muito amor.
               </p>
 
               <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-5">
@@ -587,8 +491,8 @@ export function AboutPage() {
               Para onde estamos caminhando
             </h2>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-400 leading-relaxed px-2">
-              Nosso propósito vai além de uma plataforma. Queremos construir um
-              ecossistema que melhore a vida de pets e tutores em todo o Brasil.
+              Nosso propósito vai além de uma plataforma. Queremos construir um ecossistema que
+              melhore a vida de pets e tutores em todo o Brasil.
             </p>
           </motion.div>
 
@@ -609,147 +513,9 @@ export function AboutPage() {
                 <h3 className="font-bold text-white mb-1.5 sm:mb-2 text-base sm:text-lg font-[family-name:var(--font-display)]">
                   {g.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  {g.description}
-                </p>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{g.description}</p>
               </motion.div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════ Depoimentos (Carousel) ═══════ */}
-      <section className="py-14 sm:py-20 lg:py-28 bg-[#f8f9fb]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUp}
-            custom={0}
-            className="text-center max-w-2xl mx-auto mb-10 sm:mb-14"
-          >
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
-              O que nossos clientes dizem
-            </h2>
-            <p className="mt-2 sm:mt-3 text-sm sm:text-base text-slate-500">
-              A satisfação de quem confia em nossa plataforma é o nosso maior
-              orgulho.
-            </p>
-          </motion.div>
-
-          {/* Carousel wrapper */}
-          <div className="relative flex items-center">
-            {/* Left arrow */}
-            <button
-              onClick={prev}
-              disabled={carouselIndex === 0}
-              className="hidden sm:flex shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white items-center justify-center text-slate-400 hover:text-slate-700 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm mr-2 sm:mr-4"
-              aria-label="Anterior"
-            >
-              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-
-            {/* Cards container */}
-            <div
-              className="flex-1 overflow-hidden"
-              ref={containerRef}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <motion.div
-                className="flex"
-                style={{ gap: `${GAP}px` }}
-                animate={{ x: offsetX }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >
-                {testimonials.map((t, i) => (
-                  <div
-                    key={i}
-                    className="shrink-0"
-                    style={{ width: cardWidth > 0 ? `${cardWidth}px` : `100%` }}
-                  >
-                    <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-100 p-4 sm:p-6 shadow-sm h-full flex flex-col">
-                      {/* Stars */}
-                      <div className="flex gap-0.5 mb-2 sm:mb-3">
-                        {[...Array(5)].map((_, j) => (
-                          <Star
-                            key={j}
-                            className={`h-4 w-4 sm:h-5 sm:w-5 ${j < t.rating
-                              ? "fill-amber-400 text-amber-400"
-                              : "fill-slate-200 text-slate-200"
-                              }`}
-                          />
-                        ))}
-                      </div>
-
-                      {/* Time badge */}
-                      <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 mb-1.5 sm:mb-2">
-                        {t.time}
-                      </span>
-
-                      {/* Review text */}
-                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed flex-1">
-                        {t.text}
-                      </p>
-
-                      {/* Author */}
-                      <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-medium text-slate-400">
-                        — {t.name}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* Right arrow */}
-            <button
-              onClick={next}
-              disabled={carouselIndex >= maxIndex}
-              className="hidden sm:flex shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white items-center justify-center text-slate-400 hover:text-slate-700 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm ml-2 sm:ml-4"
-              aria-label="Próximo"
-            >
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-          </div>
-
-          {/* Dots indicator + mobile arrows row */}
-          <div className="flex items-center justify-center gap-3 mt-6 sm:mt-8">
-            {/* Mobile-only prev */}
-            <button
-              onClick={prev}
-              disabled={carouselIndex === 0}
-              className="sm:hidden w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
-              aria-label="Anterior"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-
-            <div className="flex gap-1.5 sm:gap-2">
-              {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCarouselIndex(i)}
-                  className={`h-2 rounded-full transition-all ${i === carouselIndex
-                    ? "w-5 sm:w-6 bg-[var(--color-primary-500)]"
-                    : "w-2 bg-slate-300 hover:bg-slate-400"
-                    }`}
-                  aria-label={`Ir para slide ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Mobile-only next */}
-            <button
-              onClick={next}
-              disabled={carouselIndex >= maxIndex}
-              className="sm:hidden w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
-              aria-label="Próximo"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
         </div>
       </section>
@@ -770,13 +536,13 @@ export function AboutPage() {
                 Faça parte da família Pet+
               </h2>
               <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-500 max-w-lg mx-auto leading-relaxed">
-                Seja como tutor ou parceiro, o Pet+ é o lugar certo para quem
-                ama animais e busca o melhor para eles.
+                Seja como tutor ou parceiro, o Pet+ é o lugar certo para quem ama animais e busca o
+                melhor para eles.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
                 <Link
                   to="/register"
-                  className="inline-flex items-center justify-center gap-2 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl transition-colors shadow-lg shadow-orange-200 text-sm sm:text-base"
+                  className="inline-flex items-center justify-center gap-2 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white font-bold px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl transition-colors shadow-lg shadow-orange-200 text-sm sm:text-base"
                 >
                   Criar conta gratuita
                 </Link>

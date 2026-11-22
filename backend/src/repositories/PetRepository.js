@@ -1,23 +1,23 @@
-const prisma = require('../config/database');
-
-const BLOCKING_APPOINTMENT_STATUSES = ['PENDING', 'CONFIRMED'];
+const prisma = require("../config/database");
 
 class PetRepository {
   findManyByTutor(tutorId) {
     return prisma.pet.findMany({
-      where: { tutor_id: tutorId },
-      orderBy: { created_at: 'desc' },
+      where: { tutor_id: tutorId, archived_at: null },
+      orderBy: { created_at: "desc" },
     });
   }
 
   findByIdAndTutor(id, tutorId) {
     return prisma.pet.findFirst({
-      where: { id, tutor_id: tutorId },
+      where: { id, tutor_id: tutorId, archived_at: null },
     });
   }
 
   countByTutor(tutorId) {
-    return prisma.pet.count({ where: { tutor_id: tutorId } });
+    return prisma.pet.count({
+      where: { tutor_id: tutorId, archived_at: null },
+    });
   }
 
   create(data) {
@@ -25,21 +25,7 @@ class PetRepository {
   }
 
   update(id, data) {
-    return prisma.pet.update({ where: { id }, data });
-  }
-
-  delete(id) {
-    return prisma.pet.delete({ where: { id } });
-  }
-
-  countActiveAppointments(petId) {
-    return prisma.appointment.count({
-      where: {
-        pet_id: petId,
-        status: { in: BLOCKING_APPOINTMENT_STATUSES },
-        start_time: { gt: new Date() },
-      },
-    });
+    return prisma.pet.update({ where: { id, archived_at: null }, data });
   }
 }
 

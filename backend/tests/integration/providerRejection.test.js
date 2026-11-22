@@ -41,6 +41,13 @@ function stubPrismaMethod(delegate, methodName, impl) {
   });
 }
 
+// A moderação roda em transação com lock (E-11): sem banco, a transação
+// recebe o próprio prisma stubado e o SELECT ... FOR UPDATE vira no-op.
+function stubTransaction() {
+  stubPrismaMethod(prisma, "$transaction", async (fn) => fn(prisma));
+  stubPrismaMethod(prisma, "$queryRaw", async () => []);
+}
+
 afterEach(() => {
   while (prismaRestores.length > 0) {
     prismaRestores.pop()();
@@ -87,6 +94,7 @@ test("PATCH /:id/status — recusar com rejection_reason → 200, e-mail enviado
   };
   delete mockUpdated.user;
 
+  stubTransaction();
   // stub do findUnique (busca provider + email)
   stubPrismaMethod(prisma.provider, "findUnique", async ({ where }) => {
     if (where.id === providerId) return mockProvider;
@@ -159,6 +167,7 @@ test("PATCH /:id/status — falha no e-mail NÃO reverte a persistência", async
     if (where.id === providerId) return mockProvider;
     return null;
   });
+  stubTransaction();
   stubPrismaMethod(prisma.provider, "update", async () => ({ ...mockUpdated }));
 
   const EmailService = require("../../src/services/EmailService");
@@ -197,14 +206,19 @@ test("POST /me/resubmit — parceiro REJEITADO → 200, status EM_REVISAO", asyn
   };
   const mockUpdated = { ...mockProvider, status: PROVIDER_STATUS.IN_REVIEW };
 
+  // Reenvio é condicional ao status lido (E-11): updateMany com guarda REJEITADO.
+  let resubmitted = false;
   stubPrismaMethod(prisma.provider, "findUnique", async ({ where }) => {
     if (where.user_id === userId) return mockProvider;
+    if (where.id === mockProvider.id) return resubmitted ? { ...mockUpdated } : mockProvider;
     return null;
   });
-  stubPrismaMethod(prisma.provider, "update", async ({ where, data }) => {
+  stubPrismaMethod(prisma.provider, "updateMany", async ({ where, data }) => {
     assert.equal(where.id, mockProvider.id);
+    assert.equal(where.status, PROVIDER_STATUS.REJECTED);
     assert.equal(data.status, PROVIDER_STATUS.IN_REVIEW);
-    return { ...mockUpdated };
+    resubmitted = true;
+    return { count: 1 };
   });
 
   const res = await request(app)

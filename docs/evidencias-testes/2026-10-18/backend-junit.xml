@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="POST /register com role_id 1 (ADMIN) → 422 e não cria admin (PET-01)" time="0.495205" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="POST /register sem senha → 422" time="0.034850" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="POST /login sem credenciais → 400" time="0.006083" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="POST /reset-password com senha fora da politica → 422 sem acessar o banco" time="0.007844" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="respostas trazem cabeçalhos de segurança do helmet (PET-04)" time="0.006526" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="rota inexistente → 404 com shape padronizado" time="0.009085" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\authRoutes.test.js"/>
+	<testcase name="addItem: ADMIN (1) retorna 403" time="0.550957" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="addItem: LOJISTA (2) retorna 403" time="0.025983" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="addItem: HOTEL (3) retorna 403" time="0.008251" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="addItem: PET_SITTER (4) retorna 403" time="0.007632" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="addItem: TUTOR (5) retorna sucesso (2xx)" time="0.006600" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="addItem: sem role (requisição anônima com token sem role) retorna sucesso (2xx)" time="0.006850" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: ADMIN (1) retorna 403" time="0.007528" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: LOJISTA (2) retorna 403" time="0.005412" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: HOTEL (3) retorna 403" time="0.007979" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: PET_SITTER (4) retorna 403" time="0.006298" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: TUTOR (5) retorna sucesso (2xx)" time="0.005708" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="merge: sem role (requisição anônima com token sem role) retorna sucesso (2xx)" time="0.005276" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\cartRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 401 sem token de autenticação" time="0.044405" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 403 para usuários que não são clientes (role_id 1 - ADMIN)" time="0.013323" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 403 para Lojistas tentando comprar (role_id 2 - LOJISTA)" time="0.005598" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 400 quando o carrinho está vazio" time="0.005574" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 409 e rollback se estoque for insuficiente na validação prévia" time="0.006619" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 409 se produto estiver com status INACTIVE" time="0.005832" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + OrderItems, congela preço, baixa estoque e limpa carrinho" time="0.009426" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: Multi-provider cria múltiplos pedidos na mesma transação atômica (Opção A)" time="0.005565" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders: 409 e rollback se estoque mudar concorrentemente durante a transação" time="0.006567" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders/:id/pay: marca pedido próprio como PAGO" time="0.008465" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders/:id/pay: pagamento já PAGO é idempotente" time="0.005005" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders/:id/pay: pedido de outro tutor retorna 404 sem vazar existência" time="0.004812" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders/:id/pay: bloqueia usuário que não é tutor" time="0.004917" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /api/v1/orders/:id/pay: rejeita pedido em status não pagável" time="0.004761" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders: 401 sem token de autenticação" time="0.005320" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders: 200 retorna pedidos do tutor logado com headers de paginação" time="0.006109" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders: isolamento de tutor — tutor A não vê pedidos de tutor B" time="0.005980" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders: resposta não vaza password_hash do cliente" time="0.004450" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders/received: 401 sem token" time="0.003237" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/providers/orders: 401 sem token" time="0.003283" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders/received: 403 para usuário sem perfil de parceiro" time="0.004148" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/orders/received: 200 retorna apenas pedidos do parceiro logado com paginação" time="0.004878" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="GET /api/v1/providers/orders: 200 retorna pedidos do parceiro (alias da rota /received)" time="0.005062" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 401 sem token" time="0.297651" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 404 para pedido inexistente" time="0.007031" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 403 quando parceiro não é o dono do pedido" time="0.004903" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 403 para usuário sem perfil de parceiro" time="0.005266" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para status desconhecido" time="0.005223" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para transição inválida (CONCLUIDO → AGUARDANDO_PAGAMENTO)" time="0.019796" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 422 para transição inválida (ENVIADO → AGUARDANDO_PAGAMENTO)" time="0.006876" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (AGUARDANDO_PAGAMENTO → PAGO)" time="0.009598" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (PAGO → ENVIADO)" time="0.006075" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: 200 para transição válida (ENVIADO → CONCLUIDO)" time="0.005562" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="PATCH /api/v1/orders/:id/status: aceita alias em inglês (SHIPPED → CONCLUIDO via DELIVERED)" time="0.005123" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\orderRoutes.test.js"/>
+	<testcase name="POST /providers/services: hotel aprovado cria serviço e recebe preço numérico" time="0.538947" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="POST /providers/services: parceiro pendente não pode criar serviço" time="0.009061" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="POST /providers/services: lojista não pode criar serviço" time="0.029467" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="POST /providers/services: rejeita categoria desconhecida" time="0.007118" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="POST /providers/services: pet sitter aprovado recebe unidade de cobrança por hora" time="0.007777" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="PUT /providers/services/:id: bloqueia serviço de outro parceiro" time="0.009956" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="PUT /providers/services/:id: atualiza serviço próprio" time="0.008188" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="DELETE /providers/services/:id: desativa serviço próprio sem apagar histórico" time="0.009383" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="GET /providers/services: lista somente os serviços ativos do parceiro autenticado" time="0.007024" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="GET /providers/:id: detalhe público expõe serviço ativo com preço numérico" time="0.006586" classname="test" file="C:\PI - 2026\Pet\backend\tests\integration\serviceRoutes.test.js"/>
+	<testcase name="Lojista (2) PENDENTE é bloqueado com 403" time="0.016277" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) PENDENTE é bloqueado com 403" time="0.000458" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Lojista (2) APROVADO entra normalmente" time="0.004798" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) ATIVO é bloqueado após normalização do enum STA-1" time="0.000662" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Hotel (3) ACTIVE é bloqueado após normalização do enum STA-1" time="0.000831" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Pet Sitter (4) PENDENTE/INCOMPLETE CONSEGUE logar (precisa completar o onboarding)" time="0.001522" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Pet Sitter (4) em IN_REVIEW também loga" time="0.001084" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Parceiro REJEITADO agora LOGA — precisa entrar para corrigir o cadastro (REC-2)" time="0.000963" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Sitter (4) REJEITADO também loga para corrigir" time="0.000911" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Tutor (5) sem provider entra normalmente" time="0.000817" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Admin (1) entra normalmente" time="0.000492" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="status desconhecido em Lojista bloqueia (teste por conjunto, não por igualdade)" time="0.000259" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="Usuário com is_active = false é bloqueado com 403" time="0.000336" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active = false bloqueia mesmo um parceiro aprovado" time="0.000318" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active null/undefined vale como ativo (default do schema)" time="0.000629" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="is_active = true continua logando normalmente" time="0.000441" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\loginUseCase.test.js"/>
+	<testcase name="preferência usa preços congelados do banco, referência do pedido e URLs HTTPS" time="0.015034" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência é reutilizada, sem criar nova cobrança a cada tentativa" time="0.002051" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência bloqueia pedido de outro tutor e conta sem role de tutor" time="0.001590" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="preferência rejeita pedido já pago e total divergente dos itens" time="0.000618" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="SDK valida HMAC real e rejeita assinatura adulterada e cabeçalhos ausentes" time="0.002646" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="gateway desativado não permite iniciar cobrança" time="0.000322" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="gateway exige vendedor de teste mesmo se token começa por APP_USR" time="0.000477" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook consulta pagamento e marca pedido PAGO atomicamente; duplicação não reaplica" time="0.002588" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento pending não confirma pedido mesmo com body forjado aprovado" time="0.000943" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento in_process não confirma pedido mesmo com body forjado aprovado" time="0.000784" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento rejected não confirma pedido mesmo com body forjado aprovado" time="0.000491" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento cancelled não confirma pedido mesmo com body forjado aprovado" time="0.000500" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pagamento recusado pode ser aprovado em nova tentativa" time="0.000794" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência transaction_amount" time="0.000480" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência currency_id" time="0.000463" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência collector_id" time="0.000302" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência live_mode" time="0.000208" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook bloqueia divergência metadata" time="0.000175" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="pedido cancelado recebe conciliação pendente, sem voltar para PAGO" time="0.000434" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="falha ao gravar pagamento reverte a confirmação do pedido" time="0.000489" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="webhook sem assinatura válida não consulta API nem altera pedido" time="0.000362" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\mercadoPagoPayment.test.js"/>
+	<testcase name="forgot password gera token e envia e-mail de recuperação para usuário existente" time="0.016786" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="forgot password para e-mail inexistente mantém resposta genérica e não envia e-mail" time="0.000798" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="falha no provider de e-mail mantém resposta genérica e invalida token criado" time="0.001267" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="reset de senha rejeita reutilizar a senha atual sem consumir o token" time="0.022081" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<testcase name="reset de senha atualiza o hash e invalida todos os tokens pendentes" time="0.844566" classname="test" file="C:\PI - 2026\Pet\backend\tests\unit\passwordResetUseCase.test.js"/>
+	<!-- tests 104 -->
+	<!-- suites 0 -->
+	<!-- pass 104 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 2368.7157 -->
+</testsuites>

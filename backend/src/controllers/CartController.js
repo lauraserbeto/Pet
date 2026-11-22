@@ -204,7 +204,7 @@ class CartController {
       if (quantity === 0) {
         await CartRepository.deleteItem(itemId);
       } else {
-        const product = await prisma.product.findUnique({ where: { id: item.product_id } });
+        const product = await prisma.product.findUnique({ where: { id: item.product_id }, include: PRODUCT_WITH_PROVIDER });
         assertProductPurchasable(product);
 
         const cap = Math.min(MAX_QTY_PER_ITEM, product.stock_quantity);
@@ -264,6 +264,44 @@ class CartController {
     try {
       if (req.userRole && req.userRole !== 5) {
         throw AppError.forbidden('Apenas clientes podem ter um carrinho de compras');
+      }
+
+      // Protocolo E-18: alvo fixo = quantidade anterior + quantidade anônima.
+      // Repetir o mesmo payload após perda de resposta não soma novamente.
+      if (req.body.baseline) {
+        const { items, baseline } = req.body;
+        if (new Set(items.map(i => i.product_id)).size !== items.length ||
+            new Set(baseline.map(i => i.product_id)).size !== baseline.length)
+          throw AppError.validation('Produtos duplicados na sincronização.');
+        const result = await prisma.$transaction(async tx => {
+          const cart = await tx.cart.upsert({ where: { user_id: req.userId }, create: { user_id: req.userId }, update: {} });
+          await tx.$queryRaw`SELECT id FROM carts WHERE id = ${cart.id}::uuid FOR UPDATE`;
+          const warnings = [];
+          for (const incoming of [...items].sort((a, b) => a.product_id.localeCompare(b.product_id))) {
+            const product = await tx.product.findUnique({ where: { id: incoming.product_id }, include: PRODUCT_WITH_PROVIDER });
+            if (!product || product.status !== PRODUCT_ACTIVE || product.stock_quantity <= 0 || !isStoreAvailable(product.provider)) {
+              warnings.push({ code: 'PRODUCT_UNAVAILABLE', product_id: incoming.product_id, message: 'Produto indisponível — não adicionado na sincronização.' });
+              continue;
+            }
+            const existing = await tx.cartItem.findUnique({ where: { cart_id_product_id: { cart_id: cart.id, product_id: product.id } } });
+            const before = baseline.find(i => i.product_id === product.id)?.quantity ?? 0;
+            const target = Math.min(before + incoming.quantity, MAX_QTY_PER_ITEM, product.stock_quantity);
+            if ((existing?.quantity ?? 0) === target) continue;
+            if ((existing?.quantity ?? 0) !== before)
+              throw AppError.conflict('O carrinho da conta mudou. Revise os itens antes de continuar.', { syncConflict: true });
+            if (!existing && await tx.cartItem.count({ where: { cart_id: cart.id } }) >= MAX_DISTINCT_SKUS) {
+              warnings.push({ code: 'SKU_LIMIT_REACHED', product_id: product.id, message: 'Limite de produtos no carrinho atingido — item não adicionado.' });
+              continue;
+            }
+            await tx.cartItem.upsert({ where: { cart_id_product_id: { cart_id: cart.id, product_id: product.id } },
+              create: { cart_id: cart.id, product_id: product.id, quantity: target, unit_price_snapshot: product.price },
+              update: { quantity: target, unit_price_snapshot: product.price } });
+            if (target < before + incoming.quantity) warnings.push({ code: 'STOCK_CAPPED', product_id: product.id, message: `Quantidade ajustada para ${target} por estoque/limite.` });
+          }
+          await CartRepository.touch(cart.id, tx);
+          return toDTO(await CartRepository.findByUser(req.userId, tx), warnings);
+        }, { isolationLevel: 'Serializable' });
+        return res.status(200).json(result);
       }
 
       const { items } = req.body;
@@ -349,7 +387,8 @@ class CartController {
       const reloaded = await CartRepository.reloadWithItems(cart.id);
       return res.status(200).json(toDTO(reloaded, warnings));
     } catch (err) {
-      return next(err);
+      const concurrent = err.code === 'P2034' || (err.code === 'P2010' && ['40001', '40P01'].includes(err.meta?.code));
+      return next(req.body?.baseline && concurrent ? AppError.conflict('O carrinho mudou durante a sincronização. Confira os itens e tente novamente.') : err);
     }
   }
 }

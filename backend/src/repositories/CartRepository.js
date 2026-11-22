@@ -32,8 +32,8 @@ class CartRepository {
     return cart;
   }
 
-  findByUser(userId) {
-    return prisma.cart.findUnique({
+  findByUser(userId, tx = prisma) {
+    return tx.cart.findUnique({
       where: { user_id: userId },
       include: { items: { include: ITEM_INCLUDE, orderBy: { added_at: 'asc' } } },
     });

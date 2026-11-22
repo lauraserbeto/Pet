@@ -20,7 +20,7 @@ export function StyleGuide() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="space-y-2">
             <h3 className="font-semibold text-sm">Primary (Brand)</h3>
-            <div className="h-20 w-full bg-[var(--color-primary-500)] rounded-lg shadow-sm flex items-end p-2 text-white text-xs">500 (Base)</div>
+            <div className="h-20 w-full bg-[var(--color-primary-700)] rounded-lg shadow-sm flex items-end p-2 text-white text-xs">500 (Base)</div>
             <div className="h-10 w-full bg-[var(--color-primary-100)] rounded-lg shadow-sm"></div>
             <div className="h-10 w-full bg-[var(--color-primary-700)] rounded-lg shadow-sm"></div>
           </div>

@@ -1,9 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  addressService,
-  type Address,
-  type AddressInput,
-} from "../services/addressService";
+import { addressService, type Address, type AddressInput } from "../services/addressService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export const addressesQueryKey = ["addresses"] as const;
@@ -18,8 +14,7 @@ export function useAddresses() {
     enabled: Boolean(token),
   });
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: addressesQueryKey });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: addressesQueryKey });
 
   const createMutation = useMutation({
     mutationFn: (payload: AddressInput) => addressService.create(payload),
@@ -53,23 +48,7 @@ export function useAddresses() {
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => addressService.remove(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: addressesQueryKey });
-      const previous = queryClient.getQueryData<Address[]>(addressesQueryKey);
-      if (previous) {
-        queryClient.setQueryData<Address[]>(
-          addressesQueryKey,
-          previous.filter((a) => a.id !== id)
-        );
-      }
-      return { previous };
-    },
-    onError: (_err, _id, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(addressesQueryKey, context.previous);
-      }
-    },
-    onSettled: () => invalidate(),
+    onSuccess: () => invalidate(),
   });
 
   return {

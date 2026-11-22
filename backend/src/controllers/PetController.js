@@ -1,5 +1,6 @@
 const PetRepository = require('../repositories/PetRepository');
 const AppError = require('../utils/AppError');
+const removePet = require('../useCases/pets/RemovePetUseCase');
 
 const MAX_PETS_PER_TUTOR = 10;
 
@@ -67,17 +68,7 @@ class PetController {
 
   async deletePet(req, res, next) {
     try {
-      const owned = await PetRepository.findByIdAndTutor(req.params.id, req.userId);
-      if (!owned) throw AppError.notFound('Pet não encontrado');
-
-      const activeAppointments = await PetRepository.countActiveAppointments(req.params.id);
-      if (activeAppointments > 0) {
-        throw AppError.conflict(
-          'Não é possível remover este pet enquanto houver agendamentos pendentes ou confirmados'
-        );
-      }
-
-      await PetRepository.delete(req.params.id);
+      await removePet.execute({petId:req.params.id,userId:req.userId});
       return res.status(204).send();
     } catch (err) {
       return next(err);

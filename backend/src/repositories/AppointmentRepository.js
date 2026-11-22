@@ -12,6 +12,7 @@ const APPOINTMENT_TUTOR_SELECT = {
 // Include único das respostas de agendamento (criação, listagens, detalhe e
 // troca de status), para que todas tragam os mesmos campos.
 const APPOINTMENT_INCLUDE = {
+  payment: true,
   pet: { include: { tutor: { select: APPOINTMENT_TUTOR_SELECT } } },
   service: true,
   provider: true,
@@ -44,8 +45,8 @@ class AppointmentRepository {
     });
   }
 
-  async findById(id) {
-    return await prisma.appointment.findUnique({
+  async findById(id, db = prisma) {
+    return await db.appointment.findUnique({
       where: { id },
       include: APPOINTMENT_INCLUDE
     });

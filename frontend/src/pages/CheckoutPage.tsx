@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { refreshOrderHistory } from '../lib/orderCache';
+import { checkoutSuccessUrl } from '../lib/checkoutOrders';
+import { CartSyncNotice } from '../components/cart/CartSyncNotice';
 import { useNavigate, Link } from "react-router";
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
@@ -8,7 +11,7 @@ import { HamsterLoader } from "../components/ui/HamsterLoader";
 import { useAddresses } from "../lib/hooks/useAddresses";
 import { toast } from "sonner";
 import { orderService, type Order } from "../lib/services/orderService";
-import { paymentService, paymentUrl } from '../lib/services/paymentService';
+import { paymentService, paymentUrl } from "../lib/services/paymentService";
 import {
   ArrowLeft,
   CreditCard,
@@ -24,6 +27,9 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 
+import { getCheckoutErrorMessage } from "../lib/checkoutError";
+import { ApiError } from '../lib/httpClient';
+
 type Step = "address" | "payment" | "review";
 
 const STEPS: { key: Step; label: string }[] = [
@@ -32,61 +38,13 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "review", label: "Revisão" },
 ];
 
-// Utilitário de mapeamento de erros da API
-type ApiErrorCode = 
-  | 'INSUFFICIENT_STOCK' 
-  | 'PAYMENT_FAILED' 
-  | 'PAYMENT_DECLINED'
-  | 'CART_EMPTY'
-  | 'ADDRESS_REQUIRED'
-  | 'SERVER_ERROR';
-
-function getCheckoutErrorMessage(error: any): { 
-  title: string; 
-  description: string; 
-  code?: string;
-  metadata?: any; 
-} {
-  const apiError = error?.response?.data?.error || error?.data?.error || error;
-  const errorCode = apiError?.code;
-
-  switch (errorCode) {
-    case 'INSUFFICIENT_STOCK':
-      return {
-        title: 'Estoque insuficiente',
-        description: apiError.message || 'Um ou mais itens do seu carrinho esgotaram ou não têm a quantidade solicitada.',
-        code: errorCode,
-        metadata: apiError.metadata || apiError.details
-      };
-    
-    case 'PAYMENT_DECLINED':
-    case 'PAYMENT_FAILED':
-      return {
-        title: 'Falha no pagamento',
-        description: 'Não foi possível processar o pagamento. Verifique seus dados ou tente outro método.',
-        code: errorCode
-      };
-
-    case 'CART_EMPTY':
-      return {
-        title: 'Carrinho vazio',
-        description: 'Seu carrinho está vazio. Adicione produtos antes de finalizar.',
-        code: errorCode
-      };
-
-    default:
-      return {
-        title: 'Ops, algo deu errado',
-        description: 'Não foi possível finalizar o pedido no momento. Tente novamente.',
-        code: 'UNKNOWN'
-      };
-  }
-}
-
 /** Aviso do modo simulado (P5): a escolha Cartão/PIX é só um rótulo. */
 function SimulatedPaymentNotice() {
   return (
-    <div role="note" className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+    <div
+      role="note"
+      className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+    >
       <Info className="h-4 w-4 mt-0.5 shrink-0" />
       <span>Pagamento simulado — nenhum valor real é cobrado.</span>
     </div>
@@ -94,14 +52,20 @@ function SimulatedPaymentNotice() {
 }
 
 export function CheckoutPage() {
-  const { items, totalPrice, totalItems, clearCart, isLoading: isLoadingCart } = useCart();
+  const { items, totalPrice, totalItems, refreshCart, syncBlocked, cartError, isLoading: isLoadingCart } = useCart();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>("address");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [uncertain, setUncertain] = useState(false);
   const processing = useRef(false);
   const orderCreated = useRef(false);
-  const paymentConfig = useQuery({ queryKey: ['payment-config'], queryFn: paymentService.configuration, staleTime: 30000 });
-  const mercadoPagoEnabled = paymentConfig.data?.provider === 'MERCADO_PAGO';
+  const paymentConfig = useQuery({
+    queryKey: ["payment-config"],
+    queryFn: paymentService.configuration,
+    staleTime: 30000,
+  });
+  const mercadoPagoEnabled = paymentConfig.data?.provider === "MERCADO_PAGO";
 
   // Hook de endereços
   const { addresses, isLoading: isLoadingAddresses, error: addressError } = useAddresses();
@@ -129,10 +93,10 @@ export function CheckoutPage() {
 
   // Verifica carrinho vazio
   useEffect(() => {
-    if (!isLoadingCart && items.length === 0 && !isProcessing && !orderCreated.current) {
-      navigate('/cart', { replace: true });
+    if (!syncBlocked && !cartError && !isLoadingCart && items.length === 0 && !isProcessing && !orderCreated.current) {
+      navigate("/cart", { replace: true });
     }
-  }, [isLoadingCart, items.length, isProcessing, navigate]);
+  }, [syncBlocked, cartError, isLoadingCart, items.length, isProcessing, navigate]);
 
   const handleNextFromAddress = () => {
     if (!selectedAddressId) {
@@ -147,55 +111,69 @@ export function CheckoutPage() {
   };
 
   const handleFinalize = async () => {
-    if (processing.current) return;
+    if (processing.current || uncertain || syncBlocked || cartError || isLoadingCart) return;
     processing.current = true;
     setIsProcessing(true);
     let createdOrders: Order[] = [];
+    let creationAttempted = false;
     try {
       const config = await paymentService.configuration();
+      creationAttempted = true;
       const response = await orderService.createOrder({ address_id: selectedAddressId });
       const orders = response.orders?.length ? response.orders : [response.order];
-      if (!orders.every((order) => order?.id)) throw new Error('Pedido não retornado pelo servidor.');
+      if (!orders.every((order) => order?.id))
+        throw new Error("Pedido não retornado pelo servidor.");
       createdOrders = orders;
       orderCreated.current = true;
-      if (config.provider === 'MERCADO_PAGO') {
+      void refreshOrderHistory(queryClient);
+      if (config.provider === "MERCADO_PAGO") {
         navigate(paymentUrl(createdOrders.map((order) => order.id)));
-        clearCart();
         return;
       }
-      for (const order of createdOrders) await orderService.payOrder(order.id);
-      navigate('/checkout/success', { state: { orderId: createdOrders[0].id, orderIds: createdOrders.map((order) => order.id) } });
-      clearCart();
-    } catch (error: any) {
+      for (const order of createdOrders) { await orderService.payOrder(order.id); void refreshOrderHistory(queryClient); }
+      navigate(checkoutSuccessUrl(createdOrders.map(order => order.id)), {
+        state: { orderId: createdOrders[0].id, orderIds: createdOrders.map((order) => order.id) },
+      });
+    } catch (error: unknown) {
+      if (creationAttempted && !createdOrders.length && (!(error instanceof ApiError) || error.status === 0 || error.status >= 500)) {
+        orderCreated.current = true;
+        setUncertain(true);
+        void refreshOrderHistory(queryClient);
+        void refreshCart?.();
+        return;
+      }
       const parsedError = getCheckoutErrorMessage(error);
-      
+
       // Tratamento completo de erros
-      if (parsedError.code === 'INSUFFICIENT_STOCK') {
+      if (parsedError.cartAction) {
         toast.error(parsedError.title, {
           description: parsedError.description,
           duration: 8000,
           action: {
-            label: 'Ir para o Carrinho',
-            onClick: () => navigate('/cart'),
+            label: "Ir para o Carrinho",
+            onClick: () => navigate("/cart"),
           },
         });
-      } else if (parsedError.code === 'PAYMENT_FAILED' || parsedError.code === 'PAYMENT_DECLINED') {
+      } else if (parsedError.code === "PAYMENT_FAILED" || parsedError.code === "PAYMENT_DECLINED") {
         toast.error(parsedError.title, { description: parsedError.description });
-        setCurrentStep('payment'); // Volta para o usuário tentar outro cartão
+        setCurrentStep("payment"); // Volta para o usuário tentar outro cartão
       } else {
         toast.error(parsedError.title, { description: parsedError.description });
       }
 
       if (createdOrders.length) {
         navigate(paymentUrl(createdOrders.map((order) => order.id)));
-        clearCart();
       }
     } finally {
+      if (createdOrders.length) void refreshCart?.();
       setIsProcessing(false);
       processing.current = false;
     }
   };
 
+  if ((syncBlocked || cartError) && !uncertain) return <CartSyncNotice checkout />;
+  if (uncertain) return <div role="alert" className="max-w-2xl mx-auto p-8 space-y-4"><h1 className="text-xl font-bold">Confira se o pedido foi criado</h1><p>A resposta não chegou com segurança. Confira seu histórico antes de iniciar outra compra; não repetiremos o envio automaticamente.</p><Button asChild><Link to="/tutor/pedidos">Ver meus pedidos</Link></Button><Button asChild variant="outline"><Link to="/cart">Revisar carrinho</Link></Button></div>;
+  if (isLoadingCart) return <HamsterLoader message="Carregando carrinho..." size="sm" />;
   return (
     <div className="min-h-screen bg-slate-50 relative">
       {/* Header */}
@@ -223,10 +201,10 @@ export function CheckoutPage() {
                 <div
                   className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
                     i < stepIndex
-                      ? "bg-emerald-500 text-white"
+                      ? "bg-emerald-700 text-white"
                       : i === stepIndex
-                      ? "bg-[var(--color-primary-500)] text-white"
-                      : "bg-slate-100 text-slate-400"
+                        ? "bg-[var(--color-primary-700)] text-white"
+                        : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   {i < stepIndex ? <Check className="h-4 w-4" /> : i + 1}
@@ -280,18 +258,25 @@ export function CheckoutPage() {
                 {addressError && (
                   <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700">
                     <AlertCircle className="h-5 w-5 shrink-0" />
-                    <p className="text-sm">Não foi possível carregar os endereços. Tente novamente mais tarde.</p>
+                    <p className="text-sm">
+                      Não foi possível carregar os endereços. Tente novamente mais tarde.
+                    </p>
                   </div>
                 )}
 
                 {!isLoadingAddresses && !addressError && addresses?.length === 0 && (
                   <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl space-y-3">
                     <MapPin className="h-10 w-10 text-slate-300 mx-auto" />
-                    <p className="text-sm text-slate-600">Você ainda não possui endereços cadastrados.</p>
+                    <p className="text-sm text-slate-600">
+                      Você ainda não possui endereços cadastrados.
+                    </p>
                     <Button asChild variant="outline" className="gap-2">
-                      <Link to="/tutor/perfil#meus-enderecos" onClick={() => sessionStorage.setItem("come_from_checkout", "true")}>
+                      <Link
+                        to="/tutor/perfil#meus-enderecos"
+                        onClick={() => sessionStorage.setItem("come_from_checkout", "true")}
+                      >
                         <Plus className="h-4 w-4" />
-                          Cadastrar Novo Endereço
+                        Cadastrar Novo Endereço
                       </Link>
                     </Button>
                   </div>
@@ -314,7 +299,9 @@ export function CheckoutPage() {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-slate-900 text-sm">
-                                {addr.rua}{addr.numero ? `, ${addr.numero}` : ''} {addr.complemento && `\n${addr.complemento}`}
+                                {addr.rua}
+                                {addr.numero ? `, ${addr.numero}` : ""}{" "}
+                                {addr.complemento && `\n${addr.complemento}`}
                               </p>
                               {addr.is_default && (
                                 <span className="text-[10px] bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
@@ -329,7 +316,7 @@ export function CheckoutPage() {
                           <div
                             className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
                               isSelected
-                                ? "border-[var(--color-primary-500)] bg-[var(--color-primary-500)] text-white"
+                                ? "border-[var(--color-primary-500)] bg-[var(--color-primary-700)] text-white"
                                 : "border-slate-300"
                             }`}
                           >
@@ -340,13 +327,20 @@ export function CheckoutPage() {
                     })}
                     <div className="pt-1">
                       <div className="pt-1">
-                      <Button asChild variant="outline" className="w-full gap-2 border-dashed h-11 rounded-xl">
-                        <Link to="/tutor/perfil#meus-enderecos" onClick={() => sessionStorage.setItem("come_from_checkout", "true")}>
-                          <Plus className="h-4 w-4" />
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="w-full gap-2 border-dashed h-11 rounded-xl"
+                        >
+                          <Link
+                            to="/tutor/perfil#meus-enderecos"
+                            onClick={() => sessionStorage.setItem("come_from_checkout", "true")}
+                          >
+                            <Plus className="h-4 w-4" />
                             Cadastrar Novo Endereço
-                        </Link>    
-                      </Button>
-                     </div>
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -378,41 +372,59 @@ export function CheckoutPage() {
                   </h2>
                 </div>
 
-                {paymentConfig.isError && <p role="alert" className="text-sm text-rose-700">Não foi possível carregar os meios de pagamento. <button onClick={() => void paymentConfig.refetch()} className="underline">Tentar novamente</button></p>}
-                {mercadoPagoEnabled && <p className="text-sm text-slate-600">Pagamento de teste no Mercado Pago. Você escolherá o meio de pagamento na próxima etapa. Use apenas cartões e conta de teste.</p>}
-                {!mercadoPagoEnabled && <>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { key: "credit" as const, icon: CreditCard, label: "Cartão" },
-                    { key: "pix" as const, icon: QrCode, label: "PIX" },
-                  ].map((m) => (
-                    <button
-                      key={m.key}
-                      onClick={() => setPaymentMethod(m.key)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                        paymentMethod === m.key
-                          ? "border-[var(--color-primary-500)] bg-[var(--color-primary-50)]"
-                          : "border-slate-100 hover:border-slate-200"
-                      }`}
-                    >
-                      <m.icon
-                        className={`h-6 w-6 ${
-                          paymentMethod === m.key ? "text-[var(--color-primary-600)]" : "text-slate-400"
-                        }`}
-                      />
-                      <span
-                        className={`text-xs font-semibold ${
-                          paymentMethod === m.key ? "text-[var(--color-primary-700)]" : "text-slate-600"
-                        }`}
-                      >
-                        {m.label}
-                      </span>
+                {paymentConfig.isError && (
+                  <p role="alert" className="text-sm text-rose-700">
+                    Não foi possível carregar os meios de pagamento.{" "}
+                    <button onClick={() => void paymentConfig.refetch()} className="underline">
+                      Tentar novamente
                     </button>
-                  ))}
-                </div>
+                  </p>
+                )}
+                {mercadoPagoEnabled && (
+                  <p className="text-sm text-slate-600">
+                    Pagamento de teste no Mercado Pago. Você escolherá o meio de pagamento na
+                    próxima etapa. Use apenas cartões e conta de teste.
+                  </p>
+                )}
+                {!mercadoPagoEnabled && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { key: "credit" as const, icon: CreditCard, label: "Cartão" },
+                        { key: "pix" as const, icon: QrCode, label: "PIX" },
+                      ].map((m) => (
+                        <button
+                          key={m.key}
+                          onClick={() => setPaymentMethod(m.key)}
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                            paymentMethod === m.key
+                              ? "border-[var(--color-primary-500)] bg-[var(--color-primary-50)]"
+                              : "border-slate-100 hover:border-slate-200"
+                          }`}
+                        >
+                          <m.icon
+                            className={`h-6 w-6 ${
+                              paymentMethod === m.key
+                                ? "text-[var(--color-primary-700)]"
+                                : "text-slate-400"
+                            }`}
+                          />
+                          <span
+                            className={`text-xs font-semibold ${
+                              paymentMethod === m.key
+                                ? "text-[var(--color-primary-700)]"
+                                : "text-slate-600"
+                            }`}
+                          >
+                            {m.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
 
-                <SimulatedPaymentNotice />
-                </>}
+                    <SimulatedPaymentNotice />
+                  </>
+                )}
 
                 <Button
                   size="lg"
@@ -442,7 +454,7 @@ export function CheckoutPage() {
                     </div>
                     <button
                       onClick={() => setCurrentStep("address")}
-                      className="text-xs text-[var(--color-primary-600)] font-medium hover:underline"
+                      className="text-xs text-[var(--color-primary-700)] font-medium hover:underline"
                     >
                       Alterar
                     </button>
@@ -450,10 +462,13 @@ export function CheckoutPage() {
                   {selectedAddress ? (
                     <>
                       <p className="text-sm text-slate-600">
-                        {selectedAddress.rua}{selectedAddress.numero ? `, ${selectedAddress.numero}` : ''} {selectedAddress.complemento && `\n${selectedAddress.complemento}`}
+                        {selectedAddress.rua}
+                        {selectedAddress.numero ? `, ${selectedAddress.numero}` : ""}{" "}
+                        {selectedAddress.complemento && `\n${selectedAddress.complemento}`}
                       </p>
                       <p className="text-sm text-slate-500">
-                        {selectedAddress.bairro}, {selectedAddress.cidade} {selectedAddress.estado}, {selectedAddress.cep}
+                        {selectedAddress.bairro}, {selectedAddress.cidade} {selectedAddress.estado},{" "}
+                        {selectedAddress.cep}
                       </p>
                     </>
                   ) : (
@@ -469,14 +484,14 @@ export function CheckoutPage() {
                     </div>
                     <button
                       onClick={() => setCurrentStep("payment")}
-                      className="text-xs text-[var(--color-primary-600)] font-medium hover:underline"
+                      className="text-xs text-[var(--color-primary-700)] font-medium hover:underline"
                     >
                       Alterar
                     </button>
                   </div>
                   <p className="text-sm text-slate-600">
                     {mercadoPagoEnabled
-                      ? 'Mercado Pago (teste)'
+                      ? "Mercado Pago (teste)"
                       : `${paymentMethod === "pix" ? "PIX" : "Cartão de Crédito"} (simulado)`}
                   </p>
                 </div>
@@ -484,9 +499,7 @@ export function CheckoutPage() {
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Package className="h-4 w-4 text-[var(--color-primary-500)]" />
-                    <h3 className="font-bold text-sm text-slate-900">
-                      Itens ({totalItems})
-                    </h3>
+                    <h3 className="font-bold text-sm text-slate-900">Itens ({totalItems})</h3>
                   </div>
                   <div className="space-y-3">
                     {items.map((item) => (

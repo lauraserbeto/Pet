@@ -1,0 +1,13 @@
+
+> pet-plus@0.0.1 test
+> vitest run src/lib/documentIdentity.test.ts src/pages/auth/RegisterPage.test.tsx --pool=threads --maxWorkers=1 --no-file-parallelism --testTimeout=15000
+
+
+ RUN  v4.1.10 C:/PI - 2026/Pet/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  16:34:35
+   Duration  14.33s (transform 387ms, setup 1.62s, import 2.44s, tests 1.21s, environment 8.05s)
+

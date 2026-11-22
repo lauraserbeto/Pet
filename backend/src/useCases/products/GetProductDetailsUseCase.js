@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const reviewRepository = require('../../repositories/ReviewRepository');
 const AppError = require('../../utils/AppError');
 const { PROVIDER_ROLES, operationalProviderWhere } = require('../providers/providerAccess');
 
@@ -14,7 +15,6 @@ const PRODUCT_DETAILS_INCLUDE = {
         select: {
           full_name: true,
           avatar_url: true,
-          phone: true
         }
       }
     }
@@ -38,10 +38,11 @@ class GetProductDetailsUseCase {
       throw AppError.notFound('Produto não encontrado.');
     }
 
-    return {
+    const [ratedProduct] = await reviewRepository.withProductRatings([{
       ...product,
       price: Number(product.price)
-    };
+    }]);
+    return ratedProduct;
   }
 }
 

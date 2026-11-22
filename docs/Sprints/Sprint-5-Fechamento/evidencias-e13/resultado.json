@@ -1,0 +1,31 @@
+{
+  "data": "2026-11-22",
+  "entrega": "E-13",
+  "ambiente": "local descartável, PostgreSQL 16, API 3313, preview 4173",
+  "backend": { "aprovados": 559, "falhas": 0, "ignorados": 0 },
+  "frontend": { "aprovados": 229, "arquivos": 44, "falhas": 0 },
+  "navegador": {
+    "api_e_postgresql_reais": 4,
+    "regressao_smoke_e_api_controlada": 25,
+    "larguras_reais": [1280, 390],
+    "papeis_reais": [2, 3],
+    "capturas": 8
+  },
+  "typecheck": "aprovado",
+  "build": "aprovado com avisos preexistentes",
+  "lint": { "erros": 0, "avisos_backend": 1, "avisos_frontend": 121 },
+  "criterios_conferidos": [
+    "Login direto e pelo link protegido chegam à correção sem passar pelo dashboard",
+    "Cliente rejeita nome/CEP/UF inválidos sem gravar; API rejeita UF inválida com 422",
+    "Falha controlada de salvamento impede o reenvio",
+    "Falha controlada de reenvio conserva correções reais e mantém estado REJEITADO",
+    "Nova tentativa grava EM_REVISAO e dados normalizados; sessão é atualizada",
+    "Parceiro continua sem acesso ao painel enquanto aguarda aprovação"
+  ],
+  "limites": [
+    "Respostas 503 foram injetadas; não houve envio real de e-mail",
+    "Não comprova Mercado Pago, produção ou acessibilidade integral",
+    "Candidatura de Pet Sitter e guardas globais não encerradas pela E-13",
+    "Sem migration nova, commit, push ou deploy"
+  ]
+}

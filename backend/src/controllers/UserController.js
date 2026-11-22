@@ -1,9 +1,12 @@
-const prisma = require('../config/database');
-const bcrypt = require('bcryptjs');
-const AppError = require('../utils/AppError');
-const { listUsersQuery } = require('../schemas/userSchemas');
-const { PROVIDER_STATUS } = require('../constants/providerStatus');
-const setUserActiveUseCase = require('../useCases/users/SetUserActiveUseCase');
+const prisma = require("../config/database");
+const changePasswordUseCase = require("../useCases/users/ChangePasswordUseCase");
+const AppError = require("../utils/AppError");
+const { listUsersQuery } = require("../schemas/userSchemas");
+const {
+  SubmitSitterEvaluationUseCase,
+  ReviewSitterEvaluationUseCase,
+} = require("../useCases/users/SitterEvaluationUseCases");
+const setUserActiveUseCase = require("../useCases/users/SetUserActiveUseCase");
 
 const PROFILE_SELECT = {
   id: true,
@@ -18,14 +21,14 @@ const PROFILE_SELECT = {
 
 function pickDefined(obj, keys) {
   return keys.reduce((acc, key) => {
-    if (obj[key] !== undefined && obj[key] !== '') acc[key] = obj[key];
+    if (obj[key] !== undefined && obj[key] !== "") acc[key] = obj[key];
     return acc;
   }, {});
 }
 
 class UserController {
   // Retorna os dados do próprio usuário (utilizado no Perfil)
-  async getMe(req, res) {
+  async getMe(req, res, next) {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.userId },
@@ -39,11 +42,11 @@ class UserController {
           onboarding_step: true,
           provider: {
             select: {
-              status: true
-            }
+              status: true,
+            },
           },
           created_at: true,
-        }
+        },
       });
 
       // Formatar o retorno para facilitar o frontend
@@ -53,13 +56,12 @@ class UserController {
       }
 
       if (!user) {
-        return res.status(404).json({ error: 'Usuário não encontrado' });
+        throw AppError.notFound("Usuário não encontrado");
       }
 
       return res.status(200).json(user);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao buscar perfil' });
+      return next(error);
     }
   }
 
@@ -67,10 +69,10 @@ class UserController {
   // Email é imutável por esta rota e é ignorado se enviado.
   async updateProfile(req, res, next) {
     try {
-      const data = pickDefined(req.body, ['full_name', 'phone', 'avatar_url']);
+      const data = pickDefined(req.body, ["full_name", "phone", "avatar_url"]);
 
       if (Object.keys(data).length === 0) {
-        throw AppError.badRequest('Nenhum campo válido para atualizar');
+        throw AppError.badRequest("Nenhum campo válido para atualizar");
       }
 
       const user = await prisma.user.update({
@@ -110,33 +112,11 @@ class UserController {
     try {
       const { currentPassword, newPassword } = req.body;
 
-      const user = await prisma.user.findUnique({
-        where: { id: req.userId },
-        select: { password_hash: true },
+      await changePasswordUseCase.execute({
+        userId: req.userId,
+        currentPassword,
+        newPassword,
       });
-
-      if (!user?.password_hash) {
-        throw AppError.unauthorized('Usuário não possui senha definida');
-      }
-
-      const isValid = await bcrypt.compare(currentPassword, user.password_hash);
-      if (!isValid) {
-        throw AppError.unauthorized('Senha atual incorreta');
-      }
-
-      const password_hash = await bcrypt.hash(newPassword, 10);
-
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: req.userId },
-          data: { password_hash },
-        }),
-        // invalida todos os tokens de reset pendentes
-        prisma.passwordResetToken.updateMany({
-          where: { user_id: req.userId, used: false },
-          data: { used: true },
-        }),
-      ]);
 
       return res.status(204).send();
     } catch (error) {
@@ -145,33 +125,22 @@ class UserController {
   }
 
   // Envia avaliação de Sitter
-  async submitSitterEvaluation(req, res) {
+  async submitSitterEvaluation(req, res, next) {
     try {
       const { experience_details, environment_photos, quiz_answers } = req.body;
-
-      // 1. Criar o registro de SitterEvaluation
-      const evaluation = await prisma.sitterEvaluation.create({
-        data: {
-          user_id: req.userId,
-          experience_details: typeof experience_details === 'string' ? experience_details : JSON.stringify(experience_details),
-          environment_photos, // array of base64 ou urls
-          quiz_answers,
-          status: 'PENDING'
-        }
+      // Papel, candidatura única e lock no use case (E-11 / DEC-D).
+      const evaluation = await new SubmitSitterEvaluationUseCase().execute({
+        userId: req.userId,
+        userRole: req.userRole,
+        experienceDetails: experience_details,
+        environmentPhotos: environment_photos,
+        quizAnswers: quiz_answers,
       });
-
-      // 2. Atualizar o onboarding_step do User
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: req.userId },
-          data: { onboarding_step: 'IN_REVIEW' }
-        })
-      ]);
-
-      return res.status(201).json({ message: 'Avaliação enviada com sucesso', evaluation });
+      return res
+        .status(201)
+        .json({ message: "Avaliação enviada com sucesso", evaluation });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao enviar avaliação de Sitter' });
+      return next(error);
     }
   }
 
@@ -189,8 +158,8 @@ class UserController {
         ...(q
           ? {
               OR: [
-                { full_name: { contains: q, mode: 'insensitive' } },
-                { email: { contains: q, mode: 'insensitive' } },
+                { full_name: { contains: q, mode: "insensitive" } },
+                { email: { contains: q, mode: "insensitive" } },
               ],
             }
           : {}),
@@ -210,55 +179,56 @@ class UserController {
             onboarding_step: true,
             created_at: true,
             role: { select: { name: true } },
-            provider: { select: { business_name: true, status: true, document: true } },
+            provider: {
+              select: { business_name: true, status: true, document: true },
+            },
           },
-          orderBy: { created_at: 'desc' },
+          orderBy: { created_at: "desc" },
           skip: (page - 1) * limit,
           take: limit,
         }),
       ]);
 
       res.set({
-        'X-Total-Count': String(total),
-        'X-Page': String(page),
-        'X-Limit': String(limit),
-        'X-Total-Pages': String(Math.ceil(total / limit)),
+        "X-Total-Count": String(total),
+        "X-Page": String(page),
+        "X-Limit": String(limit),
+        "X-Total-Pages": String(Math.ceil(total / limit)),
       });
       return res.status(200).json(users);
     } catch (error) {
-      if (error?.name === 'ZodError') {
-        return next(AppError.validation('Parâmetros de listagem inválidos.'));
+      if (error?.name === "ZodError") {
+        return next(AppError.validation("Parâmetros de listagem inválidos."));
       }
       return next(error);
     }
   }
 
   // Retorna avaliações filtradas por status
-  async getEvaluations(req, res) {
+  async getEvaluations(req, res, next) {
     try {
       const { status } = req.query;
-      
+
       const evaluations = await prisma.sitterEvaluation.findMany({
         where: {
-          status: status || 'PENDING'
+          status: status || "PENDING",
         },
         orderBy: {
-          created_at: 'desc'
+          created_at: "desc",
         },
         include: {
           user: {
             select: {
               full_name: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       return res.status(200).json(evaluations);
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao buscar avaliações' });
+      return next(error);
     }
   }
 
@@ -277,64 +247,25 @@ class UserController {
   }
 
   // Aprova ou Rejeita a avaliação de um Pet Sitter
-  async reviewEvaluation(req, res) {
+  async reviewEvaluation(req, res, next) {
     try {
       const { id } = req.params;
-      const { status, feedback } = req.body; // status: APPROVED or REJECTED
+      const { status, feedback } = req.body; // APPROVED | REJECTED (feedback obrigatório na recusa)
 
-      // Verifica se a avaliação existe
-      const evaluation = await prisma.sitterEvaluation.findUnique({
-        where: { id }
+      // Só candidatura PENDING de Pet Sitter, com lock e estados coerentes (E-11 / DEC-D).
+      await new ReviewSitterEvaluationUseCase().execute({
+        evaluationId: id,
+        status,
+        feedback,
       });
 
-      if (!evaluation) {
-        return res.status(404).json({ error: 'Avaliação não encontrada' });
-      }
-
-      // Prepara as atualizações em transação
-      const targetUserStatus = status === 'APPROVED' ? 'COMPLETED' : 'REJECTED';
-
-      await prisma.$transaction(async (tx) => {
-        // 1. Atualizar a evaluation
-        await tx.sitterEvaluation.update({
-          where: { id },
-          data: {
-            status,
-            feedback: feedback || null
-          }
-        });
-
-        // 2. Atualizar o usuário
-        await tx.user.update({
-          where: { id: evaluation.user_id },
-          data: {
-            onboarding_step: targetUserStatus
-          }
-        });
-
-        // 3. Atualizar provider do usuário se for aprovado
-        if (status === 'APPROVED') {
-          // Precisamos encontrar se ele tem um provider
-          const provider = await tx.provider.findUnique({
-            where: { user_id: evaluation.user_id }
-          });
-          if (provider) {
-             await tx.provider.update({
-               where: { user_id: evaluation.user_id },
-               data: { status: PROVIDER_STATUS.APPROVED }
-             });
-          }
-        }
-
-      });
-
-      return res.status(200).json({ message: `Avaliação processada com sucesso: ${status}` });
+      return res
+        .status(200)
+        .json({ message: `Avaliação processada com sucesso: ${status}` });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Erro ao processar avaliação' });
+      return next(error);
     }
   }
-
 }
 
 module.exports = new UserController();

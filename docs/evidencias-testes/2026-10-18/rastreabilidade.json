@@ -1,0 +1,173 @@
+{
+  "date": "18/10/2026",
+  "branch": "Tasks-Laura",
+  "commit": "176e5a42156870d5e18c755fa70e8508099ecff1",
+  "node": "v24.18.0",
+  "summary": {
+    "backend": {
+      "tests": 104,
+      "passed": 104,
+      "failed": 0,
+      "skipped": 0
+    },
+    "frontend": {
+      "tests": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "CT-01",
+      "requirements": "RF-001; RNE-001",
+      "requirement": "Cadastro público",
+      "scenario": "Tentativa de criar administrador pelo cadastro público.",
+      "expected": "HTTP 422; operação rejeitada.",
+      "suite": "backend",
+      "match": "POST /register com role_id 1 (ADMIN)",
+      "source": "backend/tests/integration/authRoutes.test.js",
+      "type": "Integração HTTP; rejeição antes do acesso ao banco.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "POST /register com role_id 1 (ADMIN) → 422 e não cria admin (PET-01)"
+    },
+    {
+      "id": "CT-02",
+      "requirements": "RF-002; RNF-001",
+      "requirement": "Controle de acesso",
+      "scenario": "Login de usuário com is_active=false.",
+      "expected": "Use case rejeita acesso com statusCode 403.",
+      "suite": "backend",
+      "match": "Usuário com is_active = false é bloqueado",
+      "source": "backend/tests/unit/loginUseCase.test.js",
+      "type": "Unitário; repositório e comparação de senha simulados.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "Usuário com is_active = false é bloqueado com 403"
+    },
+    {
+      "id": "CT-03",
+      "requirements": "RF-016*",
+      "requirement": "Recuperação de senha",
+      "scenario": "Redefinição com a mesma senha atual.",
+      "expected": "Reutilização recusada sem consumir o token.",
+      "suite": "backend",
+      "match": "reset de senha rejeita reutilizar a senha atual",
+      "source": "backend/tests/unit/passwordResetUseCase.test.js",
+      "type": "Unitário; persistência simulada; não envia e-mail real.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "reset de senha rejeita reutilizar a senha atual sem consumir o token"
+    },
+    {
+      "id": "CT-04",
+      "requirements": "RF-014",
+      "requirement": "Carrinho do tutor",
+      "scenario": "Adição de item ao carrinho pelo perfil Tutor.",
+      "expected": "Resposta de sucesso 2xx.",
+      "suite": "backend",
+      "match": "addItem: TUTOR (5) retorna sucesso",
+      "source": "backend/tests/integration/cartRoutes.test.js",
+      "type": "Integração HTTP com Prisma simulado; não é teste com PostgreSQL.",
+      "result": "APROVADO",
+      "testName": "addItem: TUTOR (5) retorna sucesso (2xx)"
+    },
+    {
+      "id": "CT-05",
+      "requirements": "RF-022*; RNE-013*",
+      "requirement": "Geração de pedidos",
+      "scenario": "Finalização de carrinho com um lojista.",
+      "expected": "Criar pedido/itens, registrar preço, baixar estoque e limpar carrinho.",
+      "suite": "backend",
+      "match": "Sucesso (Happy-Path Single Provider)",
+      "source": "backend/tests/integration/orderRoutes.test.js",
+      "type": "Integração HTTP com Prisma/repositórios simulados.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "POST /api/v1/orders: Sucesso (Happy-Path Single Provider) cria Order + OrderItems, congela preço, baixa estoque e limpa carrinho"
+    },
+    {
+      "id": "CT-06",
+      "requirements": "RF-022*",
+      "requirement": "Validação de estoque",
+      "scenario": "Pedido com quantidade superior ao estoque disponível.",
+      "expected": "HTTP 409; pedido não criado.",
+      "suite": "backend",
+      "match": "409 e rollback se estoque for insuficiente na validação prévia",
+      "source": "backend/tests/integration/orderRoutes.test.js",
+      "type": "Integração HTTP com dependências simuladas; rejeição na validação prévia.",
+      "result": "APROVADO",
+      "testName": "POST /api/v1/orders: 409 e rollback se estoque for insuficiente na validação prévia"
+    },
+    {
+      "id": "CT-07",
+      "requirements": "RF-024*; RNE-011*",
+      "requirement": "Pedidos do tutor",
+      "scenario": "Consulta de pedidos autenticada como tutor A.",
+      "expected": "Consulta limitada ao tutor A, sem retornar pedidos do tutor B.",
+      "suite": "backend",
+      "match": "isolamento de tutor — tutor A não vê pedidos de tutor B",
+      "source": "backend/tests/integration/orderRoutes.test.js",
+      "type": "Integração HTTP; consulta/persistência simuladas.",
+      "result": "APROVADO",
+      "testName": "GET /api/v1/orders: isolamento de tutor — tutor A não vê pedidos de tutor B"
+    },
+    {
+      "id": "CT-08",
+      "requirements": "RF-026*; RNE-010*",
+      "requirement": "Propriedade do serviço",
+      "scenario": "Parceiro tenta editar serviço de outra conta.",
+      "expected": "HTTP 403; alteração não autorizada.",
+      "suite": "backend",
+      "match": "PUT /providers/services/:id: bloqueia serviço de outro parceiro",
+      "source": "backend/tests/integration/serviceRoutes.test.js",
+      "type": "Integração HTTP com Prisma/repositórios simulados.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "PUT /providers/services/:id: bloqueia serviço de outro parceiro"
+    },
+    {
+      "id": "CT-09",
+      "requirements": "RF-023*; RNE-023*",
+      "requirement": "Pagamento idempotente",
+      "scenario": "Repetição de notificação de pagamento aprovado.",
+      "expected": "Pedido confirmado uma vez, sem reaplicar efeitos.",
+      "suite": "backend",
+      "match": "webhook consulta pagamento e marca pedido PAGO atomicamente; duplicação não reaplica",
+      "source": "backend/tests/unit/mercadoPagoPayment.test.js",
+      "type": "Unitário; banco e gateway simulados; não comprova sandbox externo.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "webhook consulta pagamento e marca pedido PAGO atomicamente; duplicação não reaplica"
+    },
+    {
+      "id": "CT-10",
+      "requirements": "RF-023*; RNE-023*",
+      "requirement": "Confirmação na interface",
+      "scenario": "Retorno com aprovação na URL, sem confirmação do backend.",
+      "expected": "Interface aguarda confirmação e não anuncia pedido pago.",
+      "suite": "frontend",
+      "match": "retorno aprovado na URL aguarda webhook e não anuncia pedido pago",
+      "source": "frontend/src/pages/CheckoutPaymentPage.test.tsx",
+      "type": "Componente com respostas de API simuladas.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "retorno aprovado na URL aguarda webhook e não anuncia pedido pago"
+    },
+    {
+      "id": "CT-11",
+      "requirements": "RF-017*; RNE-016*",
+      "requirement": "Correção de cadastro",
+      "scenario": "Parceiro salva correções e solicita reanálise.",
+      "expected": "Salvar os dados antes de chamar o reenvio.",
+      "suite": "frontend",
+      "match": "salva as correções e só então reenvia",
+      "source": "frontend/src/pages/parceiro/CorrecaoCadastro.test.tsx",
+      "type": "Componente com serviços simulados.",
+      "visual": true,
+      "result": "APROVADO",
+      "testName": "salva as correções e só então reenvia — o endpoint de reenvio não grava dados"
+    }
+  ]
+}

@@ -1,4 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { OrdersPagination } from '../../components/orders/OrdersPagination';
+import { Button } from '../../components/ui/button';
 import { 
   Search, 
   Package, 
@@ -54,68 +57,23 @@ function StatusIcon({ variant }: { variant: string }) {
 }
 
 export function Orders() {
+  const { user } = useAuth();
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [query, setQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
-  const {
-    data: orders = [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ['provider-orders'],
-    queryFn: () => orderService.listProviderOrders(),
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ['provider-orders', user?.id, page, query],
+    queryFn: ({ signal }) => orderService.listProviderOrdersPage(page, query, signal),
+    enabled: !!user,
   });
-
-  // KPIs derivados dos dados reais
-  const kpis = useMemo(() => {
-    const totalOrders = orders.length;
-
-    // Pedidos pendentes de processamento/finalização
-    const pendingOrders = orders.filter((o) => {
-      const norm = o.status?.toUpperCase() || '';
-      return norm !== 'CONCLUIDO' && norm !== 'COMPLETED' && norm !== 'CANCELADO' && norm !== 'CANCELLED';
-    }).length;
-
-    // Receita do mês corrente com base nos pedidos faturados / não cancelados
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-
-    const monthlyRevenue = orders
-      .filter((o) => {
-        const d = new Date(o.created_at);
-        const isThisMonth =
-          !isNaN(d.getTime()) &&
-          d.getMonth() === currentMonth &&
-          d.getFullYear() === currentYear;
-        const norm = o.status?.toUpperCase() || '';
-        const isRevenueStatus = norm !== 'CANCELADO' && norm !== 'CANCELLED' && norm !== 'AGUARDANDO_PAGAMENTO';
-        return isThisMonth && isRevenueStatus;
-      })
-      .reduce((acc, o) => acc + (Number(o.total_price) || 0), 0);
-
-    return {
-      totalOrders,
-      pendingOrders,
-      monthlyRevenue,
-    };
-  }, [orders]);
-
-  // Busca e filtro por ID ou Cliente
-  const filteredOrders = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return orders;
-
-    return orders.filter((order) => {
-      const idMatch = order.id.toLowerCase().includes(term);
-      const customerNameMatch = order.customer?.full_name?.toLowerCase().includes(term) ?? false;
-      const customerEmailMatch = order.customer?.email?.toLowerCase().includes(term) ?? false;
-      return idMatch || customerNameMatch || customerEmailMatch;
-    });
-  }, [orders, searchTerm]);
+  const orders = data?.orders ?? [];
+  const filteredOrders = orders;
+  const kpis = data?.summary;
+  useEffect(() => {
+    if (data && page > Math.max(1, data.totalPages)) setPage(Math.max(1, data.totalPages));
+  }, [data, page]);
+  function search() { setQuery(searchTerm.trim()); setPage(1); }
 
   // Tratamento específico de erro de parceiro não cadastrado (403)
   const isForbiddenError =
@@ -135,18 +93,22 @@ export function Orders() {
           </div>
           
           <div className="relative w-full md:w-80">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute top-3 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
             </div>
             <input
               type="text"
               placeholder="Buscar por ID ou Cliente..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); if (!e.target.value) { setQuery(''); setPage(1); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter') search(); }}
+              aria-label="Buscar pedidos por ID ou cliente"
+              maxLength={100}
               disabled={isLoading || isError}
               className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:border-transparent transition-colors sm:text-sm disabled:opacity-50"
               style={{ '--tw-ring-color': 'var(--color-primary-500, #3b82f6)' } as React.CSSProperties}
             />
+            <Button className="mt-2" onClick={search} disabled={isLoading}>Buscar pedidos</Button>
           </div>
         </header>
 
@@ -164,7 +126,7 @@ export function Orders() {
               <div>
                 <p className="text-sm font-medium text-slate-500">Total de Pedidos</p>
                 <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isLoading ? '...' : kpis.totalOrders}
+                  {isError || !kpis ? '—' : kpis.totalOrders}
                 </h3>
               </div>
             </div>
@@ -182,7 +144,7 @@ export function Orders() {
               <div>
                 <p className="text-sm font-medium text-slate-500">Pedidos Pendentes</p>
                 <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isLoading ? '...' : kpis.pendingOrders}
+                  {isError || !kpis ? '—' : kpis.pendingOrders}
                 </h3>
               </div>
             </div>
@@ -200,7 +162,7 @@ export function Orders() {
               <div>
                 <p className="text-sm font-medium text-slate-500">Receita do Mês</p>
                 <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isLoading ? '...' : formatBRL(kpis.monthlyRevenue)}
+                  {isError || !kpis ? '—' : formatBRL(kpis.monthlyRevenue)}
                 </h3>
               </div>
             </div>
@@ -234,7 +196,7 @@ export function Orders() {
               <button
                 onClick={() => refetch()}
                 disabled={isFetching}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
               >
                 <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
                 Tentar Novamente
@@ -252,7 +214,7 @@ export function Orders() {
                 <h2 className="text-base font-semibold text-slate-800">Lista de Pedidos</h2>
               </div>
               <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
-                {orders.length} {orders.length === 1 ? 'pedido' : 'pedidos'} no total
+                {data?.total ?? 0} pedidos {query ? 'encontrados' : 'no total'}
               </span>
             </div>
             
@@ -346,14 +308,7 @@ export function Orders() {
               </table>
             </div>
             
-            {/* Footer of Table */}
-            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-sm text-slate-500">
-              <span>Mostrando {filteredOrders.length} de {orders.length} pedidos</span>
-              <div className="flex items-center gap-2">
-                <button disabled className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-400 cursor-not-allowed">Anterior</button>
-                <button disabled className="px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-400 cursor-not-allowed">Próximo</button>
-              </div>
-            </div>
+            {data && <OrdersPagination page={page} totalPages={data.totalPages} total={data.total} busy={isFetching} onPage={setPage} />}
           </div>
         )}
 
@@ -365,7 +320,7 @@ export function Orders() {
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
-                <Receipt className="w-5 h-5 text-[var(--color-primary-600)]" />
+                <Receipt className="w-5 h-5 text-[var(--color-primary-700)]" />
                 Pedido #{selectedOrder.id.slice(0, 8).toUpperCase()}
               </DialogTitle>
               <DialogDescription className="text-sm text-slate-500">

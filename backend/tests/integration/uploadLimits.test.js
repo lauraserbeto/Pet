@@ -58,7 +58,7 @@ beforeEach(() => {
   }));
   stub(prisma.provider, 'update', record('provider.update', ({ data }) => ({ id: 'p', ...data })));
   stub(prisma.sitterEvaluation, 'create', record('sitterEvaluation.create', ({ data }) => ({ id: 'e', ...data })));
-  stub(prisma, '$transaction', async (ops) => Promise.all(ops));
+  stub(prisma, '$transaction', async (ops) => typeof ops === 'function' ? ops(prisma) : Promise.all(ops));
   stub(ProductRepository, 'create', record('product.create', (data) => ({ id: 'prod', ...data })));
 });
 

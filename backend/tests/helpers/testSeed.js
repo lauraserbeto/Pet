@@ -137,6 +137,7 @@ async function createApprovedPartner({ role_id = 3, payment_policy = 'PRESENCIAL
   const suffix = uniqueSuffix();
   const partnerUser = await createUser({
     role_id,
+    onboarding_step: 'COMPLETED',
     full_name: role_id === 4 ? 'Pet Sitter QA' : 'Hotel QA',
     email: `partner-${suffix}@petplus.test`,
   });

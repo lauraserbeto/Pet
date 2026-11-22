@@ -2,6 +2,8 @@
 
 > Sprint 5 · Semana 10 (27/out–01/nov) · Infra · Prioridade Alta · Esforço M · Responsável R1
 
+> Atualização de 20/11/2026: E-16/INF-2 implementadas e verificadas localmente, sem commit/publicação. Runtime validado: Node 24.22.3/npm 11.19.1, substituindo a recomendação antiga de Node 20 já fora de suporte. O boot já aplicava migrations e foi preservado. Backend sem achados npm; frontend sem high/critical, com quatro moderados registrados. Evidências e limites em [INF-2-IMPLEMENTACAO-E-VALIDACAO.md](INF-2-IMPLEMENTACAO-E-VALIDACAO.md). Confirmar configuração dos provedores, preflights e checks obrigatórios antes de um release; não há aceite de produção.
+
 ## Contexto
 O backend não tem um manifesto de deploy reproduzível: não há `Dockerfile`, `railway.json`,
 `Procfile` nem `nixpacks.toml` no repositório (confirmado — nenhum desses arquivos existe). O
@@ -24,8 +26,8 @@ release, versão de Node fixada, e o CI **bloqueando** merges com vulnerabilidad
 2. **Migrate deploy no release:** garantir que `npx prisma migrate deploy` rode na fase de release
    (release command do provedor, ou um script `start` que faça `prisma migrate deploy && node src/server.js`).
    Nunca usar `migrate dev` em produção.
-3. **Fixar runtime:** adicionar `"engines": { "node": "20.x" }` ao `backend/package.json` (alinhado ao
-   `node-version: 20` do CI).
+3. **Fixar runtime:** declarar Node 24/npm 11 nos dois projetos, com versão validada na `.nvmrc`,
+   usada pelos três jobs do CI, e mesma versão do Node na imagem Docker. Rever patches e suporte ao atualizar.
 4. **Fix de vulnerabilidades high:** rodar `npm audit fix` e/ou subir as versões afetadas (`react-router`
    pela correção do CSRF, `undici`, `ip-address`, `js-yaml`) no backend e no frontend; revalidar com
    `npm audit --audit-level=high`.
@@ -45,7 +47,7 @@ release, versão de Node fixada, e o CI **bloqueando** merges com vulnerabilidad
 ## Critério de aceite (Definition of Done)
 - Deploy reproduzível a partir do repositório (o provedor constrói e sobe usando o manifesto versionado).
 - `prisma migrate deploy` roda no release; o banco de produção fica em sincronia com o schema após o deploy.
-- `engines.node` fixado; runtime alinhado ao CI (Node 20).
+- `engines.node` declarado; runtime suportado e alinhado ao CI/imagem (Node 24, patch validado na `.nvmrc`).
 - `npm audit --audit-level=high` retorna **zero** vulnerabilidades high no backend e no frontend.
 - Passo de auditoria do CI é **bloqueante** (sem `continue-on-error`) para high nos dois jobs.
 
@@ -59,5 +61,5 @@ release, versão de Node fixada, e o CI **bloqueando** merges com vulnerabilidad
 - `migrate deploy` (produção) ≠ `migrate dev` (desenvolvimento) — nunca rodar `dev`/`reset` em produção.
 - `prisma generate` precisa acontecer no build (a pasta gerada não é versionada); sem ele o servidor não sobe.
 - Ao subir `react-router` no frontend, revalidar as rotas com lazy loading (code splitting por rota já existe) e o build.
-- Fixar `engines.node` pode fazer o provedor recusar versões divergentes — alinhar com o `node-version` do CI (20).
+- Conferir runtime no provedor: `engines`/`.nvmrc`/imagem e CI precisam ser compatíveis. A validação local não comprova as configurações atuais do painel.
 - Alguns highs podem só ter fix em major da dependência transitiva; usar `overrides` no `package.json` quando o fix direto não existir, e registrar o motivo.

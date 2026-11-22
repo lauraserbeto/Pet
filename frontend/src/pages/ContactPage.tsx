@@ -26,7 +26,6 @@ import {
   Instagram,
   Facebook,
   Twitter,
-  CheckCircle2,
   User,
   AtSign,
   FileText,
@@ -105,6 +104,8 @@ const contactChannels = [
   },
 ];
 
+const CONTACT_EMAIL = "contato@petplus.com.br";
+
 const subjects = [
   "Selecione o assunto",
   "Dúvida sobre serviços",
@@ -139,7 +140,7 @@ function FaqItem({
         <div
           className={`shrink-0 p-2 rounded-lg transition-colors ${
             isOpen
-              ? "bg-[var(--color-primary-500)] text-white"
+              ? "bg-[var(--color-primary-700)] text-white"
               : "bg-slate-100 text-slate-400 group-hover:bg-[var(--color-primary-50)] group-hover:text-[var(--color-primary-500)]"
           }`}
         >
@@ -228,8 +229,13 @@ export function ContactPage() {
       toast.error("Informe um e-mail válido.");
       return;
     }
+    // E-20: não há endpoint de contato. Em vez de anunciar um envio que não
+    // aconteceu, abrimos o aplicativo de e-mail da pessoa com a mensagem pronta.
+    const body = `${message.trim()}\n\n—\n${name.trim()}\n${email.trim()}`;
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+      `[Pet+] ${subject}`
+    )}&body=${encodeURIComponent(body)}`;
     setSubmitted(true);
-    toast.success("Mensagem enviada com sucesso!");
   };
 
   const resetForm = () => {
@@ -348,8 +354,8 @@ export function ContactPage() {
                     Envie sua mensagem
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500">
-                    Preencha o formulário abaixo e retornaremos em até 24h
-                    úteis.
+                    Preencha o formulário: abriremos seu e-mail com a mensagem
+                    pronta. Retornamos em até 24h úteis.
                   </p>
                 </div>
               </div>
@@ -363,23 +369,32 @@ export function ContactPage() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     className="flex flex-col items-center justify-center py-12 text-center"
                   >
-                    <div className="h-16 w-16 rounded-full bg-green-50 flex items-center justify-center mb-4">
-                      <CheckCircle2 className="h-8 w-8 text-green-500" />
+                    <div className="h-16 w-16 rounded-full bg-[var(--color-primary-50)] flex items-center justify-center mb-4">
+                      <Mail className="h-8 w-8 text-[var(--color-primary-700)]" aria-hidden="true" />
                     </div>
                     <h3 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)] mb-2">
-                      Mensagem enviada!
+                      Sua mensagem está pronta
                     </h3>
-                    <p className="text-sm text-slate-500 max-w-sm mb-6 leading-relaxed">
-                      Obrigado por entrar em contato, {name.split(" ")[0]}!
-                      Nossa equipe analisará sua mensagem e responderá pelo
-                      e-mail informado.
+                    <p role="status" className="text-sm text-slate-600 max-w-sm mb-2 leading-relaxed">
+                      Abrimos o seu aplicativo de e-mail com a mensagem preenchida.
+                      Para concluir, envie por lá.
+                    </p>
+                    <p className="text-sm text-slate-600 max-w-sm mb-6 leading-relaxed">
+                      Se nada abriu, escreva para{" "}
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="font-semibold text-[var(--color-primary-700)] underline underline-offset-2"
+                      >
+                        {CONTACT_EMAIL}
+                      </a>
+                      .
                     </p>
                     <button
                       onClick={resetForm}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary-700)] text-white text-sm font-semibold hover:bg-[var(--color-primary-800)] transition-colors"
                     >
-                      <MessageSquare className="h-4 w-4" />
-                      Enviar outra mensagem
+                      <MessageSquare className="h-4 w-4" aria-hidden="true" />
+                      Escrever outra mensagem
                     </button>
                   </motion.div>
                 ) : (
@@ -394,11 +409,12 @@ export function ContactPage() {
                     {/* Name + Email row */}
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                          <User className="h-3.5 w-3.5 text-slate-400" />
+                        <label htmlFor="contact-name" className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                          <User className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                           Nome completo *
                         </label>
                         <input
+                          id="contact-name"
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
@@ -407,11 +423,12 @@ export function ContactPage() {
                         />
                       </div>
                       <div>
-                        <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                          <AtSign className="h-3.5 w-3.5 text-slate-400" />
+                        <label htmlFor="contact-email" className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                          <AtSign className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                           E-mail *
                         </label>
                         <input
+                          id="contact-email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -423,12 +440,12 @@ export function ContactPage() {
 
                     {/* Subject */}
                     <div>
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                        <FileText className="h-3.5 w-3.5 text-slate-400" />
+                      <label htmlFor="contact-subject" className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                        <FileText className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         Assunto *
                       </label>
                       <Select value={subject || undefined} onValueChange={setSubject}>
-                        <SelectTrigger className="w-full rounded-xl bg-slate-50 px-4 py-2.5 h-auto">
+                        <SelectTrigger id="contact-subject" className="w-full rounded-xl bg-slate-50 px-4 py-2.5 h-auto">
                           <SelectValue placeholder={subjects[0]} />
                         </SelectTrigger>
                         <SelectContent>
@@ -443,11 +460,12 @@ export function ContactPage() {
 
                     {/* Message */}
                     <div>
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                        <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
+                      <label htmlFor="contact-message" className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                        <MessageSquare className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
                         Mensagem *
                       </label>
                       <textarea
+                        id="contact-message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         rows={5}
@@ -462,11 +480,14 @@ export function ContactPage() {
                     {/* Submit */}
                     <button
                       type="submit"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold text-sm shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 hover:-translate-y-0.5 transition-all"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[var(--color-primary-700)] text-white font-semibold text-sm shadow-sm hover:bg-[var(--color-primary-800)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-700)] focus-visible:ring-offset-2"
                     >
-                      <Send className="h-4 w-4" />
-                      Enviar mensagem
+                      <Mail className="h-4 w-4" aria-hidden="true" />
+                      Abrir e-mail com a mensagem
                     </button>
+                    <p className="text-xs text-slate-500">
+                      A mensagem é enviada pelo seu aplicativo de e-mail, para {CONTACT_EMAIL}.
+                    </p>
                   </motion.form>
                 )}
               </AnimatePresence>

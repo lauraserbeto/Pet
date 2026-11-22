@@ -1,140 +1,128 @@
 const UserRepository = require("../../repositories/UserRepository");
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const bcrypt = require("bcryptjs");
 const prisma = require("../../config/database");
 const { FRONTEND_URL } = require("../../config/env");
 const EmailService = require("../../services/EmailService");
 const logger = require("../../config/logger");
-
+const AppError = require("../../utils/AppError");
+const { emailSchema } = require("../../security/emailIdentity");
+const { PASSWORD_HASH_COST } = require("../../security/passwordPolicy");
+const { lockCredentials } = require("../../security/credentialLock");
+const { resetPasswordSchema } = require("../../schemas/authSchemas");
 const GENERIC_RESET_MESSAGE =
   "Se esse e-mail estiver cadastrado, você receberá as instruções.";
-
-// ── Helpers ──────────────────────────────────────────────────────────
-function hashToken(rawToken) {
-  return crypto.createHash("sha256").update(rawToken).digest("hex");
-}
-
-// ── ForgotPasswordUseCase ─────────────────────────────────────────────
+const hashToken = (raw) =>
+  crypto.createHash("sha256").update(raw).digest("hex");
 const ForgotPasswordUseCase = {
   async execute(email) {
-    // 1. Verificar se o usuário existe (resposta genérica por segurança)
-    const user = await UserRepository.findByEmail(email);
-    if (!user) {
-      // Retornamos sucesso mesmo quando o email não existe (evita enumeração)
-      return { message: GENERIC_RESET_MESSAGE };
+    const normalized = emailSchema.parse(email);
+    let user;
+    try {
+      user = await UserRepository.findByEmail(normalized);
+    } catch (error) {
+      if (error.code === "EMAIL_COLLISION")
+        return { message: GENERIC_RESET_MESSAGE };
+      throw error;
     }
-
-    // 2. Invalidar tokens anteriores deste usuário
-    await prisma.passwordResetToken.updateMany({
-      where: { user_id: user.id, used: false },
-      data: { used: true },
-    });
-
-    // 3. Gerar token aleatório seguro de 32 bytes
+    if (!user || user.is_active === false)
+      return { message: GENERIC_RESET_MESSAGE };
     const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = hashToken(rawToken);
-
-    // 4. Salvar no banco com expiração de 1 hora
-    const resetToken = await prisma.passwordResetToken.create({
-      data: {
-        user_id: user.id,
-        token_hash: tokenHash,
-        expires_at: new Date(Date.now() + 60 * 60 * 1000), // +1h
-      },
+    const resetToken = await prisma.$transaction(async (tx) => {
+      await lockCredentials(tx, user.id);
+      await tx.passwordResetToken.updateMany({
+        where: { user_id: user.id, used: false },
+        data: { used: true },
+      });
+      return tx.passwordResetToken.create({
+        data: {
+          user_id: user.id,
+          token_hash: hashToken(rawToken),
+          expires_at: new Date(Date.now() + 3600000),
+        },
+      });
     });
-
-    // 5. Enviar e-mail real de recuperação. A resposta HTTP continua genérica
-    // tanto no sucesso quanto em falha de provider para evitar enumeração.
     const resetUrl = `${FRONTEND_URL}/redefinir-senha?token=${rawToken}`;
     try {
-      await EmailService.sendPasswordReset(user.email, resetUrl);
-    } catch (err) {
+      await EmailService.sendPasswordReset(normalized, resetUrl);
+    } catch {
+      // Não registrar URL, token, corpo do e-mail ou o objeto bruto do provider.
       await prisma.passwordResetToken
-        .update({
-          where: { id: resetToken.id },
-          data: { used: true },
-        })
-        .catch((updateErr) => {
+        .update({ where: { id: resetToken.id }, data: { used: true } })
+        .catch(() => {
           logger.error(
-            { err: updateErr, user_id: user.id },
-            "Falha ao invalidar token de reset não enviado",
+            { user_id: user.id, code: "RESET_INVALIDATION_FAILED" },
+            "Falha ao invalidar token não enviado",
           );
         });
-
       logger.error(
-        { err, user_id: user.id },
-        "Falha ao enviar e-mail de recuperação de senha",
+        { user_id: user.id, code: "RESET_DELIVERY_FAILED" },
+        "Falha ao enviar recuperação de senha",
       );
     }
-
     return { message: GENERIC_RESET_MESSAGE };
   },
 };
-
-// ── ResetPasswordUseCase ──────────────────────────────────────────────
 const ResetPasswordUseCase = {
   async execute(rawToken, newPassword) {
-    if (!rawToken || !newPassword) {
-      throw new Error("Token e nova senha são obrigatórios.");
-    }
-
-    if (newPassword.length < 8) {
-      throw new Error("A senha deve ter no mínimo 8 caracteres.");
-    }
-
-    const tokenHash = hashToken(rawToken);
-
-    // 1. Buscar o token e a senha atual do usuário no banco
+    const parsed = resetPasswordSchema.parse({
+      token: rawToken,
+      password: newPassword,
+    });
+    const tokenHash = hashToken(parsed.token);
     const record = await prisma.passwordResetToken.findUnique({
       where: { token_hash: tokenHash },
-      include: {
-        user: {
-          select: { password_hash: true },
-        },
+      include: { user: { select: { password_hash: true } } },
+    });
+    if (!record) throw AppError.badRequest("Token inválido ou já utilizado.");
+    if (record.used)
+      throw AppError.badRequest("Este link de recuperação já foi utilizado.");
+    if (new Date() >= record.expires_at)
+      throw AppError.badRequest(
+        "Este link de recuperação expirou. Solicite um novo.",
+      );
+    if (
+      record.user?.password_hash &&
+      (await bcrypt.compare(parsed.password, record.user.password_hash))
+    )
+      throw AppError.validation(
+        "A nova senha deve ser diferente da senha atual.",
+      );
+    const passwordHash = await bcrypt.hash(parsed.password, PASSWORD_HASH_COST);
+    await prisma.$transaction(
+      async (tx) => {
+        await lockCredentials(tx, record.user_id);
+        const consumed = await tx.passwordResetToken.updateMany({
+          where: {
+            id: record.id,
+            user_id: record.user_id,
+            used: false,
+            expires_at: { gt: new Date() },
+          },
+          data: { used: true },
+        });
+        if (consumed.count !== 1)
+          throw AppError.badRequest("Token inválido ou já utilizado.");
+        const changed = await tx.user.updateMany({
+          where: {
+            id: record.user_id,
+            password_hash: record.user.password_hash,
+            OR: [{ is_active: true }, { is_active: null }],
+          },
+          data: { password_hash: passwordHash, updated_at: new Date() },
+        });
+        if (changed.count !== 1)
+          throw AppError.conflict(
+            "As credenciais mudaram. Solicite um novo link de recuperação.",
+          );
+        await tx.passwordResetToken.updateMany({
+          where: { user_id: record.user_id, used: false },
+          data: { used: true },
+        });
       },
-    });
-
-    if (!record) {
-      throw new Error("Token inválido ou já utilizado.");
-    }
-
-    if (record.used) {
-      throw new Error("Este link de recuperação já foi utilizado.");
-    }
-
-    if (new Date() > record.expires_at) {
-      // Marca como usado para evitar ataques de timing
-      await prisma.passwordResetToken.update({
-        where: { id: record.id },
-        data: { used: true },
-      });
-      throw new Error("Este link de recuperação expirou. Solicite um novo.");
-    }
-
-    const reusesCurrentPassword = await bcrypt.compare(
-      newPassword,
-      record.user.password_hash,
+      { timeout: 15000 },
     );
-    if (reusesCurrentPassword) {
-      throw new Error("A nova senha deve ser diferente da senha atual.");
-    }
-
-    // 2. Atualizar a senha e invalidar todos os links pendentes atomicamente
-    const passwordHash = await bcrypt.hash(newPassword, 12);
-    await prisma.$transaction(async (tx) => {
-      await tx.user.update({
-        where: { id: record.user_id },
-        data: { password_hash: passwordHash, updated_at: new Date() },
-      });
-
-      await tx.passwordResetToken.updateMany({
-        where: { user_id: record.user_id, used: false },
-        data: { used: true },
-      });
-    });
-
     return { message: "Senha atualizada com sucesso." };
   },
 };
-
 module.exports = { ForgotPasswordUseCase, ResetPasswordUseCase };

@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const UserController = require('../controllers/UserController');
-const authMiddleware = require('../middlewares/authMiddleware');
-const adminMiddleware = require('../middlewares/adminMiddleware');
-const validate = require('../middlewares/validate');
+const UserController = require("../controllers/UserController");
+const authMiddleware = require("../middlewares/authMiddleware");
+const adminMiddleware = require("../middlewares/adminMiddleware");
+const validate = require("../middlewares/validate");
 const {
   updateProfileSchema,
   changePasswordSchema,
@@ -11,7 +11,9 @@ const {
   submitSitterEvaluationSchema,
   userIdParamsSchema,
   updateUserActiveSchema,
-} = require('../schemas/userSchemas');
+  reviewSitterEvaluationSchema,
+  evaluationsQuerySchema,
+} = require("../schemas/userSchemas");
 
 router.use(authMiddleware);
 
@@ -27,7 +29,7 @@ router.use(authMiddleware);
  *       200:
  *         description: Dados do usuário
  */
-router.get('/me', UserController.getMe);
+router.get("/me", UserController.getMe);
 
 /**
  * @swagger
@@ -47,7 +49,11 @@ router.get('/me', UserController.getMe);
  *       200:
  *         description: Perfil atualizado
  */
-router.put('/me', validate({ body: updateProfileSchema }), UserController.updateProfile);
+router.put(
+  "/me",
+  validate({ body: updateProfileSchema }),
+  UserController.updateProfile,
+);
 
 /**
  * @swagger
@@ -73,9 +79,9 @@ router.put('/me', validate({ body: updateProfileSchema }), UserController.update
  *         description: Senha atualizada
  */
 router.patch(
-  '/me/password',
+  "/me/password",
   validate({ body: changePasswordSchema }),
-  UserController.updatePassword
+  UserController.updatePassword,
 );
 
 /**
@@ -105,9 +111,9 @@ router.patch(
  *         description: Formato inválido ou imagem acima de 2 MB
  */
 router.post(
-  '/me/avatar',
+  "/me/avatar",
   validate({ body: uploadAvatarSchema }),
-  UserController.uploadAvatar
+  UserController.uploadAvatar,
 );
 
 /**
@@ -148,9 +154,9 @@ router.post(
  *         description: Foto de tipo não permitido, acima de 2 MB ou mais de 6 fotos
  */
 router.post(
-  '/me/evaluations',
+  "/me/evaluations",
   validate({ body: submitSitterEvaluationSchema }),
-  UserController.submitSitterEvaluation
+  UserController.submitSitterEvaluation,
 );
 
 /**
@@ -165,7 +171,12 @@ router.post(
  *       200:
  *         description: Lista de avaliações
  */
-router.get('/admin/evaluations', adminMiddleware, UserController.getEvaluations);
+router.get(
+  "/admin/evaluations",
+  adminMiddleware,
+  validate({ query: evaluationsQuerySchema }),
+  UserController.getEvaluations,
+);
 
 /**
  * @swagger
@@ -192,7 +203,7 @@ router.get('/admin/evaluations', adminMiddleware, UserController.getEvaluations)
  *       200:
  *         description: Lista de usuários (metadados de paginação nos headers X-Total-*)
  */
-router.get('/admin/users', adminMiddleware, UserController.listUsers);
+router.get("/admin/users", adminMiddleware, UserController.listUsers);
 
 /**
  * @swagger
@@ -234,10 +245,10 @@ router.get('/admin/users', adminMiddleware, UserController.listUsers);
  *         description: Dados inválidos ou tentativa de alterar a própria conta
  */
 router.patch(
-  '/admin/users/:id/active',
+  "/admin/users/:id/active",
   adminMiddleware,
   validate({ params: userIdParamsSchema, body: updateUserActiveSchema }),
-  UserController.setActive
+  UserController.setActive,
 );
 
 /**
@@ -268,6 +279,11 @@ router.patch(
  *       200:
  *         description: Avaliação revisada
  */
-router.patch('/admin/evaluations/:id', adminMiddleware, UserController.reviewEvaluation);
+router.patch(
+  "/admin/evaluations/:id",
+  adminMiddleware,
+  validate({ params: userIdParamsSchema, body: reviewSitterEvaluationSchema }),
+  UserController.reviewEvaluation,
+);
 
 module.exports = router;

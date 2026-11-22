@@ -1,65 +1,73 @@
-const prisma = require('../config/database');
-const getProviderDetailsUseCase = require('../useCases/providers/GetProviderDetailsUseCase');
-const updateProviderProfileUseCase = require('../useCases/providers/UpdateProviderProfileUseCase');
-const updateProviderAccountUseCase = require('../useCases/providers/UpdateProviderAccountUseCase');
+const prisma = require("../config/database");
+const reviewRepository = require("../repositories/ReviewRepository");
+const {
+  getProfileCompleteness,
+  isPublicProfileComplete,
+} = require("../utils/profileCompleteness");
+const {
+  UpdateProviderStatusUseCase,
+} = require("../useCases/providers/UpdateProviderStatusUseCase");
+const getProviderDetailsUseCase = require("../useCases/providers/GetProviderDetailsUseCase");
+const updateProviderProfileUseCase = require("../useCases/providers/UpdateProviderProfileUseCase");
+const updateProviderAccountUseCase = require("../useCases/providers/UpdateProviderAccountUseCase");
 const {
   PROVIDER_STATUS,
   isOperationalSitter,
-} = require('../constants/providerStatus');
-const { PROVIDER_ROLES, operationalProviderWhere } = require('../useCases/providers/providerAccess');
-const { toPublicProvider, toPublicProviders } = require('../utils/publicProvider');
-const { ADMIN_PROVIDER_SELECT, toAdminProviders } = require('../utils/adminProvider');
-const emailService = require('../services/EmailService');
-const logger = require('../config/logger');
-const { FRONTEND_URL } = require('../config/env');
-const AppError = require('../utils/AppError');
-
+} = require("../constants/providerStatus");
+const {
+  PROVIDER_ROLES,
+  operationalProviderWhere,
+} = require("../useCases/providers/providerAccess");
+const {
+  toPublicProvider,
+  toPublicProviders,
+} = require("../utils/publicProvider");
+const {
+  ADMIN_PROVIDER_SELECT,
+  toAdminProviders,
+} = require("../utils/adminProvider");
+const emailService = require("../services/EmailService");
+const logger = require("../config/logger");
+const { FRONTEND_URL } = require("../config/env");
+const AppError = require("../utils/AppError");
+const getProviderMetricsUseCase = require("../useCases/providers/GetProviderMetricsUseCase");
+const { metricsQuery } = require("../schemas/adminSchemas");
 
 class ProviderController {
-
-  // Validador de completitude em memória (JS) para estabilidade de tipagem
-  #isProfileComplete(p) {
-
-    // Regras Básicas (Gerais)
-    // Flexibilizamos a foto (avatar_url): Se não tiver, ainda consideramos "completo" para listagem,
-    // o frontend lida com o fallback.
-    const hasBasicInfo = p.description && p.phone && p.city && p.zip_code;
-
-    if (!hasBasicInfo) return false;
-
-    // Regras por Role
-    const roleId = p.user?.role_id;
-
-    const hasActiveService =
-      Array.isArray(p.services) &&
-      p.services.some(service => service.is_active);
-
-    if (roleId === 3) { // HOTEL
-      const hasImages = Array.isArray(p.gallery_images) && p.gallery_images.length >= 1;
-
-      return !!(hasActiveService && hasImages);
+  async getMetrics(req, res, next) {
+    try {
+      const { days } = metricsQuery.parse(req.query);
+      return res.json(
+        await getProviderMetricsUseCase.execute({
+          userId: req.userId,
+          userRole: req.userRole,
+          days,
+        }),
+      );
+    } catch (error) {
+      return next(
+        error?.name === "ZodError"
+          ? AppError.validation(
+              "Parâmetros de métricas inválidos (days entre 1 e 365).",
+            )
+          : error,
+      );
     }
-
-    if (roleId === 4) { // PET_SITTER
-      const hasRoles = Array.isArray(p.sitter_roles) && p.sitter_roles.length > 0;
-
-      return !!(hasActiveService && hasRoles);
-    }
-
-    return true; // LOJISTA
   }
 
+  // Vitrine: mesma regra usada por /providers/completeness (utils/profileCompleteness).
+  #isProfileComplete(p) {
+    return isPublicProfileComplete(p);
+  }
 
   #withoutSitterEvaluationProbe(provider) {
     const { sitter_evaluations: _omit, ...user } = provider.user || {};
     return { ...provider, user };
   }
 
-
-  async listHotels(req, res) {
+  async listHotels(req, res, next) {
     try {
       const providers = await prisma.provider.findMany({
-
         // Vitrine: hotel aprovado, com conta ativa e pelo menos um serviço ativo.
         where: {
           ...operationalProviderWhere({ roleId: PROVIDER_ROLES.HOTEL }),
@@ -75,49 +83,49 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
-              role_id: true
-            }
+              role_id: true,
+            },
           },
 
           services: {
             where: { is_active: true },
-            orderBy: { price: 'asc' },
+            orderBy: { price: "asc" },
             select: {
               id: true,
               name: true,
               price: true,
               is_active: true,
             },
-          }
-        }
+          },
+        },
       });
 
-      const completeHotels = providers.filter(p => this.#isProfileComplete(p));
+      const completeHotels = providers.filter((p) =>
+        this.#isProfileComplete(p),
+      );
 
-      const hotelsWithStartingPrice = completeHotels.map(p => ({
+      const hotelsWithStartingPrice = completeHotels.map((p) => ({
         ...p,
-        starting_price: p.services.length > 0
-          ? Number(p.services[0].price)
-          : null,
-        services: p.services.map(service => ({
+        starting_price:
+          p.services.length > 0 ? Number(p.services[0].price) : null,
+        services: p.services.map((service) => ({
           ...service,
           price: Number(service.price),
         })),
       }));
 
-      return res.status(200).json(toPublicProviders(hotelsWithStartingPrice));
-
+      const ratedHotels = await reviewRepository.withProviderRatings(
+        hotelsWithStartingPrice,
+      );
+      return res.status(200).json(toPublicProviders(ratedHotels));
     } catch (error) {
-      console.error("[ProviderController] listHotels:", error);
-      return res.status(500).json({ error: 'Erro ao listar hotéis' });
+      return next(error);
     }
   }
 
-
-  async listSitters(req, res) {
+  async listSitters(req, res, next) {
     try {
       const providers = await prisma.provider.findMany({
-
         // Vitrine: sitter aprovado, com conta ativa, avaliação aprovada e serviço ativo.
         where: {
           ...operationalProviderWhere({ roleId: PROVIDER_ROLES.PET_SITTER }),
@@ -135,56 +143,53 @@ class ProviderController {
               avatar_url: true,
               role_id: true,
               sitter_evaluations: {
-                where: { status: 'APPROVED' },
+                where: { status: "APPROVED" },
                 select: {
                   id: true,
-                  status: true
+                  status: true,
                 },
-                take: 1
-              }
-            }
+                take: 1,
+              },
+            },
           },
 
           services: {
             where: { is_active: true },
-            orderBy: { price: 'asc' },
+            orderBy: { price: "asc" },
             select: {
               id: true,
               name: true,
               price: true,
               is_active: true,
             },
-          }
-        }
+          },
+        },
       });
 
       const completeSitters = providers
-        .filter(p => isOperationalSitter(p) && this.#isProfileComplete(p))
-        .map(p => ({
+        .filter((p) => isOperationalSitter(p) && this.#isProfileComplete(p))
+        .map((p) => ({
           ...p,
-          starting_price: p.services.length > 0
-            ? Number(p.services[0].price)
-            : null,
-          services: p.services.map(service => ({
+          starting_price:
+            p.services.length > 0 ? Number(p.services[0].price) : null,
+          services: p.services.map((service) => ({
             ...service,
             price: Number(service.price),
           })),
         }))
-        .map(p => this.#withoutSitterEvaluationProbe(p));
+        .map((p) => this.#withoutSitterEvaluationProbe(p));
 
-      return res.status(200).json(toPublicProviders(completeSitters));
-
+      const ratedSitters =
+        await reviewRepository.withProviderRatings(completeSitters);
+      return res.status(200).json(toPublicProviders(ratedSitters));
     } catch (error) {
-      console.error("[ProviderController] listSitters:", error);
-      return res.status(500).json({ error: 'Erro ao listar pet sitters' });
+      return next(error);
     }
   }
 
-
-  async listStores(req, res) {
+  async listStores(req, res, next) {
     try {
       const providers = await prisma.provider.findMany({
-
         // Vitrine: lojista aprovado e com conta ativa (E-01).
         where: operationalProviderWhere({ roleId: PROVIDER_ROLES.STORE }),
 
@@ -193,26 +198,25 @@ class ProviderController {
             select: {
               full_name: true,
               avatar_url: true,
-              role_id: true
-            }
+              role_id: true,
+            },
           },
 
           _count: {
-            select: { products: true }
-          }
-        }
+            select: { products: true },
+          },
+        },
       });
 
-      const completeStores = providers.filter(p => this.#isProfileComplete(p));
+      const completeStores = providers.filter((p) =>
+        this.#isProfileComplete(p),
+      );
 
       return res.status(200).json(toPublicProviders(completeStores));
-
     } catch (error) {
-      console.error("[ProviderController] listStores:", error);
-      return res.status(500).json({ error: 'Erro ao listar lojas' });
+      return next(error);
     }
   }
-
 
   // Listagem administrativa de parceiros (E-02): rota exclusiva do admin, com
   // os dados de moderação (CPF/CNPJ, motivo da recusa e estado da conta).
@@ -223,12 +227,10 @@ class ProviderController {
       });
 
       return res.status(200).json(toAdminProviders(providers));
-
     } catch (error) {
       return next(error);
     }
   }
-
 
   async getDetails(req, res, next) {
     try {
@@ -237,14 +239,12 @@ class ProviderController {
 
       // Rota pública: o detalhe do parceiro também não pode carregar CPF/CNPJ.
       return res.status(200).json(toPublicProvider(provider));
-
     } catch (error) {
       return next(error);
     }
   }
 
-
-  async getMe(req, res) {
+  async getMe(req, res, next) {
     try {
       const userId = req.userId;
 
@@ -261,53 +261,49 @@ class ProviderController {
               phone: true,
             },
           },
-        }
+        },
       });
 
+      if (!provider) throw AppError.notFound("Parceiro não encontrado");
       return res.status(200).json(provider);
-
     } catch (error) {
-      console.error("[ProviderController] Erro em getMe:", error);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
-
 
   // Novo endpoint exclusivo para Vitrine/Perfil Público
-  async updateProfile(req, res) {
+  async updateProfile(req, res, next) {
     try {
       const userId = req.userId;
-      console.log("[updateProfile] Atualizando vitrine para:", userId);
 
-      const updatedProvider = await updateProviderProfileUseCase.execute(userId, req.body);
+      const updatedProvider = await updateProviderProfileUseCase.execute(
+        userId,
+        req.body,
+      );
 
       return res.status(200).json(updatedProvider);
-
     } catch (error) {
-      console.error("[ProviderController] Erro em updateProfile:", error.message);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
-
 
   // Endpoint para dados básicos de conta
-  async updateMe(req, res) {
+  async updateMe(req, res, next) {
     try {
       const userId = req.userId;
-      console.log("[updateMe] Atualizando conta para:", userId);
 
-      const updatedProvider = await updateProviderAccountUseCase.execute(userId, req.body);
+      const updatedProvider = await updateProviderAccountUseCase.execute(
+        userId,
+        req.body,
+      );
 
       return res.status(200).json(updatedProvider);
-
     } catch (error) {
-      console.error("[ProviderController] Erro em updateMe:", error.message);
-      return res.status(500).json({ error: error.message });
+      return next(error);
     }
   }
 
-
-  async getCompleteness(req, res) {
+  async getCompleteness(req, res, next) {
     try {
       const userId = req.userId;
 
@@ -333,69 +329,28 @@ class ProviderController {
               id: true,
             },
           },
-        }
+        },
       });
 
       if (!provider) {
-        return res.status(404).json({ error: 'Provedor não encontrado' });
+        throw AppError.notFound("Parceiro não encontrado");
       }
 
-      const missingFields = [];
-      const roleName = provider.user.role_id === 3 ? 'HOTEL' : (provider.user.role_id === 4 ? 'PET_SITTER' : 'OTHER');
-
-
-      // Campos Obrigatórios Gerais
-      if (!provider.description) missingFields.push('description');
-      if (!provider.phone) missingFields.push('phone');
-      if (!provider.user.avatar_url) missingFields.push('avatar_url');
-      if (!provider.zip_code) missingFields.push('zip_code');
-      if (!provider.city) missingFields.push('city');
-      if (!provider.operating_hours || Object.keys(provider.operating_hours).length === 0) missingFields.push('operating_hours');
-
-
-      // Campos Obrigatórios por Role
-      if (roleName === 'HOTEL') {
-
-        if (!provider.services || provider.services.length === 0) {
-          missingFields.push('services');
-        }
-
-        const allowedAnimals = provider.allowed_animals || [];
-        if (Array.isArray(allowedAnimals) && allowedAnimals.length < 1) missingFields.push('allowed_animals');
-        else if (!Array.isArray(allowedAnimals)) missingFields.push('allowed_animals');
-
-        const amenities = provider.amenities || [];
-        if (Array.isArray(amenities) && amenities.length < 1) missingFields.push('amenities');
-        else if (!Array.isArray(amenities)) missingFields.push('amenities');
-
-        const galleryImages = provider.gallery_images || [];
-        if (Array.isArray(galleryImages) && galleryImages.length < 3) missingFields.push('gallery_images');
-        else if (!Array.isArray(galleryImages)) missingFields.push('gallery_images');
-
-
-      } else if (roleName === 'PET_SITTER') {
-
-        if (!provider.services || provider.services.length === 0) {
-          missingFields.push('services');
-        }
-
-        const sitterRoles = provider.sitter_roles || [];
-        if (Array.isArray(sitterRoles) && sitterRoles.length < 1) missingFields.push('sitter_roles');
-        else if (!Array.isArray(sitterRoles)) missingFields.push('sitter_roles');
-      }
-
+      // Mesma regra da vitrine. `isComplete`/`missingFields` mantêm o contrato
+      // anterior, agora restritos ao que de fato impede a publicação;
+      // `recommendedFields` lista o que melhora o perfil sem bloquear (G12).
+      const { isPublic, required, recommended } =
+        getProfileCompleteness(provider);
 
       return res.status(200).json({
-        isComplete: missingFields.length === 0,
-        missingFields
+        isComplete: isPublic,
+        missingFields: required,
+        recommendedFields: recommended,
       });
-
     } catch (error) {
-      console.error("[ProviderController] Erro em getCompleteness:", error);
-      return res.status(500).json({ error: 'Erro ao verificar completitude do perfil' });
+      return next(error);
     }
   }
-
 
   // Atualiza status do provedor (admin)
   async updateStatus(req, res, next) {
@@ -403,56 +358,35 @@ class ProviderController {
       const { id } = req.params;
       const { status, rejection_reason } = req.body;
 
-      // Busca o provider com o e-mail do user para envio de e-mail
-      const existing = await prisma.provider.findUnique({
-        where: { id },
-        include: {
-          user: {
-            select: { email: true },
-          },
-        },
+      // Transição validada e serializada no use case (E-11 / AUD-15, DEC-D).
+      const { updated, email } = await new UpdateProviderStatusUseCase().execute({
+        providerId: id,
+        status,
+        rejectionReason: rejection_reason,
       });
 
-      if (!existing) {
-        return next(AppError.notFound('Parceiro não encontrado'));
-      }
-
-      const updated = await prisma.provider.update({
-        where: { id },
-        data: {
-          status,
-          rejection_reason: status === PROVIDER_STATUS.REJECTED
-            ? rejection_reason
-            : null,
-        },
-      });
-
-
-      // Dispara e-mail de recusa — falha não reverte a persistência
-      if (status === PROVIDER_STATUS.REJECTED && existing.user?.email) {
+      // Dispara e-mail de recusa após o commit — falha não reverte a persistência
+      if (status === PROVIDER_STATUS.REJECTED && email) {
         const correctionUrl = `${FRONTEND_URL}/parceiro/corrigir-cadastro`;
 
         try {
-          await emailService.sendRejection(existing.user.email, {
+          await emailService.sendRejection(email, {
             reason: rejection_reason,
             correctionUrl,
           });
-
         } catch (err) {
           logger.error(
             { err, providerId: id },
-            '[ProviderController] Falha ao enviar e-mail de recusa',
+            "[ProviderController] Falha ao enviar e-mail de recusa",
           );
         }
       }
 
       return res.status(200).json(updated);
-
     } catch (error) {
       return next(error);
     }
   }
-
 
   // Endpoint de reenvio: parceiro REJEITADO move o próprio cadastro para EM_REVISAO
   async resubmit(req, res, next) {
@@ -464,7 +398,7 @@ class ProviderController {
       });
 
       if (!provider) {
-        return next(AppError.notFound('Perfil de parceiro não encontrado'));
+        return next(AppError.notFound("Perfil de parceiro não encontrado"));
       }
 
       if (provider.status !== PROVIDER_STATUS.REJECTED) {
@@ -475,18 +409,28 @@ class ProviderController {
         );
       }
 
-      const updated = await prisma.provider.update({
-        where: { id: provider.id },
+      // Condicional ao status lido: um reenvio concorrente com a decisão do
+      // admin não sobrescreve uma aprovação/recusa já gravada (E-11).
+      const { count } = await prisma.provider.updateMany({
+        where: { id: provider.id, status: PROVIDER_STATUS.REJECTED },
         data: { status: PROVIDER_STATUS.IN_REVIEW },
       });
+      if (count !== 1) {
+        return next(
+          AppError.conflict(
+            "O status do cadastro mudou durante o reenvio. Recarregue a página.",
+          ),
+        );
+      }
 
+      const updated = await prisma.provider.findUnique({
+        where: { id: provider.id },
+      });
       return res.status(200).json(updated);
-
     } catch (error) {
       return next(error);
     }
   }
 }
-
 
 module.exports = new ProviderController();

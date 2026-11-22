@@ -1,13 +1,14 @@
-import { Bell, Search, Home, Loader2, User, Globe, LogOut, Menu, X, AlertTriangle, ArrowRight } from "lucide-react";
+import { Home, User, Globe, LogOut, Menu, X, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import { Avatar } from "../../components/ui/avatar";
+import { HamsterLoader } from "../ui/HamsterLoader";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
 import { cn } from "../../lib/utils";
 import { useCompleteness } from "../../lib/hooks/useCompleteness";
+import { requiredFieldLabel } from "../../lib/profileCompleteness";
 
 export function DashboardLayout() {
   const { pathname } = useLocation();
@@ -102,25 +103,11 @@ export function DashboardLayout() {
     }
   };
 
-  const fieldLabels: Record<string, string> = {
-    description: "Descrição",
-    phone: "Telefone",
-    avatar_url: "Foto de Perfil",
-    zip_code: "CEP",
-    city: "Cidade",
-    operating_hours: "Horário de Funcionamento",
-    daily_rate: "Valor da Diária",
-    allowed_animals: "Animais Aceitos",
-    amenities: "Comodidades",
-    gallery_images: "Imagens da Galeria (mínimo 3)",
-    hourly_rate: "Valor da Hora",
-    sitter_roles: "Tipos de Serviço"
-  };
-
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-10 w-10 animate-spin text-[var(--color-primary-500)]" />
+        {/* Mesmo carregamento com identidade do restante do app (G23). */}
+        <HamsterLoader size="sm" message="Carregando seu painel..." />
       </div>
     );
   }
@@ -138,14 +125,16 @@ export function DashboardLayout() {
       {/* Mobile Sidebar Drawer */}
       <div 
         className={cn(
-          "fixed inset-y-0 left-0 z-[70] w-64 bg-slate-900 shadow-2xl transition-transform duration-300 md:hidden",
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-[70] w-64 bg-slate-900 transition-transform duration-300 md:hidden",
+          // Sombra só aberta: fechada, ela vazava como faixa na borda esquerda (G17).
+          isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full invisible"
         )}
       >
         <div className="flex flex-col h-full">
           <div className="p-4 flex justify-end">
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Fechar menu"
               className="p-2 text-slate-400 hover:text-white transition-colors"
             >
               <X size={24} />
@@ -183,29 +172,27 @@ export function DashboardLayout() {
                 size="icon" 
                 className="md:hidden rounded-lg text-slate-600 hover:bg-slate-100"
                 onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Abrir menu"
+                aria-expanded={isMobileMenuOpen}
             >
                 <Menu className="h-6 w-6" />
             </Button>
-            <div className="relative w-full max-w-md hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input className="pl-10 bg-slate-50 border-slate-200 focus-visible:ring-[var(--color-primary-500)]" placeholder="Buscar no painel..." />
-            </div>
+            {/* Busca do painel e sino de notificações removidos: não havia busca
+                nem backend de notificações; o ponto vermelho era fixo (G19). */}
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/" className="md:hidden">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                    <Home className="h-5 w-5 text-slate-600" />
-                </Button>
-            </Link>
-            <Button variant="ghost" size="icon" className="relative rounded-full">
-              <Bell className="h-5 w-5 text-slate-600 hover:text-[var(--color-primary-600)] transition-colors" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full animate-pulse"></span>
+            <Button asChild variant="ghost" size="icon" className="rounded-full md:hidden">
+              <Link to="/" aria-label="Ir para o site">
+                <Home className="h-5 w-5 text-slate-600" aria-hidden="true" />
+              </Link>
             </Button>
-            
             {/* Profile Dropdown Component */}
             <div className="relative">
               <button 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
+                aria-label={`Menu da conta de ${displayName}`}
+                aria-expanded={isProfileOpen}
+                aria-haspopup="menu"
                 className="flex items-center focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)] focus:ring-offset-2 rounded-full transition-shadow"
               >
                 <Avatar className="h-9 w-9 border-2 border-[var(--color-primary-500)] bg-slate-100 flex items-center justify-center text-slate-700 font-bold hover:shadow-md transition-shadow" fallback={getInitials(displayName)}>
@@ -279,20 +266,20 @@ export function DashboardLayout() {
                   <p className="font-semibold text-amber-900 text-sm sm:text-base">
                     Seu perfil ainda não está visível para os tutores.
                   </p>
-                  <p className="text-amber-700 text-xs sm:text-sm mt-0.5">
-                    Complete as informações obrigatórias para ser publicado: 
+                  <p className="text-amber-800 text-xs sm:text-sm mt-0.5">
+                    Para aparecer na vitrine, falta:
                     <span className="font-medium ml-1">
-                      {completeness.missingFields.map(f => fieldLabels[f] || f).join(", ")}
+                      {completeness.missingFields.map(requiredFieldLabel).join(", ")}
                     </span>
                   </p>
                 </div>
               </div>
-              <Link to="/dashboard/perfil">
-                <Button variant="outline" size="sm" className="bg-white border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800 transition-all flex-shrink-0 gap-2">
+              <Button asChild variant="outline" size="sm" className="bg-white border-amber-200 text-amber-800 hover:bg-amber-100 hover:text-amber-900 transition-all flex-shrink-0 gap-2">
+                <Link to="/dashboard/perfil">
                   Completar Perfil
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </Button>
             </div>
           </div>
         )}
@@ -303,7 +290,7 @@ export function DashboardLayout() {
              <Suspense
                fallback={
                  <div className="flex items-center justify-center py-16">
-                   <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)]" />
+                   <HamsterLoader size="sm" message="Carregando..." />
                  </div>
                }
              >

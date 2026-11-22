@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="15" failures="0" errors="0" time="0.7983328">
+    <testsuite name="src/lib/postLoginRedirect.test.ts" timestamp="2026-10-18T22:05:12.709Z" hostname="LAUBS" tests="4" failures="0" errors="0" skipped="0" time="0.0111594">
+        <testcase classname="src/lib/postLoginRedirect.test.ts" name="postLoginRedirect &gt; aceita somente caminhos internos" time="0.0030968">
+        </testcase>
+        <testcase classname="src/lib/postLoginRedirect.test.ts" name="postLoginRedirect &gt; preserva e recupera o contexto do checkout" time="0.0018456">
+        </testcase>
+        <testcase classname="src/lib/postLoginRedirect.test.ts" name="postLoginRedirect &gt; prioriza o estado da rota e permite limpar o destino" time="0.0007589">
+        </testcase>
+        <testcase classname="src/lib/postLoginRedirect.test.ts" name="postLoginRedirect &gt; descarta conteúdo de storage inválido" time="0.0004853">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/CheckoutPaymentPage.test.tsx" timestamp="2026-10-18T22:05:12.712Z" hostname="LAUBS" tests="6" failures="0" errors="0" skipped="0" time="0.4914846">
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="retorno aprovado na URL aguarda webhook e não anuncia pedido pago" time="0.2155742">
+        </testcase>
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="estado confirmado pelo backend anuncia pagamento, inclusive pedido em preparação" time="0.0185187">
+        </testcase>
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="vários lojistas recebem ações separadas, sem omitir o segundo pedido" time="0.0585558">
+        </testcase>
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="pagamento recusado permite nova tentativa com link do gateway" time="0.0796213">
+        </testcase>
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="modo simulado preserva confirmação e consulta status novamente" time="0.0907677">
+        </testcase>
+        <testcase classname="src/pages/CheckoutPaymentPage.test.tsx" name="retorno recupera pedidos de vários lojistas da sessão do mesmo tutor" time="0.0245306">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/parceiro/CorrecaoCadastro.test.tsx" timestamp="2026-10-18T22:05:12.715Z" hostname="LAUBS" tests="5" failures="0" errors="0" skipped="0" time="0.2956888">
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="mostra o motivo da recusa em destaque" time="0.0693131">
+        </testcase>
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="salva as correções e só então reenvia — o endpoint de reenvio não grava dados" time="0.1275727">
+        </testcase>
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="avisa quando as correções salvam mas o reenvio falha" time="0.0336572">
+        </testcase>
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="bloqueia o reenvio quando não há recusa pendente" time="0.0333587">
+        </testcase>
+        <testcase classname="src/pages/parceiro/CorrecaoCadastro.test.tsx" name="mostra erro com retry quando o cadastro não carrega" time="0.0282117">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { API_URL, getHeaders } from "../../../lib/api";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, XCircle, Store, Bed, MapPin, User, AlertTriangle, Search, Loader2, Ban, RefreshCcw } from "lucide-react";
@@ -26,6 +27,20 @@ type TabType = 'PENDENTE' | 'APROVADO' | 'REJEITADO';
 
 const APPROVED_STATUSES = APPROVED_PROVIDER_STATUSES;
 const REVIEW_STATUSES: string[] = [PROVIDER_STATUS.PENDING, PROVIDER_STATUS.IN_REVIEW];
+
+// Mensagem real da API (ex.: transição inválida, sitter sem avaliação) em vez
+// de um erro genérico (E-11).
+async function apiErrorMessage(res: Response, fallback: string) {
+  try {
+    const body = await res.json();
+    return body?.error?.message || body?.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
+// Célula da tabela que, abaixo de md, vira um campo do card com o rótulo do data-label.
+const MOBILE_CELL =
+  "max-md:block max-md:p-0 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:font-bold max-md:before:uppercase max-md:before:tracking-wider max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]";
 
 export function Approvals() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -114,14 +129,13 @@ export function Approvals() {
         headers: getHeaders(),
         body: JSON.stringify({ status: 'APROVADO' })
       });
-      
-      if (!res.ok) throw new Error("Erro ao aprovar parceiro");
+
+      if (!res.ok) throw new Error(await apiErrorMessage(res, "Não foi possível aprovar o parceiro."));
 
       toast.success("Parceiro aprovado com sucesso!");
       setPartners(prev => prev.map(p => p.id === providerId ? { ...p, status: 'APROVADO', rejection_reason: undefined } : p));
     } catch (err) {
-      console.error("Error approving:", err);
-      toast.error("Ocorreu um erro ao aprovar o parceiro.");
+      toast.error(err instanceof Error ? err.message : "Não foi possível aprovar o parceiro.");
     } finally {
       setProcessingId(null);
     }
@@ -140,24 +154,24 @@ export function Approvals() {
   };
 
   const confirmRejection = async () => {
-    if (!rejectingId) return;
+    const reason = rejectionReason.trim();
+    if (!rejectingId || !reason) return;
     try {
       setProcessingId(rejectingId);
-      
+
       const res = await fetch(`${API_URL}/providers/${rejectingId}/status`, {
         method: "PATCH",
         headers: getHeaders(),
-        body: JSON.stringify({ status: 'REJEITADO', rejection_reason: rejectionReason || null })
+        body: JSON.stringify({ status: 'REJEITADO', rejection_reason: reason })
       });
 
-      if (!res.ok) throw new Error("Erro ao rejeitar parceiro");
+      if (!res.ok) throw new Error(await apiErrorMessage(res, "Não foi possível recusar o parceiro."));
 
       toast.success("Parceiro recusado com sucesso.");
-      setPartners(prev => prev.map(p => p.id === rejectingId ? { ...p, status: 'REJEITADO', rejection_reason: rejectionReason } : p));
+      setPartners(prev => prev.map(p => p.id === rejectingId ? { ...p, status: 'REJEITADO', rejection_reason: reason } : p));
       closeRejectModal();
     } catch (err) {
-      console.error("Error rejecting:", err);
-      toast.error("Ocorreu um erro ao rejeitar o parceiro.");
+      toast.error(err instanceof Error ? err.message : "Não foi possível recusar o parceiro.");
     } finally {
       setProcessingId(null);
     }
@@ -266,7 +280,7 @@ export function Approvals() {
           onClick={() => setActiveTab('PENDENTE')}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'PENDENTE' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`}
         >
-          Novos
+          Para analisar
         </button>
         <button
           onClick={() => setActiveTab('APROVADO')}
@@ -320,10 +334,11 @@ export function Approvals() {
           </CardContent>
         </Card>
       ) : (
+        // Abaixo de md cada linha vira um card com rótulos e ações visíveis (auditoria visual G17).
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
+          <div className="md:overflow-x-auto">
+            <table className="w-full text-left border-collapse max-md:block">
+              <thead className="max-md:sr-only">
                 <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="px-6 py-4 font-semibold text-sm text-slate-600">Contato</th>
                   <th className="px-6 py-4 font-semibold text-sm text-slate-600">Negócio</th>
@@ -332,19 +347,19 @@ export function Approvals() {
                   <th className="px-6 py-4 font-semibold text-sm text-slate-600 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 max-md:block">
                 {filteredPartners.map((partner) => {
                   const isProcessing = processingId === partner.id;
 
                   return (
-                    <tr key={partner.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
+                    <tr key={partner.id} className="hover:bg-slate-50/50 transition-colors max-md:block max-md:space-y-3 max-md:p-4">
+                      <td data-label="Contato" className={`px-6 py-4 ${MOBILE_CELL}`}>
                         <div className="flex flex-col">
                           <span className="font-semibold text-slate-900">{partner.full_name}</span>
                           <span className="text-sm text-slate-500">{partner.email}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td data-label="Negócio" className={`px-6 py-4 ${MOBILE_CELL}`}>
                         <span className="font-medium text-slate-800">{partner.business_name}</span>
                         {partner.is_active === false && (
                           <span className="ml-2 inline-flex items-center text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
@@ -352,12 +367,25 @@ export function Approvals() {
                           </span>
                         )}
                         {partner.rejection_reason && activeTab === 'REJEITADO' && (
-                          <p className="text-xs text-red-500 mt-1 line-clamp-1" title={partner.rejection_reason}>
+                          <p className="text-xs text-red-700 mt-1 line-clamp-1" title={partner.rejection_reason}>
                             Motivo: {partner.rejection_reason}
                           </p>
                         )}
+                        {/* EM_REVISAO distinto de cadastro novo (E-11 / AUD-15). */}
+                        {partner.status === PROVIDER_STATUS.IN_REVIEW && (
+                          <div className="mt-1 space-y-0.5">
+                            <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                              Reenviado após correção
+                            </span>
+                            {partner.rejection_reason && (
+                              <p className="text-xs text-slate-600 line-clamp-1" title={partner.rejection_reason}>
+                                Recusa anterior: {partner.rejection_reason}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td data-label="Documento" className={`px-6 py-4 ${MOBILE_CELL}`}>
                         <div className="flex items-center gap-1.5">
                           <span className="text-slate-600 font-mono text-sm">{formatDocument(partner.document)}</span>
                           {!isValidDocument(partner.document) && (
@@ -370,14 +398,14 @@ export function Approvals() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td data-label="Tipo" className={`px-6 py-4 ${MOBILE_CELL}`}>
                         <div className="flex items-center text-sm font-medium text-slate-700 bg-slate-100 w-fit px-2.5 py-1 rounded-full">
                           {getRoleIcon(partner.role_id)}
                           {getRoleName(partner.role_id)}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col sm:flex-row items-center justify-end gap-2">
+                      <td className="px-6 py-4 max-md:block max-md:p-0 max-md:pt-1">
+                        <div className="flex flex-wrap items-center justify-end gap-2 max-md:justify-start">
                           {activeTab === 'PENDENTE' && (
                             <>
                               <Button 
@@ -390,15 +418,22 @@ export function Approvals() {
                                 {isProcessing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <XCircle className="h-4 w-4 mr-1.5" />}
                                 Recusar
                               </Button>
-                              <Button 
-                                onClick={() => handleApprove(partner.id)}
-                                size="sm"
-                                disabled={isProcessing}
-                                className={`bg-emerald-600 hover:bg-emerald-700 text-white ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}
-                              >
-                                {isProcessing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1.5" />}
-                                Aprovar
-                              </Button>
+                              {/* DEC-D: Pet Sitter é aprovado pela avaliação da candidatura. */}
+                              {partner.role_id === 4 ? (
+                                <Button asChild size="sm" variant="outline">
+                                  <Link to="/dashboard/avaliacoes-sitters">Avaliar candidatura</Link>
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() => handleApprove(partner.id)}
+                                  size="sm"
+                                  disabled={isProcessing}
+                                  className={`bg-emerald-700 hover:bg-emerald-800 text-white ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}
+                                >
+                                  {isProcessing ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-1.5" />}
+                                  Aprovar
+                                </Button>
+                              )}
                             </>
                           )}
                           {activeTab === 'APROVADO' && partner.is_active !== false && (
@@ -462,13 +497,19 @@ export function Approvals() {
             </div>
 
             <div className="p-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Motivo da recusa (Opcional)
+              {/* Motivo obrigatório: a API exige e o parceiro recebe por e-mail (E-11). */}
+              <label htmlFor="rejection-reason" className="block text-sm font-medium text-slate-700 mb-1">
+                Motivo da recusa (obrigatório)
               </label>
-              <textarea 
+              <p className="text-xs text-slate-500 mb-2">
+                O parceiro recebe este motivo por e-mail e o vê na tela de correção do cadastro.
+              </p>
+              <textarea
+                id="rejection-reason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Descreva o motivo para manter no histórico..."
+                maxLength={500}
+                placeholder="Ex.: documento ilegível — envie uma foto nítida do CNPJ."
                 className="w-full h-24 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors resize-none"
               ></textarea>
             </div>
@@ -482,9 +523,9 @@ export function Approvals() {
               >
                 Cancelar
               </Button>
-              <Button 
+              <Button
                 onClick={confirmRejection}
-                disabled={processingId === rejectingId}
+                disabled={processingId === rejectingId || !rejectionReason.trim()}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 {processingId === rejectingId ? (

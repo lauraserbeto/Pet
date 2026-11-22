@@ -1,0 +1,26 @@
+◇ injecting env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injecting env (0) from .env // tip: ⌘ enable debugging { debug: true }
+✔ E-08 DB: dois tutores disputam a última unidade; só um pedido e nenhum estoque negativo (1248.3499ms)
+✔ E-08 DB: finalizações simultâneas do mesmo carrinho não criam pedidos duplicados (971.708ms)
+✔ E-08 DB: edição de quantidade concorrente é preservada quando checkout perde a versão (1055.1298ms)
+✔ E-08 DB: cancelamento repetido/concorrente devolve estoque uma vez e não reativa produto (1125.5468ms)
+✔ E-08 DB: cancelamento simulado em PAGO restitui a reserva (1030.0419ms)
+✔ E-08 DB: cancelamento simulado em PREPARANDO restitui a reserva (1115.4709ms)
+✔ E-08 DB: pagar e cancelar simultaneamente nunca ressuscita pedido nem duplica estoque (797.9251ms)
+✔ E-08 DB: envio contra cancelamento preserva apenas uma transição e seu efeito de estoque (1048.6328ms)
+✔ E-08 DB: falha na reposição reverte cancelamento; nova tentativa restitui exatamente uma vez (1063.3581ms)
+✔ E-08 DB: falha no segundo lojista reverte todos os pedidos/estoques e preserva carrinho (973.8551ms)
+✔ E-08 DB: CHECK rejeita estoque negativo inclusive fora da API (640.4877ms)
+✔ E-08 HTTP: parceiro alheio, tutor e PAGO manual não alteram estoque; UUID/body inválidos dão 422 (1008.5335ms)
+✔ E-08 DB: tentativa reservada no gateway bloqueia cancelamento e atalho simulado enquanto gera link (1013.397ms)
+✔ E-08 DB: cancelamento vencedor impede iniciar preferência e não chama gateway externo (935.8507ms)
+✔ E-08 DB: webhook e cancelamento respeitam mesma reserva sem reposição ou pagamento duplicados (905.2914ms)
+✔ E-08 DB: aprovação tardia de cancelado legado exige conciliação e não volta a reservar estoque (942.6844ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18935.4744

@@ -2,6 +2,8 @@
 
 > Sprint 4 · Semana 9 (20–26/out) · Backend · Prioridade Alta · Esforço M · Responsável R2
 
+> Implementação local em 18/11/2026 sobre main `d593b03`, sem commit/publicação. Estratégia definida: **on-read**, com GROUP BY em lote, `rating_avg` arredondado a uma casa decimal e `rating_count`; sem reviews, `null`/`0`. Detalhes e validação em `AVL-2-IMPLEMENTACAO-E-VALIDACAO.md`. O contexto abaixo preserva a descrição original da task.
+
 ## Contexto
 Com o modelo `Review` e o POST/GET criados no **AVL-1**, cada avaliação já existe individualmente vinculada ao alvo (produto/hotel/sitter) e a uma origem concluída. Falta o que o front precisa consumir no Sprint 5: o **rating agregado** — média das notas e contagem de avaliações — disponível diretamente nos endpoints de listagem e detalhe de produtos, hotéis e sitters. Hoje esses valores são inventados no front (`HotelsPage.tsx:73` `rating: 5.0` + `reviews` aleatório); AVL-2 fornece o número real.
 

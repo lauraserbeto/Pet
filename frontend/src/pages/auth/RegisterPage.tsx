@@ -39,18 +39,10 @@ import iconTransparente from "../../assets/pet+/logo-horizontal.png";
 import heroShopDog from "../../assets/imgs/hero_shop_dog.png";
 
 import { authService } from "@/lib/services/authService";
+import { newPasswordSchema, passwordChecks } from "../../lib/passwordPolicy";
+import { useLegalPolicy } from "../../lib/hooks/useLegalPolicy";
+import { isValidDocument, normalizeDocument } from "../../lib/documentIdentity";
 import { getPostLoginRedirect, rememberPostLoginRedirect } from "@/lib/postLoginRedirect";
-
-interface PasswordCheck {
-  label: string;
-  test: (pw: string) => boolean;
-}
-
-const passwordChecks: PasswordCheck[] = [
-  { label: "Mínimo de 8 caracteres", test: (pw) => pw.length >= 8 },
-  { label: "Uma letra maiúscula", test: (pw) => /[A-Z]/.test(pw) },
-  { label: "Um número", test: (pw) => /\d/.test(pw) },
-];
 
 // ── Máscaras ──
 function maskCPF(value: string): string {
@@ -61,18 +53,20 @@ function maskCPF(value: string): string {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 function maskCNPJ(value: string): string {
-  const d = value.replace(/\D/g, "").slice(0, 14);
+  const d = normalizeDocument(value).slice(0, 14);
   return d
-    .replace(/(\d{2})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1/$2")
-    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+    .replace(/^(.{2})(.)/, "$1.$2")
+    .replace(/^(..\....)(.)/, "$1.$2")
+    .replace(/^(..\....\....)(.)/, "$1/$2")
+    .replace(/(\/.{4})(.{1,2})$/, "$1-$2");
 }
 
 // Lojista = 2, Hotel = 3 → CNPJ obrigatório
 const CNPJ_ONLY_ROLES = ["2", "3"];
 
 export function RegisterPage() {
+  const legalPolicy = useLegalPolicy();
+  const legalReady = Boolean(legalPolicy.data) && !legalPolicy.isError;
   const navigate = useNavigate();
   const location = useLocation();
   const postLoginRedirect = getPostLoginRedirect(location.state);
@@ -91,6 +85,9 @@ export function RegisterPage() {
     documentType: "CNPJ" as "CPF" | "CNPJ",
   });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  useEffect(() => {
+    setAcceptedTerms(false);
+  }, [legalPolicy.data?.version]);
 
   const isDocTypeLocked = CNPJ_ONLY_ROLES.includes(formData.partnerType);
 
@@ -130,7 +127,10 @@ export function RegisterPage() {
           : "Forte";
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/\D/g, "");
+    const raw =
+      formData.documentType === "CPF"
+        ? e.target.value.replace(/\D/g, "")
+        : normalizeDocument(e.target.value);
     const max = formData.documentType === "CPF" ? 11 : 14;
     setFormData({ ...formData, document: raw.slice(0, max) });
   };
@@ -146,16 +146,27 @@ export function RegisterPage() {
       toast.error("As senhas não coincidem", { description: "Verifique e tente novamente." });
       return;
     }
-    if (passwordStrength < 3) {
-      toast.error("Senha muito fraca", { description: "Atenda todos os requisitos." });
+    const passwordValidation = newPasswordSchema.safeParse(formData.password);
+    if (!passwordValidation.success) {
+      toast.error("Confira a senha", { description: passwordValidation.error.issues[0].message });
       return;
     }
     if (!acceptedTerms) {
       toast.error("Aceite os Termos de Uso para continuar.");
       return;
     }
+    if (!legalPolicy.data || !legalReady) {
+      toast.error("Não foi possível conferir a versão dos termos. Tente novamente.");
+      return;
+    }
     if (formData.type === "partner" && !formData.partnerType) {
       toast.error("Selecione o tipo de parceiro.");
+      return;
+    }
+    if (formData.type === "partner" && !isValidDocument(formData.document, formData.documentType)) {
+      toast.error(`Confira o ${formData.documentType}`, {
+        description: "O documento possui formato ou dígitos verificadores inválidos.",
+      });
       return;
     }
 
@@ -166,7 +177,8 @@ export function RegisterPage() {
         password: formData.password,
         full_name: formData.name,
         role_id: formData.type === "partner" ? parseInt(formData.partnerType) : 5,
-        terms_accepted: true,
+        terms_accepted: acceptedTerms,
+        terms_version: legalPolicy.data.version,
         ...(formData.type === "partner" && {
           business_name: formData.businessName,
           document: formData.document,
@@ -189,6 +201,7 @@ export function RegisterPage() {
         state: formData.type === "tutor" ? (postLoginRedirect ?? undefined) : undefined,
       });
     } catch (error: any) {
+      void legalPolicy.refetch();
       toast.error("Erro ao criar conta", {
         description: error.message || "Verifique os dados e tente novamente",
       });
@@ -453,7 +466,10 @@ export function RegisterPage() {
                   {/* Tipo de parceiro + Nome do negócio (2 colunas) */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                      <Label
+                        htmlFor="partnerType"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                      >
                         Tipo
                       </Label>
                       <Select
@@ -494,10 +510,13 @@ export function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* Documento + E-mail (2 colunas) */}
-                  <div className="grid grid-cols-2 gap-3">
+                  {/* Campos completos no celular; duas colunas a partir de sm. */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                      <Label
+                        htmlFor="documentInput"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wide"
+                      >
                         Documento
                       </Label>
                       <div className="flex gap-0 overflow-visible">
@@ -531,7 +550,7 @@ export function RegisterPage() {
                           value={maskedDocument}
                           onChange={handleDocumentChange}
                           className="rounded-l-none rounded-r-xl flex-1 h-10 text-sm bg-white/80 border-slate-200/80"
-                          inputMode="numeric"
+                          inputMode={formData.documentType === "CPF" ? "numeric" : "text"}
                         />
                       </div>
                       {isDocTypeLocked && (
@@ -592,8 +611,8 @@ export function RegisterPage() {
                 </div>
               )}
 
-              {/* ─ Senha + Confirmar Senha (2 colunas) ─ */}
-              <div className="grid grid-cols-2 gap-2">
+              {/* ─ Senha + Confirmar Senha: coluna única no celular, 2 colunas a partir de sm (G24) ─ */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {/* Senha */}
                 <div className="space-y-1">
                   <Label
@@ -616,6 +635,7 @@ export function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -653,6 +673,7 @@ export function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? "Ocultar confirmação de senha" : "Mostrar confirmação de senha"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors z-10"
                     >
                       {showConfirmPassword ? (
@@ -720,10 +741,29 @@ export function RegisterPage() {
               )}
 
               {/* ─ Termos ─ */}
+              <div className="text-xs text-slate-600" aria-live="polite">
+                {legalReady && legalPolicy.data ? (
+                  `Versão dos termos: ${legalPolicy.data.version}`
+                ) : legalPolicy.isError ? (
+                  <span>
+                    Não foi possível carregar a versão dos termos.{" "}
+                    <button
+                      type="button"
+                      className="underline font-semibold"
+                      onClick={() => void legalPolicy.refetch()}
+                    >
+                      Tentar novamente
+                    </button>
+                  </span>
+                ) : (
+                  "Conferindo versão dos termos..."
+                )}
+              </div>
               <div className="flex items-start space-x-2 pt-0.5">
                 <Checkbox
                   id="terms"
                   checked={acceptedTerms}
+                  disabled={!legalReady}
                   onCheckedChange={(c) => setAcceptedTerms(c === true)}
                 />
                 <label
@@ -733,14 +773,18 @@ export function RegisterPage() {
                   Li e concordo com os{" "}
                   <Link
                     to="/terms"
-                    className="text-[var(--color-primary-600)] hover:underline font-medium"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--color-primary-700)] hover:underline font-medium"
                   >
                     Termos de Uso
                   </Link>{" "}
                   e{" "}
                   <Link
                     to="/privacy"
-                    className="text-[var(--color-primary-600)] hover:underline font-medium"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--color-primary-700)] hover:underline font-medium"
                   >
                     Política de Privacidade
                   </Link>
@@ -755,7 +799,7 @@ export function RegisterPage() {
                     ? "bg-gradient-to-r from-[var(--color-secondary-500)] to-[var(--color-secondary-600)] hover:from-[var(--color-secondary-600)] hover:to-[var(--color-secondary-700)] shadow-sky-200/40 hover:shadow-sky-200/60"
                     : "bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] hover:from-[var(--color-primary-600)] hover:to-[var(--color-primary-700)] shadow-orange-200/50 hover:shadow-orange-200/60"
                 }`}
-                disabled={isLoading}
+                disabled={isLoading || !legalReady}
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -785,7 +829,7 @@ export function RegisterPage() {
                   onClick={() => {
                     if (postLoginRedirect) rememberPostLoginRedirect(postLoginRedirect);
                   }}
-                  className="font-bold text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
+                  className="font-bold text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] hover:underline transition-colors"
                 >
                   Entrar
                 </Link>
@@ -803,7 +847,7 @@ export function RegisterPage() {
 
         {/* Copyright */}
         <p className="text-[10px] text-slate-400/60 mt-3">
-          © 2026 Pet+. Todos os direitos reservados.
+          © {new Date().getFullYear()} Pet+. Todos os direitos reservados.
         </p>
       </div>
     </div>

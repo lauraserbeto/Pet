@@ -1,5 +1,4 @@
 const prisma = require('../../config/database');
-const AppError = require('../../utils/AppError');
 const { formatOrder } = require('../../utils/orderFormatter');
 
 /**
@@ -41,7 +40,7 @@ class ListCustomerOrdersUseCase {
       prisma.order.count({ where }),
       prisma.order.findMany({
         where,
-        orderBy: { created_at: 'desc' },
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
         skip,
         take: limit,
         include,

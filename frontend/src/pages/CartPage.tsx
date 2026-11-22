@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { useCart } from "../components/cart/CartContext";
+import { CartSyncNotice } from '../components/cart/CartSyncNotice';
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "sonner";
 import {
@@ -30,13 +31,14 @@ import { rememberPostLoginRedirect } from "../lib/postLoginRedirect";
 import { useState } from "react";
 
 export function CartPage() {
-  const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, totalItems, totalPrice, clearCart, syncBlocked, isLoading, cartError } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [itemToRemove, setItemToRemove] = useState<any | null>(null);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
 
   const handleCheckout = () => {
+    if (syncBlocked || isLoading || cartError) return;
     if (isAuthenticated) {
       navigate("/checkout");
       return;
@@ -52,6 +54,8 @@ export function CartPage() {
     navigate(destination, { state: redirect });
   };
 
+  if (syncBlocked || cartError) return <CartSyncNotice />;
+  if (isLoading) return <div role="status" className="p-8 text-center">Carregando carrinho...</div>;
   if (items.length === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
@@ -136,7 +140,7 @@ export function CartPage() {
                       </p>
                       <Link
                         to={`/shopping/${item.product_id}`}
-                        className="text-sm font-semibold text-slate-800 line-clamp-2 hover:text-[var(--color-primary-600)] transition-colors font-[family-name:var(--font-display)]"
+                        className="text-sm font-semibold text-slate-800 line-clamp-2 hover:text-[var(--color-primary-700)] transition-colors font-[family-name:var(--font-display)]"
                       >
                         {item.name}
                       </Link>
@@ -196,9 +200,8 @@ export function CartPage() {
             {/* Clear cart */}
             <div className="flex justify-end">
               <button
-                onClick={() => {
-                  clearCart();
-                  toast.success("Carrinho limpo");
+                onClick={async () => {
+                  if (await clearCart()) toast.success("Carrinho limpo");
                 }}
                 className="text-sm text-slate-400 hover:text-red-500 transition-colors"
               >
@@ -236,7 +239,7 @@ export function CartPage() {
 
               <Link
                 to="/shopping"
-                className="flex items-center justify-center gap-1.5 text-sm text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] font-medium transition-colors"
+                className="flex items-center justify-center gap-1.5 text-sm text-[var(--color-primary-700)] hover:text-[var(--color-primary-700)] font-medium transition-colors"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Continuar comprando

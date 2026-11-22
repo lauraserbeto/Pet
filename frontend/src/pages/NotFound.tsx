@@ -115,7 +115,7 @@ export function NotFound() {
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center px-4">
           <Button
             size="lg"
-            className="w-full sm:w-auto rounded-full bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] text-white px-8 h-14 font-bold shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
+            className="w-full sm:w-auto rounded-full bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-700)] text-white px-8 h-14 font-bold shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
             onClick={() => navigate("/")}
           >
             <Home className="mr-2 h-5 w-5" />

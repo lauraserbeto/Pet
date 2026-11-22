@@ -30,7 +30,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
            // Note: ImageWithFallback handles its own fallback, but for avatar semantics we might want initials
          />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-500 font-bold font-[family-name:var(--font-display)]">
+          <div className="flex h-full w-full items-center justify-center bg-slate-200 text-slate-700 font-bold font-[family-name:var(--font-display)]">
             {fallback || "??"}
           </div>
         )}

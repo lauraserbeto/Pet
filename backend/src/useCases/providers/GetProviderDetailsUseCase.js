@@ -1,4 +1,5 @@
 const prisma = require('../../config/database');
+const reviewRepository = require('../../repositories/ReviewRepository');
 const AppError = require('../../utils/AppError');
 const { operationalProviderWhere } = require('./providerAccess');
 
@@ -70,7 +71,11 @@ class GetProviderDetailsUseCase {
        }));
     }
 
-    return provider;
+    const [ratedProvider] = await reviewRepository.withProviderRatings([provider]);
+    if (ratedProvider.products) {
+      ratedProvider.products = await reviewRepository.withProductRatings(ratedProvider.products);
+    }
+    return ratedProvider;
   }
 }
 

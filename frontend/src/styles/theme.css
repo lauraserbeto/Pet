@@ -32,3 +32,33 @@
   --breakpoint-fhd: 1920px;
   --breakpoint-3xl: 1920px;
 }
+
+/*
+ * Camada base (auditoria visual G01/G02). Fica em @layer base, abaixo das
+ * utilidades: qualquer classe explícita (border-*, text-*, font-*) continua
+ * prevalecendo.
+ */
+@layer base {
+  /* Tailwind v4 usa currentColor como cor padrão de borda (no v3 era cinza).
+     Sem esta regra, todo `border` sem cor aparece preto nas telas novas. */
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-slate-200, currentColor);
+  }
+
+  /* Texto principal do design system (slate-900) em vez de preto puro. */
+  body {
+    color: var(--color-slate-900);
+  }
+
+  /* Títulos sempre na fonte de display da marca (Nunito). A cor é herdada,
+     para não sobrescrever títulos brancos de heróis e banners. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+}

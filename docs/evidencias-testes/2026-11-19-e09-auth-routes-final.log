@@ -1,0 +1,16 @@
+◇ injecting env (0) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injecting env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+✔ POST /register com role_id 1 (ADMIN) → 422 e não cria admin (PET-01) (154.6025ms)
+✔ POST /register sem senha → 422 (16.5011ms)
+✔ POST /login sem credenciais → 400 (12.367ms)
+✔ POST /reset-password com senha fora da politica → 422 sem acessar o banco (12.2621ms)
+✔ respostas trazem cabeçalhos de segurança do helmet (PET-04) (8.8524ms)
+✔ rota inexistente → 404 com shape padronizado (9.1141ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3584.013

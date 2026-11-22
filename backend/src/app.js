@@ -1,94 +1,112 @@
-require('dotenv').config();
+require("dotenv").config();
 // Valida variáveis de ambiente obrigatórias no boot (fail-fast).
-const env = require('./config/env');
+const env = require("./config/env");
 // Sentry antes do express: o SDK instrumenta os módulos no momento do require.
 // No-op quando SENTRY_DSN não está definido.
-require('./config/sentry').initSentry();
-const crypto = require('crypto');
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const pinoHttp = require('pino-http');
-const swaggerUi = require('swagger-ui-express');
+require("./config/sentry").initSentry();
+const crypto = require("crypto");
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const { createRequestLimits } = require("./middlewares/requestLimits");
+const authMiddleware = require("./middlewares/authMiddleware");
+const adminMiddleware = require("./middlewares/adminMiddleware");
+const pinoHttp = require("pino-http");
+const swaggerUi = require("swagger-ui-express");
 
-const prisma = require('./config/database');
-const logger = require('./config/logger');
-const swaggerDocs = require('./config/swagger.config');
-const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
-const { metricsMiddleware, metricsHandler } = require('./middlewares/metrics');
-const { jsonBodyParser, urlencodedBodyParser } = require('./middlewares/bodyLimits');
+const prisma = require("./config/database");
+const logger = require("./config/logger");
+const swaggerDocs = require("./config/swagger.config");
+const { errorHandler, notFoundHandler } = require("./middlewares/errorHandler");
+const { metricsMiddleware, metricsHandler } = require("./middlewares/metrics");
+const {
+  jsonBodyParser,
+  urlencodedBodyParser,
+} = require("./middlewares/bodyLimits");
 
 const app = express();
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://petplus-frontend.vercel.app',
-  'https://petplus.vercel.app',
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://petplus-frontend.vercel.app",
+  "https://petplus.vercel.app",
   env.FRONTEND_URL,
 ];
 
+app.set("trust proxy", env.TRUST_PROXY_HOPS);
 
-app.set('trust proxy', 1);
-
-const authRoutes = require('./routes/authRoutes');
-const providerRoutes = require('./routes/providerRoutes');
-const serviceRoutes = require('./routes/serviceRoutes');
+const authRoutes = require("./routes/authRoutes");
+const providerRoutes = require("./routes/providerRoutes");
+const serviceRoutes = require("./routes/serviceRoutes");
 
 // Limitador para as rotas de autenticação — mitiga força bruta e enumeração
 // em login, recuperação de senha, registro e reset.
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 20,                  // 20 requisições por IP por janela nas rotas de auth
-  standardHeaders: true,    // expõe cabeçalhos RateLimit-*
-  legacyHeaders: false,
-  message: {
-    error: { code: 'RATE_LIMITED', message: 'Muitas tentativas. Tente novamente em alguns minutos.' },
-    message: 'Muitas tentativas. Tente novamente em alguns minutos.',
-  },
-});
+const requestLimits = createRequestLimits();
+const authLimiter = requestLimits.auth;
 
 // Middlewares Globais
 // Helmet: cabeçalhos de segurança (HSTS, X-Content-Type-Options, frameguard, etc.).
 // CSP desativado aqui — é responsabilidade do frontend (PET-10) e evita quebrar o Swagger UI.
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({
-  origin: [...new Set(allowedOrigins)],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit', 'X-Total-Pages'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [...new Set(allowedOrigins)],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: [
+      "X-Total-Count",
+      "X-Page",
+      "X-Limit",
+      "X-Total-Pages",
+      "X-Request-Id",
+      "Retry-After",
+      "RateLimit-Limit",
+      "RateLimit-Remaining",
+      "RateLimit-Reset",
+    ],
+    credentials: true,
+  }),
+);
 
 // Logging estruturado por requisição com correlation id (req.id).
 // Ecoa o id no header X-Request-Id para correlação cliente↔servidor.
-app.use(pinoHttp({
-  logger,
-  genReqId: (req, res) => {
-    const id = req.headers['x-request-id'] || crypto.randomUUID();
-    res.setHeader('X-Request-Id', id);
-    return id;
-  },
-  customLogLevel: (req, res, err) => {
-    if (res.statusCode >= 500 || err) return 'error';
-    if (res.statusCode >= 400) return 'warn';
-    return 'info';
-  },
-  serializers: {
-    req: (req) => ({ id: req.id, method: req.method, url: req.url }),
-    res: (res) => ({ statusCode: res.statusCode }),
-  },
-}));
+app.use(
+  pinoHttp({
+    logger,
+    genReqId: (req, res) => {
+      const incoming = req.headers["x-request-id"];
+      const id =
+        typeof incoming === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          incoming,
+        )
+          ? incoming
+          : crypto.randomUUID();
+      res.setHeader("X-Request-Id", id);
+      return id;
+    },
+    customLogLevel: (req, res, err) => {
+      if (res.statusCode >= 500 || err) return "error";
+      if (res.statusCode >= 400) return "warn";
+      return "info";
+    },
+    serializers: {
+      req: (req) => ({ id: req.id, method: req.method }),
+      res: (res) => ({ statusCode: res.statusCode }),
+    },
+  }),
+);
 
 // Corpo JSON: 100 kb por padrão; só as rotas de upload aceitam mais (E-03).
+app.use(metricsMiddleware);
+app.use("/api", requestLimits.api);
+app.use("/api/health", requestLimits.health);
+app.use("/api/v1/orders/webhook", requestLimits.webhook);
 app.use(jsonBodyParser());
 app.use(urlencodedBodyParser());
 
-// Coleta métricas RED (rate/errors/duration) por rota — alimenta GET /api/metrics.
-app.use(metricsMiddleware);
-
 // Documentação Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 /**
  * @swagger
@@ -100,16 +118,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *       200:
  *         description: API e Banco operacionais
  */
-app.get('/api/health', async (req, res) => {
+app.get("/api/health", async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({
-      status: 'success',
-      message: 'API rodando e conectada ao PostgreSQL!'
+      status: "success",
+      message: "API rodando e conectada ao PostgreSQL!",
     });
   } catch (error) {
-    req.log.error({ err: error }, 'Health check: falha na conexão com o banco');
-    res.status(500).json({ status: 'error', message: 'Falha no banco de dados.' });
+    req.log.error({ err: error }, "Health check: falha na conexão com o banco");
+    res
+      .status(500)
+      .json({ status: "error", message: "Falha no banco de dados." });
   }
 });
 
@@ -119,27 +139,53 @@ app.get('/api/health', async (req, res) => {
  *   get:
  *     summary: Métricas RED (rate, errors, duration) por rota
  *     tags: [Health]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Contagem, taxa de erro e latências (p50/p95/p99) por rota
+ *       401:
+ *         description: Sessão ausente ou inválida
+ *       403:
+ *         description: Acesso exclusivo do administrador ativo
  */
-app.get('/api/metrics', metricsHandler);
+app.get(
+  "/api/metrics",
+  requestLimits.metrics,
+  authMiddleware,
+  adminMiddleware,
+  metricsHandler,
+);
 
 // Rotas do Sistema
-app.use('/api/v1/auth', authLimiter, authRoutes);
+// Metadados públicos dos textos legais; mesma fonte usada para gravar o aceite.
+/**
+ * @swagger
+ * /api/v1/legal/policy:
+ *   get:
+ *     summary: Versão vigente dos textos legais exigida no cadastro
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Identificador de versão e data de publicação, sem autenticação
+ */
+app.get("/api/v1/legal/policy", (_req, res) => {
+  res.set("Cache-Control", "no-store").json(require("./constants/legalPolicy"));
+});
+app.use("/api/v1/auth", authLimiter, authRoutes);
 // Registrar antes de providerRoutes: GET /providers/:id não deve capturar "services".
-app.use('/api/v1/providers/services', serviceRoutes);
-app.use('/api/v1/providers', providerRoutes);
-app.use('/api/v1/admin', require('./routes/adminRoutes'));
-app.use('/api/v1/users', require('./routes/userRoutes'));
-app.use('/api/v1/users/me/pets', require('./routes/petRoutes'));
-app.use('/api/v1/addresses', require('./routes/addressRoutes'));
-app.use('/api/v1/products', require('./routes/productsRoutes'));
-app.use('/api/v1/favorites', require('./routes/favoriteRoutes'));
-app.use('/api/v1/cart', require('./routes/cartRoutes'));
-app.use('/api/v1/orders', require('./routes/orderRoutes'));
-app.use('/api/v1/appointments', require('./routes/appointmentRoutes'));
-app.use('/api/v1/reviews', require('./routes/reviewRoutes'));
+app.use("/api/v1/providers/services", serviceRoutes);
+app.use("/api/v1/providers", providerRoutes);
+app.use("/api/v1/admin", require("./routes/adminRoutes"));
+app.use("/api/v1/users", require("./routes/userRoutes"));
+app.use("/api/v1/users/me/pets", require("./routes/petRoutes"));
+app.use("/api/v1/addresses", require("./routes/addressRoutes"));
+app.use("/api/v1/products", require("./routes/productsRoutes"));
+app.use("/api/v1/favorites", require("./routes/favoriteRoutes"));
+app.use("/api/v1/cart", require("./routes/cartRoutes"));
+app.use("/api/v1/orders", require("./routes/orderRoutes"));
+app.use("/api/v1/appointments", require("./routes/appointmentRoutes"));
+app.use("/api/v1/reviews", require("./routes/reviewRoutes"));
 
 // 404 + Error Handler (devem ser os últimos)
 app.use(notFoundHandler);

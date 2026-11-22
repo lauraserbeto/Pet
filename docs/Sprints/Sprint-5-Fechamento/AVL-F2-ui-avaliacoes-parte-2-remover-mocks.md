@@ -1,5 +1,7 @@
 # AVL-F2 — UI de avaliações (parte 2) + remover últimos mocks
 
+> Implementada localmente em 18/11/2026, junto à AVL-F1; sem commit ou publicação. Escopo, evidências e limites em [AVL-F-IMPLEMENTACAO-E-VALIDACAO.md](AVL-F-IMPLEMENTACAO-E-VALIDACAO.md). O texto abaixo preserva o planejamento original.
+
 > Sprint 5 · Semana 11 (02–08/nov) · Frontend · Prioridade Alta · Esforço M · Responsável R3
 
 ## Contexto

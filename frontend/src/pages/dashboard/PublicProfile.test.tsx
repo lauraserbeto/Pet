@@ -97,3 +97,30 @@ it("mostra a mensagem da API quando o salvamento é recusado", async () => {
     expect(toast.error).toHaveBeenCalledWith("Envie no máximo 8 fotos na galeria.")
   );
 });
+
+it("perfil já publicado mostra recomendações como sugestão, sem alerta de bloqueio (G12)", async () => {
+  vi.spyOn(providerService, "fetchCompleteness").mockResolvedValue({
+    isComplete: true,
+    missingFields: [],
+    recommendedFields: ["operating_hours", "amenities"],
+  });
+
+  renderTela();
+
+  expect(await screen.findByText("Seu perfil já aparece na vitrine.")).toBeTruthy();
+  expect(screen.getByText("Horário de funcionamento, Comodidades")).toBeTruthy();
+  expect(screen.queryByText(/não está visível/)).toBeNull();
+});
+
+it("sem recomendações pendentes, nenhuma sugestão aparece", async () => {
+  vi.spyOn(providerService, "fetchCompleteness").mockResolvedValue({
+    isComplete: true,
+    missingFields: [],
+    recommendedFields: [],
+  });
+
+  renderTela();
+
+  await screen.findByDisplayValue("Hotel Patinhas");
+  expect(screen.queryByText("Seu perfil já aparece na vitrine.")).toBeNull();
+});

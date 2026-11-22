@@ -1,0 +1,186 @@
+[
+ {
+  "name": "g06-pendente-desk",
+  "who": "pending",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "url=/ toast=true status=true sair=true"
+ },
+ {
+  "name": "g06-recusado-desk",
+  "who": "rejected",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "url=/parceiro/corrigir-cadastro link=1"
+ },
+ {
+  "name": "g06-pendente-mob",
+  "who": "pending",
+  "route": "/",
+  "vp": 390,
+  "ok": true,
+  "detail": "menu móvel"
+ },
+ {
+  "name": "g07-admin-config-desk",
+  "who": "admin",
+  "route": "/dashboard/settings",
+  "vp": 1440,
+  "ok": true,
+  "detail": "salvar=0 logoutGlobal=false"
+ },
+ {
+  "name": "g07-lojista-config-desk",
+  "who": "store",
+  "route": "/dashboard/settings",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/settings"
+ },
+ {
+  "name": "g07-admin-config-mob",
+  "who": "admin",
+  "route": "/dashboard/settings",
+  "vp": 390,
+  "ok": true,
+  "detail": "mob"
+ },
+ {
+  "name": "g08-sitter-pedidos-desk",
+  "who": "sitter",
+  "route": "/dashboard/orders",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/orders"
+ },
+ {
+  "name": "g08-admin-financeiro-desk",
+  "who": "admin",
+  "route": "/dashboard/financeiro",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/financeiro"
+ },
+ {
+  "name": "g08-tutor-painel-desk",
+  "who": "tutor",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/tutor/perfil"
+ },
+ {
+  "name": "g08-hotel-produtos-mob",
+  "who": "hotel",
+  "route": "/dashboard/products",
+  "vp": 390,
+  "ok": true,
+  "detail": "/dashboard/products"
+ },
+ {
+  "name": "reg-store-orders",
+  "who": "store",
+  "route": "/dashboard/orders",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/orders"
+ },
+ {
+  "name": "reg-store-products",
+  "who": "store",
+  "route": "/dashboard/products",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/products"
+ },
+ {
+  "name": "reg-hotel-schedule",
+  "who": "hotel",
+  "route": "/dashboard/schedule",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/schedule"
+ },
+ {
+  "name": "reg-sitter-servicos",
+  "who": "sitter",
+  "route": "/dashboard/servicos",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/servicos"
+ },
+ {
+  "name": "reg-admin-aprovacoes",
+  "who": "admin",
+  "route": "/dashboard/aprovacoes",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/aprovacoes"
+ },
+ {
+  "name": "reg-admin-usuarios",
+  "who": "admin",
+  "route": "/dashboard/usuarios",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/usuarios"
+ },
+ {
+  "name": "reg-hotel-financeiro",
+  "who": "hotel",
+  "route": "/dashboard/financeiro",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/financeiro"
+ },
+ {
+  "name": "reg-store-perfil",
+  "who": "store",
+  "route": "/dashboard/perfil",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard/perfil"
+ },
+ {
+  "name": "reg-admin-dashboard",
+  "who": "admin",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/dashboard"
+ },
+ {
+  "name": "g10-produtos-erro-desk",
+  "who": "store",
+  "route": "/dashboard/products",
+  "vp": 1440,
+  "ok": true,
+  "detail": "erro=true ctaVazio=false zeros=false"
+ },
+ {
+  "name": "g10-produtos-erro-mob",
+  "who": "store",
+  "route": "/dashboard/products",
+  "vp": 390,
+  "ok": true,
+  "detail": "mob"
+ },
+ {
+  "name": "g10-produtos-ok-desk",
+  "who": "store",
+  "route": "/dashboard/products",
+  "vp": 1440,
+  "ok": true,
+  "detail": "lista real"
+ },
+ {
+  "name": "g10-produtos-vazio-desk",
+  "who": "empty",
+  "route": "/dashboard/products",
+  "vp": 1440,
+  "ok": true,
+  "detail": "loja com 1 produto de fixture"
+ }
+]

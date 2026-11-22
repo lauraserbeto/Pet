@@ -72,16 +72,18 @@ Cor de destaque da marca. Usada em CTAs, links ativos, badges, gradientes de ava
 | `--color-primary-200` | `#fcd9a3` | ▒▒ Hover de badge / borda hover |
 | `--color-primary-300` | `#fbbd68` | ▒▒ Borda em foco de input/search |
 | `--color-primary-400` | `#f99c2b` | ▓▓ Borda focus de input / topo do gradient avatar |
-| `--color-primary-500` | `#f58b05` | ██ **Cor base da marca** — botões primários, ícones de destaque |
-| `--color-primary-600` | `#d67000` | ██ Hover do botão primário, link button, base do gradient avatar |
-| `--color-primary-700` | `#b35602` | ██ Texto sobre badges claros |
-| `--color-primary-800` | `#8f4107` | ██ Reservado para profundidade |
+| `--color-primary-500` | `#f58b05` | ██ **Cor base da marca** — ícones, ilustrações, destaques e fundos decorativos **sem texto** |
+| `--color-primary-600` | `#d67000` | ██ Base do gradient avatar; não usar como cor de texto |
+| `--color-primary-700` | `#b35602` | ██ **Botões primários com texto**, links, anel de foco, texto sobre badges claros |
+| `--color-primary-800` | `#8f4107` | ██ Hover do botão primário |
 | `--color-primary-900` | `#75330a` | ██ Reservado para alto contraste |
 
 **Uso comum:**
 ```tsx
-className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white"
+className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white"
 ```
+
+> **Decisão de contraste (20/11/2026, auditoria visual G03).** Texto branco sobre `primary-500` mede 2,45:1, abaixo do mínimo WCAG 2.1 AA (4,5:1; 3:1 para texto grande). Botões e superfícies com texto passaram a `primary-700` (4,94:1 com branco) e links a `primary-700` sobre branco (4,94:1; o antigo `primary-600` media 3,40:1). O laranja `primary-500` continua sendo a cor da marca em ícones, ilustrações e fundos decorativos.
 
 ### 2.2 Secondary — Trust Blue 🔵
 
@@ -553,7 +555,9 @@ className="bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-s
 
 ### 11.1 Boas práticas implementadas
 
-- **`focus-visible:ring-2 ring-offset-2`** em botões e elementos interativos.
+- **`focus-visible:ring-2 ring-offset-2`** em botões e elementos interativos, com anel em `primary-700` (no Tailwind v4 o anel sem cor herda `currentColor` e some em botões de texto branco).
+- **Camada base** (`styles/theme.css`): bordas sem cor usam `slate-200` (o Tailwind v4 usa `currentColor` por padrão), `body` em `slate-900` e `h1–h3` na fonte de display (Nunito).
+- **Botões só com ícone** sempre com `aria-label` (favoritar, menu, notificações, recolher menu lateral, ações de tabela).
 - **`aria-label`** / `aria-expanded` / `aria-haspopup` no dropdown de perfil.
 - **`role="status"`** + `aria-label` no HamsterLoader.
 - **Teclas Enter/Space** ativando o dropdown do tutor (`onKeyDown`).

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { newPasswordSchema } from "../../lib/passwordPolicy";
 import { toast } from "sonner";
 import { Camera, Lock, Loader2, ArrowLeft } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
@@ -26,11 +27,7 @@ type PersonalForm = z.infer<typeof personalSchema>;
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Senha atual obrigatória"),
-    newPassword: z
-      .string()
-      .min(8, "Mínimo 8 caracteres")
-      .regex(/[A-Za-z]/, "Inclua ao menos uma letra")
-      .regex(/\d/, "Inclua ao menos um número"),
+    newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, "Confirme a nova senha"),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -252,10 +249,11 @@ export function TutorProfile() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="tutor-email" className="block text-sm font-medium text-slate-700 mb-1">
                     E-mail (Apenas leitura)
                   </label>
                   <input
+                    id="tutor-email"
                     type="email"
                     value={currentUser?.email ?? ""}
                     disabled
@@ -284,7 +282,7 @@ export function TutorProfile() {
                   <button
                     type="submit"
                     disabled={isUpdatingProfile || !personalDirty}
-                    className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-6 py-2 rounded-xl font-medium transition-all shadow-md shadow-primary-500/20 disabled:opacity-50 flex items-center gap-2"
+                    className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-6 py-2 rounded-xl font-medium transition-all shadow-md shadow-primary-500/20 disabled:opacity-50 flex items-center gap-2"
                   >
                     {isUpdatingProfile && <Loader2 className="w-4 h-4 animate-spin" />}
                     Salvar Alterações
@@ -332,7 +330,7 @@ export function TutorProfile() {
                   autoComplete="new-password"
                   {...regPassword("newPassword")}
                   className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
-                  placeholder="Mínimo 8 caracteres, com letra e número"
+                  placeholder="Mínimo 8 caracteres, com maiúscula e número"
                 />
                 {passwordErrors.newPassword && (
                   <p className="text-sm text-red-500 mt-1">{passwordErrors.newPassword.message}</p>
@@ -374,7 +372,7 @@ export function TutorProfile() {
           <div className="fixed bottom-6 right-6 z-50">
             <Link
               to="/checkout"
-              className={`flex items-center gap-2 bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-5 py-3 rounded-full text-sm font-semibold shadow-2xl shadow-primary-500/40 transition-all transform hover:scale-105 ${
+              className={`flex items-center gap-2 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-5 py-3 rounded-full text-sm font-semibold shadow-2xl shadow-primary-500/40 transition-all transform hover:scale-105 ${
                 isPulseActive ? "animate-bounce scale-105" : "scale-100"
               }`}
             >

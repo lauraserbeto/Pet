@@ -1,0 +1,58 @@
+Environment variables loaded from .env
+Prisma schema loaded from ..\..\..\Users\serbe\AppData\Local\Temp\petplus-e08-upgrade-20261119\schema.prisma
+Datasource "db": PostgreSQL database "petplus_upgrade_test", schema "public" at "127.0.0.1:55446"
+
+10 migrations found in prisma/migrations
+
+Applying migration `20260901000000_init_baseline`
+Applying migration `20260908000000_provider_status_enum`
+Applying migration `20260930000000_order_payment_default`
+Applying migration `20261007000000_appointment_states_payment_policy`
+Applying migration `20261012000000_payment_attempts`
+Applying migration `20261024000000_appointment_payment_policy_snapshot`
+Applying migration `20261025000000_order_shipping_address`
+Applying migration `20261026000000_add_review_model`
+Applying migration `20261116000000_appointment_payments`
+Applying migration `20261118000000_align_review_unique_indexes`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260901000000_init_baseline/
+    └─ migration.sql
+  └─ 20260908000000_provider_status_enum/
+    └─ migration.sql
+  └─ 20260930000000_order_payment_default/
+    └─ migration.sql
+  └─ 20261007000000_appointment_states_payment_policy/
+    └─ migration.sql
+  └─ 20261012000000_payment_attempts/
+    └─ migration.sql
+  └─ 20261024000000_appointment_payment_policy_snapshot/
+    └─ migration.sql
+  └─ 20261025000000_order_shipping_address/
+    └─ migration.sql
+  └─ 20261026000000_add_review_model/
+    └─ migration.sql
+  └─ 20261116000000_appointment_payments/
+    └─ migration.sql
+  └─ 20261118000000_align_review_unique_indexes/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "petplus_upgrade_test", schema "public" at "127.0.0.1:55446"
+
+11 migrations found in prisma/migrations
+
+Applying migration `20261119000000_products_stock_nonnegative`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261119000000_products_stock_nonnegative/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+UPGRADE_OK: negativo legado preservado; novas gravações negativas bloqueadas; validação posterior demonstrada com dado fictício.

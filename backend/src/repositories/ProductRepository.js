@@ -1,4 +1,5 @@
 const prisma = require('../config/database');
+const AppError = require('../utils/AppError');
 
 class ProductRepository {
   // Criar um novo produto
@@ -33,14 +34,16 @@ class ProductRepository {
 
   // Decrementar estoque de um produto com suporte a transação
   async decrementStock(productId, quantity, tx = prisma) {
-    return await tx.product.update({
-      where: { id: productId },
+    const result = await tx.product.updateMany({
+      where: { id: productId, status: 'ACTIVE', stock_quantity: { gte: quantity } },
       data: {
         stock_quantity: {
           decrement: quantity,
         },
       },
     });
+    if (result.count !== 1) throw AppError.conflict('Estoque insuficiente ou produto indisponível no momento da finalização.', { product_id: productId });
+    return result;
   }
 
   // Excluir (ou desativar) um produto

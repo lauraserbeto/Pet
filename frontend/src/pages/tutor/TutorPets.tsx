@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router";
+import { isSafeInternalPath } from "../../lib/postLoginRedirect";
 import { useForm, Controller } from "react-hook-form";
 import {
   Select,
@@ -12,6 +14,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Plus, PawPrint, Calendar, Activity, X, Trash2, Edit2 } from "lucide-react";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 import { ApiError } from "../../lib/httpClient";
 import { usePets } from "../../lib/hooks/usePets";
@@ -46,7 +49,13 @@ const EMPTY: PetForm = {
 };
 
 export function TutorPets() {
-  const { pets, isLoading, createPet, isCreating, updatePet, isUpdating, removePet } = usePets();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const candidate = location.state?.bookingReturnTo;
+  const bookingReturnTo =
+    isSafeInternalPath(candidate) && candidate.startsWith("/tutor/agendar/") ? candidate : null;
+  const { pets, isLoading, createPet, isCreating, updatePet, isUpdating, removePet, isRemoving } =
+    usePets();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -89,9 +98,7 @@ export function TutorPets() {
       name: values.name,
       species: values.species as PetSpecies,
       breed: values.breed || undefined,
-      birth_date: values.birth_date
-        ? new Date(values.birth_date as string).toISOString()
-        : null,
+      birth_date: values.birth_date ? new Date(values.birth_date as string).toISOString() : null,
       weight_kg: (values.weight_kg as number | undefined) ?? null,
       medical_notes: values.medical_notes || undefined,
     };
@@ -102,6 +109,7 @@ export function TutorPets() {
       } else {
         await createPet(payload);
         toast.success("Pet adicionado com sucesso!");
+        if (bookingReturnTo) navigate(bookingReturnTo);
       }
       setShowModal(false);
     } catch (err) {
@@ -110,8 +118,17 @@ export function TutorPets() {
     }
   });
 
-  const handleDelete = async (pet: Pet) => {
-    if (!confirm(`Tem certeza que deseja remover ${pet.name}?`)) return;
+  // Confirmação no diálogo do app em vez de window.confirm() (G22).
+  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
+  const handleDelete = (pet: Pet) => {
+    if (isRemoving) return;
+    setPetToDelete(pet);
+  };
+
+  const confirmDelete = async () => {
+    const pet = petToDelete;
+    setPetToDelete(null);
+    if (!pet || isRemoving) return;
     try {
       await removePet(pet.id);
       toast.success("Pet removido.");
@@ -133,19 +150,33 @@ export function TutorPets() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8 font-[family-name:var(--font-body)]">
+      <ConfirmDialog
+        open={!!petToDelete}
+        title={`Remover ${petToDelete?.name ?? "pet"}?`}
+        description="O pet sai da sua lista. O histórico de atendimentos, pagamentos e avaliações é preservado."
+        confirmLabel="Remover pet"
+        destructive
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setPetToDelete(null)}
+      />
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
               Meus Pets
             </h1>
+            {bookingReturnTo && (
+              <Link to={bookingReturnTo} className="text-sm text-sky-700 underline">
+                Voltar à reserva
+              </Link>
+            )}
             <p className="text-slate-500 mt-2">
               Gerencie e acompanhe o perfil do seu melhor amigo.
             </p>
           </div>
           <button
             onClick={openCreate}
-            className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-6 py-2.5 rounded-xl font-bold shadow-md shadow-primary-500/20 transition-all flex items-center gap-2"
+            className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-6 py-2.5 rounded-xl font-bold shadow-md shadow-primary-500/20 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" /> Adicionar Pet
           </button>
@@ -173,7 +204,7 @@ export function TutorPets() {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-primary-50)] rounded-bl-full -z-0 opacity-50 group-hover:scale-110 transition-transform"></div>
                 <div className="relative z-10 flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-[var(--color-primary-100)] text-[var(--color-primary-600)] flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-full bg-[var(--color-primary-100)] text-[var(--color-primary-700)] flex items-center justify-center">
                       <PawPrint className="w-6 h-6" />
                     </div>
                     <div>
@@ -186,6 +217,7 @@ export function TutorPets() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => openEdit(pet)}
+                      disabled={isRemoving}
                       className="p-2 text-slate-300 hover:text-blue-500 transition-colors"
                       title="Editar"
                     >
@@ -193,6 +225,9 @@ export function TutorPets() {
                     </button>
                     <button
                       onClick={() => handleDelete(pet)}
+                      disabled={isRemoving}
+                      aria-label={`Excluir pet ${pet.name}`}
+                      aria-busy={isRemoving}
                       className="p-2 text-slate-300 hover:text-red-500 transition-colors"
                       title="Excluir"
                     >
@@ -247,9 +282,7 @@ export function TutorPets() {
                   {...register("name")}
                   className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
-                )}
+                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -295,9 +328,7 @@ export function TutorPets() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Peso (kg)
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Peso (kg)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -334,7 +365,7 @@ export function TutorPets() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors flex items-center gap-2"
+                  className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors flex items-center gap-2"
                 >
                   {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {editingId ? "Salvar Alterações" : "Cadastrar Pet"}

@@ -1,8 +1,10 @@
 import { httpClient } from "../httpClient";
+import type { CommerceMetrics } from "./commerceMetrics";
 
 export type AdminMetrics = {
   generated_at: string;
   range_days: number;
+  commerce: CommerceMetrics;
   users: {
     total: number;
     new_in_range: number;

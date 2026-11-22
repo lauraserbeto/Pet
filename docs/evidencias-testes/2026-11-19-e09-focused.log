@@ -1,0 +1,23 @@
+◇ injecting env (0) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injecting env (0) from .env // tip: ⌘ enable debugging { debug: true }
+✔ E-09 DB: cadastro grava e-mail canônico/hash 12; login antigo custo 10 e senha fora da política continuam válidos (4340.1506ms)
+✔ E-09 DB: legado com bordas/maiúsculas recupera acesso sem reescrita de e-mail; índice acompanha trim do cliente (862.4618ms)
+✔ E-09 DB: cadastros concorrentes com variantes do mesmo e-mail criam uma única conta (2301.3169ms)
+✔ E-09 DB: consumo concorrente do mesmo token aceita uma senha e invalida os demais links (11862.793ms)
+✔ E-09 DB: tokens diferentes concorrentes do mesmo usuário não sobrescrevem duas senhas (3491.0473ms)
+✔ E-09 DB: senha repetida/fraca, token expirado ou usado não mudam credenciais (770.577ms)
+✔ E-09 DB: troca autenticada usa custo 12, valida senha atual e invalida links anteriores (5957.8632ms)
+✔ E-09 DB: reset contra troca autenticada não permite sobrescrever usando credenciais antigas (3913.0196ms)
+✔ E-09 DB: emissão concorrente de recuperação deixa somente um token válido e armazena apenas o hash (997.5785ms)
+✔ E-09 DB: falha ao gravar a senha reverte o consumo do token e permite nova tentativa (3343.8661ms)
+✔ E-09 DB: recuperação desconhecida/desativada tem resposta genérica e falha de entrega invalida só o próprio link (879.5633ms)
+✔ E-09: mesma política em cadastro, troca e reset, sem remover espaços da senha (7.9321ms)
+✔ E-09: e-mail normaliza caixa/bordas, preservando pontos e aliases + (0.4009ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45699.9788

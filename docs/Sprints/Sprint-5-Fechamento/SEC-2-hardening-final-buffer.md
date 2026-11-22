@@ -2,6 +2,8 @@
 
 > Sprint 5 · Semana 11 (02–08/nov) · Segurança · Prioridade Alta · Esforço M · Responsável R1
 
+> Atualização de 20/11/2026: escopo técnico implementado e validado localmente, junto às pendências reproduzidas E-07/E-14/E-15. Sem commit/publicação. Critérios, política de limites, evidências e ressalvas em [SEC-2-IMPLEMENTACAO-E-VALIDACAO.md](SEC-2-IMPLEMENTACAO-E-VALIDACAO.md). O contexto abaixo registra o diagnóstico original; não descreve o estado atual após a correção. Não representa aceite de release ou encerramento de todas as pendências dos demais tracks.
+
 ## Contexto
 Endurecimento residual de segurança antes da entrega. Pontos confirmados no código:
 - **not-found vira 500 em vez de 404:** o `notFoundHandler` existe e devolve `AppError.notFound`
@@ -60,6 +62,6 @@ validação de UUID nos `:id`, proteção do `GET /api/metrics` e rate limit glo
   correção real é **validar UUID antes** da query.
 - `errorHandler` já trata `P2025` como 404 — mas UUID malformado não gera `P2025`, e sim um erro de validação
   do Prisma que cai no fallback 500; por isso a validação prévia.
-- `app.set('trust proxy', 1)` já está configurado — o rate limit global usa o IP correto atrás do proxy.
+- `TRUST_PROXY_HOPS` agora é configurável (padrão local 0, produção 1). Um salto foi testado localmente; confirmar a topologia e os cabeçalhos do ambiente publicado antes do deploy, sem presumir que o padrão comprova o IP correto em produção.
 - Não afrouxar o `authLimiter` (20/15min) ao adicionar o limite global — mantê-lo mais rígido nas rotas de auth.
 - Proteger `/api/metrics` sem quebrar coleta interna — o middleware de coleta (`metricsMiddleware`) continua global; só o **endpoint de leitura** é protegido.

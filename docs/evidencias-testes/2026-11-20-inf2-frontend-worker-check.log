@@ -1,0 +1,11 @@
+
+ RUN  v4.1.12 C:/PI - 2026/Pet/frontend
+
+ ✓ src/lib/checkoutError.test.ts > conflito real preserva mensagem e ação de carrinho, sem depender de código inventado 3ms
+ ✓ src/lib/checkoutError.test.ts > falha interna não devolve mensagem crua; limitação e validação preservam resposta operacional 1ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  18:00:35
+   Duration  1.75s (transform 105ms, setup 305ms, import 121ms, tests 7ms, environment 922ms)
+

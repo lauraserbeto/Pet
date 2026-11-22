@@ -22,7 +22,7 @@ const TONES: Record<Tone, { border: string; iconBg: string; iconText: string }> 
   action: {
     border: "border-l-[var(--color-primary-500)]",
     iconBg: "bg-[var(--color-primary-50)]",
-    iconText: "text-[var(--color-primary-600)]",
+    iconText: "text-[var(--color-primary-700)]",
   },
   warning: {
     border: "border-l-amber-400",

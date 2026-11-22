@@ -1,0 +1,114 @@
+[
+ {
+  "name": "g16-diretorio-hoteis-mob",
+  "who": "anon",
+  "route": "/hotels",
+  "vp": 390,
+  "ok": true,
+  "detail": "buscaLargura=308 seletoresLadoALado=true"
+ },
+ {
+  "name": "g16-diretorio-hoteis-desk",
+  "who": "anon",
+  "route": "/hotels",
+  "vp": 1440,
+  "ok": true,
+  "detail": "desktop em uma linha"
+ },
+ {
+  "name": "g17-aprovacoes-mob",
+  "who": "admin",
+  "route": "/dashboard/aprovacoes",
+  "vp": 390,
+  "ok": true,
+  "detail": "aprovarVisivel=true sidebarFechada=hidden"
+ },
+ {
+  "name": "g17-aprovacoes-desk",
+  "who": "admin",
+  "route": "/dashboard/aprovacoes",
+  "vp": 1440,
+  "ok": true,
+  "detail": "tabela no desktop"
+ },
+ {
+  "name": "g18-avaliacoes-hotel-desk",
+  "who": "anon",
+  "route": "/hotels/041f2891-0f61-490a-b98f-d80996d33225",
+  "vp": 1440,
+  "ok": true,
+  "detail": "larguraPainel=720 paginação=0 duplicado=false"
+ },
+ {
+  "name": "g19-busca-cabecalho-desk",
+  "who": "anon",
+  "route": "/",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/shopping?q=Coleira"
+ },
+ {
+  "name": "g19-rota-search",
+  "who": "anon",
+  "route": "/search?q=Racao",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/shopping?q=Racao"
+ },
+ {
+  "name": "g19-rota-appointments",
+  "who": "tutor",
+  "route": "/appointments",
+  "vp": 1440,
+  "ok": true,
+  "detail": "/tutor/agendamentos"
+ },
+ {
+  "name": "g19-painel-sem-sino-busca-desk",
+  "who": "store",
+  "route": "/dashboard",
+  "vp": 1440,
+  "ok": true,
+  "detail": "sem busca/sino"
+ },
+ {
+  "name": "g19-favorito-landing-anon",
+  "who": "anon",
+  "route": "/",
+  "vp": 1440,
+  "ok": true,
+  "detail": "pede login, sem sucesso falso"
+ },
+ {
+  "name": "g20-produto-mob",
+  "who": "anon",
+  "route": "/shopping/883b7e5d-c0af-47b0-b3f5-184db94db853",
+  "vp": 390,
+  "ok": true,
+  "detail": "sem promessas"
+ },
+ {
+  "name": "g20-parceiros-desk",
+  "who": "anon",
+  "route": "/partners",
+  "vp": 1440,
+  "ok": true,
+  "detail": "sem promessas"
+ },
+ {
+  "name": "g20-shopping-desk",
+  "who": "anon",
+  "route": "/shopping",
+  "vp": 1440,
+  "ok": true,
+  "detail": "hero"
+ },
+ {
+  "name": "g21-sitter-mob",
+  "who": "anon",
+  "route": "/walkers/e794449d-c2a5-4664-8081-e1083bd8e4f8",
+  "vp": 390,
+  "ok": true,
+  "detail": "unidade do serviço + Agendar"
+ }
+]

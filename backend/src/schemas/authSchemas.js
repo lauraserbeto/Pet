@@ -1,4 +1,8 @@
 const { z } = require("zod");
+const { newPasswordSchema } = require("../security/passwordPolicy");
+const { emailSchema } = require("../security/emailIdentity");
+const legalPolicy = require("../constants/legalPolicy");
+const { isValidCPF, isValidCNPJ } = require("../security/documentIdentity");
 
 // Papéis que PODEM ser criados via cadastro público (self-service):
 //   2 = Lojista, 3 = Hotel, 4 = Pet Sitter, 5 = Tutor.
@@ -14,15 +18,8 @@ const registerSchema = z
       .trim()
       .min(2, "Nome deve ter ao menos 2 caracteres")
       .max(150, "Nome muito longo"),
-    email: z
-      .string()
-      .trim()
-      .email("E-mail inválido")
-      .max(150, "E-mail muito longo"),
-    password: z
-      .string()
-      .min(6, "A senha deve ter no mínimo 6 caracteres")
-      .max(128, "Senha muito longa"),
+    email: emailSchema,
+    password: newPasswordSchema,
     role_id: z
       .number()
       .int("Tipo de conta inválido")
@@ -40,21 +37,49 @@ const registerSchema = z
       .optional(),
     document: z.string().trim().max(20).optional(),
     document_type: z.enum(["CPF", "CNPJ"]).optional(),
-    terms_accepted: z.boolean().optional(),
+    terms_accepted: z.literal(true, {
+      message:
+        "É necessário aceitar os Termos de Uso e a Política de Privacidade.",
+    }),
+    terms_version: z.literal(legalPolicy.version, {
+      message:
+        "Confira a versão vigente dos termos antes de concluir o cadastro.",
+    }),
   })
   // `.strip()` (padrão do Zod) remove chaves não declaradas antes de chegar ao
   // use case — impede mass-assignment de campos inesperados (is_active, status…).
-  .strip();
+  .strip()
+  .superRefine((data, ctx) => {
+    if (![2, 3, 4].includes(data.role_id)) return;
+    const issue = (path, message) =>
+      ctx.addIssue({ code: "custom", path: [path], message });
+    if (!data.business_name)
+      issue("business_name", "Informe o nome comercial.");
+    if (!["CPF", "CNPJ"].includes(data.document_type)) {
+      issue("document_type", "Informe o tipo de documento.");
+      return;
+    }
+    if ([2, 3].includes(data.role_id) && data.document_type !== "CNPJ")
+      issue("document_type", "Lojistas e Hotéis devem utilizar CNPJ.");
+    const valid =
+      data.document_type === "CPF"
+        ? isValidCPF(data.document)
+        : isValidCNPJ(data.document);
+    if (!valid)
+      issue(
+        "document",
+        `O ${data.document_type} informado possui formato ou dígitos verificadores inválidos.`,
+      );
+  });
 
 const resetPasswordSchema = z
   .object({
-    token: z.string().trim().min(1, "Token de recuperação obrigatório."),
-    password: z
+    token: z
       .string()
-      .min(8, "A senha deve ter no mínimo 8 caracteres")
-      .max(128, "Senha muito longa")
-      .regex(/[A-Z]/, "A senha deve conter ao menos uma letra maiúscula")
-      .regex(/\d/, "A senha deve conter ao menos um número"),
+      .trim()
+      .min(1, "Token de recuperação obrigatório.")
+      .max(256),
+    password: newPasswordSchema,
   })
   .strip();
 

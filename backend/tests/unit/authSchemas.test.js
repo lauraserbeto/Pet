@@ -9,7 +9,9 @@ const {
 const base = {
   full_name: "Fulano Teste",
   email: "fulano@teste.com",
-  password: "senha123",
+  password: "Senha123",
+  terms_accepted: true,
+  terms_version: require("../../src/constants/legalPolicy").version,
 };
 
 test("rejeita role_id 1 (ADMIN) — trava a escalada de privilégio (PET-01)", () => {
@@ -25,7 +27,7 @@ test("aceita todas as roles self-service (2,3,4,5)", () => {
         ? {}
         : {
             business_name: "Loja X",
-            document: "12345678000199",
+            document: "12ABC34501DE35",
             document_type: "CNPJ",
           };
     const r = registerSchema.safeParse({ ...base, role_id: role, ...extra });
@@ -57,7 +59,7 @@ test("rejeita e-mail inválido", () => {
   );
 });
 
-test("rejeita senha curta (< 6 caracteres)", () => {
+test("rejeita senha curta (< 8 caracteres)", () => {
   assert.equal(
     registerSchema.safeParse({ ...base, password: "123", role_id: 5 }).success,
     false,

@@ -15,7 +15,10 @@ class CreateReviewUseCase {
     this.db = db;
   }
 
-  async execute({ userId, rating, comment, product_id, provider_id, order_id, appointment_id }) {
+  async execute({ userId, userRole, rating, comment, product_id, provider_id, order_id, appointment_id }) {
+    if (userRole !== 5) {
+      throw AppError.forbidden('Apenas tutores podem criar avaliações.');
+    }
     // ── 1. Verificar origem via Order ────────────────────────────────────────
     if (order_id) {
       const order = await this.db.order.findUnique({

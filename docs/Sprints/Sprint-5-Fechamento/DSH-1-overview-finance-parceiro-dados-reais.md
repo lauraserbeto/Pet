@@ -1,5 +1,7 @@
 # DSH-1 — Overview/Finance do parceiro com dados reais
 
+> Implementada localmente em 19/11/2026, junto à DSH-2; sem commit ou publicação. Regras, critérios e evidências em [DSH-IMPLEMENTACAO-E-VALIDACAO.md](DSH-IMPLEMENTACAO-E-VALIDACAO.md). A receita utiliza estados pagos e posteriores e a data de criação do pedido; não é fluxo de caixa. Pré-pagamentos/estornos simulados de agendamentos ficam separados. Os exemplos de mocks abaixo registram o diagnóstico original.
+
 > Sprint 5 · Semana 10 (27/out–01/nov) · Backend · Prioridade Alta · Esforço M · Responsável R2
 
 ## Contexto
@@ -21,7 +23,7 @@ removendo os mocks.
    que, para o `provider` do usuário logado, retorne: total/breakdown de pedidos e agendamentos, receita de
    pedidos **pagos**, série temporal de receita por dia e mix de serviços. Seguir camadas routes → controller →
    useCase → repositories/prisma; validar `days` com Zod inline (Express 5: `req.query` read-only).
-2. **Receita de pedidos pagos:** somar apenas pedidos com status pago; converter `Prisma.Decimal` → `Number()`.
+2. **Receita de pedidos reconhecidos:** incluir PAGO/PREPARANDO/ENVIADO/CONCLUIDO; excluir cancelados e tentativas não aprovadas. Usar total congelado e período pela criação, deixando explícito que não há data de pagamento de todos os pedidos. Converter Decimal com soma monetária em centavos, sem inventar origem financeira para legados.
 3. **Séries por dia:** bucketizar `groupBy` por timestamp em JS (dia a dia), reaproveitando o utilitário de
    `adminMetrics` (`groupByDay`) para consistência com o painel admin.
 4. **Serviço/hook no frontend:** adicionar método em `lib/services/providerService` (sobre `httpClient`) e um
@@ -59,5 +61,5 @@ removendo os mocks.
 - **Prisma `Decimal` → `Number()`** antes de somar/enviar (valores monetários).
 - **Express 5:** `req.query` é read-only — validar `days` com Zod inline, sem reatribuir `req.query`.
 - **`groupBy` por timestamp** não agrupa por dia sozinho — bucketizar em JS (reusar `groupByDay`).
-- Receita = **somente pedidos pagos**; não contar `PENDENTE`/`REJEITADO`/cancelado.
+- Receita reconhecida não desaparece ao avançar de PAGO para PREPARANDO/ENVIADO/CONCLUIDO. Não contar pedidos ainda não pagos, cancelados ou com tentativa não aprovada; não usar updated_at como data do pagamento.
 - Nunca incluir `password_hash`/`document` ao trazer dados do parceiro/usuário — `select` explícito.

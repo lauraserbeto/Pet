@@ -1,6 +1,8 @@
 const UserRepository = require('../../repositories/UserRepository');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { emailSchema } = require('../../security/emailIdentity');
+const AppError = require('../../utils/AppError');
 const { JWT_SECRET } = require('../../config/env');
 const { PROVIDER_STATUS, isApprovedProviderStatus } = require('../../constants/providerStatus');
 
@@ -12,15 +14,22 @@ const ROLES_REQUIRING_APPROVAL = [2, 3];
 class LoginUseCase {
   async execute(email, password) {
     // 1. Verificar se o usuário existe
-    const user = await UserRepository.findByEmail(email);
-    if (!user) {
-      throw new Error('E-mail ou senha inválidos.');
+    const parsedEmail = emailSchema.safeParse(email);
+    if (!parsedEmail.success || typeof password !== 'string' || !password) throw AppError.unauthorized('E-mail ou senha inválidos.');
+    let user;
+    try { user = await UserRepository.findByEmail(parsedEmail.data); }
+    catch (error) {
+      if (error.code === 'EMAIL_COLLISION') throw AppError.unauthorized('E-mail ou senha inválidos.');
+      throw error;
+    }
+    if (!user || !user.password_hash) {
+      throw AppError.unauthorized('E-mail ou senha inválidos.');
     }
 
     // 2. Verificar se a senha bate (Comparando o hash)
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
-      throw new Error('E-mail ou senha inválidos.');
+      throw AppError.unauthorized('E-mail ou senha inválidos.');
     }
 
     // --- BLOQUEIO DE CONTA DESATIVADA ---

@@ -1,0 +1,107 @@
+[WebServer] (node:28508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 30 tests using 1 worker
+
+(node:36988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+⚠ 1 violação(ões) SÉRIA(s) rastreada(s) (requer decisão de design de contraste):
+  - color-contrast: 10 nó(s)
+  ok  1 [chromium] › e2e\a11y.spec.ts:8:1 › landing page sem violações CRÍTICAS de a11y (axe, WCAG 2 A/AA) (10.3s)
+  ok  2 [chromium] › e2e\booking-real.spec.ts:9:3 › BKG integrado com API e Postgres: hotel (9.3s)
+  ok  3 [chromium] › e2e\booking-real.spec.ts:9:3 › BKG integrado com API e Postgres: sitter (6.9s)
+  ok  4 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 390px: cria, acompanha, paga e cancela (5.0s)
+  ok  5 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRESENCIAL em 1280px: cria, acompanha, paga e cancela (8.8s)
+  ok  6 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 390px: cria, acompanha, paga e cancela (5.9s)
+  ok  7 [chromium] › e2e\booking.spec.ts:6:5 › reserva PRE_PAGO em 1280px: cria, acompanha, paga e cancela (5.6s)
+  ok  8 [chromium] › e2e\booking.spec.ts:140:1 › visitante precisa entrar e mantém o destino de reserva (1.2s)
+  ok  9 [chromium] › e2e\legal.spec.ts:11:3 › /terms — leitura linear, headings e listas reais (1.0s)
+  ok 10 [chromium] › e2e\legal.spec.ts:28:3 › /terms — deep-link por âncora posiciona na cláusula (1.7s)
+  ok 11 [chromium] › e2e\legal.spec.ts:34:3 › /terms — sem violações CRÍTICAS de a11y (axe) (2.8s)
+  ok 12 [chromium] › e2e\legal.spec.ts:11:3 › /privacy — leitura linear, headings e listas reais (1.2s)
+  ok 13 [chromium] › e2e\legal.spec.ts:28:3 › /privacy — deep-link por âncora posiciona na cláusula (1.7s)
+  ok 14 [chromium] › e2e\legal.spec.ts:34:3 › /privacy — sem violações CRÍTICAS de a11y (axe) (2.5s)
+  ok 15 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 375px (1.5s)
+  ok 16 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine hotels em 1280px (20.3s)
+  ok 17 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 375px (1.1s)
+  ok 18 [chromium] › e2e\partner-directory.spec.ts:5:5 › vitrine walkers em 1280px (1.4s)
+  ok 19 [chromium] › e2e\payment.spec.ts:8:3 › checkout SIMULATED: cria uma vez e processa todos os pedidos (3.9s)
+  ok 20 [chromium] › e2e\payment.spec.ts:8:3 › checkout MERCADO_PAGO: cria uma vez e processa todos os pedidos (3.4s)
+  x  21 [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado (30.7s)
+(node:34360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  22 [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: hotel gerencia agenda e tutor recebe alterações (30.8s)
+(node:36808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 23 [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: sitter gerencia agenda e tutor recebe alterações (38.0s)
+  ok 24 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 2 não acessa a agenda diretamente pela URL (20.3s)
+  ok 25 [chromium] › e2e\schedule.spec.ts:5:3 › perfil 5 não acessa a agenda diretamente pela URL (1.3s)
+  ok 26 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 3, desktop (11.2s)
+  ok 27 [chromium] › e2e\schedule.spec.ts:30:3 › agenda real na interface: perfil 4, celular (5.7s)
+  ok 28 [chromium] › e2e\smoke.spec.ts:8:1 › landing page carrega e renderiza a navegação (1.2s)
+  ok 29 [chromium] › e2e\smoke.spec.ts:22:1 › rota lazy standalone (/login) carrega o formulário (911ms)
+  ok 30 [chromium] › e2e\smoke.spec.ts:27:1 › rota lazy sob layout (/products) renderiza sem cair no ErrorBoundary (882ms)
+
+
+  1) [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.screenshot: Test timeout of 30000ms exceeded.
+    Call log:
+      - taking page screenshot
+      - waiting for fonts to load...
+      - fonts loaded
+
+
+       96 |   await expect(page.getByRole('button', { name: 'Pagar no Mercado Pago' })).toHaveCount(2);
+       97 |   await expect(page.locator('input[name="cvv"]')).toHaveCount(0);
+    >  98 |   await page.screenshot({ path: testInfo.outputPath('payment-desktop.png'), fullPage: true });
+          |              ^
+       99 |   await page.setViewportSize({ width: 390, height: 844 });
+      100 |   await expect(page.getByRole('button', { name: 'Pagar no Mercado Pago' }).first()).toBeVisible();
+      101 |   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        at C:\PI - 2026\Pet\frontend\e2e\payment.spec.ts:98:14
+
+    Error Context: test-results\payment-pagamento-de-múlti-25e9a-le-retorno-e-link-hospedado-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\payment-pagamento-de-múlti-25e9a-le-retorno-e-link-hospedado-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\payment-pagamento-de-múlti-25e9a-le-retorno-e-link-hospedado-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: hotel gerencia agenda e tutor recebe alterações 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: page.goto: Test timeout of 30000ms exceeded.
+    Call log:
+      - navigating to "http://localhost:4173/dashboard/schedule", waiting until "load"
+
+
+      26 |       await route.fulfill({ response });
+      27 |     });
+    > 28 |     await page.goto("/dashboard/schedule");
+         |                ^
+      29 |     const schedule = page.getByRole("region", { name: "Agenda do parceiro" });
+      30 |     const chooseDay = async (kind: string) => {
+      31 |       const day = new Intl.DateTimeFormat("en-CA", {
+        at C:\PI - 2026\Pet\frontend\e2e\schedule-real.spec.ts:28:16
+
+    Error Context: test-results\schedule-real-SCH-integrad-eedab-a-e-tutor-recebe-alterações-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\schedule-real-SCH-integrad-eedab-a-e-tutor-recebe-alterações-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\schedule-real-SCH-integrad-eedab-a-e-tutor-recebe-alterações-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › e2e\payment.spec.ts:72:1 › pagamento de múltiplos lojistas: desktop/mobile, retorno e link hospedado 
+    [chromium] › e2e\schedule-real.spec.ts:9:3 › SCH integrado: hotel gerencia agenda e tutor recebe alterações 
+  28 passed (5.1m)

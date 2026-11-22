@@ -1,5 +1,7 @@
 # DSH-2 — Métricas admin com receita/pedidos reais
 
+> Implementada localmente em 19/11/2026, junto à DSH-1; sem commit ou publicação. Regras, critérios e evidências em [DSH-IMPLEMENTACAO-E-VALIDACAO.md](DSH-IMPLEMENTACAO-E-VALIDACAO.md). O bloco commerce usa o mesmo repositório do parceiro, preservando as métricas institucionais existentes. “Pedidos pagos” abrange os estados posteriores; a janela dos pedidos usa criação, sem apresentar fluxo de caixa. O contexto abaixo preserva o diagnóstico original.
+
 > Sprint 5 · Semana 11 (02–08/nov) · Backend · Prioridade Alta · Esforço M · Responsável R2
 
 ## Contexto

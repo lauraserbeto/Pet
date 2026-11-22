@@ -5,6 +5,7 @@ const { cents } = require('./CreatePaymentPreferenceUseCase');
 const { ORDER_STATUS, PAYMENT_PROVIDER } = require('../../constants/orderStatus');
 const AppError = require('../../utils/AppError');
 const logger = require('../../config/logger');
+const { lockOrder } = require('../../utils/orderConcurrency');
 
 const NON_APPROVED_STATUSES = new Set(['pending', 'in_process', 'authorized', 'rejected', 'cancelled']);
 
@@ -45,7 +46,8 @@ class ProcessPaymentWebhookUseCase {
     }
 
     return this.database.$transaction(async (tx) => {
-      // Serializa notificações do mesmo pedido; pedido e pagamento mudam juntos.
+      // Mesma ordem de locks do cancelamento e da criação de preferência.
+      await lockOrder(tx, reference);
       await tx.$queryRaw`SELECT id FROM payment_attempts WHERE id = ${attempt.id}::uuid FOR UPDATE`;
       const current = await tx.paymentAttempt.findUnique({ where: { id: attempt.id } });
       if (current.status === 'APPROVED') {
