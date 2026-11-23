@@ -41,7 +41,14 @@ const serviceRoutes = require("./routes/serviceRoutes");
 
 // Limitador para as rotas de autenticação — mitiga força bruta e enumeração
 // em login, recuperação de senha, registro e reset.
-const requestLimits = createRequestLimits();
+// Em ambiente de teste o limite de /auth (20 por 15 min) derruba cenários E2E
+// que autenticam vários perfis seguidos. A política de produção é a mesma de
+// sempre: só NODE_ENV=test com a variável explícita afrouxa, e apenas o auth.
+const limiteAuthDeTeste =
+  process.env.NODE_ENV === "test" && process.env.QA_AUTH_RATE_LIMIT
+    ? { auth: { limit: Number(process.env.QA_AUTH_RATE_LIMIT) } }
+    : {};
+const requestLimits = createRequestLimits(limiteAuthDeTeste);
 const authLimiter = requestLimits.auth;
 
 // Middlewares Globais

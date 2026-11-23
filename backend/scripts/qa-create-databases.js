@@ -1,13 +1,22 @@
-// Cria os bancos dedicados que algumas fixtures de E2E exigem (E-13, E-19, E-33).
-// Esses scripts recusam rodar fora do banco com o nome exato, para que a massa
-// de um cenário nunca contamine a de outro.
+// Cria os bancos dos cenários de E2E (QA-2).
 //
-// Uso: node scripts/qa-create-databases.js
-// Lê DATABASE_URL e cria os bancos irmãos no mesmo servidor.
+// Cada cenário roda isolado: várias fixtures semeiam massa fixa e os cenários
+// que medem agregados (métricas, integridade de pedido, segurança) quebram se
+// outro cenário escrever no mesmo banco.
+//
+// Uso:
+//   node scripts/qa-create-databases.js <nome> [--recriar] [--template <base>]
+//
+// `--template` copia um banco já migrado, em vez de rodar as migrations de
+// novo em cada um — 14 bancos × migrations seria lento sem necessidade.
 const { PrismaClient } = require('@prisma/client');
 
-const EXTRA_DATABASES = ['petplus_e13_test', 'petplus_e19_test', 'petplus_e33_test'];
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', 'postgres'];
+
+function valorDe(args, flag) {
+  const i = args.indexOf(flag);
+  return i >= 0 ? args[i + 1] : null;
+}
 
 async function main() {
   const url = new URL(process.env.DATABASE_URL || '');
@@ -17,22 +26,36 @@ async function main() {
     throw new Error('Recusado: exige banco local de teste em DATABASE_URL.');
   }
 
+  const args = process.argv.slice(2);
+  const nome = args.find((arg) => !arg.startsWith('--') && arg !== valorDe(args, '--template'));
+  const recriar = args.includes('--recriar');
+  const template = valorDe(args, '--template');
+
+  if (!nome) throw new Error('Informe o nome do banco.');
+  if (!nome.includes('test')) throw new Error(`Recusado: "${nome}" não é banco de teste.`);
+
   const adminUrl = new URL(url);
   adminUrl.pathname = '/postgres';
   const prisma = new PrismaClient({ datasources: { db: { url: adminUrl.toString() } } });
 
   try {
-    for (const name of EXTRA_DATABASES) {
-      try {
-        await prisma.$executeRawUnsafe(`CREATE DATABASE "${name}"`);
-        console.log(`criado: ${name}`);
-      } catch (error) {
-        // 42P04 = already exists. Reexecutar o script precisa ser inofensivo.
-        if (error?.meta?.code === '42P04' || /already exists/i.test(error.message)) {
-          console.log(`já existia: ${name}`);
-        } else {
-          throw error;
-        }
+    // Recriar deixa a execução repetível: as fixtures semeiam massa fixa e
+    // colidiriam em chave única numa segunda rodada. No CI o banco já nasce
+    // vazio; localmente, sem isto, só funcionaria na primeira vez.
+    if (recriar) {
+      await prisma.$executeRawUnsafe(`DROP DATABASE IF EXISTS "${nome}" WITH (FORCE)`);
+    }
+
+    const origem = template ? ` TEMPLATE "${template}"` : '';
+    try {
+      await prisma.$executeRawUnsafe(`CREATE DATABASE "${nome}"${origem}`);
+      console.log(`criado: ${nome}${template ? ` (a partir de ${template})` : ''}`);
+    } catch (error) {
+      // 42P04 = already exists. Reexecutar precisa ser inofensivo.
+      if (error?.meta?.code === '42P04' || /already exists/i.test(error.message)) {
+        console.log(`já existia: ${nome}`);
+      } else {
+        throw error;
       }
     }
   } finally {
