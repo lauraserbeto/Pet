@@ -85,7 +85,7 @@ export function PartnersPage() {
             <div className="lg:col-span-7 space-y-8 text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight font-[family-name:var(--font-display)]">
                 Leve a gestão do seu <br />
-                <span className="text-[var(--color-primary-500)]">negócio pet para o futuro</span>
+                <span className="text-[var(--color-primary-700)]">negócio pet para o futuro</span>
               </h1>
 
               <p className="text-lg text-slate-600 max-w-2xl leading-relaxed">
@@ -157,7 +157,7 @@ export function PartnersPage() {
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
               Uma ferramenta inteligente para <br />
-              <span className="text-[var(--color-primary-500)]">cada tipo de negócio</span>
+              <span className="text-[var(--color-primary-700)]">cada tipo de negócio</span>
             </h2>
             <p className="text-slate-600 max-w-xl mx-auto font-medium">
               Desenvolvemos painéis dedicados com funcionalidades específicas para o seu segmento
@@ -178,13 +178,15 @@ export function PartnersPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
+                    aria-label={tab.label}
+                    aria-pressed={isActive}
                     className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all ${
                       isActive
                         ? "bg-white text-slate-900 shadow-sm border border-slate-200/50"
-                        : "text-slate-500 hover:text-slate-800"
+                        : "text-slate-700 hover:text-slate-900"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 );
@@ -243,16 +245,16 @@ export function PartnersPage() {
                 {/* Dashboard layout emulation */}
                 <div className="flex-1 grid grid-cols-2 gap-4">
                   <div className="bg-white border border-slate-200/80 p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">
+                    <span className="text-[10px] text-slate-600 font-bold uppercase">
                       Agendamentos Hoje
                     </span>
                     <span className="text-2xl font-black text-slate-900 mt-2">12</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold mt-1">
+                    <span className="text-[10px] text-emerald-700 font-semibold mt-1">
                       ▲ 8% hoje
                     </span>
                   </div>
                   <div className="bg-white border border-slate-200/80 p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">
+                    <span className="text-[10px] text-slate-600 font-bold uppercase">
                       Ticket Médio
                     </span>
                     <span className="text-2xl font-black text-slate-900 mt-2">R$ 135</span>
@@ -261,7 +263,7 @@ export function PartnersPage() {
                     </span>
                   </div>
                   <div className="col-span-2 bg-white border border-slate-200/80 p-4 rounded-xl flex flex-col gap-3 shadow-sm">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">
+                    <span className="text-[10px] text-slate-600 font-bold uppercase">
                       Próximos Clientes
                     </span>
                     <div className="space-y-2">
@@ -275,7 +277,7 @@ export function PartnersPage() {
                         >
                           <span className="font-bold text-slate-800">{appt.pet}</span>
                           <span className="text-slate-500 font-medium">{appt.service}</span>
-                          <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded font-black border border-orange-100">
+                          <span className="bg-orange-50 text-orange-800 px-2 py-0.5 rounded font-black border border-orange-100">
                             {appt.time}
                           </span>
                         </div>
@@ -339,7 +341,7 @@ export function PartnersPage() {
         <div className="relative z-10 text-center max-w-4xl mx-auto space-y-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] leading-tight tracking-tight">
             Pronto para expandir o seu{" "}
-            <span className="text-[var(--color-primary-500)]">negócio pet?</span>
+            <span className="text-[var(--color-primary-700)]">negócio pet?</span>
           </h2>
 
           <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed font-semibold">

@@ -32,8 +32,8 @@ for (const width of [1280, 390]) test(`E-19 API/PostgreSQL reais: paginação e 
     });
     await page.screenshot({ path: info.outputPath(`pedidos-${role}-${width}.png`), fullPage: true, animations: 'disabled' });
     if (role === 2) {
-      await page.getByRole('textbox', { name: /Buscar pedidos/ }).fill('Localizavel');
-      await page.getByRole('button', { name: 'Buscar pedidos' }).click();
+      await page.getByRole('searchbox', { name: /Buscar pedidos/ }).fill('Localizavel');
+      await page.getByRole('button', { name: 'Buscar', exact: true }).click();
       await expect(page.getByText('1 pedidos · Página 1 de 1')).toBeVisible();
       await expect(page.getByText('25', { exact: true })).toBeVisible();
     }

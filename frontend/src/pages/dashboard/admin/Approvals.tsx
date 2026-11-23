@@ -7,6 +7,7 @@ import { HamsterLoader } from "../../../components/ui/HamsterLoader";
 import { toast } from "sonner";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
 import { formatDocument, isValidDocument } from "../../../lib/utils/masks";
 import { APPROVED_PROVIDER_STATUSES, PROVIDER_STATUS } from "../../../lib/constants/providerStatus";
 
@@ -275,21 +276,24 @@ export function Approvals() {
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg w-fit">
+      <div role="group" aria-label="Filtrar cadastros por situação" className="flex space-x-1 bg-slate-100 p-1 rounded-lg w-fit">
         <button
           onClick={() => setActiveTab('PENDENTE')}
+          aria-pressed={activeTab === 'PENDENTE'}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'PENDENTE' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`}
         >
           Para analisar
         </button>
         <button
           onClick={() => setActiveTab('APROVADO')}
+          aria-pressed={activeTab === 'APROVADO'}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'APROVADO' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`}
         >
           Aprovados
         </button>
         <button
           onClick={() => setActiveTab('REJEITADO')}
+          aria-pressed={activeTab === 'REJEITADO'}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'REJEITADO' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'}`}
         >
           Recusados
@@ -310,7 +314,7 @@ export function Approvals() {
         </div>
         <div className="w-full sm:w-48">
           <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Filtrar por tipo de parceiro">
               <SelectValue placeholder="Todos os tipos" />
             </SelectTrigger>
             <SelectContent>
@@ -483,98 +487,99 @@ export function Approvals() {
         </div>
       )}
 
-      {/* Rejection Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">
-                Recusar Parceiro
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Tem certeza que deseja recusar esta solicitação de cadastro?
-              </p>
-            </div>
+      {/* Recusa: Dialog acessível (foco preso, Esc, título) — E-34 */}
+      <Dialog
+        open={isModalOpen}
+        onOpenChange={(open) => !open && processingId !== rejectingId && closeRejectModal()}
+      >
+        <DialogContent className="max-w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-xl p-0 sm:max-w-md">
+          <DialogHeader className="border-b border-slate-100 px-6 py-5 text-left">
+            <DialogTitle className="text-lg font-bold text-slate-900">Recusar Parceiro</DialogTitle>
+            <DialogDescription className="text-sm text-slate-600">
+              Tem certeza que deseja recusar esta solicitação de cadastro?
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="p-6">
-              {/* Motivo obrigatório: a API exige e o parceiro recebe por e-mail (E-11). */}
-              <label htmlFor="rejection-reason" className="block text-sm font-medium text-slate-700 mb-1">
-                Motivo da recusa (obrigatório)
-              </label>
-              <p className="text-xs text-slate-500 mb-2">
-                O parceiro recebe este motivo por e-mail e o vê na tela de correção do cadastro.
-              </p>
-              <textarea
-                id="rejection-reason"
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                maxLength={500}
-                placeholder="Ex.: documento ilegível — envie uma foto nítida do CNPJ."
-                className="w-full h-24 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors resize-none"
-              ></textarea>
-            </div>
-            
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <Button 
-                variant="ghost" 
-                onClick={closeRejectModal}
-                disabled={processingId === rejectingId}
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={confirmRejection}
-                disabled={processingId === rejectingId || !rejectionReason.trim()}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {processingId === rejectingId ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processando...</>
-                ) : (
-                  'Confirmar Ação'
-                )}
-              </Button>
-            </div>
+          <div className="p-6">
+            {/* Motivo obrigatório: a API exige e o parceiro recebe por e-mail (E-11). */}
+            <label htmlFor="rejection-reason" className="mb-1 block text-sm font-medium text-slate-700">
+              Motivo da recusa (obrigatório)
+            </label>
+            <p id="rejection-reason-hint" className="mb-2 text-xs text-slate-600">
+              O parceiro recebe este motivo por e-mail e o vê na tela de correção do cadastro.
+            </p>
+            <textarea
+              id="rejection-reason"
+              aria-describedby="rejection-reason-hint"
+              aria-required="true"
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              maxLength={500}
+              placeholder="Ex.: documento ilegível — envie uma foto nítida do CNPJ."
+              className="h-24 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 transition-colors focus:border-[var(--color-primary-500)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]/20"
+            ></textarea>
           </div>
-        </div>
-      )}
 
-      {/* Deactivation Modal */}
-      {deactivatingPartner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">Desativar conta do parceiro</h3>
-              <p className="text-sm text-slate-500 mt-1">
-                {deactivatingPartner.business_name} perde o acesso imediatamente e os produtos e serviços saem da vitrine.
-                Nenhum e-mail é enviado, e a conta pode ser reativada depois.
-              </p>
-            </div>
-
-            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setDeactivatingPartner(null)}
-                disabled={processingId === deactivatingPartner.id}
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => setPartnerActive(deactivatingPartner, false)}
-                disabled={processingId === deactivatingPartner.id}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                {processingId === deactivatingPartner.id ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processando...</>
-                ) : (
-                  'Desativar conta'
-                )}
-              </Button>
-            </div>
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+            <Button
+              variant="ghost"
+              onClick={closeRejectModal}
+              disabled={processingId === rejectingId}
+              className="text-slate-600 hover:text-slate-900"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmRejection}
+              disabled={processingId === rejectingId || !rejectionReason.trim()}
+            >
+              {processingId === rejectingId ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Processando...</>
+              ) : (
+                'Confirmar Ação'
+              )}
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Desativação: Dialog acessível — E-34 */}
+      <Dialog
+        open={!!deactivatingPartner}
+        onOpenChange={(open) => !open && processingId !== deactivatingPartner?.id && setDeactivatingPartner(null)}
+      >
+        <DialogContent className="max-w-[calc(100vw-2rem)] gap-0 overflow-hidden rounded-xl p-0 sm:max-w-md">
+          <DialogHeader className="border-b border-slate-100 px-6 py-5 text-left">
+            <DialogTitle className="text-lg font-bold text-slate-900">Desativar conta do parceiro</DialogTitle>
+            <DialogDescription className="text-sm text-slate-600">
+              {deactivatingPartner?.business_name} perde o acesso imediatamente e os produtos e serviços saem da vitrine.
+              Nenhum e-mail é enviado, e a conta pode ser reativada depois.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+            <Button
+              variant="ghost"
+              onClick={() => setDeactivatingPartner(null)}
+              disabled={processingId === deactivatingPartner?.id}
+              className="text-slate-600 hover:text-slate-900"
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deactivatingPartner && setPartnerActive(deactivatingPartner, false)}
+              disabled={processingId === deactivatingPartner?.id}
+            >
+              {deactivatingPartner && processingId === deactivatingPartner.id ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Processando...</>
+              ) : (
+                'Desativar conta'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

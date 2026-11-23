@@ -1,10 +1,10 @@
 # AVL-2 — Agregados reais e integração de AVL-1
 
-Implementação local em 18/11/2026 na branch `codex/retomada-servicos`, atualizada por fast-forward para a main `d593b03` após o merge do PR #52. Sem commit de entrega ou publicação.
+Implementação local em 18/11/2026 na branch `tasks-laura`, atualizada por fast-forward para a main `d593b03` após o merge do PR #52. Sem commit de entrega ou publicação.
 
 ## Atualização da base
 
-O trabalho anterior foi preservado com `git stash push --include-untracked`. Backup mantido: `ca63bf003f8b242b47effbbd0f7d4427fe1a2be2`, mensagem `codex-backup-antes-main-avl1-2026-11-18`.
+O trabalho anterior foi preservado com `git stash push --include-untracked`. Backup mantido: `ca63bf003f8b242b47effbbd0f7d4427fe1a2be2`.
 
 Após o pull, o backup foi reaplicado. O único conflito foi no fim de `schema.prisma`: foram preservados o modelo Review da main, o AppointmentPayment da PAG-2 e as duas relações de Appointment. Os arquivos foram retirados do estágio automático produzido pelo stash; não restam conflitos. A comparação do frontend rastreado com o backup não mostrou diferenças.
 

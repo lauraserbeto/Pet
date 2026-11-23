@@ -1,6 +1,6 @@
 # G07 — Plano: Configurações da Plataforma com backend real
 
-Elaborado em 20/11/2026. **Somente planejamento**: nada aqui foi implementado, migrado, commitado ou publicado. Origem: decisão G07 → “Planejar backend” em [FASE0-DECISOES.md](FASE0-DECISOES.md); a tela atual é a versão informativa da Fase 1 ([FASE1-IMPLEMENTACAO-E-VALIDACAO.md](FASE1-IMPLEMENTACAO-E-VALIDACAO.md)). Corresponde à pendência **CFG-1** de [CONTEXTO-HANDOFF-IMPLEMENTACOES-2026-11-20.md](../../CONTEXTO-HANDOFF-IMPLEMENTACOES-2026-11-20.md) §7.
+Elaborado em 20/11/2026. **Somente planejamento**: nada aqui foi implementado, migrado, commitado ou publicado. Origem: decisão G07 → “Planejar backend” em [FASE0-DECISOES.md](FASE0-DECISOES.md); a tela atual é a versão informativa da Fase 1 ([FASE1-IMPLEMENTACAO-E-VALIDACAO.md](FASE1-IMPLEMENTACAO-E-VALIDACAO.md)). Corresponde à pendência **CFG-1** do [plano de retomada](../../Sprints/PLANO-RETOMADA-E-FECHAMENTO-2026-11-16.md).
 
 Fora da Sprint atual e fora das Fases 2–5 da auditoria. Antes de implementar, reconferir o código: o working tree tem centenas de alterações locais não commitadas e este plano descreve o estado lido em 20/11/2026.
 
@@ -58,9 +58,9 @@ Sugestão de entrega mínima: só `partners.auto_approval_roles`, se D1 for “s
 
 | Item do layout antigo | Dependência ausente | O que a tela deve dizer |
 |---|---|---|
-| Comissões (Hotel, Sitter, Lojista) | Split/repasse e cobrança real. Hoje: pagamento de agendamento **simulado** (PAG-2); pedidos via Mercado Pago sem retenção de comissão; split/repasse listado como fora de escopo no handoff §7. Uma taxa gravada não seria aplicada a nada. | “Não disponível nesta versão”, sem campo. |
+| Comissões (Hotel, Sitter, Lojista) | Split/repasse e cobrança real. Hoje: pagamento de agendamento **simulado** (PAG-2); pedidos via Mercado Pago sem retenção de comissão; split/repasse listado como fora de escopo no plano de retomada. Uma taxa gravada não seria aplicada a nada. | “Não disponível nesta versão”, sem campo. |
 | Autenticação em duas etapas | Não há segundo fator, segredo TOTP, códigos de recuperação nem etapa extra no `LoginUseCase`. | “Não disponível”, sem switch. |
-| Logout global / forçado | Não há refresh token nem revogação de JWT (handoff §7). O token vale 1 dia (`expiresIn: '1d'` em `LoginUseCase.js`). Desativar a conta (`SetUserActiveUseCase`) já invalida o acesso na requisição seguinte, porque `authMiddleware` relê `is_active`, mas isso é suspensão individual, não encerramento de sessões. | “Não disponível”; manter a indicação de “Sair da conta”. |
+| Logout global / forçado | Não há refresh token nem revogação de JWT (limite registrado na SEC-2 e na E-35). O token vale 1 dia (`expiresIn: '1d'` em `LoginUseCase.js`). Desativar a conta (`SetUserActiveUseCase`) já invalida o acesso na requisição seguinte, porque `authMiddleware` relê `is_active`, mas isso é suspensão individual, não encerramento de sessões. | “Não disponível”; manter a indicação de “Sair da conta”. |
 
 Nota para planejamento futuro (não é parte deste plano): como `authMiddleware` já consulta o banco a cada requisição, uma revogação poderia ser feita com uma coluna do tipo `users.sessions_valid_after` comparada ao `iat` do JWT. Isso é uma funcionalidade de segurança própria (com testes, efeitos sobre troca de senha e reset), e não uma “configuração”; deve ser decidida separadamente.
 
@@ -127,7 +127,7 @@ Escolhas:
 - Nome: `backend/prisma/migrations/20261121000000_platform_settings/migration.sql` (posterior à última, `20261120020000_pet_archive`). **Não editar nenhuma migration existente.**
 - Conteúdo: `CREATE TABLE platform_settings`, `CREATE TABLE platform_setting_audits`, FKs e índices acima. **Não inserir linhas**: a ausência de linha significa “valor padrão”, então a migration é puramente aditiva e não muda comportamento.
 - Geração sem `migrate dev`/`db push`/`reset`: escrever o SQL à mão (padrão das migrations recentes) e conferir com `npx prisma migrate diff --from-schema-datasource <banco de teste descartável já migrado> --to-schema-datamodel prisma/schema.prisma --script`, que deve sair vazio depois de aplicar a migration nova com `migrate deploy` nesse banco descartável (URL contendo `test`, como exigem os helpers de `tests/helpers/dbIntegration.js`).
-- Impacto em publicação: o boot do container aplica migrations (handoff §5 / INF-2). Esta migration só cria tabelas, mas segue a mesma regra das outras: só entra em banco publicado com autorização explícita e junto do código que a usa.
+- Impacto em publicação: o boot do container aplica migrations (INF-2). Esta migration só cria tabelas, mas segue a mesma regra das outras: só entra em banco publicado com autorização explícita e junto do código que a usa.
 
 ### 2.3 Registro de chaves e padrões
 
@@ -152,7 +152,7 @@ const PLATFORM_SETTINGS = Object.freeze({
 });
 ```
 
-Novo `backend/src/services/PlatformSettingsService.js` (ou `useCases/settings/`): `get(key, tx?)` → valor da linha ou padrão do registro; `list()`; `update({ key, value, expectedVersion, actor, requestId })`. Sem cache em memória nesta versão (leitura por PK, uma vez por cadastro; evita divergência entre instâncias, já que não há armazenamento compartilhado — vide rate limit no handoff).
+Novo `backend/src/services/PlatformSettingsService.js` (ou `useCases/settings/`): `get(key, tx?)` → valor da linha ou padrão do registro; `list()`; `update({ key, value, expectedVersion, actor, requestId })`. Sem cache em memória nesta versão (leitura por PK, uma vez por cadastro; evita divergência entre instâncias, já que não há armazenamento compartilhado — vide limite de requisições na SEC-2).
 
 ---
 
@@ -256,7 +256,7 @@ Inalterado. `submitSitterEvaluation` → `reviewEvaluation` continua sendo o ún
 
 ### 5.4 Interações com o restante da pendência
 
-- E-11 (candidaturas/onboarding) ainda está aberta no handoff; implementar G07 depois de E-11 ou garantir que §5.1 não toque nos caminhos de `SitterEvaluation`.
+- E-11 (candidaturas/onboarding) foi concluída em 22/11/2026 ([registro](../../Sprints/Sprint-5-Fechamento/E-11-IMPLEMENTACAO-E-VALIDACAO.md)); ao implementar G07, garantir que §5.1 não toque nos caminhos de `SitterEvaluation`.
 - G12 (Fase 3) mexe em `isProfileComplete`/`/providers/completeness`; a aprovação automática depende dessa regra continuar barrando a vitrine. Testar juntos se as entregas se cruzarem.
 
 ---
@@ -334,7 +334,7 @@ Inalterado. `submitSitterEvaluation` → `reviewEvaluation` continua sendo o ún
 2. **Fase B — aprovação automática** (se D1): leitura em `RegisterUseCase`, `provider_status` na resposta do cadastro, testes de cadastro/onboarding, mensagem de `RegisterPage`.
 3. **Fase C — tela**: `settingsService.ts`, `Settings.tsx` real, histórico, testes §7.3, E2E §7.4.
 4. **Fase D — e-mail de contato** (se D3): chave pública, endpoint §3.4, `ContactPage`.
-5. Registro de implementação e evidências em `docs/evidencias-testes/` com prefixo próprio; atualizar o handoff (CFG-1).
+5. Registro de implementação e evidências em `docs/evidencias-testes/` com prefixo próprio; atualizar os registros da sprint (CFG-1).
 
 Cada fase termina com suíte completa verde e **sem commit/push/deploy** até autorização explícita. Backend (A/B) e tela (C) devem entrar juntos em qualquer commit futuro: a tela sem endpoint quebraria, e endpoint sem tela é aceitável só como passo local.
 

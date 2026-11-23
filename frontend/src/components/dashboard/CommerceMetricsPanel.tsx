@@ -11,6 +11,7 @@ import {
 import type { CommerceMetrics } from "../../lib/services/commerceMetrics";
 import { StatCard } from "./StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 const currency = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -208,7 +209,11 @@ export function CommerceMetricsPanel({
           </CardHeader>
           <CardContent>
             {data.revenue.paid_orders ? (
-              <div className="h-64 min-w-0" aria-label="Gráfico de vendas reconhecidas">
+              <div
+                className="h-64 min-w-0"
+                role="img"
+                aria-label="Gráfico de vendas reconhecidas por dia; os valores estão na tabela abaixo"
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data.revenue.daily}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -218,7 +223,13 @@ export function CommerceMetricsPanel({
                       labelFormatter={(value) => day(String(value))}
                       formatter={(value) => [currency(Number(value)), "Vendas"]}
                     />
-                    <Area type="monotone" dataKey="amount" stroke="#0369a1" fill="#e0f2fe" />
+                    {/* Cor da marca (G03): traço primary-700, preenchimento primary-100. */}
+                    <Area
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="var(--color-primary-700)"
+                      fill="var(--color-primary-100)"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -226,25 +237,25 @@ export function CommerceMetricsPanel({
               <p>Nenhuma venda reconhecida no período.</p>
             )}
             <details className="mt-4">
-              <summary className="cursor-pointer font-semibold">Consultar valores diários</summary>
-              <div className="max-h-64 overflow-auto">
-                <table className="mt-3 w-full text-left text-sm">
-                  <caption className="sr-only">Vendas reconhecidas por dia em reais</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Dia</th>
-                      <th scope="col">Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <summary className="cursor-pointer font-semibold text-slate-800">Consultar valores diários</summary>
+              <div className="mt-3 max-h-64 overflow-auto rounded-lg border border-slate-100">
+                <Table>
+                  <TableCaption className="sr-only">Vendas reconhecidas por dia em reais</TableCaption>
+                  <TableHeader className="sticky top-0 bg-slate-50">
+                    <TableRow>
+                      <TableHead scope="col">Dia</TableHead>
+                      <TableHead scope="col" className="text-right">Valor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {data.revenue.daily.map((row) => (
-                      <tr key={row.date}>
-                        <td>{day(row.date)}</td>
-                        <td>{currency(row.amount)}</td>
-                      </tr>
+                      <TableRow key={row.date}>
+                        <TableCell>{day(row.date)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{currency(row.amount)}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </details>
             <p className="mt-3 text-xs text-slate-600">

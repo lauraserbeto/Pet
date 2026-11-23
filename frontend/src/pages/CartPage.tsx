@@ -35,6 +35,7 @@ export function CartPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [itemToRemove, setItemToRemove] = useState<any | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false);
 
   const handleCheckout = () => {
@@ -90,9 +91,10 @@ export function CartPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
+              aria-label="Voltar"
               className="p-2 rounded-full hover:bg-slate-100 transition-colors"
             >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
+              <ArrowLeft className="h-5 w-5 text-slate-600" aria-hidden="true" />
             </button>
             <div>
               <h1 className="text-xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
@@ -135,7 +137,7 @@ export function CartPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0 flex flex-col">
-                      <p className="text-[11px] text-slate-400 uppercase tracking-wider">
+                      <p className="text-[11px] text-slate-600 uppercase tracking-wider">
                         {item.brand}
                       </p>
                       <Link
@@ -156,18 +158,20 @@ export function CartPage() {
                                 updateQuantity(item.id, item.quantity - 1);
                               }
                             }}
+                            aria-label={`Diminuir quantidade de ${item.name}`}
                             className="p-1.5 hover:bg-slate-100 rounded-l-lg transition-colors"
                           >
-                            <Minus className="h-3.5 w-3.5 text-slate-500" />
+                            <Minus className="h-3.5 w-3.5 text-slate-600" aria-hidden="true" />
                           </button>
-                          <span className="w-8 text-center text-sm font-semibold text-slate-800">
+                          <span className="w-8 text-center text-sm font-semibold text-slate-800" aria-live="polite" aria-label={`Quantidade: ${item.quantity}`}>
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            aria-label={`Aumentar quantidade de ${item.name}`}
                             className="p-1.5 hover:bg-slate-100 rounded-r-lg transition-colors"
                           >
-                            <Plus className="h-3.5 w-3.5 text-slate-500" />
+                            <Plus className="h-3.5 w-3.5 text-slate-600" aria-hidden="true" />
                           </button>
                         </div>
 
@@ -188,9 +192,10 @@ export function CartPage() {
                     {/* Remove */}
                     <button
                       onClick={() => setItemToRemove(item)}
+                      aria-label={`Remover ${item.name} do carrinho`}
                       className="self-start p-2 rounded-full hover:bg-red-50 transition-colors"
                     >
-                      <Trash2 className="h-4 w-4 text-slate-400 hover:text-red-500 transition-colors" />
+                      <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-600 transition-colors" aria-hidden="true" />
                     </button>
                   </div>
                 </motion.div>
@@ -203,7 +208,7 @@ export function CartPage() {
                 onClick={async () => {
                   if (await clearCart()) toast.success("Carrinho limpo");
                 }}
-                className="text-sm text-slate-400 hover:text-red-500 transition-colors"
+                className="text-sm text-slate-600 hover:text-red-700 transition-colors"
               >
                 Limpar carrinho
               </button>
@@ -263,64 +268,48 @@ export function CartPage() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      <AnimatePresence>
-        {itemToRemove && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+      {/* Confirmação de remoção: Dialog acessível (foco preso, Esc, título) — E-34 */}
+      <Dialog open={!!itemToRemove} onOpenChange={(open) => !open && !isRemoving && setItemToRemove(null)}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-3xl p-6 text-center sm:max-w-sm sm:p-8">
+          <DialogHeader className="items-center text-center">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-100 bg-orange-50">
+              <Trash2 className="h-5 w-5 text-orange-700" aria-hidden="true" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
+              Remover este item?
+            </DialogTitle>
+            <DialogDescription className="text-sm font-semibold leading-relaxed text-slate-600">
+              Você quer retirar{" "}
+              <span className="font-bold text-slate-800">"{itemToRemove?.name}"</span> do seu carrinho?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex gap-3">
+            <Button
+              variant="outline"
+              className="h-11 flex-1 rounded-xl border-slate-200 font-bold text-slate-700 hover:bg-slate-50"
               onClick={() => setItemToRemove(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs"
-            />
-
-            {/* Modal Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ type: "spring", duration: 0.3 }}
-              className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-slate-100 shadow-xl relative z-10 text-center"
+              disabled={isRemoving}
             >
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center mb-4 mx-auto">
-                <Trash2 className="h-5 w-5 text-orange-500" />
-              </div>
-
-              <h3 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
-                Remover este item?
-              </h3>
-
-              <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed font-semibold">
-                Você quer retirar{" "}
-                <span className="text-slate-800 font-bold">"{itemToRemove.name}"</span> do seu
-                carrinho?
-              </p>
-
-              <div className="flex gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  className="flex-1 rounded-xl h-11 border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
-                  onClick={() => setItemToRemove(null)}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  className="flex-1 rounded-xl h-11 bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-md shadow-orange-500/10"
-                  onClick={async () => {
-                    await removeItem(itemToRemove.id);
-                    setItemToRemove(null);
-                    toast.success("Item removido do carrinho");
-                  }}
-                >
-                  Remover
-                </Button>
-              </div>
-            </motion.div>
+              Cancelar
+            </Button>
+            <Button
+              className="h-11 flex-1 rounded-xl font-bold"
+              disabled={isRemoving}
+              onClick={async () => {
+                if (!itemToRemove) return;
+                setIsRemoving(true);
+                // Sucesso só depois da confirmação da API (E-20).
+                const removed = await removeItem(itemToRemove.id);
+                setIsRemoving(false);
+                setItemToRemove(null);
+                if (removed) toast.success("Item removido do carrinho");
+              }}
+            >
+              Remover
+            </Button>
           </div>
-        )}
-      </AnimatePresence>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isAuthPromptOpen} onOpenChange={setIsAuthPromptOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] rounded-2xl sm:max-w-md">

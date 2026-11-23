@@ -227,7 +227,7 @@ export const PetSitterOnboarding = () => {
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">Avaliação em Análise</h2>
                     <p className="text-gray-600 mb-6">
                         Recebemos suas informações e nossa equipe de especialistas já está analisando seu perfil. 
-                        Isso pode levar até 48 horas úteis.
+                        Você poderá acompanhar o resultado pela plataforma.
                     </p>
                     <button 
                         onClick={() => navigate('/')}
@@ -247,7 +247,7 @@ export const PetSitterOnboarding = () => {
             <div className="w-full bg-white px-6 py-4 flex justify-between items-center shadow-sm z-10 shrink-0">
                 <button 
                     onClick={() => navigate('/')}
-                    className="flex items-center text-sm font-medium text-gray-600 hover:text-orange-500 transition-colors"
+                    className="flex items-center text-sm font-medium text-gray-600 hover:text-[var(--color-primary-700)] transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Voltar para a Página Inicial
@@ -276,13 +276,13 @@ export const PetSitterOnboarding = () => {
                     </div>
 
                     <div className="mb-6 relative shrink-0">
-                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200" role="progressbar" aria-label="Etapa da candidatura" aria-valuemin={1} aria-valuemax={3} aria-valuenow={currentStep}>
                             <div style={{ width: `${(currentStep / 3) * 100}%` }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-orange-500 transition-all duration-500"></div>
                         </div>
-                        <div className="flex justify-between text-xs font-medium text-gray-400 px-1">
-                            <span className={currentStep >= 1 ? 'text-orange-500' : ''}>Currículo</span>
-                            <span className={currentStep >= 2 ? 'text-orange-500' : ''}>Ambiente</span>
-                            <span className={currentStep >= 3 ? 'text-orange-500' : ''}>Escola</span>
+                        <div className="flex justify-between text-xs font-medium text-gray-600 px-1">
+                            <span className={currentStep >= 1 ? 'text-[var(--color-primary-700)]' : 'text-gray-600'}>Currículo</span>
+                            <span className={currentStep >= 2 ? 'text-[var(--color-primary-700)]' : 'text-gray-600'}>Ambiente</span>
+                            <span className={currentStep >= 3 ? 'text-[var(--color-primary-700)]' : 'text-gray-600'}>Escola</span>
                         </div>
                     </div>
 
@@ -298,8 +298,9 @@ export const PetSitterOnboarding = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">1. Descreva sua experiência com animais (cães ou gatos)</label>
+                                <label htmlFor="resume-experience" className="block text-sm font-medium text-gray-700">1. Descreva sua experiência com animais (cães ou gatos)</label>
                                 <textarea
+                                    id="resume-experience"
                                     rows={4}
                                     value={resumeData.experience}
                                     onChange={e => setResumeData({...resumeData, experience: e.target.value})}
@@ -309,8 +310,9 @@ export const PetSitterOnboarding = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">2. Você sabe administrar remédios via oral ou injetável?</label>
+                                <label htmlFor="resume-medicines" className="block text-sm font-medium text-gray-700">2. Você sabe administrar remédios via oral ou injetável?</label>
                                 <textarea
+                                    id="resume-medicines"
                                     rows={3}
                                     value={resumeData.medicines}
                                     onChange={e => setResumeData({...resumeData, medicines: e.target.value})}
@@ -320,8 +322,9 @@ export const PetSitterOnboarding = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">3. Tem experiência com cães idosos ou filhotes muito novos?</label>
+                                <label htmlFor="resume-elderly" className="block text-sm font-medium text-gray-700">3. Tem experiência com cães idosos ou filhotes muito novos?</label>
                                 <textarea
+                                    id="resume-elderly"
                                     rows={3}
                                     value={resumeData.elderly}
                                     onChange={e => setResumeData({...resumeData, elderly: e.target.value})}
@@ -364,12 +367,15 @@ export const PetSitterOnboarding = () => {
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
                                     {photoPreviews.map((src, index) => (
                                         <div key={index} className="relative group rounded-xl overflow-hidden border border-gray-200 aspect-square">
-                                            <img src={src} alt="Preview" className="object-cover w-full h-full" />
+                                            <img src={src} alt={`Foto ${index + 1} do ambiente`} className="object-cover w-full h-full" />
                                             <button 
+                                                type="button"
                                                 onClick={() => removePhoto(index)}
-                                                className="absolute top-2 right-2 p-1 bg-white/90 rounded-full text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                                aria-label={`Remover foto ${index + 1}`}
+                                                // Visível também com foco do teclado, não só no hover (E-34).
+                                                className="absolute top-2 right-2 p-1 bg-white/90 rounded-full text-red-700 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-50"
                                             >
-                                                <X size={16} />
+                                                <X size={16} aria-hidden="true" />
                                             </button>
                                         </div>
                                     ))}
@@ -388,14 +394,14 @@ export const PetSitterOnboarding = () => {
 
                             <div className="space-y-5">
                                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50">
-                                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                                    <label htmlFor="quiz-q1" className="block text-sm font-bold text-gray-800 mb-3">
                                         1. O que você faria se o cachorro hospede engasgasse com um osso de brinquedo?
                                     </label>
                                     <Select
                                         value={quizData.q1 || undefined}
                                         onValueChange={(value) => setQuizData({...quizData, q1: value})}
                                     >
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger id="quiz-q1" className="w-full">
                                             <SelectValue placeholder="Selecione uma resposta" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -407,14 +413,14 @@ export const PetSitterOnboarding = () => {
                                 </div>
 
                                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50">
-                                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                                    <label htmlFor="quiz-q2" className="block text-sm font-bold text-gray-800 mb-3">
                                         2. Como lidar com um cão sofrendo forte Ansiedade de Separação?
                                     </label>
                                     <Select
                                         value={quizData.q2 || undefined}
                                         onValueChange={(value) => setQuizData({...quizData, q2: value})}
                                     >
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger id="quiz-q2" className="w-full">
                                             <SelectValue placeholder="Selecione uma resposta" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -426,14 +432,14 @@ export const PetSitterOnboarding = () => {
                                 </div>
 
                                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50">
-                                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                                    <label htmlFor="quiz-q3" className="block text-sm font-bold text-gray-800 mb-3">
                                         3. Em caso de briga feia entre dois cães na sua casa, qual a ação correta?
                                     </label>
                                     <Select
                                         value={quizData.q3 || undefined}
                                         onValueChange={(value) => setQuizData({...quizData, q3: value})}
                                     >
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger id="quiz-q3" className="w-full">
                                             <SelectValue placeholder="Selecione uma resposta" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -467,7 +473,7 @@ export const PetSitterOnboarding = () => {
                             <button
                                 type="button"
                                 onClick={nextStep}
-                                className="flex items-center px-6 py-2.5 bg-orange-500 text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-all shadow-sm active:scale-95"
+                                className="flex items-center px-6 py-2.5 bg-[var(--color-primary-700)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-primary-800)] transition-all shadow-sm active:scale-95"
                             >
                                 Avançar
                                 <ChevronRight className="w-4 h-4 ml-1" />
@@ -480,7 +486,7 @@ export const PetSitterOnboarding = () => {
                                 className={`flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 text-white ${
                                     isSubmitting || !quizData.q1 || !quizData.q2 || !quizData.q3
                                     ? 'bg-orange-300 cursor-not-allowed'
-                                    : 'bg-orange-500 hover:bg-orange-600'
+                                    : 'bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)]'
                                 }`}
                             >
                                 {isSubmitting ? (

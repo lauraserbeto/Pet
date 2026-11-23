@@ -1,5 +1,5 @@
 import { it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Orders } from "./Orders";
 import { orderService, type Order } from "../../lib/services/orderService";
@@ -30,7 +30,7 @@ const renderTela = () => {
 };
 
 const abrirDetalhe = async () => {
-  fireEvent.click(await screen.findByTitle("Ver Detalhes"));
+  fireEvent.click(await screen.findByRole("button", { name: /^Ver detalhes do pedido #/ }));
   return screen.findByRole("dialog");
 };
 
@@ -67,4 +67,29 @@ it("pedido antigo, sem endereço gravado, avisa em vez de quebrar", async () => 
   const detalhe = within(await abrirDetalhe());
 
   expect(detalhe.getByText("Endereço não registrado neste pedido.")).toBeTruthy();
+});
+
+it("usa componentes do design system: indicadores, sem cor crua inline e ação com nome acessível (E-23)", async () => {
+  vi.spyOn(orderService, "listProviderOrdersPage").mockResolvedValue(pageOf([pedido()]));
+  const { container } = renderTela();
+  expect(await screen.findByText("Vendas reconhecidas no mês")).toBeTruthy();
+  expect(screen.queryByText("Receita do Mês")).toBeNull();
+  expect(container.querySelector('[style*="#3b82f6"], [style*="#eff6ff"]')).toBeNull();
+  expect(await screen.findByRole("table")).toBeTruthy();
+  // Cartões do celular e tabela compartilham o mesmo pedido, cada um com rótulo próprio.
+  expect(screen.getByRole("button", { name: "Detalhes do pedido #ABCDEF12" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Ver detalhes do pedido #ABCDEF12" })).toBeTruthy();
+});
+
+it("mensagem de busca vazia mostra o termo aplicado, não o que ainda está sendo digitado (E-23)", async () => {
+  const list = vi.spyOn(orderService, "listProviderOrdersPage").mockResolvedValue(pageOf([]));
+  renderTela();
+  const campo = await screen.findByRole("searchbox", { name: "Buscar pedidos por ID ou cliente" });
+  await waitFor(() => expect((campo as HTMLInputElement).disabled).toBe(false));
+  fireEvent.change(campo, { target: { value: "maria" } });
+  fireEvent.click(screen.getByRole("button", { name: "Buscar" }));
+  expect(await screen.findByText('Nenhum pedido encontrado para "maria".')).toBeTruthy();
+  expect(list).toHaveBeenLastCalledWith(1, "maria", expect.anything());
+  fireEvent.change(campo, { target: { value: "joão" } });
+  expect(screen.getByText('Nenhum pedido encontrado para "maria".')).toBeTruthy();
 });

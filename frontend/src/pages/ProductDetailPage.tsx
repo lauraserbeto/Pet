@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "../components/ui/button";
 import { RatingBadge } from "../components/reviews/RatingBadge";
 import { ReviewsPanel } from "../components/reviews/ReviewsPanel";
 import { useParams, Link } from "react-router";
@@ -8,6 +7,8 @@ import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { toast } from "sonner";
 import { productService } from "../lib/services/productService";
+import { ApiError, isMissingResourceError } from "../lib/httpClient";
+import { ResourceLoadError } from "../components/ResourceLoadError";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { useCart } from "../components/cart/CartContext";
 import {
@@ -60,17 +61,24 @@ export function ProductDetailPage() {
     queryKey: ["public-product", id],
     queryFn: () => productService.fetchProductDetails(id!),
     enabled: !!id,
+    // Produto inexistente não melhora com nova tentativa automática (E-31).
+    retry: (count, error) => !isMissingResourceError(error) && count < 2,
   });
   const product = query.data;
+  const hasStock = !!product && product.status === "ACTIVE" && product.stock_quantity > 0;
   const isFavorite = product ? isFav("PRODUCT", String(product.id)) : false;
   if (!id || query.isError)
     return (
-      <section className="mx-auto max-w-4xl space-y-4 p-8" role="alert">
-        <h1 className="text-xl font-bold">Não foi possível carregar o produto</h1>
-        <p>Ele pode estar indisponível. Tente novamente para conferir.</p>
-        <Button onClick={() => void query.refetch()}>Tentar novamente</Button>
-        <Link to="/shopping">Voltar ao Shopping</Link>
-      </section>
+      <ResourceLoadError
+        notFound={!id || isMissingResourceError(query.error)}
+        notFoundTitle="Produto não encontrado"
+        errorTitle="Não foi possível carregar o produto"
+        message={query.error instanceof ApiError ? query.error.message : null}
+        onRetry={() => void query.refetch()}
+        retrying={query.isFetching}
+        backTo="/shopping"
+        backLabel="Voltar ao Shopping"
+      />
     );
   if (query.isPending || !product)
     return (
@@ -85,7 +93,7 @@ export function ProductDetailPage() {
   ].filter((item) => item.value);
 
   const addToCart = async () => {
-    if (!product) return;
+    if (!product || !hasStock) return;
     const added = await addItem(
       {
         id: String(product.id),
@@ -111,8 +119,8 @@ export function ProductDetailPage() {
       {/* ═══════ Header/Breadcrumb ═══════ */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30 sm:relative sm:top-auto">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <nav className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Link to="/shopping" className="hover:text-slate-600 transition-colors">
+          <nav aria-label="Trilha de navegação" className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Link to="/shopping" className="hover:text-slate-900 transition-colors">
               Shopping
             </Link>
             <ChevronRight className="h-3 w-3 shrink-0" />
@@ -168,7 +176,7 @@ export function ProductDetailPage() {
                 {/* Header: Title & Category/Status */}
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-[10px] font-bold text-slate-700 uppercase tracking-wider">
                       {product.category}
                     </span>
                   </div>
@@ -190,9 +198,9 @@ export function ProductDetailPage() {
                   </div>
                   {/* Sem parcelamento: o checkout não oferece parcelas (G20). */}
 
-                  <div className="mt-4 inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100/50 transition-all hover:bg-emerald-100">
-                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[11px] font-bold">Em estoque</span>
+                  <div className={`mt-4 inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full border ${hasStock ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                    <div className={`h-2 w-2 rounded-full ${hasStock ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} aria-hidden="true" />
+                    <span className="text-[11px] font-bold">{hasStock ? "Em estoque" : "Produto indisponível"}</span>
                   </div>
                 </div>
 
@@ -219,8 +227,9 @@ export function ProductDetailPage() {
 
                   <button
                     onClick={addToCart}
+                    disabled={!hasStock}
                     // No celular o container é coluna: flex-1 encolhia a altura para 24px (G15).
-                    className="w-full shrink-0 sm:w-auto sm:flex-1 px-8 h-[52px] bg-gradient-to-br from-[var(--color-primary-700)] to-[var(--color-primary-800)] hover:from-[var(--color-primary-800)] hover:to-[var(--color-primary-900)] text-white font-black rounded-2xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.3)] hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base"
+                    className="w-full shrink-0 sm:w-auto sm:flex-1 px-8 h-[52px] bg-gradient-to-br from-[var(--color-primary-700)] to-[var(--color-primary-800)] hover:from-[var(--color-primary-800)] hover:to-[var(--color-primary-900)] text-white font-black rounded-2xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.3)] hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-base disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-500 disabled:shadow-none disabled:active:scale-100"
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Adicionar ao Carrinho
@@ -319,7 +328,7 @@ export function ProductDetailPage() {
                   className={`flex items-center gap-1.5 px-6 py-4 text-sm font-bold border-b-2 transition-all shrink-0 ${
                     activeTab === tab.key
                       ? "border-[var(--color-primary-500)] text-[var(--color-primary-700)]"
-                      : "border-transparent text-slate-400 hover:text-slate-600"
+                      : "border-transparent text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   <tab.icon className="h-4 w-4" />
@@ -414,11 +423,12 @@ export function ProductDetailPage() {
           <span className="text-lg font-extrabold text-slate-900">
             {fmt(Number(product.price))}
           </span>
-          <span className="text-[10px] text-slate-400">Preço à vista</span>
+          <span className="text-[10px] text-slate-600">Preço à vista</span>
         </div>
         <button
           onClick={addToCart}
-          className="flex-1 h-11 bg-[var(--color-primary-700)] text-white font-bold rounded-xl shadow-lg shadow-orange-100 flex items-center justify-center gap-2"
+          disabled={!hasStock}
+          className="flex-1 h-11 bg-[var(--color-primary-700)] text-white font-bold rounded-xl shadow-lg shadow-orange-100 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
         >
           <ShoppingCart className="h-4 w-4" />
           Comprar

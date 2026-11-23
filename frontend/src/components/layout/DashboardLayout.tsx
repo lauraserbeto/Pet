@@ -6,7 +6,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { authService } from "../../lib/services/authService";
-import { cn } from "../../lib/utils";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { useCompleteness } from "../../lib/hooks/useCompleteness";
 import { requiredFieldLabel } from "../../lib/profileCompleteness";
 
@@ -114,42 +114,35 @@ export function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-slate-50 font-[family-name:var(--font-body)] overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-900/50 z-[60] md:hidden backdrop-blur-sm transition-opacity"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar Drawer */}
-      <div 
-        className={cn(
-          "fixed inset-y-0 left-0 z-[70] w-64 bg-slate-900 transition-transform duration-300 md:hidden",
-          // Sombra só aberta: fechada, ela vazava como faixa na borda esquerda (G17).
-          isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full invisible"
-        )}
-      >
-        <div className="flex flex-col h-full">
-          <div className="p-4 flex justify-end">
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-label="Fechar menu"
-              className="p-2 text-slate-400 hover:text-white transition-colors"
-            >
-              <X size={24} />
-            </button>
+      {/* Menu do celular em Dialog (Radix): foco preso, Esc fecha, foco volta ao botão (E-34) */}
+      <Dialog open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="left-0 top-0 h-full max-w-64 w-64 translate-x-0 translate-y-0 gap-0 rounded-none border-0 bg-slate-900 p-0 sm:rounded-none md:hidden"
+        >
+          <DialogTitle className="sr-only">Menu do painel</DialogTitle>
+          <div className="flex flex-col h-full">
+            <div className="p-4 flex justify-end">
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Fechar menu"
+                className="p-2 text-slate-300 hover:text-white transition-colors"
+              >
+                <X size={24} aria-hidden="true" />
+              </button>
+            </div>
+            <Sidebar
+              roleId={roleId}
+              userName={displayName}
+              onLinkClick={() => setIsMobileMenuOpen(false)}
+              onLogout={handleLogout}
+              isLoggingOut={isLoggingOut}
+              className="w-full flex-1"
+            />
           </div>
-          <Sidebar 
-            roleId={roleId} 
-            userName={displayName} 
-            onLinkClick={() => setIsMobileMenuOpen(false)}
-            onLogout={handleLogout}
-            isLoggingOut={isLoggingOut}
-            className="w-full flex-1"
-          />
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Desktop Sidebar with props received from global layout state */}
       <Sidebar 

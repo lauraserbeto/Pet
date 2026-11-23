@@ -1,6 +1,6 @@
 # PAG-2 - Pagamento simulado e estorno de agendamentos
 
-Implementação local em 16/11/2026, branch codex/retomada-servicos, sobre main 5d11b7e. Alterações ainda sem commit e sem publicação.
+Implementação local em 16/11/2026, branch tasks-laura, sobre main 5d11b7e. Alterações ainda sem commit e sem publicação.
 
 ## Contrato
 

@@ -463,7 +463,7 @@ export function Products() {
                ) : (
                  <div className="flex gap-2 items-baseline mt-1">
                    <h3 className="text-2xl font-bold text-orange-600">{lowStockCount}</h3>
-                   <span className="text-xs text-red-500 font-medium">({outOfStockCount} esgotados)</span>
+                   <span className="text-xs text-red-700 font-medium">({outOfStockCount} esgotados)</span>
                  </div>
                )}
             </div>
@@ -634,7 +634,7 @@ export function Products() {
                           'bg-red-500 ring-4 ring-red-500/20'
                         }`}></span>
                         <span className="text-sm font-medium">
-                          {product.stock_quantity > 0 ? `${product.stock_quantity} un.` : <span className="text-red-500">Esgotado</span>}
+                          {product.stock_quantity > 0 ? `${product.stock_quantity} un.` : <span className="text-red-700">Esgotado</span>}
                         </span>
                       </div>
                     </TableCell>

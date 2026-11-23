@@ -166,7 +166,7 @@ export function ForgotPasswordPage() {
 
                     <Button
                       type="submit"
-                      className="w-full bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-600)] h-10 font-semibold"
+                      className="w-full h-10 font-semibold"
                       disabled={status === "loading"}
                     >
                       {status === "loading" ? (
@@ -187,7 +187,7 @@ export function ForgotPasswordPage() {
               <CardFooter className="flex flex-col gap-2 pt-2 pb-5">
                 <Link
                   to="/login"
-                  className="flex items-center justify-center text-sm text-slate-400 hover:text-slate-700 group transition-colors"
+                  className="flex items-center justify-center text-sm text-slate-600 hover:text-slate-900 group transition-colors"
                 >
                   <ArrowLeft className="mr-1 h-3 w-3 group-hover:-translate-x-1 transition-transform" />
                   Voltar para o login

@@ -1,0 +1,13 @@
+{
+  "entrega": "E-17",
+  "data": "2026-11-22",
+  "branch": "tasks-laura",
+  "frontend": { "aprovados": 289, "arquivos": 47, "direcionados_repetidos_apos_ultimo_ajuste": 5 },
+  "navegador": { "aprovados": 28, "novos_e17": 2, "regressao": 26, "api": "respostas controladas", "banco_real": false, "larguras": [1280, 390], "capturas_finais": 2 },
+  "backend": "Não alterado ou reexecutado nesta frente; regressão anterior 561 aprovada",
+  "typecheck": "aprovado",
+  "build": "aprovado",
+  "lint": { "erros": 0, "avisos_frontend": 116 },
+  "axe_landing": { "criticas": 0, "serias": 1, "elementos_contraste": 1 },
+  "limites": ["Sem testes de provedores externos", "Contatos fictícios preservados por decisão da Laura", "Acessibilidade global e código sem uso continuam pendentes", "Sem commit, push, deploy ou migration"]
+}

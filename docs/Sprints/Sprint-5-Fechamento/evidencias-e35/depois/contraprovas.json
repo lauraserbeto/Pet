@@ -1,0 +1,18 @@
+{
+ "injecao": {
+  "scriptInlineExecutou": false,
+  "fetchExternoBloqueado": true,
+  "violacoes": [
+   "script-src-elem ← inline",
+   "script-src-elem ← https://evil.example/x.js",
+   "connect-src ← https://evil.example/exfiltrar?t=x"
+  ],
+  "observacao": "eval não é mensurável por page.evaluate (o DevTools ignora a CSP da página). A evidência de bloqueio de eval é a violação script-src ← eval registrada na varredura antes (Zod), sob a mesma regra script-src self."
+ },
+ "politicaAntigaBlob": {
+  "previasCarregadas": 0,
+  "violacoes": [
+   "img-src ← blob"
+  ]
+ }
+}

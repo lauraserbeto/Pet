@@ -1,0 +1,164 @@
+{
+ "cabecalho": {
+  "enforce": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' http://localhost:3000 https://viacep.com.br https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+  "reportOnly": null
+ },
+ "rotas": {
+  "anon /": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /login": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /register": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /recuperar-senha": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /hotels": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /walkers": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /shopping": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /shopping/:id": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /hotels/:id": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /walkers/:id": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /store/:id": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /about": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /partners": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /contact": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /terms": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /privacy": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /cart": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /checkout": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /tutor/pets": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /tutor/pedidos": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /tutor/agendamentos": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /tutor/perfil": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "tutor /tutor/agendar/:id": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard/orders": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard/products": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard/financeiro": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard/perfil": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "store /dashboard/conta": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "hotel /dashboard/servicos": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "hotel /dashboard/schedule": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "admin /dashboard": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "admin /dashboard/aprovacoes": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "admin /dashboard/usuarios": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "admin /dashboard/avaliacoes-sitters": {
+   "violacoes": [],
+   "quebrou": false
+  }
+ },
+ "fluxos": {
+  "perfil-foto-data-url": {
+   "violacoes": [],
+   "imagemExibida": true
+  },
+  "endereco-viacep": {
+   "violacoes": [],
+   "cepPreenchido": true,
+   "logradouroAutomatico": true
+  },
+  "onboarding-previa-blob": {
+   "violacoes": [],
+   "campoEncontrado": true,
+   "previasCarregadas": 1
+  }
+ }
+}

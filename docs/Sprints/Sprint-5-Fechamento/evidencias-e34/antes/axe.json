@@ -1,0 +1,618 @@
+{
+ "rotas": {
+  "anon / 1280": [],
+  "anon /login 1280": [],
+  "anon /register 1280": [],
+  "anon /recuperar-senha 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "alvos": [
+     "button",
+     ".hover\\:text-slate-700"
+    ]
+   }
+  ],
+  "anon /hotels 1280": [],
+  "anon /walkers 1280": [],
+  "anon /shopping 1280": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".placeholder\\:text-slate-500"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 8,
+    "alvos": [
+     ".sm\\:rounded-2xl.hover\\:shadow-lg.hover\\:-translate-y-1:nth-child(1) > .aspect-square.bg-slate-100.overflow-hidden > .le",
+     ".sm\\:rounded-2xl.hover\\:shadow-lg.hover\\:-translate-y-1:nth-child(1) > .p-3.sm\\:p-4.flex-1 > .tracking-wide.uppercase.te",
+     ".sm\\:rounded-2xl.hover\\:shadow-lg.hover\\:-translate-y-1:nth-child(2) > .aspect-square.bg-slate-100.overflow-hidden > .le"
+    ]
+   }
+  ],
+  "anon /shopping/86ac0284-52bc-47bd-9c5e-f777e87e90eb 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 4,
+    "alvos": [
+     ".hover\\:text-slate-600.transition-colors[href$=\"shopping\"]",
+     ".px-2\\.5",
+     ".border-transparent.px-6.border-b-2:nth-child(2)"
+    ]
+   }
+  ],
+  "anon /hotels/c9888e2e-1059-40a5-a64c-d3da0dfec166 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 7,
+    "alvos": [
+     ".inset-0 > p",
+     ".text-\\[10px\\]",
+     ".gap-4.justify-between.bg-slate-50:nth-child(1) > .text-right.shrink-0 > .text-xs.text-slate-400"
+    ]
+   }
+  ],
+  "anon /walkers/cf880e17-c6aa-4aff-8ba8-7cacc76073ff 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".hover\\:text-slate-700"
+    ]
+   }
+  ],
+  "anon /store/09ac200c-555f-4387-8bed-887f2158f991 1280": [],
+  "anon /about 1280": [],
+  "anon /partners 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 9,
+    "alvos": [
+     ".max-w-3xl > .sm\\:text-4xl > .text-\\[var\\(--color-primary-500\\)\\]",
+     ".hover\\:text-slate-800 > .sm\\:inline.hidden",
+     ".p-4.border-slate-200\\/80.flex-col:nth-child(1) > .text-\\[10px\\].uppercase.text-slate-400"
+    ]
+   }
+  ],
+  "anon /contact 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".mt-1"
+    ]
+   }
+  ],
+  "anon /terms 1280": [],
+  "anon /privacy 1280": [],
+  "anon /cart 1280": [],
+  "tutor /cart 1280": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 4,
+    "alvos": [
+     ".p-2.hover\\:bg-slate-100",
+     ".rounded-l-lg",
+     ".rounded-r-lg"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "alvos": [
+     ".text-\\[11px\\]",
+     ".justify-end > .hover\\:text-red-500"
+    ]
+   }
+  ],
+  "tutor /checkout 1280": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".p-2.hover\\:bg-slate-100"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 3,
+    "alvos": [
+     ".gap-2.flex.items-center:nth-child(2) > .sm\\:inline.hidden.font-medium",
+     ".gap-2.flex.items-center:nth-child(3) > .sm\\:inline.hidden.font-medium",
+     ".min-w-0 > .text-\\[10px\\]"
+    ]
+   }
+  ],
+  "tutor /tutor/pets 1280": [],
+  "tutor /tutor/pedidos 1280": [],
+  "tutor /tutor/agendamentos 1280": [],
+  "tutor /tutor/perfil 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".mt-2.text-xs"
+    ]
+   }
+  ],
+  "tutor /tutor/agendar/c9888e2e-1059-40a5-a64c-d3da0dfec166 1280": [],
+  "store /dashboard 1280": [],
+  "store /dashboard/orders 1280": [],
+  "store /dashboard/products 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "alvos": [
+     ".text-red-500.text-xs",
+     ".text-sm > .text-red-500"
+    ]
+   }
+  ],
+  "store /dashboard/financeiro 1280": [],
+  "store /dashboard/perfil 1280": [],
+  "store /dashboard/conta 1280": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 3,
+    "alvos": [
+     ".items-start.bg-slate-50.border-slate-100:nth-child(1) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest",
+     ".items-start.bg-slate-50.border-slate-100:nth-child(2) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest",
+     ".items-start.bg-slate-50.border-slate-100:nth-child(3) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest"
+    ]
+   }
+  ],
+  "hotel /dashboard 1280": [],
+  "hotel /dashboard/servicos 1280": [],
+  "hotel /dashboard/schedule 1280": [],
+  "admin /dashboard 1280": [
+   {
+    "id": "svg-img-alt",
+    "impact": "serious",
+    "nodes": 5,
+    "alvos": [
+     "path[name=\"Hotel\"]",
+     "path[name=\"Pet Sitter\"]",
+     "path[name=\"Lojista\"]"
+    ]
+   }
+  ],
+  "admin /dashboard/aprovacoes 1280": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".justify-between"
+    ]
+   }
+  ],
+  "admin /dashboard/usuarios 1280": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".justify-between"
+    ]
+   }
+  ],
+  "admin /dashboard/avaliacoes-sitters 1280": [
+   {
+    "id": "aria-valid-attr-value",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     "#radix-\\:r0\\:-trigger-PENDING"
+    ]
+   }
+  ],
+  "admin /dashboard/settings 1280": [],
+  "anon / 390": [],
+  "anon /login 390": [],
+  "anon /register 390": [],
+  "anon /recuperar-senha 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "alvos": [
+     "button",
+     ".hover\\:text-slate-700"
+    ]
+   }
+  ],
+  "anon /hotels 390": [],
+  "anon /walkers 390": [],
+  "anon /shopping 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".placeholder\\:text-slate-500"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 9,
+    "alvos": [
+     ".bg-\\[\\#b6ddf4\\]",
+     ".sm\\:rounded-2xl.hover\\:shadow-lg.hover\\:-translate-y-1:nth-child(1) > .aspect-square.bg-slate-100.overflow-hidden > .le",
+     ".sm\\:rounded-2xl.hover\\:shadow-lg.hover\\:-translate-y-1:nth-child(1) > .p-3.sm\\:p-4.flex-1 > .tracking-wide.uppercase.te"
+    ]
+   }
+  ],
+  "anon /shopping/86ac0284-52bc-47bd-9c5e-f777e87e90eb 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 5,
+    "alvos": [
+     ".hover\\:text-slate-600.transition-colors[href$=\"shopping\"]",
+     ".px-2\\.5",
+     ".border-transparent.px-6.border-b-2:nth-child(2)"
+    ]
+   }
+  ],
+  "anon /hotels/c9888e2e-1059-40a5-a64c-d3da0dfec166 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 6,
+    "alvos": [
+     ".inset-0 > p",
+     ".text-\\[10px\\]",
+     ".gap-4.justify-between.bg-slate-50:nth-child(1) > .text-right.shrink-0 > .text-xs.text-slate-400"
+    ]
+   }
+  ],
+  "anon /walkers/cf880e17-c6aa-4aff-8ba8-7cacc76073ff 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".hover\\:text-slate-700"
+    ]
+   }
+  ],
+  "anon /store/09ac200c-555f-4387-8bed-887f2158f991 390": [],
+  "anon /about 390": [
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".overflow-x-auto"
+    ]
+   }
+  ],
+  "anon /partners 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 2,
+    "alvos": [
+     ".border-slate-200\\/50",
+     ".hover\\:text-slate-800"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 5,
+    "alvos": [
+     ".max-w-3xl > .sm\\:text-4xl > .text-\\[var\\(--color-primary-500\\)\\]",
+     ".p-4.border-slate-200\\/80.flex-col:nth-child(1) > .text-\\[10px\\].uppercase.text-slate-400",
+     ".text-emerald-600"
+    ]
+   }
+  ],
+  "anon /contact 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 3,
+    "alvos": [
+     ".from-pink-500",
+     ".bg-blue-600",
+     ".bg-slate-800"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".mt-1"
+    ]
+   }
+  ],
+  "anon /terms 390": [],
+  "anon /privacy 390": [],
+  "anon /cart 390": [],
+  "tutor /cart 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 4,
+    "alvos": [
+     ".p-2.hover\\:bg-slate-100",
+     ".rounded-l-lg",
+     ".rounded-r-lg"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "alvos": [
+     ".text-\\[11px\\]",
+     ".justify-end > .hover\\:text-red-500"
+    ]
+   }
+  ],
+  "tutor /checkout 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".p-2.hover\\:bg-slate-100"
+    ]
+   },
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".min-w-0 > .text-\\[10px\\]"
+    ]
+   }
+  ],
+  "tutor /tutor/pets 390": [],
+  "tutor /tutor/pedidos 390": [],
+  "tutor /tutor/agendamentos 390": [],
+  "tutor /tutor/perfil 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".mt-2.text-xs"
+    ]
+   }
+  ],
+  "tutor /tutor/agendar/c9888e2e-1059-40a5-a64c-d3da0dfec166 390": [],
+  "store /dashboard 390": [],
+  "store /dashboard/orders 390": [],
+  "store /dashboard/products 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".text-red-500.text-xs"
+    ]
+   }
+  ],
+  "store /dashboard/financeiro 390": [],
+  "store /dashboard/perfil 390": [],
+  "store /dashboard/conta 390": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 3,
+    "alvos": [
+     ".items-start.bg-slate-50.border-slate-100:nth-child(1) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest",
+     ".items-start.bg-slate-50.border-slate-100:nth-child(2) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest",
+     ".items-start.bg-slate-50.border-slate-100:nth-child(3) > .min-w-0.flex-1 > .mb-0\\.5.text-\\[11px\\].tracking-widest"
+    ]
+   }
+  ],
+  "hotel /dashboard 390": [],
+  "hotel /dashboard/servicos 390": [],
+  "hotel /dashboard/schedule 390": [],
+  "admin /dashboard 390": [
+   {
+    "id": "svg-img-alt",
+    "impact": "serious",
+    "nodes": 5,
+    "alvos": [
+     "path[name=\"Hotel\"]",
+     "path[name=\"Pet Sitter\"]",
+     "path[name=\"Lojista\"]"
+    ]
+   }
+  ],
+  "admin /dashboard/aprovacoes 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".justify-between"
+    ]
+   }
+  ],
+  "admin /dashboard/usuarios 390": [
+   {
+    "id": "button-name",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     ".justify-between"
+    ]
+   },
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "nodes": 1,
+    "alvos": [
+     ".overflow-x-auto"
+    ]
+   }
+  ],
+  "admin /dashboard/avaliacoes-sitters 390": [
+   {
+    "id": "aria-valid-attr-value",
+    "impact": "critical",
+    "nodes": 1,
+    "alvos": [
+     "#radix-\\:r0\\:-trigger-PENDING"
+    ]
+   }
+  ],
+  "admin /dashboard/settings 390": []
+ },
+ "modais": {
+  "pet-form": {
+   "aberto": true,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": [
+    {
+     "id": "button-name",
+     "impact": "critical",
+     "nodes": 2,
+     "alvos": [
+      ".top-6",
+      ".placeholder\\:text-slate-500"
+     ]
+    },
+    {
+     "id": "label",
+     "impact": "critical",
+     "nodes": 3,
+     "alvos": [
+      ".focus\\:ring-\\[var\\(--color-primary-500\\)\\]",
+      "input[name=\"breed\"]",
+      "input[type=\"date\"]"
+     ]
+    }
+   ]
+  },
+  "carrinho-remover": {
+   "aberto": true,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": [
+    {
+     "id": "button-name",
+     "impact": "critical",
+     "nodes": 4,
+     "alvos": [
+      ".p-2.hover\\:bg-slate-100.rounded-full",
+      ".rounded-l-lg",
+      ".rounded-r-lg"
+     ]
+    },
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 3,
+     "alvos": [
+      ".text-\\[11px\\]",
+      ".justify-end > .hover\\:text-red-500.text-slate-400",
+      ".bg-orange-500"
+     ]
+    }
+   ]
+  },
+  "navbar-sair": {
+   "aberto": true,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": []
+  },
+  "aprovacoes-recusar": {
+   "aberto": true,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": [
+    {
+     "id": "button-name",
+     "impact": "critical",
+     "nodes": 1,
+     "alvos": [
+      ".justify-between"
+     ]
+    }
+   ]
+  },
+  "aprovacoes-desativar": {
+   "aberto": false,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": [],
+   "erro": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Desativar/ }).first()\u001b[22m\n"
+  },
+  "avaliacao-sitter": {
+   "aberto": true,
+   "roleDialog": false,
+   "focoDentro": false,
+   "escFecha": false,
+   "axe": [
+    {
+     "id": "aria-valid-attr-value",
+     "impact": "critical",
+     "nodes": 1,
+     "alvos": [
+      "#radix-\\:r0\\:-trigger-PENDING"
+     ]
+    },
+    {
+     "id": "button-name",
+     "impact": "critical",
+     "nodes": 1,
+     "alvos": [
+      ".hover\\:text-slate-600"
+     ]
+    },
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 3,
+     "alvos": [
+      ".text-\\[10px\\]",
+      ".text-red-600",
+      ".bg-emerald-600"
+     ]
+    },
+    {
+     "id": "scrollable-region-focusable",
+     "impact": "serious",
+     "nodes": 1,
+     "alvos": [
+      ".bg-slate-50\\/30"
+     ]
+    }
+   ]
+  }
+ },
+ "lang": "en"
+}

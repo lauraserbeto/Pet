@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
+import { Dialog, DialogContent, DialogTitle } from "../components/ui/dialog";
 import {
   Search,
   ShoppingCart,
@@ -53,6 +54,7 @@ type Product = {
   pet: string;
   badge?: string;
   isFavorite?: boolean;
+  available: boolean;
 };
 
 const categories = [
@@ -120,13 +122,18 @@ export function ShoppingPage() {
 
   const [apiProducts, setApiProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const loadProducts = async () => {
       try {
         setLoading(true);
+        setLoadError(false);
         const data = await productService.fetchAllPublicProducts();
-        
+        if (cancelled) return;
+
         const now = new Date();
         const mapped: Product[] = data.map((p: any) => {
           let badge = undefined;
@@ -142,7 +149,8 @@ export function ShoppingPage() {
             name: p.name,
             brand: p.provider_name || 'Desconhecida',
             price: Number(p.price),
-            image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
+            image: p.image_url || "",
+            available: p.status === "ACTIVE" && Number(p.stock_quantity) > 0,
             category: p.category ? p.category.toLowerCase() : 'outros',
             pet: p.pet_type ? (p.pet_type.toLowerCase() === 'cães' || p.pet_type.toLowerCase() === 'caes' ? 'caes' : p.pet_type.toLowerCase()) : 'todos',
             badge: badge
@@ -150,14 +158,21 @@ export function ShoppingPage() {
         });
         
         setApiProducts(mapped);
-      } catch (err: any) {
-        toast.error("Erro ao carregar o catálogo de produtos.");
+      } catch {
+        // Falha não é catálogo vazio: a tela mostra erro e nova tentativa (E-17).
+        if (!cancelled) {
+          setApiProducts([]);
+          setLoadError(true);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     loadProducts();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
 
   // Sidebar section toggles
   const [openSections, setOpenSections] = useState({
@@ -346,16 +361,17 @@ export function ShoppingPage() {
 
   const badgeColor = (badge: string) => {
     switch (badge) {
+      // Tons 700: texto branco com contraste AA (E-34).
       case "Mais Vendido":
-        return "bg-emerald-500";
+        return "bg-emerald-700";
       case "Oferta":
-        return "bg-red-500";
+        return "bg-red-700";
       case "Novo":
-        return "bg-blue-500";
+        return "bg-blue-700";
       case "Popular":
-        return "bg-[var(--color-primary-500)]";
+        return "bg-[var(--color-primary-700)]";
       case "Premium":
-        return "bg-amber-500";
+        return "bg-amber-700";
       default:
         return "bg-slate-500";
     }
@@ -433,7 +449,7 @@ export function ShoppingPage() {
                 onClick={() => setSelectedPet(pt.id)}
                 className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedPet === pt.id
-                    ? "bg-[#b6ddf4] text-[#3699d2]"
+                    ? "bg-[var(--color-secondary-100)] text-[var(--color-secondary-700)]"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
@@ -479,12 +495,12 @@ export function ShoppingPage() {
                 </button>
 
                 <p className="text-sm text-slate-500">
-                  <span className="font-semibold text-slate-800">{loading ? "Carregando catálogo..." : `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`}</span>
+                  <span className="font-semibold text-slate-800">{loading ? "Carregando catálogo..." : loadError ? "Catálogo indisponível" : `${filtered.length} ${filtered.length === 1 ? 'produto' : 'produtos'}`}</span>
                 </p>
               </div>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px] bg-white border-slate-200 rounded-xl shadow-sm text-slate-700">
+                <SelectTrigger aria-label="Ordenar produtos" className="w-[180px] bg-white border-slate-200 rounded-xl shadow-sm text-slate-700">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -517,6 +533,19 @@ export function ShoppingPage() {
             {/* Content Switcher */}
             {loading ? (
               <HamsterLoader message="Carregando catálogo completo..." size="sm" />
+            ) : loadError ? (
+              <div role="alert" className="text-center py-16 sm:py-24 space-y-3">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-800">
+                  Não foi possível carregar o catálogo
+                </h3>
+                <p className="text-sm text-slate-500">Verifique sua conexão e tente novamente.</p>
+                <button
+                  onClick={() => setAttempt((value) => value + 1)}
+                  className="mt-2 inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  Tentar novamente
+                </button>
+              </div>
             ) : filtered.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                 {filtered.map((product, i) => (
@@ -529,11 +558,18 @@ export function ShoppingPage() {
                   >
                     {/* Image */}
                     <Link to={`/shopping/${product.id}`} className="relative aspect-square bg-slate-100 overflow-hidden">
-                      <ImageWithFallback
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      {product.image ? (
+                        <ImageWithFallback
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <Package
+                          aria-label="Produto sem foto cadastrada"
+                          className="h-full w-full p-10 text-slate-300"
+                        />
+                      )}
 
                       {/* Badge */}
                       {product.badge && (
@@ -564,7 +600,7 @@ export function ShoppingPage() {
                     {/* Info */}
                     <div className="flex-1 flex flex-col p-3 sm:p-4">
                       {/* Brand */}
-                      <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wide">
+                      <span className="text-[10px] sm:text-xs text-slate-600 font-medium uppercase tracking-wide">
                         {product.brand}
                       </span>
 
@@ -584,9 +620,15 @@ export function ShoppingPage() {
                             R$ {product.price.toFixed(2).replace(".", ",")}
                           </p>
                           <button
-                            onClick={() => addToCart(product)}
-                            aria-label={`Adicionar ao carrinho: ${product.name}`}
-                            className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white flex items-center justify-center shadow-md shadow-orange-200 transition-colors"
+                            onClick={() => product.available && addToCart(product)}
+                            disabled={!product.available}
+                            aria-label={
+                              product.available
+                                ? `Adicionar ao carrinho: ${product.name}`
+                                : `Esgotado: ${product.name}`
+                            }
+                            title={product.available ? undefined : "Esgotado"}
+                            className="shrink-0 h-8 w-8 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white flex items-center justify-center shadow-md shadow-orange-200 transition-colors disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none"
                           >
                             <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </button>
@@ -620,36 +662,24 @@ export function ShoppingPage() {
         </div>
       </div>
 
-      {/* ═══════ Mobile Filter Drawer ═══════ */}
-      <AnimatePresence>
-        {mobileFiltersOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 z-50 lg:hidden"
-              onClick={() => setMobileFiltersOpen(false)}
-            />
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white z-50 shadow-2xl flex flex-col lg:hidden"
-            >
+      {/* ═══════ Filtros no celular: Dialog (Radix) com foco preso e Esc — E-34 ═══════ */}
+      <Dialog open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="left-0 top-0 flex h-full w-80 max-w-[85vw] translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 bg-white p-0 shadow-2xl sm:rounded-none lg:hidden"
+        >
               <div className="flex items-center justify-between p-4 border-b border-slate-100">
-                <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4 text-[var(--color-primary-500)]" />
+                <DialogTitle className="font-bold text-slate-900 flex items-center gap-2 text-base">
+                  <SlidersHorizontal className="h-4 w-4 text-[var(--color-primary-700)]" aria-hidden="true" />
                   Filtros
-                </h3>
+                </DialogTitle>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200"
+                  aria-label="Fechar filtros"
+                  className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
@@ -663,10 +693,8 @@ export function ShoppingPage() {
                   Ver {filtered.length} produto{filtered.length !== 1 ? "s" : ""}
                 </button>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -41,31 +41,31 @@ const faqs = [
     id: "faq1",
     question: "Como faço para cadastrar meu pet na plataforma?",
     answer:
-      'Após criar sua conta como Tutor, acesse "Meu Perfil" e clique em "Adicionar Pet". Preencha as informações do seu animal (nome, raça, porte, idade e vacinas) e adicione uma foto. Você pode cadastrar quantos pets desejar.',
+      'Após entrar como Tutor, acesse "Meus Pets" e escolha "Novo Pet". Informe os dados solicitados, como nome, espécie, raça e observações de saúde.',
   },
   {
     id: "faq2",
     question: "Qual o prazo para resposta do atendimento?",
     answer:
-      "Nosso prazo padrão de resposta é de até 24 horas úteis para e-mails e formulários. Para atendimento urgente, recomendamos o chat ao vivo (disponível de segunda a sexta, das 8h às 20h) ou o telefone.",
+      "Não há prazo de resposta garantido. Esta página prepara uma mensagem no seu aplicativo de e-mail; conclua o envio por lá. A plataforma não oferece chat ao vivo.",
   },
   {
     id: "faq3",
     question: "Como funciona o cancelamento de uma reserva?",
     answer:
-      "Cancelamentos com mais de 48h de antecedência têm reembolso integral. Entre 24h e 48h, o reembolso é de 50%. Com menos de 24h, não há reembolso, exceto em casos de força maior. Consulte nossos Termos de Uso para detalhes completos.",
+      "Consulte o agendamento na sua conta para verificar as ações disponíveis. O cancelamento depende do estado e do horário do atendimento. Nos pré-pagamentos simulados, cancelamentos elegíveis registram estorno integral simulado; não há devolução financeira real nem percentuais de reembolso por antecedência.",
   },
   {
     id: "faq4",
     question: "Quero ser um Parceiro Pet+. Como faço?",
     answer:
-      'Clique em "Cadastre-se" e selecione o tipo de conta "Parceiro". Preencha os dados da sua empresa, envie a documentação necessária e nossa equipe analisará seu cadastro em até 5 dias úteis. Você será notificado por e-mail sobre a aprovação.',
+      'Clique em "Cadastre-se", escolha seu perfil de parceiro e preencha os dados solicitados. Pet Sitters também passam pela candidatura. O acesso às operações depende da aprovação; não há prazo de análise garantido.',
   },
   {
     id: "faq5",
     question: "Como reportar um problema com um serviço ou produto?",
     answer:
-      "Acesse a seção de pedidos/agendamentos no seu perfil, selecione o item em questão e clique em \"Reportar Problema\". Descreva a situação com detalhes e, se possível, anexe fotos. Também é possível reportar diretamente por este formulário de contato selecionando o assunto \"Reclamação\".",
+      "Descreva a situação e informe o número do pedido ou agendamento na mensagem de contato. A página abre seu aplicativo de e-mail com o texto preparado; revise e conclua o envio nele. Não existe um botão de disputa ou de envio de anexos nesta página.",
   },
 ];
 
@@ -355,7 +355,7 @@ export function ContactPage() {
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500">
                     Preencha o formulário: abriremos seu e-mail com a mensagem
-                    pronta. Retornamos em até 24h úteis.
+                    pronta. Revise e conclua o envio no seu aplicativo de e-mail.
                   </p>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export function ContactPage() {
                         placeholder="Descreva como podemos ajudar..."
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-400 transition-all resize-none"
                       />
-                      <p className="text-xs text-slate-400 mt-1 text-right">
+                      <p className="text-xs text-slate-600 mt-1 text-right">
                         {message.length}/1000
                       </p>
                     </div>
@@ -582,12 +582,14 @@ export function ContactPage() {
                   return (
                     <button
                       key={social.label}
+                      // Perfis fictícios do projeto acadêmico: não anunciar que algo "abriu" (E-20/E-34).
                       onClick={() =>
-                        toast.info(`Abrindo ${social.label} da Pet+`)
+                        toast.info(`${social.label} da Pet+: perfil de demonstração, sem página publicada.`)
                       }
+                      aria-label={`${social.label} da Pet+ (perfil de demonstração)`}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${social.color}`}
                     >
-                      <SIcon className="h-4 w-4" />
+                      <SIcon className="h-4 w-4" aria-hidden="true" />
                       <span className="hidden sm:inline">
                         {social.label}
                       </span>

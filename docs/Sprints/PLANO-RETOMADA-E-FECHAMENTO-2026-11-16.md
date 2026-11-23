@@ -2,7 +2,7 @@
 
 Preparado em 16/11/2026. Status: **proposta para análise, sem implementação autorizada por este documento**.
 
-Atualização de 16/11: execução autorizada pela usuária neste chat, em entregas sequenciais, sem divisão entre colegas e sem commits por enquanto. O status original acima corresponde à preparação do plano; os registros finais identificam as entregas implementadas localmente.
+Atualização de 16/11: execução autorizada pela Laura, em entregas sequenciais, sem divisão entre colegas e sem commits por enquanto. O status original acima corresponde à preparação do plano; os registros finais identificam as entregas implementadas localmente.
 
 Base técnica: main `5d11b7e`, consultada no diagnóstico de 16/11. O workspace continua na branch `chore/remove-env-local`, cinco commits atrás dessa referência. Nenhuma atualização de branch ou alteração da aplicação é parte desta entrega de planejamento.
 
@@ -41,7 +41,7 @@ Não tratar o primeiro marco como conclusão de todas as Sprints 4 e 5. Em caso 
 
 Responsabilidade: equipe, com uma pessoa responsável por registrar os acordos. Nomes a confirmar.
 
-1. Escolher uma base atualizada da main e criar branches de tarefa sem sobrescrever documentos locais. Atualização de branch depende de autorização nova da usuária.
+1. Escolher uma base atualizada da main e criar branches de tarefa sem sobrescrever documentos locais. Atualização de branch depende de autorização nova da Laura.
 2. Conferir se a main avançou desde `5d11b7e`; se avançou, revisar somente o delta antes de manter este plano.
 3. Executar a linha de base: lint, testes, typecheck, build e E2E atuais. Registrar commit, ambiente e falhas prévias.
 4. Confirmar responsáveis e disponibilidade. Limitar cada pessoa a uma entrega principal em implementação por vez; revisão e testes acompanham a entrega.
@@ -372,7 +372,7 @@ Foi criado apenas este documento de planejamento, com leitura dos documentos loc
 
 ### Execução iniciada em 16/11/2026
 
-A usuária autorizou executar a retomada neste chat, sem divisão entre integrantes. Foi criada a branch `codex/retomada-servicos` a partir de `origin/main` em `5d11b7e`, preservando os documentos locais e sem commit.
+A Laura autorizou executar a retomada, sem divisão entre integrantes. Foi criada a branch de trabalho (hoje `tasks-laura`) a partir de `origin/main` em `5d11b7e`, preservando os documentos locais e sem commit.
 
 Primeira entrega local: restante das listagens da SRV-Fpub. HotelsPage e WalkersPage usam uma listagem compartilhada, preço `starting_price`, serviços ativos da API, busca por nome/local/serviço, filtro por serviço real e ordenação por nome/preço. Foram retirados ratings, reviews aleatórias, distâncias, experiência, disponibilidade e filtros sem implementação. Favoritos e navegação para detalhes foram preservados. Não foi alterado o backend nesta etapa.
 
@@ -398,7 +398,7 @@ Sem commit, publicação ou acesso ao banco publicado. A jornada de serviços es
 
 ### Revisão de entrega da equipe - 17/11/2026
 
-Após autorização da usuária, realizado fetch e pull com fast-forward da main: ela permanece em `5d11b7e`, sem atualização a incorporar. Identificada a branch `feature/reviews-avl-1`, commit `ad21e26` de Layssafernandes, com PR #52 aberto e checks verdes. A implementação de Review foi revisada em cópia temporária isolada, sem merge na branch de retomada e sem alterar as implementações locais.
+Após autorização da Laura, realizado fetch e pull com fast-forward da main: ela permanece em `5d11b7e`, sem atualização a incorporar. Identificada a branch `feature/reviews-avl-1`, commit `ad21e26` de Layssafernandes, com PR #52 aberto e checks verdes. A implementação de Review foi revisada em cópia temporária isolada, sem merge na branch de retomada e sem alterar as implementações locais.
 
 Suíte backend da branch revisada: 428 testes aprovados com PostgreSQL descartável, zero falhas/ignorados; 29 testes novos de Review aprovados; validações adicionais reais confirmaram os fluxos principais. Permanecem dois ajustes para aceite: alinhar índices parciais da migration com as unicidades do Prisma (migrate diff retorna 2) e compatibilizar o gate de perfil com o contrato de criação exclusiva por Tutor. Detalhes em REVISAO-PR52-AVL1-2026-11-17.md, com evidências reproduzíveis.
 
@@ -406,7 +406,7 @@ Não iniciar outra implementação independente de AVL-1 nem duplicar a migratio
 
 ### Quinta entrega local - integração da main e AVL-2 - 18/11/2026
 
-Após a usuária confirmar o merge do PR #52, a branch foi atualizada por fast-forward para a main `d593b03`. Backup de todas as alterações locais mantido em stash `ca63bf0`. Reaplicação preservou SRV-Fpub/PAG-2/BKG/SCH; conflito do schema resolvido mantendo Review e AppointmentPayment. Nenhum commit de entrega foi criado e os arquivos permanecem fora do estágio.
+Após a Laura confirmar o merge do PR #52, a branch foi atualizada por fast-forward para a main `d593b03`. Backup de todas as alterações locais mantido em stash `ca63bf0`. Reaplicação preservou SRV-Fpub/PAG-2/BKG/SCH; conflito do schema resolvido mantendo Review e AppointmentPayment. Nenhum commit de entrega foi criado e os arquivos permanecem fora do estágio.
 
 Os dois achados da revisão foram corrigidos localmente: criação de review exclusiva de Tutor, com papel validado da sessão, e migration nova `20261118000000_align_review_unique_indexes`, sem editar a migration publicada. Testados banco novo com dez migrations e atualização de nove para dez com avaliação preexistente: dados/unicidade preservados e nenhuma diferença entre banco e schema.
 
@@ -547,3 +547,25 @@ Permissões do painel compartilhadas entre rotas, menu e retomada. Perfil/pets d
 Backend 559/559 com PostgreSQL local; frontend 284/46 arquivos; 39 cenários Chromium aprovados, sendo 13 com API/banco reais nos cinco perfis, desktop/celular e JWT expirado. Capturas finais aguardam o carregamento e mascaram e-mails. Typecheck/build/lint sem erros, um aviso backend e 118 frontend. A11y continua com uma violação séria de contraste em dois elementos da landing. Helper de parceiros operacionais de teste alinhado ao estado COMPLETED, sem alterar aprovação de produção. Detalhes em [E-33](Sprint-5-Fechamento/E-33-IMPLEMENTACAO-E-VALIDACAO.md).
 
 Sem commit, push, publicação ou migration nova. Próxima frente sugerida: reproduzir E-17 e seguir as demais pendências; nove frentes técnicas restantes, além das decisões e QA/release.
+
+### Entrega local — E-17 — 22/11/2026
+
+Conferida a integração já existente de preços, serviços, avaliações e indicadores; removidos resíduos de afirmações sem fonte no Sobre/landing/FAQ/onboarding. Landing distingue erro de vazio e tem retry; produto/loja sem foto usam placeholder, hotel mostra a unidade real do serviço mais barato e não presume restrições de animais. Produto sem estoque não anuncia disponibilidade nem permite compra pelos botões desktop/móvel. Contatos fictícios e telas explicitamente demonstrativas preservados conforme decisões anteriores.
+
+Frontend 289 testes/47 arquivos aprovados, mais repetição dos cinco direcionados após o último ajuste; 28 cenários Chromium com respostas controladas, incluindo dois E-17 desktop/celular. Typecheck/build/lint sem erros (116 avisos frontend). Contraste sério em um elemento da landing permanece na E-34. Sem backend/migration/banco ou validação externa nesta etapa; última regressão backend anterior: 561. Registro: [E-17](Sprint-5-Fechamento/E-17-IMPLEMENTACAO-E-VALIDACAO.md). Sem commit/push/deploy. Próxima frente sugerida: E-23; oito frentes técnicas restantes, além das decisões e QA/release.
+
+### Entrega local — Revisão da E-17 e E-23 — 22/11/2026
+
+A revisão do diff local da E-17 encontrou e corrigiu cinco resíduos, só no frontend: preço e unidade colados na barra do hotel; botões de produto indisponível com aparência de ativos; destaque da landing e Shopping oferecendo produto esgotado; foto genérica no Shopping; e falha do Shopping apresentada como "nenhum produto". A E-23 (AUD-31) levou Pedidos ao padrão do Financeiro (StatCard, Card, Table, lista no celular, nomes acessíveis, "Vendas reconhecidas no mês"), aplicou os tokens da marca ao gráfico e à tabela do Financeiro e deixou "Descartar" do Perfil visível no celular, ativo só com alteração. Axe sem violações sérias nas três telas. Frontend 296/48 arquivos; E2E reais E-19 2/2 e E-33 13/13 em bases exclusivas, removidas ao final. Sem backend, migration, commit ou publicação. Detalhes em [E-17](Sprint-5-Fechamento/E-17-IMPLEMENTACAO-E-VALIDACAO.md) e [E-23](Sprint-5-Fechamento/E-23-IMPLEMENTACAO-E-VALIDACAO.md).
+
+### Entrega local — E-31 — 22/11/2026
+
+Estados de erro honestos (AUD-22). Um helper (`isMissingResourceError`) e um componente (`ResourceLoadError`) passam a ser usados nos detalhes de hotel, pet sitter, loja e produto: 404/ID inválido mostra "não encontrado" sem nova tentativa; falha mostra a mensagem real com "Tentar novamente". A loja deixou de afirmar "não encontrada" em queda de rede e passou a descartar resposta tardia; o produto passou para `httpClient` e não repete 404; a Conta não mostra status antigo da sessão na falha. Itens já resolvidos antes foram conferidos e mantidos. Frontend 306/49 arquivos; 19/19 cenários com API/PostgreSQL reais em base exclusiva removida ao final; 28 de regressão. Sem backend, migration, commit ou publicação. Detalhes em [E-31](Sprint-5-Fechamento/E-31-IMPLEMENTACAO-E-VALIDACAO.md).
+
+### Entrega local — E-34 — 22/11/2026
+
+Acessibilidade (AUD-40). `lang="pt-BR"`; `Dialog` em português, com opção sem botão de fechar e devolução de foco ao elemento de origem; 6 modais e 2 drawers migrados; nomes acessíveis em botões de ícone; rótulos no formulário de pet; contraste dos textos secundários, selos e botões; textos sem `animate-pulse`; gráfico decorativo oculto; regiões roláveis focáveis. Portão `e2e/a11y.spec.ts` reescrito: reprova sérias e críticas em 12 rotas públicas, checkout e painel de 3 perfis, em 1280/390, e testa foco e Esc dos modais. Varredura real: 76 combinações, de 33 com violações para 0; 6/6 modais acessíveis. De passagem: fotos reais na avaliação de sitter (RF-010), remoção do carrinho sem sucesso falso e redes do Contato sem "Abrindo…". Frontend 308/50 arquivos; 38 testes Chromium. Sem backend, migration, commit ou publicação. Detalhes em [E-34](Sprint-5-Fechamento/E-34-IMPLEMENTACAO-E-VALIDACAO.md).
+
+### Entrega local — E-35 — 22/11/2026
+
+CSP efetiva (AUD-41). A política Report-Only teria quebrado a API fora de produção (origem fixa no `vite.config.ts`) e a prévia `blob:` do onboarding, e o Zod gerava violação de `eval`. Agora `vercel.json` é a fonte única, com o cabeçalho efetivo; o preview lê o arquivo e troca só a origem da API; `csp.test.ts` garante a política; Zod em `jitless`. Portão `e2e/csp.spec.ts`: cabeçalho efetivo, rotas sem violação e script injetado bloqueado. Varredura real com a política efetiva: 35 rotas, 0 violações; contraprovas (injeção bloqueada; política antiga quebraria o `blob:`). De passagem, acessibilidade do onboarding, do endereço e do botão de cadastro. Guarda do token avaliada sem mudança: recomendação e decisão pendente registradas. Frontend 310/51 arquivos; 42 testes Chromium com a CSP ativa. Sem backend, migration, commit ou publicação. Detalhes em [E-35](Sprint-5-Fechamento/E-35-IMPLEMENTACAO-E-VALIDACAO.md).

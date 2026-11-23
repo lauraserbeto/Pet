@@ -1,0 +1,101 @@
+{
+ "data": "2026-11-22",
+ "base": "petplus_e31_test (local, removida ao final)",
+ "resultados": [
+  {
+   "name": "fixture",
+   "ok": true,
+   "detail": "hotel, loja e produto públicos na base exclusiva"
+  },
+  {
+   "name": "hotel-404-1280",
+   "ok": true,
+   "detail": "título=\"Hotel não encontrado\" tentarNovamente=0"
+  },
+  {
+   "name": "sitter-404-1280",
+   "ok": true,
+   "detail": "título=\"Profissional não encontrado\" tentarNovamente=0"
+  },
+  {
+   "name": "loja-404-1280",
+   "ok": true,
+   "detail": "título=\"Loja não encontrada\" tentarNovamente=0"
+  },
+  {
+   "name": "produto-404-1280",
+   "ok": true,
+   "detail": "chamadas=1"
+  },
+  {
+   "name": "hotel-id-invalido-1280",
+   "ok": true,
+   "detail": "API respondeu 422 (VALIDATION_ERROR)"
+  },
+  {
+   "name": "hotel-rede-retry-1280",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "loja-rede-retry-1280",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "produto-rede-retry-1280",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "conta-falha-1280",
+   "ok": true,
+   "detail": "alerta=true statusAntigo=0 statusRealAposRetry=true"
+  },
+  {
+   "name": "hotel-404-390",
+   "ok": true,
+   "detail": "título=\"Hotel não encontrado\" tentarNovamente=0"
+  },
+  {
+   "name": "sitter-404-390",
+   "ok": true,
+   "detail": "título=\"Profissional não encontrado\" tentarNovamente=0"
+  },
+  {
+   "name": "loja-404-390",
+   "ok": true,
+   "detail": "título=\"Loja não encontrada\" tentarNovamente=0"
+  },
+  {
+   "name": "produto-404-390",
+   "ok": true,
+   "detail": "chamadas=1"
+  },
+  {
+   "name": "hotel-id-invalido-390",
+   "ok": true,
+   "detail": "API respondeu 422 (VALIDATION_ERROR)"
+  },
+  {
+   "name": "hotel-rede-retry-390",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "loja-rede-retry-390",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "produto-rede-retry-390",
+   "ok": true,
+   "detail": "erro=true \"não encontrado\"=0 carregouAposRetry=true"
+  },
+  {
+   "name": "conta-falha-390",
+   "ok": true,
+   "detail": "alerta=true statusAntigo=0 statusRealAposRetry=true"
+  }
+ ]
+}

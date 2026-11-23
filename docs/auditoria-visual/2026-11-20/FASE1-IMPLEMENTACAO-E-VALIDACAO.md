@@ -1,6 +1,6 @@
 # Auditoria visual — Fase 1 (P0): implementação e validação
 
-20/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**.
+20/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**.
 
 Origem: [relatório da auditoria](index.html), grupos G06, G07, G08 e G10. Os demais grupos continuam pendentes conforme o plano do relatório.
 
@@ -19,7 +19,7 @@ Observação: `/dashboard/customers` é uma tela demonstrativa com dados fictíc
 
 ## Validação
 
-Runtime usado: Node 24.18.0 global (o validado no handoff é 24.22.3; não houve troca de runtime nesta rodada).
+Runtime usado: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`; não houve troca de runtime nesta rodada).
 
 - **Testes unitários novos (12):** `ProtectedRoute.test.tsx` (5), `Navbar.test.tsx` (4), `Settings.test.tsx` (1), `Products.test.tsx` (2).
 - **Suíte do frontend:** 35 arquivos / **181 testes aprovados** (antes: 31 / 169), `--pool=forks --maxWorkers=2`.

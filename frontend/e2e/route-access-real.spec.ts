@@ -16,7 +16,7 @@ const targets: Record<number, { path: string; title: string; denied: string; for
     },
     2: {
       path: "/dashboard/orders?pagina=2#lista",
-      title: "Meus Pedidos",
+      title: "Pedidos",
       denied: "/dashboard/settings",
       forbidden: "/admin/metrics",
     },
@@ -93,7 +93,7 @@ for (const width of [1280, 390]) {
       await expect(page.getByRole("heading", { name: target.title, exact: true })).toBeVisible();
       // A evidência precisa incluir o resultado da API, não apenas o título durante o loader.
       if (role === 1) await expect(page.getByText(account.email, { exact: true }).first()).toBeVisible();
-      else if (role === 2) await expect(page.getByRole("heading", { name: "Lista de Pedidos" })).toBeVisible();
+      else if (role === 2) await expect(page.getByRole("heading", { name: "Lista de pedidos" })).toBeVisible();
       else if (role === 5) await expect(page.getByRole("heading", { name: "Nenhum pet cadastrado" })).toBeVisible();
       else await expect(page.getByText("Nenhum serviço cadastrado ainda", { exact: true })).toBeVisible();
       await page.evaluate(() => window.scrollTo(0, 0));

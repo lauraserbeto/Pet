@@ -15,6 +15,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router";
+import { isMissingResourceError } from "../lib/httpClient";
+import { ResourceLoadError } from "../components/ResourceLoadError";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion } from "motion/react";
 import { isApprovedProviderStatus } from "../lib/constants/providerStatus";
@@ -44,10 +46,13 @@ export function WalkerDetailsPage() {
   const [apiWalker, setApiWalker] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!id) {
       setError("Identificador do profissional não informado.");
+      setNotFound(true);
       setLoading(false);
       return;
     }
@@ -56,6 +61,7 @@ export function WalkerDetailsPage() {
 
     setLoading(true);
     setError(null);
+    setNotFound(false);
 
     providerService
       .fetchProviderDetails(id)
@@ -99,9 +105,9 @@ export function WalkerDetailsPage() {
       .catch((error) => {
         if (cancelled) return;
 
-        console.error("Erro ao carregar perfil do profissional:", error);
-
         setApiWalker(null);
+        // 404/ID inválido é "não encontrado"; o resto é falha com nova tentativa (E-31).
+        setNotFound(isMissingResourceError(error));
         setError(
           error instanceof Error
             ? error.message
@@ -117,7 +123,7 @@ export function WalkerDetailsPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, attempt]);
 
   const formatPrice = (price: number) => {
     return price.toLocaleString("pt-BR", {
@@ -137,24 +143,15 @@ export function WalkerDetailsPage() {
 
   if (!apiWalker) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 max-w-md w-full text-center">
-          <PawPrint className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-
-          <h1 className="text-xl font-bold text-slate-900 mb-2">
-            Não foi possível carregar o profissional
-          </h1>
-
-          <p className="text-sm text-slate-500 mb-6">
-            {error || "Ocorreu um erro ao buscar os dados do profissional."}
-          </p>
-
-          <Button onClick={() => navigate("/walkers")}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar para a lista
-          </Button>
-        </div>
-      </div>
+      <ResourceLoadError
+        notFound={notFound}
+        notFoundTitle="Profissional não encontrado"
+        errorTitle="Não foi possível carregar o profissional"
+        message={error}
+        onRetry={() => setAttempt((value) => value + 1)}
+        backTo="/walkers"
+        backLabel="Voltar para os Pet Sitters"
+      />
     );
   }
 
@@ -310,7 +307,7 @@ export function WalkerDetailsPage() {
               className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                 activeTab === tab
                   ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
               {tab === "about" ? "Sobre" : "Serviços"}

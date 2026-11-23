@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { OrdersPagination } from '../../components/orders/OrdersPagination';
 import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { StatCard } from '../../components/dashboard/StatCard';
 import { 
   Search, 
   Package, 
@@ -56,6 +61,26 @@ function StatusIcon({ variant }: { variant: string }) {
   }
 }
 
+function OrderStatusPill({ status, className }: { status: string; className: string }) {
+  const badge = getOrderStatusBadge(status);
+  return (
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${className}`}>
+      <StatusIcon variant={badge.variant} />
+      {badge.label}
+    </span>
+  );
+}
+
+function itemsSummary(order: Order) {
+  return order.items && order.items.length > 0
+    ? order.items.map((i) => `${i.quantity}x ${i.product?.name || 'Item'}`).join(', ')
+    : 'Sem itens';
+}
+
+function customerLabel(order: Order) {
+  return order.customer?.full_name || order.customer?.email || 'Cliente';
+}
+
 export function Orders() {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
@@ -79,113 +104,74 @@ export function Orders() {
   const isForbiddenError =
     error instanceof ApiError && (error.status === 403 || error.code === 'FORBIDDEN');
 
-  return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
+  const summaryHint = kpis
+    ? 'Pedidos pagos ou em etapa posterior criados neste mês (horário de São Paulo).'
+    : undefined;
 
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Meus Pedidos</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Gerencie e acompanhe os pedidos da sua loja.
-            </p>
-          </div>
-          
-          <div className="relative w-full md:w-80">
-            <div className="absolute top-3 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar por ID ou Cliente..."
+  return (
+    <div className="space-y-6 pb-8 min-w-0">
+      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Pedidos</h1>
+          <p className="mt-1 text-slate-600">Gerencie e acompanhe os pedidos da sua loja.</p>
+        </div>
+
+        <form
+          role="search"
+          className="flex w-full gap-2 md:w-auto"
+          onSubmit={(e) => { e.preventDefault(); search(); }}
+        >
+          <div className="relative flex-1 md:w-72">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" aria-hidden="true" />
+            <Input
+              type="search"
+              placeholder="ID do pedido ou cliente"
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); if (!e.target.value) { setQuery(''); setPage(1); } }}
-              onKeyDown={(e) => { if (e.key === 'Enter') search(); }}
               aria-label="Buscar pedidos por ID ou cliente"
               maxLength={100}
               disabled={isLoading || isError}
-              className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:border-transparent transition-colors sm:text-sm disabled:opacity-50"
-              style={{ '--tw-ring-color': 'var(--color-primary-500, #3b82f6)' } as React.CSSProperties}
+              className="pl-9"
             />
-            <Button className="mt-2" onClick={search} disabled={isLoading}>Buscar pedidos</Button>
           </div>
-        </header>
+          <Button type="submit" disabled={isLoading || isError}>Buscar</Button>
+        </form>
+      </header>
 
-        {/* KPIs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Total de Pedidos */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-              <ShoppingBag className="w-32 h-32" />
-            </div>
-            <div className="relative z-10 flex items-start gap-4">
-              <div className="p-3 bg-blue-50 rounded-xl text-blue-600 ring-4 ring-blue-50/50">
-                <ShoppingBag className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Total de Pedidos</p>
-                <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isError || !kpis ? '—' : kpis.totalOrders}
-                </h3>
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+        <StatCard title="Total de pedidos" value={isError || !kpis ? '—' : kpis.totalOrders} icon={ShoppingBag} />
+        <StatCard
+          title="Em andamento"
+          value={isError || !kpis ? '—' : kpis.pendingOrders}
+          icon={Clock}
+          tone="warning"
+          hint="Aguardando pagamento, pagos, em preparação ou enviados."
+        />
+        <StatCard
+          title="Vendas reconhecidas no mês"
+          value={isError || !kpis ? '—' : formatBRL(kpis.monthlyRevenue)}
+          icon={DollarSign}
+          tone="action"
+          hint={summaryHint}
+        />
+      </div>
 
-          {/* Pedidos Pendentes */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-              <Clock className="w-32 h-32" />
-            </div>
-            <div className="relative z-10 flex items-start gap-4">
-              <div className="p-3 bg-amber-50 rounded-xl text-amber-500 ring-4 ring-amber-50/50">
-                <Clock className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Pedidos Pendentes</p>
-                <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isError || !kpis ? '—' : kpis.pendingOrders}
-                </h3>
-              </div>
-            </div>
-          </div>
-
-          {/* Receita do Mês */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-6 opacity-5 transform translate-x-1/4 -translate-y-1/4 group-hover:scale-110 transition-transform duration-500">
-              <DollarSign className="w-32 h-32" />
-            </div>
-            <div className="relative z-10 flex items-start gap-4">
-              <div className="p-3 rounded-xl ring-4" style={{ backgroundColor: 'var(--color-primary-50, #eff6ff)', color: 'var(--color-primary-500, #3b82f6)', boxShadow: '0 0 0 4px var(--color-primary-50, #eff6ff)' }}>
-                <DollarSign className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Receita do Mês</p>
-                <h3 className="text-3xl font-bold text-slate-800 mt-1 tracking-tight">
-                  {isError || !kpis ? '—' : formatBRL(kpis.monthlyRevenue)}
-                </h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Estado de Loading */}
-        {isLoading && (
-          <div className="bg-white rounded-2xl p-16 shadow-sm border border-slate-200 flex justify-center items-center">
+      {isLoading && (
+        <Card>
+          <CardContent className="flex items-center justify-center p-16">
             <HamsterLoader message="Carregando pedidos da loja..." size="sm" />
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Estado de Erro */}
-        {!isLoading && isError && (
-          <div className="bg-white rounded-2xl p-10 shadow-sm border border-rose-100 text-center flex flex-col items-center">
-            <div className="h-16 w-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-4">
-              <AlertCircle size={32} />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+      {!isLoading && isError && (
+        <Card role="alert" className="border-red-200">
+          <CardContent className="flex flex-col items-center p-10 text-center">
+            <AlertCircle className="mb-4 h-10 w-10 text-red-600" aria-hidden="true" />
+            <h2 className="mb-2 text-xl font-semibold text-slate-900">
               {isForbiddenError ? 'Acesso restrito' : 'Falha ao carregar pedidos'}
-            </h3>
-            <p className="text-slate-500 max-w-md mb-6 text-sm">
+            </h2>
+            <p className="mb-6 max-w-md text-sm text-slate-600">
               {isForbiddenError
                 ? 'Esta área é exclusiva para parceiros comerciais cadastrados e aprovados.'
                 : error instanceof Error
@@ -193,126 +179,135 @@ export function Orders() {
                 : 'Não foi possível carregar os pedidos da loja. Verifique sua conexão e tente novamente.'}
             </p>
             {!isForbiddenError && (
-              <button
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-700)] text-white rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
-              >
-                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-                Tentar Novamente
-              </button>
+              <Button onClick={() => refetch()} disabled={isFetching}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} aria-hidden="true" />
+                Tentar novamente
+              </Button>
             )}
-          </div>
-        )}
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Orders Table Area */}
-        {!isLoading && !isError && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-slate-400" />
-                <h2 className="text-base font-semibold text-slate-800">Lista de Pedidos</h2>
-              </div>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
-                {data?.total ?? 0} pedidos {query ? 'encontrados' : 'no total'}
-              </span>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider">
-                    <th className="font-semibold p-4 pl-6">ID Pedido</th>
-                    <th className="font-semibold p-4">Data</th>
-                    <th className="font-semibold p-4">Cliente</th>
-                    <th className="font-semibold p-4">Itens</th>
-                    <th className="font-semibold p-4">Total</th>
-                    <th className="font-semibold p-4">Status</th>
-                    <th className="font-semibold p-4 pr-6 text-center">Ação</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredOrders.length > 0 ? (
-                    filteredOrders.map((order) => {
+      {!isLoading && !isError && (
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b border-slate-100">
+            <CardTitle className="text-lg">Lista de pedidos</CardTitle>
+            <Badge variant="outline">
+              {data?.total ?? 0} {query ? 'encontrados' : 'no total'}
+            </Badge>
+          </CardHeader>
+
+          {filteredOrders.length === 0 ? (
+            <CardContent className="p-12 text-center text-slate-600">
+              {query ? (
+                <p>Nenhum pedido encontrado para "{query}".</p>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <ShoppingBag className="h-10 w-10 text-slate-400" aria-hidden="true" />
+                  <p className="font-medium text-slate-700">Nenhum pedido recebido ainda.</p>
+                  <p className="text-sm text-slate-600">Os pedidos feitos no Shopping aparecerão aqui.</p>
+                </div>
+              )}
+            </CardContent>
+          ) : (
+            <>
+              {/* Celular: lista em cartões, sem rolagem horizontal */}
+              <ul className="divide-y divide-slate-100 md:hidden" aria-label="Pedidos">
+                {filteredOrders.map((order) => {
+                  const { date, time } = formatOrderDateTime(order.created_at);
+                  const statusBadge = getOrderStatusBadge(order.status);
+                  const code = order.id.slice(0, 8).toUpperCase();
+                  return (
+                    <li key={order.id} className="space-y-2 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900">#{code}</p>
+                          <p className="text-sm text-slate-600">{date} · {time}</p>
+                        </div>
+                        <OrderStatusPill status={order.status} className={statusBadge.className} />
+                      </div>
+                      <p className="truncate text-sm text-slate-700">{customerLabel(order)}</p>
+                      <p className="truncate text-sm text-slate-600">{itemsSummary(order)}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-bold text-slate-900">{formatBRL(order.total_price)}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedOrder(order)}
+                          aria-label={`Detalhes do pedido #${code}`}
+                        >
+                          <Eye className="mr-1.5 h-4 w-4" aria-hidden="true" />
+                          Detalhes
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {/* Desktop/tablet: tabela do design system */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 text-xs uppercase">
+                    <TableRow>
+                      <TableHead className="pl-6 font-semibold">Pedido</TableHead>
+                      <TableHead className="font-semibold">Data</TableHead>
+                      <TableHead className="font-semibold">Cliente</TableHead>
+                      <TableHead className="font-semibold">Itens</TableHead>
+                      <TableHead className="text-right font-semibold">Total</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="pr-6 text-right font-semibold">Ação</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders.map((order) => {
                       const { date, time } = formatOrderDateTime(order.created_at);
                       const statusBadge = getOrderStatusBadge(order.status);
-                      const itemsSummary =
-                        order.items && order.items.length > 0
-                          ? order.items
-                              .map((i) => `${i.quantity}x ${i.product?.name || 'Item'}`)
-                              .join(', ')
-                          : 'Sem itens';
-                      const customerName = order.customer?.full_name || order.customer?.email || 'Cliente';
-                      
+                      const code = order.id.slice(0, 8).toUpperCase();
+                      const items = itemsSummary(order);
                       return (
-                        <tr key={order.id} className="hover:bg-slate-50 transition-colors group">
-                          <td className="p-4 pl-6">
-                            <span className="text-sm font-bold text-slate-700" title={order.id}>
-                              #{order.id.slice(0, 8).toUpperCase()}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-slate-800 font-medium">{date}</div>
-                            <div className="text-xs text-slate-400">{time}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-slate-800 font-medium">{customerName}</div>
+                        <TableRow key={order.id}>
+                          <TableCell className="pl-6 font-semibold text-slate-900" title={order.id}>#{code}</TableCell>
+                          <TableCell>
+                            <div className="font-medium text-slate-900">{date}</div>
+                            <div className="text-xs text-slate-600">{time}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium text-slate-900">{order.customer?.full_name || 'Cliente'}</div>
                             {order.customer?.email && (
-                              <div className="text-xs text-slate-400">{order.customer.email}</div>
+                              <div className="text-xs text-slate-600">{order.customer.email}</div>
                             )}
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm text-slate-600 max-w-[220px] truncate" title={itemsSummary}>
-                              {itemsSummary}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm font-bold text-slate-800">
-                              {formatBRL(order.total_price)}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusBadge.className}`}>
-                              <StatusIcon variant={statusBadge.variant} />
-                              {statusBadge.label}
-                            </span>
-                          </td>
-                          <td className="p-4 pr-6 text-center">
-                            <button 
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-[220px] truncate text-slate-700" title={items}>{items}</div>
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-slate-900">{formatBRL(order.total_price)}</TableCell>
+                          <TableCell>
+                            <OrderStatusPill status={order.status} className={statusBadge.className} />
+                          </TableCell>
+                          <TableCell className="pr-6 text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => setSelectedOrder(order)}
-                              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors group-hover:text-slate-600 cursor-pointer"
-                              title="Ver Detalhes"
+                              aria-label={`Ver detalhes do pedido #${code}`}
+                              title="Ver detalhes"
                             >
-                              <Eye className="w-5 h-5" />
-                            </button>
-                          </td>
-                        </tr>
+                              <Eye className="h-5 w-5 text-slate-600" aria-hidden="true" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
                       );
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="p-12 text-center text-slate-500">
-                        {searchTerm ? (
-                          <>Nenhum pedido encontrado com "{searchTerm}".</>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center gap-2">
-                            <ShoppingBag className="w-10 h-10 text-slate-300" />
-                            <p className="font-medium text-slate-600">Nenhum pedido recebido ainda.</p>
-                            <p className="text-xs text-slate-400">Os pedidos feitos no Shopping aparecerão aqui.</p>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            
-            {data && <OrdersPagination page={page} totalPages={data.totalPages} total={data.total} busy={isFetching} onPage={setPage} />}
-          </div>
-        )}
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
 
-      </div>
+          {data && <OrdersPagination page={page} totalPages={data.totalPages} total={data.total} busy={isFetching} onPage={setPage} />}
+        </Card>
+      )}
 
       {/* Modal de Detalhes do Pedido Recebido */}
       {selectedOrder && (
@@ -396,7 +391,7 @@ export function Orders() {
                             <p className="font-medium text-slate-800 truncate">
                               {item.product?.name || 'Produto'}
                             </p>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-slate-600">
                               {item.quantity}x {formatBRL(item.unit_price)}
                               {item.product?.sku ? ` · SKU: ${item.product.sku}` : ''}
                             </p>

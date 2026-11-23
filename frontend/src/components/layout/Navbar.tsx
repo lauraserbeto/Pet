@@ -26,6 +26,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
 import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
@@ -643,32 +644,35 @@ export function Navbar() {
 
       
 
-      {/* ── Logout Modal ── */}
-      {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
-            {isLoggingOut ? (
-              <div className="flex flex-col items-center justify-center py-6">
-                <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary-500)] mb-4" />
-                <p className="text-slate-600 font-medium text-center">Desconectando...</p>
+      {/* ── Logout Modal: Dialog acessível (foco preso, Esc, título) — E-34 ── */}
+      <Dialog open={showLogoutModal} onOpenChange={(open) => !open && !isLoggingOut && setShowLogoutModal(false)}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] rounded-lg sm:max-w-sm">
+          {isLoggingOut ? (
+            <div role="status" className="flex flex-col items-center justify-center py-6">
+              <DialogTitle className="sr-only">Saindo da conta</DialogTitle>
+              <Loader2 className="mb-4 h-8 w-8 animate-spin text-[var(--color-primary-700)]" aria-hidden="true" />
+              <p className="text-center font-medium text-slate-600">Desconectando...</p>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-slate-900">Sair da conta?</DialogTitle>
+                <DialogDescription className="text-sm text-slate-600">
+                  Tem certeza que deseja desconectar da sua conta?
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-2 flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="destructive" onClick={handleLogout}>
+                  Sim, sair
+                </Button>
               </div>
-            ) : (
-              <>
-                <h2 className="text-xl font-bold text-slate-900 mb-2">Sair da conta?</h2>
-                <p className="text-slate-500 mb-6 text-sm">Tem certeza que deseja desconectar da sua conta?</p>
-                <div className="flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white">
-                    Sim, sair
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

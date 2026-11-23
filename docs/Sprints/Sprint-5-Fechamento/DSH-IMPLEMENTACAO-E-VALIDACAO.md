@@ -1,6 +1,6 @@
 # DSH-1 / DSH-2 — Painéis com dados reais
 
-Implementação local em 19/11/2026 na branch `codex/retomada-servicos`, sobre a main `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou acesso ao banco de produção. Nenhuma migration nova foi necessária nesta etapa.
+Implementação local em 19/11/2026 na branch `tasks-laura`, sobre a main `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou acesso ao banco de produção. Nenhuma migration nova foi necessária nesta etapa.
 
 ## Diagnóstico e escopo
 

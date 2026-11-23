@@ -1,6 +1,6 @@
 # Auditoria visual — Fase 3 (P1 por tela): implementação e validação
 
-20/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**.
+20/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**.
 
 Origem: [relatório](index.html), grupos G09, G11, G12, G13, G14 e G15, com a decisão G12 da [Fase 0](FASE0-DECISOES.md).
 
@@ -17,7 +17,7 @@ Origem: [relatório](index.html), grupos G09, G11, G12, G13, G14 e G15, com a de
 
 ## Validação
 
-Runtime: Node 24.18.0 global (o validado no handoff é 24.22.3).
+Runtime: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`).
 
 - **Backend:** **547/547** aprovados com PostgreSQL 16 local descartável (banco separado `petplus_ci_test`, 15 migrations), zero ignorados/cancelados. Novos: 5 testes de `profileCompleteness` e 1 de contrato `starting_price`. Lint limpo nos arquivos tocados.
 - **Frontend:** 37 arquivos / **186 testes** aprovados (novos: `Account.test.tsx`, recomendações em `PublicProfile.test.tsx`, `appointmentDate.test.ts`). Typecheck sem erros; lint 0 erros (128 avisos, mesmo total anterior); build aprovado.

@@ -1,5 +1,5 @@
 import { afterEach, test, expect, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
 import { CartPage } from './CartPage';
@@ -89,4 +89,20 @@ test('não tem cupom nem frete no resumo', async () => {
   expect(screen.queryByPlaceholderText('Cupom de desconto')).toBeNull();
   expect(screen.queryByText(/frete/i)).toBeNull();
   expect(screen.queryByText(/PETMAIS15/)).toBeNull();
+});
+
+test('remoção que falha não anuncia "Item removido" e o diálogo é acessível (E-34)', async () => {
+  const { toast } = await import('sonner');
+  vi.spyOn(cartService, 'removeItem').mockRejectedValue(Error('Falha controlada'));
+  show({
+    id: 'cart', updated_at: '', warnings: [],
+    items: [item('a', 10, 1)],
+    totals: { subtotal: 10, discount: 0, total: 10, total_items: 1 },
+  } as CartDTO);
+  const { fireEvent, waitFor } = await import('@testing-library/react');
+  fireEvent.click(await screen.findByRole('button', { name: 'Remover Produto a do carrinho' }));
+  const dialog = await screen.findByRole('dialog', { name: 'Remover este item?' });
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Remover' }));
+  await waitFor(() => expect(toast.error).toHaveBeenCalled());
+  expect(toast.success).not.toHaveBeenCalledWith('Item removido do carrinho');
 });

@@ -4,7 +4,7 @@ Revisão realizada em 17/11/2026. Commit analisado: `ad21e2666de5bed9f9c77bacf70
 
 PR: https://github.com/lauraserbeto/Pet/pull/52
 
-Atualização de 18/11/2026: a usuária mesclou o PR, incorporado na main `d593b03`. Os dois achados abaixo foram corrigidos **localmente** na retomada: gate de Tutor e nova migration `20261118000000_align_review_unique_indexes`, sem editar a migration publicada. A comparação de schema ficou limpa em banco novo e em banco atualizado com avaliação preexistente. A seção original permanece como registro da revisão do commit `ad21e26`; correções e AVL-2 estão descritas em `Sprint-4-Agendamento-Avaliacoes/AVL-2-IMPLEMENTACAO-E-VALIDACAO.md`. Não houve publicação dessas correções nesta sessão.
+Atualização de 18/11/2026: a Laura mesclou o PR, incorporado na main `d593b03`. Os dois achados abaixo foram corrigidos **localmente** na retomada: gate de Tutor e nova migration `20261118000000_align_review_unique_indexes`, sem editar a migration publicada. A comparação de schema ficou limpa em banco novo e em banco atualizado com avaliação preexistente. A seção original permanece como registro da revisão do commit `ad21e26`; correções e AVL-2 estão descritas em `Sprint-4-Agendamento-Avaliacoes/AVL-2-IMPLEMENTACAO-E-VALIDACAO.md`. Não houve publicação dessas correções nesta rodada.
 
 ## Parecer
 

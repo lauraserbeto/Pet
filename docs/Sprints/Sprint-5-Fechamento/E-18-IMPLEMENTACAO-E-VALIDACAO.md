@@ -1,6 +1,6 @@
 # E-18 — Confirmação real, recuperação do carrinho e cache de pedidos
 
-Entrega local de 22/11/2026 sobre `d593b03`, na branch `codex/retomada-servicos`, preservando as alterações acumuladas. Sem commit, push, deploy, migration nova ou uso do banco publicado.
+Entrega local de 22/11/2026 sobre `d593b03`, na branch `tasks-laura`, preservando as alterações acumuladas. Sem commit, push, deploy, migration nova ou uso do banco publicado.
 
 ## Problemas reproduzidos
 
