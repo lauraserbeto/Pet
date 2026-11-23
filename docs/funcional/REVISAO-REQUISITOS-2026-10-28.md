@@ -671,7 +671,7 @@ Pedido da Laura em 28/10: validar quatro apontamentos no documento e no código 
 
 - O texto da seção descreve só a arquitetura cliente-servidor em três camadas e não menciona REGIS.
 - REGIS não aparece no código nem na documentação do repositório.
-- O único registro é a pendência anotada em `docs/CONTEXTO-HANDOFF-PETPLUS-2026-10-22.md` §10.6: o material da disciplina que define REGIS não foi fornecido.
+- O único registro é a pendência anotada pela equipe em 22/10/2026: o material da disciplina que define REGIS não foi fornecido.
 
 **Conclusão:** o apontamento procede, porque a seção não trata do tema.
 
@@ -754,7 +754,7 @@ A troca da imagem no Google Docs fica com a Laura: clicar com o botão direito n
 
 5. **Opcional, apagar o histórico:** usar `git filter-repo --path .env.local --path frontend/.env.local --invert-paths` em um clone novo, seguido de *push* forçado de todas as branches e tags. Essa operação reescreve todos os commits e obriga a equipe a clonar o repositório de novo. Os PRs antigos do GitHub podem continuar mostrando os commits até um pedido de limpeza ao suporte. Por isso o passo 2, revogar a chave, é a medida que efetivamente protege.
 
-As regras desta sessão não permitem executar `git rm`, *commit*, reescrita de histórico nem *push*, e o `.gitignore` está fora de `docs/`. Os passos acima ficam para a Laura ou para a sessão que cuida do código.
+Nesta revisão não foram executados `git rm`, *commit*, reescrita de histórico nem *push*, e o `.gitignore` está fora de `docs/`. Os passos acima ficam para a Laura, junto com as alterações de código.
 
 **Aplicado em 28/10, com autorização da Laura:** o passo 4. Foram acrescentadas ao `frontend/.gitignore` as regras `.env`, `.env.*` e `!.env.example`. Com `git check-ignore`, `.env`, `.env.local` e `.env.development` aparecem ignorados, e `.env.example` não. O `frontend/.env.local` continua versionado até o `git rm --cached` do passo 3, porque o `.gitignore` não retira arquivos que já estão no repositório.
 

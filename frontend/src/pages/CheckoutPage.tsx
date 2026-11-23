@@ -185,9 +185,10 @@ export function CheckoutPage() {
                 if (currentStep === "address") navigate("/cart");
                 else setCurrentStep(currentStep === "review" ? "payment" : "address");
               }}
+              aria-label={currentStep === "address" ? "Voltar ao carrinho" : "Voltar à etapa anterior"}
               className="p-2 rounded-full hover:bg-slate-100 transition-colors"
             >
-              <ArrowLeft className="h-5 w-5 text-slate-600" />
+              <ArrowLeft className="h-5 w-5 text-slate-600" aria-hidden="true" />
             </button>
             <h1 className="text-lg font-bold text-slate-900 font-[family-name:var(--font-display)]">
               Checkout
@@ -204,16 +205,19 @@ export function CheckoutPage() {
                       ? "bg-emerald-700 text-white"
                       : i === stepIndex
                         ? "bg-[var(--color-primary-700)] text-white"
-                        : "bg-slate-100 text-slate-400"
+                        : "bg-slate-100 text-slate-600"
                   }`}
+                  aria-hidden="true"
                 >
                   {i < stepIndex ? <Check className="h-4 w-4" /> : i + 1}
                 </div>
                 <span
+                  aria-current={i === stepIndex ? "step" : undefined}
                   className={`text-xs font-medium hidden sm:inline ${
-                    i <= stepIndex ? "text-slate-900" : "text-slate-400"
+                    i <= stepIndex ? "text-slate-900" : "text-slate-600"
                   }`}
                 >
+                  <span className="sr-only">Etapa {i + 1} de {STEPS.length}: </span>
                   {step.label}
                 </span>
                 {i < STEPS.length - 1 && (
@@ -556,7 +560,7 @@ export function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-slate-700 truncate">{item.name}</p>
-                      <p className="text-[10px] text-slate-400">x{item.quantity}</p>
+                      <p className="text-[10px] text-slate-600">x{item.quantity}</p>
                     </div>
                     <span className="text-xs font-bold text-slate-800">
                       R$ {(item.price * item.quantity).toFixed(2).replace(".", ",")}
@@ -579,10 +583,10 @@ export function CheckoutPage() {
 
       {/* Overlay de Loading do Checkout */}
       {isProcessing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div role="status" aria-live="assertive" className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4">
             <HamsterLoader />
-            <p className="text-lg font-bold text-slate-800 animate-pulse font-[family-name:var(--font-display)]">
+            <p className="text-lg font-bold text-slate-800 font-[family-name:var(--font-display)]">
               Processando seu pedido...
             </p>
           </div>

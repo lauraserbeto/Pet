@@ -30,8 +30,8 @@ test('Parceiro usa agregado global e pesquisa no servidor voltando à primeira p
   expect(screen.getByText(/250,00/)).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Próxima página' }));
   await screen.findByText('25 pedidos · Página 2 de 2');
-  fireEvent.change(screen.getByRole('textbox', { name: /Buscar pedidos/ }), { target: { value: 'Cliente' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Buscar pedidos' }));
+  fireEvent.change(screen.getByRole('searchbox', { name: /Buscar pedidos/ }), { target: { value: 'Cliente' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Buscar' }));
   await screen.findByText('1 pedidos · Página 1 de 1');
   expect(list.mock.calls.at(-1)?.slice(0, 2)).toEqual([1, 'Cliente']);
   expect(screen.getByText('23')).toBeTruthy();

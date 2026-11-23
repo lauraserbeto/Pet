@@ -1,6 +1,6 @@
 # E-33 — Permissões de rotas e retomada após login
 
-Implementação local de 22/11/2026, branch `codex/retomada-servicos`, HEAD `d593b03`, preservando todas as entregas anteriores. Sem commit, push, deploy, migration nova ou alteração do banco publicado.
+Implementação local de 22/11/2026, branch `tasks-laura`, HEAD `d593b03`, preservando todas as entregas anteriores. Sem commit, push, deploy, migration nova ou alteração do banco publicado.
 
 ## Reprodução
 

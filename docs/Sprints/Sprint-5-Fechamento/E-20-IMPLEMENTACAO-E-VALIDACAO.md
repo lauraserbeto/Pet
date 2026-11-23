@@ -1,6 +1,6 @@
 # E-20 — Nenhuma confirmação de sucesso sem resposta 2xx: implementação e validação
 
-22/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**. Sem mudança de backend ou migration.
+22/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**. Sem mudança de backend ou migration.
 
 Origem: auditoria pré-Sprint 4, E-20 / AUD-21. Critério: nenhuma tela anuncia sucesso sem resposta 2xx. As configurações (CFG-1) devem ser implementadas ou marcadas como demonstrativas, sem ações de segurança simuladas. O Contato deve enviar de verdade ou ser marcado como demonstrativo. "Reservar/Agendar" fica desabilitado até a BKG.
 
@@ -8,7 +8,7 @@ Origem: auditoria pré-Sprint 4, E-20 / AUD-21. Critério: nenhuma tela anuncia 
 
 | Frente | Antes | Agora |
 |---|---|---|
-| Contato (`/contact`) | O formulário mostrava "Mensagem enviada!" e um toast de sucesso sem enviar nada | Abre o aplicativo de e-mail do usuário (`mailto:`) com o assunto `[Pet+] <assunto>` e o corpo (mensagem, nome, e-mail) preenchidos. A confirmação diz "Sua mensagem está pronta… Para concluir, envie por lá" e oferece o endereço como alternativa. Decisão da usuária: abrir o e-mail e manter os canais fictícios |
+| Contato (`/contact`) | O formulário mostrava "Mensagem enviada!" e um toast de sucesso sem enviar nada | Abre o aplicativo de e-mail do usuário (`mailto:`) com o assunto `[Pet+] <assunto>` e o corpo (mensagem, nome, e-mail) preenchidos. A confirmação diz "Sua mensagem está pronta… Para concluir, envie por lá" e oferece o endereço como alternativa. Decisão da Laura: abrir o e-mail e manter os canais fictícios |
 | Limpar carrinho | O toast "Carrinho limpo" aparecia antes do resultado: numa falha, o usuário via o erro **e** o sucesso | `clearCart()` retorna `true`/`false`, e o toast de sucesso só aparece com 2xx (ou no carrinho anônimo, que é local) |
 | Configurações (CFG-1) | Formulários que só disparavam toasts, inclusive "logout forçado de todos" | Já resolvido antes desta entrega: a tela descreve o comportamento real, sem ações simuladas. O backend de configurações está planejado em [G07](../../auditoria-visual/2026-11-20/G07-PLANO-BACKEND-CONFIGURACOES.md) e aguarda as decisões D1–D3 |
 | Reservar/Agendar | Botões sem fluxo real | A BKG foi entregue: "Agendar" leva a `/tutor/agendar/:id`, que cria o agendamento pela API, e fica desabilitado sem serviços. `components/ServiceCard.tsx` não é importado em lugar nenhum (pode ser removido na higiene, E-22) |

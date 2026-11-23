@@ -79,6 +79,7 @@ type Product = {
   badge?: string;
   discount?: number;
   soldCount?: number;
+  available: boolean;
 };
 
 const popularCategories = [
@@ -87,7 +88,6 @@ const popularCategories = [
     name: "Alimentação",
     icon: Bone,
     image: catAlimentacao,
-    count: 186,
     color: "from-amber-400 to-orange-500",
     pastelBg: "bg-[#FFF4E6]",
   },
@@ -96,7 +96,6 @@ const popularCategories = [
     name: "Brinquedos",
     icon: Sparkles,
     image: catBrinquedos,
-    count: 124,
     color: "from-pink-400 to-rose-500",
     pastelBg: "bg-[#FFF0F6]",
   },
@@ -105,7 +104,6 @@ const popularCategories = [
     name: "Higiene",
     icon: Bath,
     image: catHigiene,
-    count: 98,
     color: "from-sky-400 to-blue-500",
     pastelBg: "bg-[#E6F7FF]",
   },
@@ -114,7 +112,6 @@ const popularCategories = [
     name: "Acessórios",
     icon: Tag,
     image: catAcessorios,
-    count: 142,
     color: "from-violet-400 to-purple-500",
     pastelBg: "bg-[#F3F0FF]",
   },
@@ -123,7 +120,6 @@ const popularCategories = [
     name: "Conforto",
     icon: Sofa,
     image: catConforto,
-    count: 76,
     color: "from-teal-400 to-emerald-500",
     pastelBg: "bg-[#E6FFFA]",
   },
@@ -132,7 +128,6 @@ const popularCategories = [
     name: "Farmácia",
     icon: Pill,
     image: catFarmacia,
-    count: 64,
     color: "from-green-400 to-emerald-500",
     pastelBg: "bg-[#EAFDF5]",
   },
@@ -141,7 +136,6 @@ const popularCategories = [
     name: "Roupas",
     icon: Shirt,
     image: catRoupas,
-    count: 53,
     color: "from-fuchsia-400 to-pink-500",
     pastelBg: "bg-[#FFF0FD]",
   },
@@ -165,11 +159,11 @@ function ProductCard({ product }: { product: Product }) {
         to={`/shopping/${product.id}`}
         className="relative block aspect-[4/3] overflow-hidden bg-slate-50/50 p-2.5"
       >
-        <ImageWithFallback
+        {product.image ? <ImageWithFallback
           src={product.image}
           alt={product.name}
           className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-500"
-        />
+        /> : <ShoppingBag aria-label="Produto sem foto cadastrada" className="h-full w-full p-12 text-slate-300" />}
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.discount && (
@@ -236,10 +230,9 @@ function ProductCard({ product }: { product: Product }) {
 
         {/* CTA */}
         <button
+          disabled={!product.available}
           onClick={async () => {
-            // NOTE: LandingPage usa Product mock (id: number); cart server rejeita
-            // ids não-UUID com 422. Quando integrado ao catálogo real, basta
-            // garantir que `product.id` venha como UUID do backend.
+            if (!product.available) return;
             const added = await addItem({
               id: String(product.id),
               name: product.name,
@@ -252,10 +245,10 @@ function ProductCard({ product }: { product: Product }) {
               toast.success(`${product.name} adicionado ao carrinho!`);
             }
           }}
-          className="mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-700)] to-orange-400 text-white text-xs font-semibold hover:from-[var(--color-primary-800)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-sm"
+          className="mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-700)] to-orange-400 text-white text-xs font-semibold hover:from-[var(--color-primary-800)] hover:to-orange-500 active:scale-[0.98] transition-all shadow-sm disabled:cursor-not-allowed disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-700 disabled:shadow-none disabled:active:scale-100"
         >
-          <ShoppingCart className="h-4 w-4" />
-          Adicionar
+          <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+          {product.available ? "Adicionar" : "Esgotado"}
         </button>
       </div>
     </motion.div>
@@ -459,7 +452,7 @@ const heroSlides = [
     ctaText: "Explorar Serviços",
     ctaLink: "/walkers",
     features: [
-      { icon: Shield, title: "Segurança Total", subtitle: "Parceiros verificados" },
+      { icon: Shield, title: "Parceiros aprovados", subtitle: "Cadastro analisado pela equipe" },
       { icon: Calendar, title: "Agendamento Fácil", subtitle: "Online e instantâneo" },
     ],
   },
@@ -717,11 +710,17 @@ export default function LandingPage() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [highlights, setHighlights] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const loadHighlights = async () => {
+      setLoading(true);
+      setLoadError(false);
       try {
         const data = await productService.fetchAllPublicProducts();
+        if (cancelled) return;
         const now = new Date();
         const mapped: Product[] = data.map((p: any) => {
           let badge = undefined;
@@ -739,21 +738,21 @@ export default function LandingPage() {
             price: Number(p.price),
             rating_avg: p.rating_avg,
             rating_count: p.rating_count,
-            image: p.image_url || "https://images.unsplash.com/photo-1725533488658-437e3619f856",
+            image: p.image_url || "",
             badge: badge,
+            available: p.status === "ACTIVE" && Number(p.stock_quantity) > 0,
           };
         });
-        if (mapped.length > 0) {
-          setHighlights(mapped.slice(0, 8));
-        }
-      } catch (err: any) {
-        console.error("Erro ao carregar os produtos na landing page.");
+        setHighlights(mapped.slice(0, 8));
+      } catch {
+        if (!cancelled) { setHighlights([]); setLoadError(true); }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     loadHighlights();
-  }, []);
+    return () => { cancelled = true; };
+  }, [attempt]);
 
   return (
     <div className="flex flex-col min-h-screen font-[family-name:var(--font-body)]">
@@ -919,7 +918,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <SectionHeader
               title="Produtos em Destaque"
-              subtitle="Os produtos mais procurados pelos nossos clientes."
+              subtitle="Conheça alguns produtos disponíveis no catálogo."
               action="Ver todo o Shopping"
               actionHref="/shopping"
             />
@@ -939,9 +938,14 @@ export default function LandingPage() {
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-16 w-full min-h-[200px] col-span-full">
                   <Loader2 className="h-8 w-8 text-[var(--color-primary-500)] animate-spin" />
-                  <p className="mt-3 text-sm text-slate-500 font-semibold tracking-wide animate-pulse">
+                  <p className="mt-3 text-sm text-slate-600 font-semibold tracking-wide">
                     Carregando produtos...
                   </p>
+                </div>
+              ) : loadError ? (
+                <div role="alert" className="w-full py-12 text-center space-y-3">
+                  <p>Não foi possível carregar os produtos em destaque.</p>
+                  <Button variant="outline" onClick={() => setAttempt(value => value + 1)}>Tentar novamente</Button>
                 </div>
               ) : highlights.length > 0 ? (
                 highlights.map((product) => (
@@ -953,7 +957,7 @@ export default function LandingPage() {
                   </div>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center py-16 w-full text-center text-slate-400 font-medium col-span-full">
+                <div className="flex flex-col items-center justify-center py-16 w-full text-center text-slate-600 font-medium col-span-full">
                   Nenhum produto em destaque disponível no momento.
                 </div>
               )}

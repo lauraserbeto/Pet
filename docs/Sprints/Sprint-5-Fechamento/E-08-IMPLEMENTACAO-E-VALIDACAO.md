@@ -1,6 +1,6 @@
 # E-08 — Integridade de pedidos, estoque e pagamento
 
-Entrega local de 19/11/2026, na branch `codex/retomada-servicos`, sobre a main `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou acesso ao banco de produção.
+Entrega local de 19/11/2026, na branch `tasks-laura`, sobre a main `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou acesso ao banco de produção.
 
 ## Problemas confirmados na base
 

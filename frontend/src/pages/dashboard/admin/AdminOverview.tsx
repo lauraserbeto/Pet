@@ -322,6 +322,8 @@ export function AdminOverview() {
           </CardHeader>
           <CardContent>
             <div className="relative h-[200px] w-full">
+              {/* Gráfico decorativo: os mesmos valores estão na lista abaixo (E-34). */}
+              <div aria-hidden="true" className="h-full w-full">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <PieChart>
                   <Pie
@@ -332,6 +334,7 @@ export function AdminOverview() {
                     outerRadius={80}
                     paddingAngle={4}
                     dataKey="value"
+                    rootTabIndex={-1}
                   >
                     {roleData.map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
@@ -340,6 +343,7 @@ export function AdminOverview() {
                   <Tooltip contentStyle={TOOLTIP_STYLE} />
                 </PieChart>
               </ResponsiveContainer>
+              </div>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
                 <span className="block text-2xl font-bold text-slate-900">{data.users.total}</span>
                 <span className="text-xs text-slate-500">usuários</span>

@@ -165,6 +165,19 @@ export function PublicProfile() {
   });
 
   const [initialData, setInitialData] = useState<PublicProfileFormState | null>(null);
+  // Campo a campo: strings (inclusive o avatar em base64) por igualdade direta e a
+  // galeria por referência/itens, sem serializar megabytes a cada tecla.
+  const isDirty =
+    initialData !== null &&
+    (Object.keys(formData) as (keyof PublicProfileFormState)[]).some((key) => {
+      const a = formData[key];
+      const b = initialData[key];
+      if (a === b) return false;
+      if (key === "gallery_images" && Array.isArray(a) && Array.isArray(b)) {
+        return a.length !== b.length || a.some((item, i) => item !== b[i]);
+      }
+      return typeof a === "object" || typeof b === "object" ? JSON.stringify(a) !== JSON.stringify(b) : true;
+    });
 
   const [newRule, setNewRule] = useState("");
 
@@ -412,13 +425,13 @@ export function PublicProfile() {
   const CheckboxRow = ({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: () => void }) => (
     <div 
       onClick={onChange}
-      className={`flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer ${checked ? "bg-indigo-50 border-indigo-200 shadow-sm" : "bg-white border-slate-100 hover:border-slate-200"}`}
+      className={`flex items-center space-x-3 p-4 rounded-2xl border transition-all cursor-pointer ${checked ? "bg-[var(--color-primary-50)] border-[var(--color-primary-200)] shadow-sm" : "bg-white border-slate-200 hover:border-slate-300"}`}
     >
       <Checkbox 
         id={id} 
         checked={checked} 
         onCheckedChange={onChange} 
-        className="data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500" 
+        className="data-[state=checked]:bg-[var(--color-primary-700)] data-[state=checked]:border-[var(--color-primary-700)]"
         onClick={(e) => e.stopPropagation()}
       />
       <span className="text-sm font-semibold text-slate-700 select-none">{label}</span>
@@ -771,8 +784,8 @@ export function PublicProfile() {
                         className="h-11 rounded-xl bg-slate-50/30"
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddRule())}
                       />
-                      <Button type="button" onClick={handleAddRule} className="rounded-xl h-11 px-4 bg-indigo-500 hover:bg-indigo-600">
-                        <Plus size={20} />
+                      <Button type="button" onClick={handleAddRule} className="rounded-xl h-11 px-4" aria-label="Adicionar regra">
+                        <Plus size={20} aria-hidden="true" />
                       </Button>
                     </div>
 
@@ -858,7 +871,10 @@ export function PublicProfile() {
               <Button
                 type="button"
                 variant="ghost"
-                className="hidden sm:flex rounded-xl font-semibold text-slate-400 hover:text-slate-600 h-11 px-5"
+                // Visível também no celular; texto slate-600 (contraste AA). Volta ao
+                // último estado carregado ou salvo, sem recarregar a página (UX-2).
+                className="flex rounded-xl font-semibold text-slate-600 hover:text-slate-900 h-11 px-4 sm:px-5"
+                disabled={!isDirty || isSaving}
                 onClick={() => initialData && setFormData(initialData)}
               >
                 <X size={16} className="mr-1.5" /> Descartar
@@ -866,7 +882,7 @@ export function PublicProfile() {
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="flex-1 md:flex-none min-w-[180px] h-11 rounded-xl bg-[var(--color-primary-600)] hover:bg-[var(--color-primary-700)] shadow-md font-bold transition-all active:scale-[0.98]"
+                className="flex-1 md:flex-none sm:min-w-[180px] h-11 rounded-xl shadow-md font-bold transition-all active:scale-[0.98]"
               >
                 {isSaving ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...</>

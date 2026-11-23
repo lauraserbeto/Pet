@@ -1,6 +1,6 @@
 # E-16 / INF-2 — Dependências, runtime, CI e imagem de deploy
 
-Entrega local de 20/11/2026, sobre `d593b03` e as alterações anteriores da branch `codex/retomada-servicos`. Sem commit, push, alteração de painéis publicados ou acesso ao banco de produção. Não há migration nova neste bloco. Procedimento operacional em [deploy-reprodutivel.md](../../runbooks/deploy-reprodutivel.md).
+Entrega local de 20/11/2026, sobre `d593b03` e as alterações anteriores da branch `tasks-laura`. Sem commit, push, alteração de painéis publicados ou acesso ao banco de produção. Não há migration nova neste bloco. Procedimento operacional em [deploy-reprodutivel.md](../../runbooks/deploy-reprodutivel.md).
 
 ## Diagnóstico e decisão
 

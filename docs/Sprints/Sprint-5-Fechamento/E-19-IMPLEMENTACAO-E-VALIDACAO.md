@@ -1,6 +1,6 @@
 # E-19 — Paginação e totais reais dos pedidos
 
-Entrega local de 22/11/2026 sobre `d593b03`, branch `codex/retomada-servicos`, preservando todas as alterações anteriores. Sem commit, push, deploy, migration nova ou acesso ao banco publicado.
+Entrega local de 22/11/2026 sobre `d593b03`, branch `tasks-laura`, preservando todas as alterações anteriores. Sem commit, push, deploy, migration nova ou acesso ao banco publicado.
 
 ## Reprodução e correção
 

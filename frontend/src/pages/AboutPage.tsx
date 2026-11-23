@@ -35,7 +35,7 @@ const values = [
   {
     icon: Shield,
     title: "Segurança e confiança",
-    description: "Parceiros verificados, avaliações reais e monitoramento de qualidade contínuo.",
+    description: "Análise cadastral de parceiros e avaliações vinculadas às compras e aos atendimentos concluídos.",
     color: "bg-blue-50 text-blue-500",
   },
   {
@@ -59,7 +59,7 @@ const features = [
     icon: Hotel,
     title: "Hotelaria Pet",
     description:
-      "Encontre hospedagens verificadas com supervisão 24h, área verde e webcam ao vivo para acompanhar seu pet de qualquer lugar.",
+      "Consulte os serviços, as condições e as comodidades informadas por cada hotel antes de solicitar uma hospedagem.",
     link: "/hotels",
   },
   {
@@ -223,7 +223,7 @@ export function AboutPage() {
               <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Nossa história
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-[family-name:var(--font-display)]">
-              De uma ideia a milhares de pets felizes
+              Uma proposta para aproximar tutores e parceiros
             </h2>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base text-slate-500 leading-relaxed px-2">
               O Pet+ nasceu da visão de quatro graduandos de Engenharia de Software que, ao
@@ -404,7 +404,7 @@ export function AboutPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               {/* Mobile: horizontal scroll strip */}
-              <div className="lg:hidden flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide">
+              <div tabIndex={0} role="region" aria-label="Galeria de fotos (role para o lado)" className="lg:hidden flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 scrollbar-hide focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-500)]">
                 <div className="shrink-0 w-[70%] sm:w-[45%] snap-start rounded-xl overflow-hidden shadow-md">
                   <ImageWithFallback
                     src="https://images.unsplash.com/photo-1700665537650-1bf37979aae0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwY2FyaW5nJTIwZG9ncyUyMHBldHMlMjB2ZXRlcmluYXJ5fGVufDF8fHx8MTc3MjExMzQyMnww&ixlib=rb-4.1.0&q=80&w=1080"

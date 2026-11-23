@@ -796,8 +796,9 @@ export function RegisterPage() {
                 type="submit"
                 className={`w-full h-11 font-bold rounded-xl shadow-lg transition-all hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] text-base mt-1 ${
                   isPartner
-                    ? "bg-gradient-to-r from-[var(--color-secondary-500)] to-[var(--color-secondary-600)] hover:from-[var(--color-secondary-600)] hover:to-[var(--color-secondary-700)] shadow-sky-200/40 hover:shadow-sky-200/60"
-                    : "bg-gradient-to-r from-[var(--color-primary-500)] to-[var(--color-primary-600)] hover:from-[var(--color-primary-600)] hover:to-[var(--color-primary-700)] shadow-orange-200/50 hover:shadow-orange-200/60"
+                    // Tons 700/800: texto branco com contraste AA (G03; o axe não mede degradê).
+                    ? "bg-gradient-to-r from-[var(--color-secondary-700)] to-[var(--color-secondary-800)] hover:from-[var(--color-secondary-800)] hover:to-[var(--color-secondary-800)] shadow-sky-200/40 hover:shadow-sky-200/60"
+                    : "bg-gradient-to-r from-[var(--color-primary-700)] to-[var(--color-primary-800)] hover:from-[var(--color-primary-800)] hover:to-[var(--color-primary-800)] shadow-orange-200/50 hover:shadow-orange-200/60"
                 }`}
                 disabled={isLoading || !legalReady}
               >

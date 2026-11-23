@@ -50,7 +50,8 @@ export type CartAddInput = {
 type CartContextType = {
   items: CartItem[];
   addItem: (item: CartAddInput, quantity?: number) => Promise<boolean>;
-  removeItem: (id: string) => Promise<void>;
+  /** true só quando a remoção foi confirmada (E-20/E-34). */
+  removeItem: (id: string) => Promise<boolean>;
   updateQuantity: (id: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<boolean>;
   totalItems: number;
@@ -262,18 +263,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const removeItem = useCallback(
-    async (id: string) => {
-      if (sync.syncBlocked) return;
+    async (id: string): Promise<boolean> => {
+      if (sync.syncBlocked) return false;
       if (isAuthenticated) {
         try {
           await removeMutation.mutateAsync(id);
+          return true;
         } catch (err) {
           const message = err instanceof ApiError ? err.message : "Erro ao remover item";
           toast.error(message);
+          return false;
         }
-        return;
       }
       setAnonItems((prev) => prev.filter((i) => i.id !== id));
+      return true;
     },
     [isAuthenticated, removeMutation, sync.syncBlocked]
   );

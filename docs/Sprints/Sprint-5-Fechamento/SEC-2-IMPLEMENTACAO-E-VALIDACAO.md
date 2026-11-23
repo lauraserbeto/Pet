@@ -1,6 +1,6 @@
 # SEC-2 — Erros, permissões, privacidade e limites de requisições
 
-Entrega local de 20/11/2026, sobre `d593b03` e as alterações anteriores da branch `codex/retomada-servicos`. Abrange as pendências reproduzidas de E-07, E-14 e E-15 e o escopo de hardening da SEC-2. Sem commit, push, publicação ou acesso ao banco de produção. Nenhuma migration nova neste bloco.
+Entrega local de 20/11/2026, sobre `d593b03` e as alterações anteriores da branch `tasks-laura`. Abrange as pendências reproduzidas de E-07, E-14 e E-15 e o escopo de hardening da SEC-2. Sem commit, push, publicação ou acesso ao banco de produção. Nenhuma migration nova neste bloco.
 
 ## Comportamento implementado
 

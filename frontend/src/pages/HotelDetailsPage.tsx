@@ -24,11 +24,14 @@ import {
   Play,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router";
+import { isMissingResourceError } from "../lib/httpClient";
+import { ResourceLoadError } from "../components/ResourceLoadError";
 import { ImageWithFallback } from "../app/components/figma/ImageWithFallback";
 import { motion, AnimatePresence } from "motion/react";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { RatingBadge } from "../components/reviews/RatingBadge";
 import { ReviewsPanel } from "../components/reviews/ReviewsPanel";
+import { BILLING_UNIT_LABELS, type BillingUnit } from "../lib/services/serviceService";
 
 const AUTOPLAY_INTERVAL = 4500;
 
@@ -46,11 +49,14 @@ export function HotelDetailsPage() {
   const [apiHotel, setApiHotel] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   // Carrega os dados reais do hotel.
   useEffect(() => {
     if (!id) {
       setError("Identificador do hotel não informado.");
+      setNotFound(true);
       setLoading(false);
       return;
     }
@@ -59,6 +65,7 @@ export function HotelDetailsPage() {
 
     setLoading(true);
     setError(null);
+    setNotFound(false);
     setApiHotel(null);
     setActiveImage(0);
 
@@ -86,7 +93,7 @@ export function HotelDetailsPage() {
                 ...service,
                 price: Number(service.price),
               }))
-              .filter(service => Number.isFinite(service.price))
+              .filter(service => Number.isFinite(service.price) && service.price > 0)
           : [];
 
         // Calcula o menor preço entre os serviços ativos.
@@ -165,6 +172,8 @@ export function HotelDetailsPage() {
           address: address || "Endereço não informado",
           phone: data.phone || null,
           startingPrice,
+          startingUnit: services.find(service => service.price === startingPrice)?.billing_unit ?? null,
+          animalsInformed: allowed.length > 0,
           services,
           description: data.description || "Descrição não informada.",
           images: gallery.length > 0
@@ -198,9 +207,9 @@ export function HotelDetailsPage() {
       .catch(error => {
         if (cancelled) return;
 
-        console.error("Erro ao carregar detalhes do hotel:", error);
-
         setApiHotel(null);
+        // 404/ID inválido é "não encontrado"; o resto é falha com nova tentativa (E-31).
+        setNotFound(isMissingResourceError(error));
         setError(
           error instanceof Error
             ? error.message
@@ -216,7 +225,7 @@ export function HotelDetailsPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, attempt]);
 
   const hotel = apiHotel;
 
@@ -286,7 +295,7 @@ export function HotelDetailsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
         <div className="h-12 w-12 border-4 border-[var(--color-primary-200)] border-t-[var(--color-primary-600)] rounded-full animate-spin" />
-        <p className="font-bold text-slate-600 animate-pulse">
+        <p className="font-bold text-slate-600">
           Carregando detalhes do hotel...
         </p>
       </div>
@@ -296,21 +305,15 @@ export function HotelDetailsPage() {
   // Estado de erro ou hotel não encontrado.
   if (!hotel) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4 px-4">
-        <PawPrint className="h-16 w-16 text-slate-300" />
-
-        <h2 className="text-xl font-bold text-slate-800">
-          Não foi possível carregar o hotel
-        </h2>
-
-        <p className="text-sm text-slate-500 text-center">
-          {error || "Ocorreu um erro ao buscar os dados do parceiro."}
-        </p>
-
-        <Button onClick={() => navigate("/hotels")}>
-          Voltar para a listagem
-        </Button>
-      </div>
+      <ResourceLoadError
+        notFound={notFound}
+        notFoundTitle="Hotel não encontrado"
+        errorTitle="Não foi possível carregar o hotel"
+        message={error}
+        onRetry={() => setAttempt((value) => value + 1)}
+        backTo="/hotels"
+        backLabel="Voltar para os hotéis"
+      />
     );
   }
 
@@ -344,8 +347,8 @@ export function HotelDetailsPage() {
             </AnimatePresence>
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-400">
-              <PawPrint className="h-16 w-16" />
-              <p className="text-sm">
+              <PawPrint className="h-16 w-16" aria-hidden="true" />
+              <p className="text-sm text-slate-600">
                 Nenhuma imagem cadastrada
               </p>
             </div>
@@ -520,7 +523,7 @@ export function HotelDetailsPage() {
           {/* Aceitação de animais e menor preço */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 gap-3">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div
+              {hotel.animalsInformed ? <><div
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium ${
                   hotel.acceptsDogs
                     ? "bg-emerald-50 text-emerald-600"
@@ -541,6 +544,7 @@ export function HotelDetailsPage() {
                 <Cat className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {hotel.acceptsCats ? "Aceita Gatos" : "Não aceita Gatos"}
               </div>
+              </> : <span className="text-xs text-slate-500">Animais aceitos não informados</span>}
             </div>
 
             <div className="text-right shrink-0">
@@ -549,8 +553,8 @@ export function HotelDetailsPage() {
                   <p className="text-lg sm:text-2xl font-extrabold text-slate-900">
                     {formatPrice(hotel.startingPrice)}
                   </p>
-                  <p className="text-[10px] sm:text-[11px] text-slate-400">
-                    menor preço por diária
+                  <p className="text-[10px] sm:text-[11px] text-slate-600">
+                    {hotel.startingUnit ? `a partir de · ${BILLING_UNIT_LABELS[hotel.startingUnit as BillingUnit] || "unidade não informada"}` : "a partir de · unidade não informada"}
                   </p>
                 </>
               ) : (
@@ -611,10 +615,8 @@ export function HotelDetailsPage() {
                         {formatPrice(service.price)}
                       </p>
 
-                      <p className="text-xs text-slate-400">
-                        {service.billing_unit === "DIARIA"
-                          ? "por diária"
-                          : "unidade não informada"}
+                      <p className="text-xs text-slate-600">
+                        {BILLING_UNIT_LABELS[service.billing_unit as BillingUnit] || "unidade não informada"}
                       </p>
                     </div>
                   </div>
@@ -650,7 +652,7 @@ export function HotelDetailsPage() {
               ))}
 
               {hotel.amenities.length === 0 && (
-                <p className="text-xs text-slate-400 italic">
+                <p className="text-xs text-slate-600 italic">
                   Nenhuma comodidade informada.
                 </p>
               )}
@@ -685,9 +687,9 @@ export function HotelDetailsPage() {
           <div className="hidden sm:block">
             {hotel.startingPrice !== null ? (
               <p className="text-lg font-extrabold text-slate-900">
-                {formatPrice(hotel.startingPrice)}
-                <span className="text-sm font-normal text-slate-400">
-                  /diária
+                {formatPrice(hotel.startingPrice)}{" "}
+                <span className="text-sm font-normal text-slate-600">
+                  {BILLING_UNIT_LABELS[hotel.startingUnit as BillingUnit] || "unidade não informada"}
                 </span>
               </p>
             ) : (

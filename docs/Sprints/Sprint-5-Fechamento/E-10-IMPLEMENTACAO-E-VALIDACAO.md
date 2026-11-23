@@ -1,6 +1,6 @@
 # E-10 / DEC-F — Documentos e aceite dos termos
 
-Entrega local de 20/11/2026, na branch `codex/retomada-servicos`, sobre `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou consulta ao banco de produção.
+Entrega local de 20/11/2026, na branch `tasks-laura`, sobre `d593b03` e as entregas locais anteriores. Sem commit, push, publicação ou consulta ao banco de produção.
 
 ## Comportamento implementado
 

@@ -105,17 +105,10 @@ export const productService = {
     return data;
   },
 
+  // Via httpClient (E-31): o ApiError preserva status/código, e a tela distingue
+  // produto inexistente (404/ID inválido) de falha temporária.
   async fetchProductDetails(id: string): Promise<Product> {
-    const response = await fetch(`${API_URL}/products/${id}`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      throw new Error('Erro ao buscar as informações do produto');
-    }
-
-    const data = await response.json();
-    return data;
+    return httpClient.get<Product>(`/products/${encodeURIComponent(id)}`, { auth: false });
   },
 
   async fetchProducts(): Promise<Product[]> {

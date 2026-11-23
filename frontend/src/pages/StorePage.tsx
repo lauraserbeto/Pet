@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { providerService } from "../lib/services/providerService";
+import { ApiError, isMissingResourceError } from "../lib/httpClient";
+import { ResourceLoadError } from "../components/ResourceLoadError";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { MapPin, Phone, ShieldCheck, ShoppingBag, ArrowLeft } from "lucide-react";
@@ -13,21 +15,28 @@ export function StorePage() {
   const navigate = useNavigate();
   const [store, setStore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+    // Descarta resposta tardia ao trocar de loja ou sair da página (E-31).
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+    setStore(null);
     providerService
       .fetchProviderDetails(id)
       .then((data) => {
+        if (cancelled) return;
         setStore({
           id: data.id,
           name: data.business_name || data.user.full_name,
           description: data.description || "Bem-vindo à nossa loja!",
-          image:
-            data.user.avatar_url ||
-            "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=800",
-          coverImage:
-            "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=1200",
+          image: data.user?.avatar_url || null,
           address: data.address_line || "Endereço não informado",
           city: data.city || "Cidade não informada",
           state: data.state || "UF",
@@ -38,10 +47,14 @@ export function StorePage() {
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Erro ao carregar loja:", error);
+        if (cancelled) return;
+        setLoadError(error);
         setLoading(false);
       });
-  }, [id]);
+    return () => {
+      cancelled = true;
+    };
+  }, [id, attempt]);
 
   if (loading) {
     return (
@@ -52,10 +65,17 @@ export function StorePage() {
   }
 
   if (!store) {
+    // Antes toda falha virava "Loja não encontrada", inclusive queda de rede (E-31).
     return (
-      <div className="min-h-screen flex items-center justify-center font-[family-name:var(--font-display)]">
-        Loja não encontrada.
-      </div>
+      <ResourceLoadError
+        notFound={!id || isMissingResourceError(loadError)}
+        notFoundTitle="Loja não encontrada"
+        errorTitle="Não foi possível carregar a loja"
+        message={loadError instanceof ApiError ? loadError.message : null}
+        onRetry={() => setAttempt((value) => value + 1)}
+        backTo="/shopping"
+        backLabel="Voltar ao Shopping"
+      />
     );
   }
 
@@ -99,11 +119,11 @@ export function StorePage() {
             {/* Avatar */}
             <div className="shrink-0 -mt-16 sm:-mt-20 relative">
               <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-white ring-1 ring-slate-100">
-                <ImageWithFallback
+                {store.image ? <ImageWithFallback
                   src={store.image}
                   alt={store.name}
                   className="w-full h-full object-cover"
-                />
+                /> : <ShoppingBag aria-label="Loja sem foto cadastrada" className="w-full h-full p-7 text-slate-300" />}
               </div>
               {store.verified && (
                 <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm">

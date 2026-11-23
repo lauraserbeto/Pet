@@ -1,6 +1,6 @@
 # Auditoria visual — Fase 2 (fundações): implementação e validação
 
-20/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**.
+20/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**.
 
 Origem: [relatório](index.html), grupos G01, G02, G03, G04 e G05, com a decisão de contraste da [Fase 0](FASE0-DECISOES.md).
 
@@ -19,7 +19,7 @@ Origem: [relatório](index.html), grupos G01, G02, G03, G04 e G05, com a decisã
 
 ## Validação
 
-Runtime: Node 24.18.0 global (o validado no handoff é 24.22.3).
+Runtime: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`).
 
 - **Suíte do frontend:** 35 arquivos / **181 testes aprovados**. Typecheck sem erros. Build aprovado (avisos de chunk já conhecidos). Lint: 0 erros.
 - **Varredura repetida** (mesmas 151 capturas da auditoria: rotas × perfis × desktop/celular, axe WCAG 2.1 AA e Tab), com API e PostgreSQL locais descartáveis: ver comparativo abaixo.

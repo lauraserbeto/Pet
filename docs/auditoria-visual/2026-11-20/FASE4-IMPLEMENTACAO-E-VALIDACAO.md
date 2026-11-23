@@ -1,6 +1,6 @@
 # Auditoria visual — Fase 4 (P2): implementação e validação
 
-22/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**.
+22/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**.
 
 Origem: [relatório](index.html), grupos G16–G21, com a decisão G20 (“remover”) da [Fase 0](FASE0-DECISOES.md). Nenhuma mudança de backend nesta fase.
 
@@ -18,7 +18,7 @@ Origem: [relatório](index.html), grupos G16–G21, com a decisão G20 (“remov
 
 ## Validação
 
-Runtime: Node 24.18.0 global (o validado no handoff é 24.22.3).
+Runtime: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`).
 
 - **Frontend:** 38 arquivos / **188 testes** aprovados (novos: busca do cabeçalho em `Navbar.test.tsx`, `WalkerDetailsPage.test.tsx`; ajustado o teste de estado vazio de avaliações para o comportamento decidido). Typecheck sem erros; lint 0 erros (avisos 128 → 126); build aprovado.
 - **Backend:** sem alterações nesta fase (última suíte: 547/547 na Fase 3).

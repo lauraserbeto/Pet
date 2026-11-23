@@ -4,7 +4,7 @@
 
 > Regressão da correção: **561 testes backend aprovados**, sem falhas/ignorados/cancelados, PostgreSQL 16 descartável. Lint direcionado sem avisos/erros e diff-check aprovado. Banco exclusivo de QA removido após a validação; demais bancos preservados. Sem commit, push, acesso a produção ou confirmação de novo CI remoto.
 
-22/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**. Sem migration nova.
+22/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**. Sem migration nova.
 
 Origem: auditoria pré-Sprint 4, E-11 / AUD-15 (RF-008, RF-009, RF-010), decisão **DEC-D** (D1 — aprovação do Pet Sitter só pela avaliação; nova candidatura só após recusa, uma de cada vez). Já entregues antes e mantidos: candidatura exclusiva de Pet Sitter, revisão recusando candidatura de outro perfil e transações com rollback (SEC-2); verificador único de "parceiro operacional" exigindo avaliação aprovada (E-01).
 
@@ -51,7 +51,7 @@ Frontend: `pages/dashboard/admin/Approvals.tsx` (+ teste), `pages/onboarding/Pet
 
 ## Validação
 
-Runtime: Node 24.18.0 global (o validado no handoff é 24.22.3). PostgreSQL 16 local descartável, URL com `127.0.0.1` (ver achado de ambiente da auditoria visual, Fase 3).
+Runtime: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`). PostgreSQL 16 local descartável, URL com `127.0.0.1` (ver achado de ambiente da auditoria visual, Fase 3).
 
 - **Backend:** **553/553** aprovados (6 novos de banco em `moderationDb.test.js`: transições válidas/ inválidas sem efeito; sitter só pela avaliação; aprovar × recusar simultâneos; candidatura única e reenvio após recusa; revisão dupla e simultânea com estado coerente; envios simultâneos), zero ignorados. Lint: 0 erros (2 avisos já existentes).
 - **Frontend:** 38 arquivos / **191 testes** (3 novos em `Approvals.test.tsx`), typecheck sem erros, lint 0 erros, build aprovado.

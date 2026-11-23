@@ -1,6 +1,6 @@
 # Auditoria visual — Fase 5 (P3 e limpeza): implementação e validação
 
-22/11/2026 · branch `codex/retomada-servicos` · alterações locais, **sem commit, push ou deploy**.
+22/11/2026 · branch `tasks-laura` · alterações locais, **sem commit, push ou deploy**.
 
 Origem: [relatório](index.html), grupos G22–G26. Sem mudanças de backend nesta fase.
 
@@ -16,10 +16,10 @@ Origem: [relatório](index.html), grupos G22–G26. Sem mudanças de backend nes
 
 ## Validação
 
-Runtime: Node 24.18.0 global (o validado no handoff é 24.22.3).
+Runtime: Node 24.18.0 global (a referência do projeto é 24.22.3, em `.nvmrc`).
 
 - **Frontend:** 38 arquivos / **188 testes** aprovados. `ResourceRemoval.test.tsx` passou a responder o diálogo (Voltar / Remover) em vez de simular `window.confirm`, preservando as mesmas garantias. Typecheck sem erros; lint 0 erros (avisos 126 → 124); build aprovado.
-- **E2E:** `e2e/resource-deletion-real.spec.ts` foi adaptado para clicar nos botões do diálogo; **não executado** nesta sessão (depende de fixtures próprias).
+- **E2E:** `e2e/resource-deletion-real.spec.ts` foi adaptado para clicar nos botões do diálogo; **não executado** nesta rodada (depende de fixtures próprias).
 
 ### Comparativo final: auditoria original × após as Fases 1–5
 

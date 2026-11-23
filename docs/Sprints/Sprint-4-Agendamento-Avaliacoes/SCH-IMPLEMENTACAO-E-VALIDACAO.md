@@ -1,6 +1,6 @@
 # SCH-1 e SCH-2 — Agenda real do parceiro
 
-Entrega local de 16/11/2026 na branch `codex/retomada-servicos`, sobre `5d11b7e`, preservando SRV-Fpub, PAG-2 e BKG-1/BKG-2. Sem commit ou publicação.
+Entrega local de 16/11/2026 na branch `tasks-laura`, sobre `5d11b7e`, preservando SRV-Fpub, PAG-2 e BKG-1/BKG-2. Sem commit ou publicação.
 
 ## Comportamento implementado
 

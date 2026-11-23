@@ -97,7 +97,7 @@ footer{padding:30px 0 50px;color:var(--mut);font-size:13px}
 <header class="top">
   <div class="wrap">
     <h1>Auditoria visual e de usabilidade — Pet+</h1>
-    <p>20/11/2026 · branch <code>codex/retomada-servicos</code> (working tree local, sem commit) · análise somente; nenhum código foi alterado.</p>
+    <p>20/11/2026 · branch <code>tasks-laura</code> (working tree local, sem commit) · análise somente; nenhum código foi alterado.</p>
     <p>Ambiente: Vite local + API local + PostgreSQL 16 descartável com dados fictícios. 151 capturas automatizadas (desktop 1440×900 e celular 390×844), axe-core WCAG 2.1 AA, navegação por Tab e conferências manuais.</p>
     <div class="kpis">
       <div class="kpi"><b>26</b><span>grupos de problemas (G01–G26)</span></div>
@@ -115,7 +115,7 @@ footer{padding:30px 0 50px;color:var(--mut);font-size:13px}
 <main class="wrap">
 <section class="block" id="metodo">
   <h2>Método e limites da evidência</h2>
-  <p class="lead">Fontes: <code>docs/CONTEXTO-HANDOFF-IMPLEMENTACOES-2026-11-20.md</code>, <code>docs/design-system.md</code>, <code>frontend/src/styles/theme.css</code>, <code>components/ui/*</code>, layouts (<code>Navbar</code>, <code>DashboardLayout</code>, <code>Sidebar</code>) e as telas alteradas nas entregas recentes.</p>
+  <p class="lead">Fontes: <code>docs/design-system.md</code>, <code>frontend/src/styles/theme.css</code>, <code>components/ui/*</code>, layouts (<code>Navbar</code>, <code>DashboardLayout</code>, <code>Sidebar</code>) e as telas alteradas nas entregas recentes.</p>
   <table>
     <tr><th>Perfil / estado</th><th>Como foi obtido</th></tr>
     <tr><td>Visitante</td><td>Sem sessão</td></tr>
@@ -193,7 +193,7 @@ const F = [
       <div style="color:#64748b;font-size:12px;margin:4px 0 8px">Avisaremos por e-mail quando for aprovado.</div>
       <div style="border-top:1px solid #f1f5f9;padding-top:8px">Corrigir cadastro <span style="color:#94a3b8">(se recusado)</span><br>Termos e privacidade<br><span style="color:#b91c1c">Sair da conta</span></div></div>`,
       'Menu da conta para parceiro não aprovado: status visível, atalho para correção quando recusado e “Sair”. Reutiliza o dropdown do Tutor e <code>Badge</code>.'),
- desc:'Em <code>Navbar.tsx:349</code> o bloco direito só renderiza para <code>isDashboardUser</code> ou <code>isTutor</code>. O parceiro não aprovado (papéis 2/3) não é nenhum dos dois e fica sem menu. Ao abrir /dashboard, o <code>ProtectedRoute</code> o leva à home sem mensagem. Impacto: a pessoa não entende o estado do cadastro, não encontra a correção e não consegue sair da conta (relaciona-se com E-13 do handoff).',
+ desc:'Em <code>Navbar.tsx:349</code> o bloco direito só renderiza para <code>isDashboardUser</code> ou <code>isTutor</code>. O parceiro não aprovado (papéis 2/3) não é nenhum dos dois e fica sem menu. Ao abrir /dashboard, o <code>ProtectedRoute</code> o leva à home sem mensagem. Impacto: a pessoa não entende o estado do cadastro, não encontra a correção e não consegue sair da conta (relaciona-se com a E-13 da auditoria).',
  prop:['Adicionar um terceiro ramo no <code>Navbar</code> para parceiro não aprovado, reutilizando o dropdown do Tutor com: status (Badge), “Corrigir cadastro” quando <code>REJEITADO</code>, “Sair”.','No <code>ProtectedRoute</code>, redirecionar o recusado para <code>/parceiro/corrigir-cadastro</code> e o pendente para a home com aviso (toast <code>sonner</code> já usado no projeto) em vez de redirecionamento silencioso.'],
  ac:['Pendente e recusado veem nome, status e “Sair” no desktop e no menu do celular.','Recusado chega à tela de correção em 1 clique a partir do cabeçalho.','Abrir /dashboard sem aprovação mostra explicação; nenhuma tela fica sem saída.','Validar: login real com contas pendente/recusada; E2E de navegação; Tab até “Sair”.']},
 
@@ -201,7 +201,7 @@ const F = [
  where:'<b>Rota:</b> /dashboard/settings · <b>Perfis:</b> Admin (menu) e, por URL, Lojista, Hotel, Pet Sitter e Tutor · <b>Viewport:</b> desktop',
  fix:'Settings.tsx, routes.tsx',
  ev:()=>shot('loja-config-desk',1440,900,[0,60,1440,620],[[288,256,1120,393,'salvar sem API'],[654,187,390,33,''],[16,128,224,270,'Lojista']],'Conta <b>Lojista</b> vendo as configurações globais (aprovação automática de parceiros, taxas, segurança).'),
- desc:'<code>Settings.tsx:30–43</code> apenas dispara <code>toast.success</code>: “Configurações gerais salvas”, “Regras de taxa salvas” e “Logout forçado disparado para todos os usuários ativos” — nada é enviado à API. A rota não tem <code>allowedRoles</code>; só o item de menu é restrito ao Admin. O handoff (CFG-1) pede expressamente não simular sucesso nem logout global.',
+ desc:'<code>Settings.tsx:30–43</code> apenas dispara <code>toast.success</code>: “Configurações gerais salvas”, “Regras de taxa salvas” e “Logout forçado disparado para todos os usuários ativos” — nada é enviado à API. A rota não tem <code>allowedRoles</code>; só o item de menu é restrito ao Admin. A CFG-1 pede expressamente não simular sucesso nem logout global.',
  prop:['Proteger a rota com <code>allowedRoles={[1]}</code> e reutilizar o estado “Acesso Negado” de <code>admin/Users.tsx</code> (ver G08).','Manter na tela apenas o que tiver endpoint; o restante vira texto informativo desabilitado (“Ainda não disponível”) sem botão de salvar. Remover “Logout forçado” até existir revogação de sessão.'],
  ac:['Nenhum perfil diferente de Admin vê a tela.','Nenhuma ação mostra sucesso sem resposta 2xx da API.','Validar: teste de rota por perfil; teste unitário garantindo que salvar chama o serviço.']},
 
@@ -258,7 +258,7 @@ const F = [
      <div><span class="btn btn-p7">Ir para o Shopping</span><b>Opção B</b><br>branco / primary-700 #b35602 = <b style="color:#047857">4,94:1</b>; laranja mais fechado</div>
      <div><span class="btn btn-o" style="color:#b35602;border-color:#fcd9a3">Ver todo o Shopping</span><b>Links</b><br>primary-700 em branco = 4,94:1 (hoje primary-600 = 3,40:1)</div></div>`,
      'Alternativas medidas. A escolha afeta a identidade visual e precisa de decisão da equipe; a recomendação técnica é a <b>Opção B</b> para botões com texto pequeno, mantendo o <code>primary-500</code> em ícones, ilustrações e fundos.'),
- desc:'Medições: branco sobre <code>primary-500</code> 2,45:1; sobre <code>primary-600</code> (hover e item ativo da sidebar) 3,40:1; <code>primary-600</code> como texto 3,40:1; <code>slate-500</code> sobre <code>slate-900</code> (rodapé) 3,75:1; <code>slate-400</code> sobre branco 2,56:1. O handoff já registrava contraste pendente na landing; a causa está nos tokens, não em uma página.',
+ desc:'Medições: branco sobre <code>primary-500</code> 2,45:1; sobre <code>primary-600</code> (hover e item ativo da sidebar) 3,40:1; <code>primary-600</code> como texto 3,40:1; <code>slate-500</code> sobre <code>slate-900</code> (rodapé) 3,75:1; <code>slate-400</code> sobre branco 2,56:1. Os registros do projeto já apontavam contraste pendente na landing; a causa está nos tokens, não em uma página.',
  prop:['Decidir entre A e B e aplicar uma única vez na variante <code>default</code> do <code>Button</code> e no item ativo do <code>Sidebar</code>.','Links: usar <code>primary-700</code>; textos secundários sobre fundo escuro: <code>slate-400</code> em vez de <code>slate-500</code>.','Atualizar <code>docs/design-system.md</code> com a justificativa.'],
  ac:['axe sem <code>color-contrast</code> nos botões, links e sidebar.','Identidade aprovada pela equipe.','Varredura repetida comparando contagens.']},
 
@@ -376,7 +376,7 @@ const F = [
  fix:'Navbar, DashboardLayout, routes.tsx',
  ev:()=>shot('home-desk',1440,3172,[260,0,1180,70],[[310,8,346,48,'sem ação']],'Busca pública: campo sem envio nem rótulo.')
    +shot('admin-visao-desk',1440,900,[256,0,1184,70],[[278,10,452,44,'sem ação'],[1330,10,40,44,'ponto fixo']],'Painel: busca sem ação e sino com ponto vermelho pulsante fixo no código.'),
- desc:'<code>Navbar.tsx</code> e <code>DashboardLayout.tsx</code> renderizam campos sem manipulador. O sino exibe um ponto vermelho com <code>animate-pulse</code> sempre. <code>/search</code> e <code>/appointments</code> renderizam a landing (<code>routes.tsx</code>). O handoff orienta não simular funcionalidade ausente.',
+ desc:'<code>Navbar.tsx</code> e <code>DashboardLayout.tsx</code> renderizam campos sem manipulador. O sino exibe um ponto vermelho com <code>animate-pulse</code> sempre. <code>/search</code> e <code>/appointments</code> renderizam a landing (<code>routes.tsx</code>). As orientações do projeto pedem para não simular funcionalidade ausente.',
  prop:['Busca pública: enviar para <code>/products?q=</code> ou para o diretório, ou remover até existir busca.','Busca do painel e sino: remover até existir backend de notificações.','/search e /appointments: redirecionar para destino real ou para 404.'],
  ac:['Nenhum controle visível sem efeito; nenhum indicador de notificação sem dado.']},
 
@@ -385,7 +385,7 @@ const F = [
  fix:'ProductDetailPage, PartnersPage, LandingPage',
  ev:()=>shot('produto-mob',390,844,[0,100,390,500],[[36,128,250,26,'parcelamento'],[12,474,366,104,'frete/segurança']],'Produto: “10x de R$ 4,99 sem juros”, “Frete Rápido — Entrega garantida”, “Ambiente 100% blindado”.')
    +shot('partners-desk',1440,3986,[60,560,1240,1180],[[108,630,360,72,'números fictícios'],[250,1570,450,40,'WhatsApp'],[740,1330,450,336,'painel ilustrativo']],'Parceiros: “+150k agendamentos”, “98% eficiência”, lembretes por WhatsApp, abas “Clínicas & Vets”.'),
- desc:'Parcelamento, frete, WhatsApp, clínicas e repasse estão fora do escopo (handoff, seção 7); o pagamento é simulado. Os números não vêm de dados reais — o handoff registra a remoção de indicadores fictícios nas outras telas.',
+ desc:'Parcelamento, frete, WhatsApp, clínicas e repasse estão fora do escopo (plano de retomada); o pagamento é simulado. Os números não vêm de dados reais — os registros das entregas descrevem a remoção de indicadores fictícios nas outras telas.',
  prop:['Revisar textos com a equipe (Fase 0); remover ou marcar como “em breve”.','Painel ilustrativo de /partners: rotular como exemplo.'],
  ac:['Nenhuma promessa de recurso inexistente; números reais ou ausentes.']},
 

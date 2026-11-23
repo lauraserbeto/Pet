@@ -146,7 +146,7 @@ export function Users() {
         </div>
         <div className="w-full sm:w-52">
           <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Filtrar por perfil">
               <SelectValue placeholder="Todos os perfis" />
             </SelectTrigger>
             <SelectContent>
@@ -177,7 +177,7 @@ export function Users() {
             {users.length} {users.length === 1 ? "usuário" : "usuários"}
           </p>
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabela de usuários (role para o lado)">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">

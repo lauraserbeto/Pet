@@ -1,6 +1,6 @@
 # BKG-1 e BKG-2 - Jornada do tutor
 
-Implementação local em 16/11/2026, branch codex/retomada-servicos sobre main 5d11b7e, com as alterações locais anteriores de SRV-Fpub e PAG-2. Sem commit ou publicação.
+Implementação local em 16/11/2026, branch tasks-laura sobre main 5d11b7e, com as alterações locais anteriores de SRV-Fpub e PAG-2. Sem commit ou publicação.
 
 ## Jornada entregue
 

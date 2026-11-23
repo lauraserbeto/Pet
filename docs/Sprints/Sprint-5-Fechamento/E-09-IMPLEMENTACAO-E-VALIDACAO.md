@@ -1,6 +1,6 @@
 # E-09 / DEC-E — Senha, identidade de e-mail e recuperação de acesso
 
-Entrega local de 19/11/2026, sobre `d593b03` e as entregas locais anteriores da branch `codex/retomada-servicos`. Sem commit, push, publicação ou consulta ao banco de produção. As verificações utilizam PostgreSQL 16 descartável.
+Entrega local de 19/11/2026, sobre `d593b03` e as entregas locais anteriores da branch `tasks-laura`. Sem commit, push, publicação ou consulta ao banco de produção. As verificações utilizam PostgreSQL 16 descartável.
 
 ## Problemas e decisões
 

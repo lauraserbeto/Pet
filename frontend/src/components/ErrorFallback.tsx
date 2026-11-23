@@ -42,7 +42,8 @@ export function ErrorFallback() {
           fontSize: "15px",
           fontWeight: 600,
           color: "#fff",
-          background: "#e6842b",
+          // primary-700 (G03): texto branco com contraste AA (E-34).
+          background: "#b35602",
           border: "none",
           borderRadius: "8px",
           cursor: "pointer",

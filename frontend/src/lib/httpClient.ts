@@ -14,6 +14,18 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Recurso inexistente ou link inválido em uma busca pública por ID (E-31): 404, ou
+ * 422 de validação do parâmetro (ID malformado). Falha de rede, 5xx ou 429 não entram:
+ * nesses casos a tela mostra erro com nova tentativa, sem afirmar que o item não existe.
+ */
+export function isMissingResourceError(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 404 || (error.status === 422 && error.code === "VALIDATION_ERROR"))
+  );
+}
+
 type UnauthorizedHandler = () => void;
 let onUnauthorized: UnauthorizedHandler | null = null;
 

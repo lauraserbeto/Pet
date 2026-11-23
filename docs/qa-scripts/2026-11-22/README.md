@@ -1,6 +1,6 @@
 # Scripts de QA local (auditoria visual, E-11, E-20)
 
-Cópia dos scripts usados entre 20 e 22/11/2026, preservados porque a pasta temporária da sessão pode ser apagada. **Só para o banco local descartável** (`petplus_dev_test` em `127.0.0.1:55432`). Nunca rodar com a URL do `backend/.env`, que aponta para produção.
+Scripts de QA local usados entre 20 e 22/11/2026, guardados no repositório para reprodução das verificações. **Só para o banco local descartável** (`petplus_dev_test` em `127.0.0.1:55432`). Nunca rodar com a URL do `backend/.env`, que aponta para produção.
 
 | Script | O que faz |
 |---|---|

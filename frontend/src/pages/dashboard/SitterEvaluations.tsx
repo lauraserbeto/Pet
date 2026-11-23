@@ -6,6 +6,7 @@ import { userService } from '../../lib/services/userService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "../../components/ui/dialog";
 
 interface SitterEvaluation {
     id: string;
@@ -155,6 +156,8 @@ export const SitterEvaluations = () => {
                     <TabsTrigger value="REJECTED" className="data-[state=active]:bg-white">Recusados</TabsTrigger>
                 </TabsList>
 
+                {/* Painel da aba ativa: dá alvo válido ao aria-controls das abas (E-34) */}
+                <TabsContent value={activeTab} className="mt-0">
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
                     <div className="relative flex-1 w-full">
@@ -224,34 +227,38 @@ export const SitterEvaluations = () => {
                         </div>
                     </div>
                 )}
+                </TabsContent>
             </Tabs>
 
             {/* Modal de Avaliação */}
-            {selectedEval && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Dialog acessível (foco preso, Esc, título) — E-34 */}
+            <Dialog open={!!selectedEval} onOpenChange={(open) => !open && !isProcessing && closeModal()}>
+                <DialogContent showCloseButton={false} className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-4xl flex-col gap-0 overflow-hidden rounded-2xl p-0">
+                {selectedEval && (<>
                         
                         {/* Header */}
                         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900 font-cabinet">
+                                <DialogTitle className="text-xl font-bold text-slate-900 font-cabinet">
                                     Avaliação: {selectedEval.user?.full_name}
-                                </h3>
+                                </DialogTitle>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-sm text-slate-500">{selectedEval.user?.email}</span>
+                                    <DialogDescription className="text-sm text-slate-600">{selectedEval.user?.email}</DialogDescription>
                                     {getStatusBadge(selectedEval.status)}
                                 </div>
                             </div>
                             <button 
                                 onClick={closeModal}
-                                className="text-slate-400 hover:text-slate-600 transition-colors p-2 rounded-full hover:bg-slate-100"
+                                aria-label="Fechar avaliação"
+                                className="text-slate-500 hover:text-slate-700 transition-colors p-2 rounded-full hover:bg-slate-100"
                             >
-                                <XCircle className="w-6 h-6" />
+                                <XCircle className="w-6 h-6" aria-hidden="true" />
                             </button>
                         </div>
 
                         {/* Body - Scrollable */}
-                        <div className="p-6 overflow-y-auto flex-1 bg-slate-50/30">
+                        {/* tabIndex: região rolável alcançável pelo teclado (E-34) */}
+                        <div className="p-6 overflow-y-auto flex-1 bg-slate-50/30" tabIndex={0} aria-label="Detalhes da candidatura">
                             <div className="space-y-8">
                                 
                                 {/* 1. Currículo Pet */}
@@ -299,21 +306,32 @@ export const SitterEvaluations = () => {
                                         <span className="bg-primary-100 text-primary-600 w-6 h-6 rounded-full flex items-center justify-center text-sm mr-2 font-bold">2</span>
                                         Fotos do Ambiente
                                     </h4>
-                                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                        {selectedEval.environment_photos?.length > 0 ? (
-                                            selectedEval.environment_photos.map((photoUrl: string, idx: number) => (
-                                                <div key={idx} className="flex-shrink-0 w-40 h-40 rounded-lg border border-slate-200 overflow-hidden bg-slate-50 flex items-center justify-center relative group shadow-sm">
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-400">
-                                                        <ImageIcon size={40} />
-                                                        <span className="block text-[10px] mt-1 text-center truncate px-2 absolute bottom-2 w-full">{photoUrl.split('/').pop()}</span>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-sm text-slate-500 italic">Nenhuma foto enviada.</p>
-                                        )}
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 mt-2">* Previews simulados (URLs de ambiente restrito)</p>
+                                    {/* Fotos reais enviadas na candidatura (RF-010). Antes o painel mostrava um
+                                        ícone genérico e o fim da URL/base64, com o aviso "previews simulados". */}
+                                    {selectedEval.environment_photos?.length > 0 ? (
+                                        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                                            {selectedEval.environment_photos.map((photoUrl: string, idx: number, all: string[]) => {
+                                                const safe = /^(data:image\/(jpeg|png|webp);base64,|https:\/\/)/i.test(photoUrl);
+                                                const label = `Foto ${idx + 1} de ${all.length} do ambiente de ${selectedEval.user?.full_name || 'candidato'}`;
+                                                return (
+                                                    <li key={idx} className="aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                                        {safe ? (
+                                                            <a href={photoUrl} target="_blank" rel="noreferrer" className="block h-full w-full focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]" aria-label={`${label} (abrir em tamanho original)`}>
+                                                                <img src={photoUrl} alt={label} className="h-full w-full object-cover" loading="lazy" />
+                                                            </a>
+                                                        ) : (
+                                                            <div className="flex h-full flex-col items-center justify-center gap-1 p-2 text-center text-xs text-slate-600">
+                                                                <ImageIcon size={28} aria-hidden="true" />
+                                                                Formato de imagem não suportado
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-slate-600 italic">Nenhuma foto enviada.</p>
+                                    )}
                                 </section>
 
                                 {/* 3. Respostas do Quiz */}
@@ -393,13 +411,13 @@ export const SitterEvaluations = () => {
                                                     <Button 
                                                         variant="ghost"
                                                         onClick={() => setIsRejecting(true)}
-                                                        className="text-red-600 bg-red-50 hover:bg-red-100"
+                                                        className="text-red-700 bg-red-50 hover:bg-red-100"
                                                     >
                                                         Recusar Candidato
                                                     </Button>
                                                     <Button 
                                                         onClick={handleApprove}
-                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                                        className="bg-emerald-700 hover:bg-emerald-800 text-white"
                                                     >
                                                         <CheckCircle2 className="w-4 h-4 mr-2" />
                                                         Aprovar Candidato
@@ -432,10 +450,9 @@ export const SitterEvaluations = () => {
                                 </>
                             )}
                         </div>
-
-                    </div>
-                </div>
-            )}
+                </>)}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

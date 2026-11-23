@@ -45,6 +45,8 @@ export function Account() {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const { user: authUser } = useAuth();
   const isAdmin = authUser?.role_id === 1;
@@ -52,6 +54,7 @@ export function Account() {
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
+      setLoadError(false);
       // Admin não tem cadastro de parceiro: /providers/me responde 403 e o
       // fallback exibia "Tipo de parceiro · Pendente" (auditoria visual G09).
       if (isAdmin) {
@@ -76,28 +79,16 @@ export function Account() {
           status: data.status || PROVIDER_STATUS.PENDING,
         });
       } catch {
-        // fallback to localStorage
-        try {
-          const raw = localStorage.getItem("petplus_user");
-          if (raw) {
-            const user = JSON.parse(raw);
-            setAccount({
-              full_name: user.full_name || "—",
-              email: user.email || "—",
-              document: "Não disponível",
-              role_label: ROLE_LABELS[user.role_id] || "Usuário",
-              status: user.provider_status || PROVIDER_STATUS.PENDING,
-            });
-          }
-        } catch {
-          toast.error("Erro ao carregar dados da conta.");
-        }
+        // Antes caía na sessão salva no navegador e exibia status antigo, ou
+        // "Pendente", como se fosse o atual (AUD-22). Agora a falha é mostrada.
+        setAccount(null);
+        setLoadError(true);
       } finally {
         setIsLoading(false);
       }
     };
     load();
-  }, [isAdmin, authUser?.full_name, authUser?.email]);
+  }, [isAdmin, authUser?.full_name, authUser?.email, attempt]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -131,6 +122,19 @@ export function Account() {
         </p>
       </div>
 
+      {loadError && (
+        <Card role="alert" className="border-red-200 rounded-2xl">
+          <CardContent className="space-y-3 p-6">
+            <p className="font-semibold text-slate-900">Não foi possível carregar os dados da sua conta.</p>
+            <p className="text-sm text-slate-600">
+              O status do cadastro não foi confirmado agora. Tente novamente para consultar a situação atual.
+            </p>
+            <Button onClick={() => setAttempt((value) => value + 1)}>Tentar novamente</Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loadError && (<>
       {/* Identity Card */}
       <Card className="border-slate-200 shadow-sm rounded-2xl overflow-hidden">
         <CardHeader className="border-b border-slate-100 pb-5">
@@ -149,7 +153,7 @@ export function Account() {
               <User size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-0.5">
                 Nome do Responsável
               </p>
               <p className="text-base font-semibold text-slate-800 truncate">
@@ -164,7 +168,7 @@ export function Account() {
               <Mail size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-0.5">
                 E-mail de Acesso
               </p>
               <p className="text-base font-semibold text-slate-800 truncate">
@@ -179,7 +183,7 @@ export function Account() {
               <FileText size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-600 mb-0.5">
                 Documento (CPF / CNPJ)
               </p>
               <p className="text-base font-semibold text-slate-800 truncate">
@@ -243,6 +247,8 @@ export function Account() {
           )}
         </CardContent>
       </Card>
+
+      </>)}
 
       {/* Logout Card */}
       <Card className="border-red-100 shadow-sm rounded-2xl overflow-hidden bg-red-50/30">

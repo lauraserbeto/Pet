@@ -1,6 +1,6 @@
 # E-13 — Retorno e correção do cadastro recusado
 
-Entrega local de 22/11/2026, na branch `codex/retomada-servicos`, sobre HEAD `d593b03` e as alterações anteriores. Sem commit, push, deploy, migration nova ou acesso ao banco publicado.
+Entrega local de 22/11/2026, na branch `tasks-laura`, sobre HEAD `d593b03` e as alterações anteriores. Sem commit, push, deploy, migration nova ou acesso ao banco publicado.
 
 ## Reprodução e escopo
 

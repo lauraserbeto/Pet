@@ -48,7 +48,7 @@ export function HamsterLoader({
 
       {/* ── Label ── */}
       <div className="text-center">
-        <p className="text-slate-600 font-semibold text-base tracking-wide animate-pulse">
+        <p className="text-slate-600 font-semibold text-base tracking-wide">
           {message}
         </p>
       </div>

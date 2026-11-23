@@ -124,3 +124,22 @@ it("sem recomendações pendentes, nenhuma sugestão aparece", async () => {
   await screen.findByDisplayValue("Hotel Patinhas");
   expect(screen.queryByText("Seu perfil já aparece na vitrine.")).toBeNull();
 });
+
+it("Descartar só habilita com alteração e volta ao último estado salvo, sem recarregar (E-23)", async () => {
+  renderTela();
+  const nome = (await screen.findByDisplayValue("Hotel Patinhas")) as HTMLInputElement;
+  const descartar = screen.getByRole("button", { name: /Descartar/ }) as HTMLButtonElement;
+  expect(descartar.disabled).toBe(true);
+
+  fireEvent.change(nome, { target: { name: "business_name", value: "Hotel Salvo" } });
+  expect(descartar.disabled).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: /Salvar Perfil/ }));
+  await waitFor(() => expect(providerService.updatePublicProfile).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(descartar.disabled).toBe(true));
+
+  fireEvent.change(nome, { target: { name: "business_name", value: "Rascunho" } });
+  fireEvent.click(descartar);
+  // Volta ao valor salvo, não ao carregado inicialmente.
+  expect(nome.value).toBe("Hotel Salvo");
+  expect(descartar.disabled).toBe(true);
+});

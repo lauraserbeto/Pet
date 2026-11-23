@@ -12,7 +12,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Plus, PawPrint, Calendar, Activity, X, Trash2, Edit2 } from "lucide-react";
+import { Loader2, Plus, PawPrint, Calendar, Activity, Trash2, Edit2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "../../components/ui/dialog";
 import { HamsterLoader } from "../../components/ui/HamsterLoader";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 
@@ -218,10 +219,11 @@ export function TutorPets() {
                     <button
                       onClick={() => openEdit(pet)}
                       disabled={isRemoving}
-                      className="p-2 text-slate-300 hover:text-blue-500 transition-colors"
+                      className="p-2 text-slate-500 hover:text-[var(--color-primary-700)] transition-colors"
+                      aria-label={`Editar pet ${pet.name}`}
                       title="Editar"
                     >
-                      <Edit2 size={18} />
+                      <Edit2 size={18} aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => handleDelete(pet)}
@@ -260,40 +262,40 @@ export function TutorPets() {
         )}
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl relative">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 bg-slate-100 p-1 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2 font-[family-name:var(--font-display)]">
-              <PawPrint className="text-[var(--color-primary-500)]" />
+      {/* Formulário do pet em Dialog acessível (foco preso, Esc, título) — E-34 */}
+      <Dialog open={showModal} onOpenChange={(open) => !open && !isSaving && setShowModal(false)}>
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-2xl p-6">
+            <DialogTitle className="mb-2 flex items-center gap-2 text-2xl font-bold text-slate-900 font-[family-name:var(--font-display)]">
+              <PawPrint className="text-[var(--color-primary-500)]" aria-hidden="true" />
               {editingId ? "Editar Pet" : "Novo Pet"}
-            </h2>
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              Preencha os dados do pet. Nome e espécie são obrigatórios.
+            </DialogDescription>
 
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Pet</label>
+                <label htmlFor="pet-name" className="block text-sm font-medium text-slate-700 mb-1">Nome do Pet</label>
                 <input
+                  id="pet-name"
                   type="text"
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? "pet-name-error" : undefined}
                   {...register("name")}
                   className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] focus:ring-[var(--color-primary-500)] py-2 px-3 border outline-none"
                 />
-                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+                {errors.name && <p id="pet-name-error" className="text-xs text-red-700 mt-1">{errors.name.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Espécie</label>
+                  <label htmlFor="pet-species" className="block text-sm font-medium text-slate-700 mb-1">Espécie</label>
                   <Controller
                     name="species"
                     control={control}
                     render={({ field }) => (
                       <Select value={field.value || undefined} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full rounded-xl">
+                        <SelectTrigger id="pet-species" className="w-full rounded-xl">
                           <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -306,8 +308,9 @@ export function TutorPets() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Raça</label>
+                  <label htmlFor="pet-breed" className="block text-sm font-medium text-slate-700 mb-1">Raça</label>
                   <input
+                    id="pet-breed"
                     type="text"
                     {...register("breed")}
                     className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] py-2 px-3 border outline-none"
@@ -317,10 +320,11 @@ export function TutorPets() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="pet-birth-date" className="block text-sm font-medium text-slate-700 mb-1">
                     Data de Nascimento
                   </label>
                   <input
+                    id="pet-birth-date"
                     type="date"
                     max={new Date().toISOString().substring(0, 10)}
                     {...register("birth_date")}
@@ -328,25 +332,29 @@ export function TutorPets() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Peso (kg)</label>
+                  <label htmlFor="pet-weight" className="block text-sm font-medium text-slate-700 mb-1">Peso (kg)</label>
                   <input
+                    id="pet-weight"
                     type="number"
                     step="0.1"
+                    aria-invalid={!!errors.weight_kg}
+                    aria-describedby={errors.weight_kg ? "pet-weight-error" : undefined}
                     {...register("weight_kg")}
                     className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] py-2 px-3 border outline-none"
                     placeholder="Ex: 5.5"
                   />
                   {errors.weight_kg && (
-                    <p className="text-xs text-red-500 mt-1">{errors.weight_kg.message}</p>
+                    <p id="pet-weight-error" className="text-xs text-red-700 mt-1">{errors.weight_kg.message}</p>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label htmlFor="pet-medical-notes" className="block text-sm font-medium text-slate-700 mb-1">
                   Observações Médicas
                 </label>
                 <textarea
+                  id="pet-medical-notes"
                   rows={3}
                   {...register("medical_notes")}
                   className="w-full rounded-xl border-slate-300 shadow-sm focus:border-[var(--color-primary-500)] py-2 px-3 border outline-none resize-none"
@@ -367,14 +375,13 @@ export function TutorPets() {
                   disabled={isSaving}
                   className="bg-[var(--color-primary-700)] hover:bg-[var(--color-primary-800)] text-white px-6 py-2 rounded-xl font-bold shadow-md transition-colors flex items-center gap-2"
                 >
-                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
                   {editingId ? "Salvar Alterações" : "Cadastrar Pet"}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,0 +1,1262 @@
+{
+ "cabecalho": {
+  "enforce": null,
+  "reportOnly": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api-petplus.up.railway.app https://viacep.com.br https://*.ingest.sentry.io https://*.ingest.us.sentry.io; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+ },
+ "rotas": {
+  "anon /": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /login": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /register": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /recuperar-senha": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /hotels": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/hotels",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/hotels",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /walkers": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/sitters",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/sitters",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /shopping": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /shopping/:id": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/89358204-f010-47c9-b029-24489ee40b36",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/89358204-f010-47c9-b029-24489ee40b36",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?product_id=89358204-f010-47c9-b029-24489ee40b36",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?product_id=89358204-f010-47c9-b029-24489ee40b36",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?product_id=89358204-f010-47c9-b029-24489ee40b36&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?product_id=89358204-f010-47c9-b029-24489ee40b36&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /hotels/:id": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?provider_id=7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?provider_id=7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?provider_id=7ad99fc2-a1bf-4766-93af-f24f54d93c1f&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?provider_id=7ad99fc2-a1bf-4766-93af-f24f54d93c1f&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /walkers/:id": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/76a5a8ba-8aa1-43f9-9adb-2e002d41511c",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/76a5a8ba-8aa1-43f9-9adb-2e002d41511c",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?provider_id=76a5a8ba-8aa1-43f9-9adb-2e002d41511c",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews/summary?provider_id=76a5a8ba-8aa1-43f9-9adb-2e002d41511c",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?provider_id=76a5a8ba-8aa1-43f9-9adb-2e002d41511c&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/reviews?provider_id=76a5a8ba-8aa1-43f9-9adb-2e002d41511c&page=1&limit=5",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /store/:id": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/738987e5-8360-42e8-90d4-ac7e9e22eda9",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/738987e5-8360-42e8-90d4-ac7e9e22eda9",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /about": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /partners": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /contact": {
+   "violacoes": [],
+   "quebrou": false
+  },
+  "anon /terms": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "anon /privacy": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/legal/policy",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /cart": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /checkout": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/orders/payment-config",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/orders/payment-config",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/addresses",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/addresses",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /tutor/pets": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "script-src",
+     "bloqueado": "eval",
+     "modo": "report",
+     "origem": "/assets/schemas-CdY6GX4e.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me/pets",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me/pets",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /tutor/pedidos": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/orders?page=1&limit=20&view=page",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/orders?page=1&limit=20&view=page",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /tutor/agendamentos": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/appointments/my",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/appointments/my",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /tutor/perfil": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "script-src",
+     "bloqueado": "eval",
+     "modo": "report",
+     "origem": "/assets/schemas-CdY6GX4e.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/addresses",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/addresses",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "tutor /tutor/agendar/:id": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/cart",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "script-src",
+     "bloqueado": "eval",
+     "modo": "report",
+     "origem": "/assets/schemas-CdY6GX4e.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/7ad99fc2-a1bf-4766-93af-f24f54d93c1f",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me/pets",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me/pets",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard/orders": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/orders?page=1&limit=20&view=page&q=",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/orders?page=1&limit=20&view=page&q=",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard/products": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/provider",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/provider",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/options",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/products/options",
+     "modo": "report",
+     "origem": "/assets/productService-CiGbekGV.js:1"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard/financeiro": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard/perfil": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "store /dashboard/conta": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "hotel /dashboard/servicos": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/completeness",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/completeness",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "script-src",
+     "bloqueado": "eval",
+     "modo": "report",
+     "origem": "/assets/schemas-CdY6GX4e.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/services",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/services",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "hotel /dashboard/schedule": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/completeness",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers/completeness",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/appointments/provider",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/appointments/provider",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "admin /dashboard": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/admin/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/admin/metrics?days=30",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "admin /dashboard/aprovacoes": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers",
+     "modo": "report",
+     "origem": "/assets/Approvals-C4WIuGM2.js:1"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/providers",
+     "modo": "report",
+     "origem": "/assets/Approvals-C4WIuGM2.js:1"
+    }
+   ],
+   "quebrou": false
+  },
+  "admin /dashboard/usuarios": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/admin/users",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/admin/users",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  },
+  "admin /dashboard/avaliacoes-sitters": {
+   "violacoes": [
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/favorites/ids",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/me",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/admin/evaluations?status=PENDING",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    },
+    {
+     "diretiva": "connect-src",
+     "bloqueado": "http://localhost:3000/api/v1/users/admin/evaluations?status=PENDING",
+     "modo": "report",
+     "origem": "/assets/index-Bhm2LuGw.js:310"
+    }
+   ],
+   "quebrou": false
+  }
+ },
+ "fluxos": {
+  "perfil-foto-data-url": {
+   "violacoes": [],
+   "imagemExibida": true
+  },
+  "endereco-viacep": {
+   "violacoes": [],
+   "cepPreenchido": false,
+   "logradouroAutomatico": false
+  },
+  "onboarding-previa-blob": {
+   "violacoes": [],
+   "campoEncontrado": false,
+   "previasCarregadas": 0
+  }
+ }
+}

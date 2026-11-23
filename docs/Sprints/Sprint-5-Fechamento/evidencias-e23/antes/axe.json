@@ -1,0 +1,61 @@
+{
+ "pedidos-1440": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 10,
+   "alvos": [
+    ".hover\\:bg-slate-50:nth-child(1) > td:nth-child(2) > .text-xs.text-slate-400",
+    ".hover\\:bg-slate-50:nth-child(1) > td:nth-child(3) > .text-xs.text-slate-400",
+    ".hover\\:bg-slate-50:nth-child(2) > td:nth-child(2) > .text-xs.text-slate-400",
+    ".hover\\:bg-slate-50:nth-child(2) > td:nth-child(3) > .text-xs.text-slate-400"
+   ]
+  }
+ ],
+ "financeiro-1440": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "nodes": 1,
+   "alvos": [
+    ".h-64"
+   ]
+  }
+ ],
+ "perfil-1440": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 4,
+   "alvos": [
+    "#radix-\\:r0\\:-trigger-localizacao",
+    "#radix-\\:r0\\:-trigger-operacao",
+    ".sm\\:flex",
+    ".md\\:flex-none"
+   ]
+  }
+ ],
+ "pedidos-390": [],
+ "financeiro-390": [
+  {
+   "id": "aria-prohibited-attr",
+   "impact": "serious",
+   "nodes": 1,
+   "alvos": [
+    ".h-64"
+   ]
+  }
+ ],
+ "perfil-390": [
+  {
+   "id": "color-contrast",
+   "impact": "serious",
+   "nodes": 3,
+   "alvos": [
+    "#radix-\\:r0\\:-trigger-localizacao",
+    "#radix-\\:r0\\:-trigger-operacao",
+    ".md\\:flex-none"
+   ]
+  }
+ ]
+}

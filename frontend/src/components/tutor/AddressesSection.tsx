@@ -237,7 +237,7 @@ export function AddressesSection() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label htmlFor="addr-cep" className="block text-sm font-medium text-slate-700 mb-1">
                   CEP
                   <RequiredMark />
                   {isFetchingCep && <Loader2 className="inline w-3 h-3 animate-spin ml-1" />}
@@ -247,6 +247,7 @@ export function AddressesSection() {
                   inputMode="numeric"
                   maxLength={9}
                   placeholder="00000-000"
+                  id="addr-cep"
                   {...register("cep", {
                     onChange: (e) => {
                       e.target.value = formatCep(e.target.value);
@@ -257,21 +258,23 @@ export function AddressesSection() {
                 {errors.cep && <p className="text-xs text-red-500 mt-1">{errors.cep.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label htmlFor="addr-rua" className="block text-sm font-medium text-slate-700 mb-1">
                   Rua
                   <RequiredMark />
                 </label>
                 <input
                   type="text"
+                  id="addr-rua"
                   {...register("rua")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
                 {errors.rua && <p className="text-xs text-red-500 mt-1">{errors.rua.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Número</label>
+                <label htmlFor="addr-numero" className="block text-sm font-medium text-slate-700 mb-1">Número</label>
                 <input
                   type="text"
+                  id="addr-numero"
                   {...register("numero")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
@@ -280,20 +283,22 @@ export function AddressesSection() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Complemento</label>
+                <label htmlFor="addr-complemento" className="block text-sm font-medium text-slate-700 mb-1">Complemento</label>
                 <input
                   type="text"
+                  id="addr-complemento"
                   {...register("complemento")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label htmlFor="addr-bairro" className="block text-sm font-medium text-slate-700 mb-1">
                   Bairro
                   <RequiredMark />
                 </label>
                 <input
                   type="text"
+                  id="addr-bairro"
                   {...register("bairro")}
                   className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                 />
@@ -303,13 +308,14 @@ export function AddressesSection() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="addr-cidade" className="block text-sm font-medium text-slate-700 mb-1">
                     Cidade
                     <RequiredMark />
                   </label>
                   <input
                     type="text"
-                    {...register("cidade")}
+                    id="addr-cidade"
+                  {...register("cidade")}
                     className="w-full rounded-lg border-slate-300 py-2 px-3 border outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                   />
                   {errors.cidade && (
@@ -317,7 +323,7 @@ export function AddressesSection() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label htmlFor="addr-estado" className="block text-sm font-medium text-slate-700 mb-1">
                     UF
                     <RequiredMark />
                   </label>
@@ -326,7 +332,7 @@ export function AddressesSection() {
                     control={control}
                     render={({ field }) => (
                       <Select value={field.value || undefined} onValueChange={field.onChange}>
-                        <SelectTrigger className="w-full rounded-lg">
+                        <SelectTrigger id="addr-estado" className="w-full rounded-lg">
                           <SelectValue placeholder="--" />
                         </SelectTrigger>
                         <SelectContent>
@@ -427,7 +433,7 @@ export function AddressesSection() {
                 <p className="text-sm text-slate-600 mt-1">
                   {addr.bairro} - {addr.cidade}/{addr.estado}
                 </p>
-                <p className="text-xs text-slate-400 mt-2">CEP: {addr.cep}</p>
+                <p className="text-xs text-slate-600 mt-2">CEP: {addr.cep}</p>
               </div>
             ))}
           </div>

@@ -189,7 +189,7 @@ QA-2/QA-3 devem acompanhar as entregas, com cenários positivos e negativos, evi
 
 Atualizar o board com esta classificação, distribuir a conclusão da SRV-Fpub e as frentes da Sprint 4, e transformar as pendências de integridade/segurança em aceites vinculados às tasks existentes. A Sprint 5 deve ser tratada como fechamento dependente dessas entregas, não como uma etapa já concluída pelo calendário.
 
-Antes de implementar na máquina atual, atualizar a base de trabalho para a main conforme escolha da usuária, preservando os documentos locais. O fetch desta avaliação não incorporou os cinco commits à branch local.
+Antes de implementar na máquina atual, atualizar a base de trabalho para a main conforme escolha da Laura, preservando os documentos locais. O fetch desta avaliação não incorporou os cinco commits à branch local.
 
 ## Fontes locais de planejamento
 
