@@ -19,13 +19,35 @@ async function main() {
   await prepareTestDatabase();
   await disconnectTestDatabase();
   fs.writeFileSync(outbox, "[]", { flag: "wx" });
+  // Ler-modificar-escrever sem trava perdia mensagem quando dois cenários
+  // pediam recuperação ao mesmo tempo — era a origem da instabilidade do E-09.
+  // `mkdir` é atômico no POSIX e serve de trava sem dependência nova.
+  const trava = outbox + ".lock";
+  const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   require("../src/services/EmailService").sendPasswordReset = async (
     to,
     url,
   ) => {
-    const messages = JSON.parse(fs.readFileSync(outbox, "utf8"));
-    messages.push({ to, url });
-    fs.writeFileSync(outbox, JSON.stringify(messages));
+    for (let tentativa = 0; tentativa < 200; tentativa += 1) {
+      try {
+        fs.mkdirSync(trava);
+        break;
+      } catch {
+        await esperar(5);
+      }
+    }
+    try {
+      const messages = JSON.parse(fs.readFileSync(outbox, "utf8"));
+      messages.push({ to, url });
+      fs.writeFileSync(outbox, JSON.stringify(messages));
+    } finally {
+      try {
+        fs.rmdirSync(trava);
+      } catch {
+        /* outro processo já liberou */
+      }
+    }
     return { id: "qa-local-message" };
   };
   require("../src/server");

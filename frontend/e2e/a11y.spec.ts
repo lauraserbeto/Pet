@@ -58,7 +58,9 @@ async function mockApi(page: Page, user?: Record<string, unknown>) {
   });
 }
 
-for (const width of [1280, 390]) {
+// QA-3 pede mobile, tablet e desktop. 768px é o breakpoint em que o painel
+// troca entre menu lateral e menu de diálogo — justamente onde o layout quebra.
+for (const width of [1280, 768, 390]) {
   test.describe(`a11y ${width}px`, () => {
     test.beforeEach(async ({ page }) => page.setViewportSize({ width, height: 900 }));
 
@@ -81,6 +83,25 @@ for (const width of [1280, 390]) {
       await page.getByRole("button", { name: "Continuar para Pagamento" }).click();
       await settle(page);
       await expectNoSeriousViolations(page, `/checkout pagamento @${width}`);
+    });
+
+    test("telas do tutor sem violações sérias ou críticas", async ({ page }) => {
+      await mockApi(page, tutor);
+      for (const route of ["/cart", "/tutor/pets", "/tutor/pedidos", "/tutor/agendamentos", "/tutor/perfil"]) {
+        await page.goto(route);
+        await settle(page);
+        await expect(page.getByText("Algo deu errado")).toHaveCount(0);
+        await expectNoSeriousViolations(page, `${route} @${width}`);
+      }
+    });
+
+    test("gestão de serviços do parceiro sem violações sérias ou críticas", async ({ page }) => {
+      // Tela criada na SRV-F1/F2: formulário, seletor de política e listagem.
+      await mockApi(page, { id: "u-hotel", full_name: "Hotel QA", email: "hotel@petplus.test", role_id: 3, provider_status: "APROVADO", onboarding_step: "COMPLETED" });
+      await page.goto("/dashboard/servicos");
+      await settle(page);
+      await expect(page.getByText("Algo deu errado")).toHaveCount(0);
+      await expectNoSeriousViolations(page, `/dashboard/servicos @${width}`);
     });
 
     for (const [role, label] of [[2, "lojista"], [3, "hotel"], [1, "admin"]] as const) {

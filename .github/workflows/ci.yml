@@ -95,23 +95,64 @@ jobs:
         run: npm run build
 
   e2e:
+    # ATENÇÃO: este nome é o contrato com a régua de proteção da `main`, que
+    # exige o contexto `E2E — smoke (Playwright)` por nome exato. Renomear o job
+    # sem atualizar a régua antes faz o merge travar esperando para sempre um
+    # check que nunca será reportado. O job já NÃO é mais um smoke: ele roda as
+    # jornadas completas (ver o passo abaixo). Para corrigir o nome, alguém com
+    # admin precisa trocar o contexto em Settings → Rules no mesmo movimento.
     name: E2E — smoke (Playwright)
     runs-on: ubuntu-latest
     needs: frontend
-    defaults:
-      run:
-        working-directory: frontend
+    # Os specs `*-real.spec.ts` exigem fixture e API local; sem o Postgres abaixo
+    # eles PULAM e o job fica verde sem ter verificado nada (QA-2).
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: petplus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d petplus_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      JWT_SECRET: ci-dummy-secret-com-mais-de-32-caracteres-0000
+      RESEND_API_KEY: ci-resend-api-key
+      EMAIL_FROM: no-reply@petplus.test
+      LOG_LEVEL: silent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - name: Install Playwright (chromium)
+          # Dois lockfiles: o job instala backend e frontend.
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: Instalar dependências (backend)
+        run: npm ci
+        working-directory: backend
+      - name: Instalar dependências (frontend)
+        run: npm ci
+        working-directory: frontend
+      - name: Instalar Playwright (chromium)
         run: npx playwright install --with-deps chromium
-      - name: Build
-        run: npm run build
-      - name: Run E2E smoke
-        run: npm run test:e2e
+        working-directory: frontend
+      # Mesmo script usado na máquina do desenvolvedor: prepara os bancos,
+      # gera as fixtures, sobe a API e roda a suíte. Se o caminho divergir
+      # entre CI e local, o CI volta a ser teatro.
+      - name: Rodar jornadas E2E
+        run: ./scripts/e2e-full.sh
+      - name: Guardar relatório em caso de falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          retention-days: 7
