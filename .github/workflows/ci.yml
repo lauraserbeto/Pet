@@ -95,7 +95,13 @@ jobs:
         run: npm run build
 
   e2e:
-    name: E2E — jornadas completas (Playwright)
+    # ATENÇÃO: este nome é o contrato com a régua de proteção da `main`, que
+    # exige o contexto `E2E — smoke (Playwright)` por nome exato. Renomear o job
+    # sem atualizar a régua antes faz o merge travar esperando para sempre um
+    # check que nunca será reportado. O job já NÃO é mais um smoke: ele roda as
+    # jornadas completas (ver o passo abaixo). Para corrigir o nome, alguém com
+    # admin precisa trocar o contexto em Settings → Rules no mesmo movimento.
+    name: E2E — smoke (Playwright)
     runs-on: ubuntu-latest
     needs: frontend
     # Os specs `*-real.spec.ts` exigem fixture e API local; sem o Postgres abaixo
