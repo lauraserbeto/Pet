@@ -42,7 +42,7 @@
 - [x] Integração de **pedido**, **agendamento** e **auth** passa no CI. — 28 arquivos em `tests/integration/`, job com Postgres real
 - [x] E2E de **compra** e **agendamento** ponta a ponta passa no CI. — `purchase-real.spec.ts` e `booking-real.spec.ts`, agora executados (antes pulavam)
 - [x] E2E de **recusa/reenvio** e **avaliação** passa no CI. — `provider-correction-real.spec.ts` e `reviews-real.spec.ts`
-- [ ] Suíte estável, sem flakiness; `main` verde. — **3 testes passam só na segunda tentativa** (corridas `route.fetch: Test ended` nos proxies); o CI absorve com retry, mas não é estabilidade
+- [ ] Suíte estável, sem flakiness; `main` verde. — **resta ~1 falha intermitente a cada duas execuções**, concentrada em `credentials-real` (E-09) e `checkout-recovery-real` (E-18). Duas causas já foram removidas: contenção de recursos (workers do Playwright fixados em 2 no CI) e perda de mensagem no outbox de e-mail por escrita concorrente (trava em `qa-auth-server.js`). O que sobra são corridas dentro desses dois specs, que simulam falha de rede com `route.abort` — precisam de revisão própria
 - [x] Acessibilidade revisada (foco, labels/`aria-*`, contraste, teclado) sem regressão. — `e2e/a11y.spec.ts`: 22 casos, rotas públicas, checkout, painéis, telas do tutor, gestão de serviços e modais
 - [x] Responsividade revisada (mobile/tablet/desktop) sem quebras nas telas-chave. — mesma suíte em 390px, 768px e 1280px
 
