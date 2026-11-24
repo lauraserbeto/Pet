@@ -42,7 +42,7 @@
 - [x] Integração de **pedido**, **agendamento** e **auth** passa no CI. — 28 arquivos em `tests/integration/`, job com Postgres real
 - [x] E2E de **compra** e **agendamento** ponta a ponta passa no CI. — `purchase-real.spec.ts` e `booking-real.spec.ts`, agora executados (antes pulavam)
 - [x] E2E de **recusa/reenvio** e **avaliação** passa no CI. — `provider-correction-real.spec.ts` e `reviews-real.spec.ts`
-- [ ] Suíte estável, sem flakiness; `main` verde. — **resta ~1 falha intermitente a cada duas execuções**, concentrada em `credentials-real` (E-09) e `checkout-recovery-real` (E-18). Duas causas já foram removidas: contenção de recursos (workers do Playwright fixados em 2 no CI) e perda de mensagem no outbox de e-mail por escrita concorrente (trava em `qa-auth-server.js`). O que sobra são corridas dentro desses dois specs, que simulam falha de rede com `route.abort` — precisam de revisão própria
+- [ ] Suíte estável, sem flakiness; `main` verde. — **falta corrigir `checkout-recovery-real` (E-18), viewport 1280px**. Duas causas de instabilidade já foram removidas: contenção de recursos (workers do Playwright fixados em 2 no CI) e perda de mensagem no outbox de e-mail por escrita concorrente (trava em `qa-auth-server.js`), que derrubava o E-09. O E-18 não é intermitente: **falha de forma determinística quando o spec roda sozinho**, e só passa na suíte completa por coincidência de temporização. Investigação registrada abaixo
 - [x] Acessibilidade revisada (foco, labels/`aria-*`, contraste, teclado) sem regressão. — `e2e/a11y.spec.ts`: 22 casos, rotas públicas, checkout, painéis, telas do tutor, gestão de serviços e modais
 - [x] Responsividade revisada (mobile/tablet/desktop) sem quebras nas telas-chave. — mesma suíte em 390px, 768px e 1280px
 
@@ -66,6 +66,23 @@
 
 **28 dos 33 itens validados com evidência.** Os cinco restantes não são
 verificáveis a partir do repositório ou dependem de ação humana.
+
+## E-18: o que já se sabe
+
+`checkout-recovery-real.spec.ts` simula perda de rede abortando a primeira
+sincronização do carrinho. O handler **busca a requisição no servidor e só
+depois aborta a resposta** (`spec:22` e `spec:27`), então o merge acontece de
+fato no banco: o cliente acha que falhou, mas o carrinho já foi mesclado. Na
+segunda tentativa, `total_items` pode vir diferente de 5 e a asserção dentro do
+próprio handler derruba a requisição.
+
+Tentativa de correção (abortar antes de buscar, sem tocar no servidor) tornou a
+falha **determinística** em vez de resolvê-la — foi revertida. Resolver exige
+conhecer a semântica pretendida do carrinho anônimo nesse cenário, que é de
+quem escreveu o spec.
+
+Reprodução: `./scripts/e2e-full.sh e2e/checkout-recovery-real.spec.ts` — o caso
+de 1280px falha, inclusive na repetição; o de 390px passa.
 
 ## Como reproduzir as evidências de teste
 
