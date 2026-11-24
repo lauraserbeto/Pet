@@ -3,7 +3,7 @@
 
   # 🐾 Pet+ | Ecossistema & Marketplace Pet
 
-  **Uma plataforma SaaS ponta a ponta projetada para conectar tutores de pets a uma rede qualificada de prestadores de serviços e lojistas.**
+  **Plataforma que conecta tutores de pets a prestadores de serviços e lojistas.**
 
   [![Deploy Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)](https://petplus.vercel.app/)
   [![Swagger Docs](https://img.shields.io/badge/Swagger-API_Docs-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://api-petplus.up.railway.app/api-docs/swagger)
@@ -14,12 +14,12 @@
 
 ## 📖 Sobre o Projeto
 
-O **Pet+** vai além de um simples e-commerce. É um ecossistema completo e centralizado para o mundo pet. A plataforma atende às diferentes necessidades dos animais e de seus tutores, permitindo desde a compra de produtos rotineiros até a contratação de serviços de alto nível de confiança, como hospedagem e cuidados domiciliares.
+O **Pet+** reúne, em uma única plataforma, a compra de produtos para pets e a contratação de serviços como hospedagem, daycare e cuidados domiciliares.
 
 ### ✨ Principais Implementações
 - 🛍️ **Marketplace Integrado:** Compra e venda de produtos pet através de lojistas cadastrados.
 - 🏨 **Booking de Serviços:** Agendamento simplificado de Hotéis, Daycare e Pet Sitters.
-- 🔐 **Sistema Multi-Tenant:** Arquitetura robusta de Role-Based Access Control (RBAC) para diferentes perfis de usuários.
+- 🔐 **Controle de acesso por perfil (RBAC):** cinco perfis de usuário, com permissões e interface diferentes para cada um.
 - 📍 **Automação de Endereços:** Integração com ViaCEP para preenchimento ágil durante os cadastros, com validação server-side e endereço principal por usuário.
 - 🛒 **Carrinho Persistente:** Funciona offline (anônimo, via localStorage) e sincroniza com o servidor ao logar. Inclui snapshot de preço, validação de estoque e limites configuráveis.
 - ❤️ **Favoritos Polimórficos:** Tutores podem favoritar produtos, hotéis ou pet sitters em uma única tabela, com idempotência e validação de tipo.
@@ -27,9 +27,17 @@ O **Pet+** vai além de um simples e-commerce. É um ecossistema completo e cent
 
 ---
 
+## 👥 Equipe
+
+Projeto acadêmico do curso de Engenharia de Software da UniEVANGÉLICA, desenvolvido em equipe.
+
+**Equipe:** [@lauraserbeto](https://github.com/lauraserbeto), [@marcelf12](https://github.com/marcelf12), [@Vitorrfc1](https://github.com/Vitorrfc1), [@Layssafs](https://github.com/Layssafs)
+
+---
+
 ## 🚀 Tecnologias e Ferramentas
 
-A aplicação foi construída visando performance, escalabilidade e uma excelente experiência de usuário (UI/UX), utilizando uma stack moderna:
+Stack usada no projeto:
 
 ### Tech Stack Visual
 <div align="center">
